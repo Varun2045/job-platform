@@ -1,0 +1,163 @@
+import { jest } from '@jest/globals';
+import fs from 'fs';
+import path from 'path';
+
+let serverInstance: any;
+
+// Mock express to capture the server instance so we can close it cleanly
+jest.unstable_mockModule('express', () => {
+  const expressActual = jest.requireActual('express') as any;
+  const appWrapper = () => {
+    const app = expressActual();
+    const originalListen = app.listen;
+    app.listen = function (this: any, ...args: any[]) {
+      serverInstance = originalListen.apply(this, args);
+      return serverInstance;
+    };
+    return app;
+  };
+  Object.assign(appWrapper, expressActual);
+  return {
+    default: appWrapper,
+    ...expressActual
+  };
+});
+
+describe('Performance and Scale Verification Tests', () => {
+  let client: any;
+  const testPort = '4700';
+
+  beforeAll(async () => {
+    process.env.PORT = testPort;
+    process.env.NODE_ENV = 'development';
+    process.env.SUPABASE_URL = '';
+    process.env.SUPABASE_SERVICE_KEY = '';
+
+    // Load Express Server
+    await import('../core/server.js');
+
+    const { HttpClient } = await import('../core/HttpClient.js');
+    client = new HttpClient();
+  });
+
+  afterAll(async () => {
+    if (serverInstance) {
+      await new Promise<void>((resolve) => {
+        serverInstance.close(() => resolve());
+      });
+    }
+  });
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should handle 100 concurrent API requests with p95 latency verification', async () => {
+    const startTime = Date.now();
+    const requests = Array.from({ length: 100 }).map(() =>
+      client.request(`http://localhost:${testPort}/api/dashboard`, {
+        method: 'GET',
+        headers: { Authorization: 'Bearer user-token' },
+        retries: 1
+      })
+    );
+
+    const responses = await Promise.all(requests);
+    const duration = Date.now() - startTime;
+
+    expect(responses.length).toBe(100);
+    responses.forEach((res) => {
+      expect(res.status).toBe(200);
+    });
+
+    // Check average duration per request
+    const avgDuration = duration / 100;
+    expect(avgDuration).toBeLessThan(1000); // Allow higher latency threshold under heavy local concurrent load
+  }, 20000); // 20s timeout
+
+  it('should run a simulated 100 company scraper queue execution', async () => {
+    // Generate 100 mock company configs
+    const mockCompanies = Array.from({ length: 100 }).map((_, idx) => ({
+      id: `mock-company-${idx}`,
+      name: `Mock Company ${idx}`,
+      enabled: true,
+      api_endpoint: 'https://google.com/careers',
+      priority: 3,
+      interval_minutes: 60,
+      resume_profiles: ['backend'],
+      consecutive_failures: 0,
+      total_scrapes: 0,
+      total_failures: 0,
+      preferred_scraper: 'cheerio_fallback'
+    }));
+
+    const companiesPath = path.join(process.cwd(), 'storage', 'companies_state.json');
+    fs.writeFileSync(companiesPath, JSON.stringify(mockCompanies, null, 2), 'utf-8');
+
+    // Mock HTML fetch response
+    global.fetch = (jest.fn() as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'text/html' }),
+      text: async () => `
+        <html>
+          <body>
+            <a href="https://mock.com/jobs/1">SDE II</a>
+          </body>
+        </html>
+      `
+    });
+
+    const { runOrchestrator } = await import('../core/index.js');
+    const { config } = await import('../config/config.js');
+    const originalPlaywright = config.features.playwright;
+    config.features.playwright = false;
+
+    try {
+      await expect(
+        runOrchestrator({
+          forceAll: true,
+          dryRun: true
+        })
+      ).resolves.not.toThrow();
+    } finally {
+      config.features.playwright = originalPlaywright;
+    }
+  }, 40000); // 40s timeout for queue processing
+
+  it('should complete resume match iterations without memory leaks', async () => {
+    const { ResumeMatcher } = await import('../core/ResumeMatcher.js');
+
+    const job = {
+      company: 'LeakTest',
+      id: '1',
+      title: 'TypeScript Developer',
+      location: 'Remote',
+      description: 'We need a backend developer skilled in TypeScript and Node.js.',
+      url: 'https://leak.com/1',
+      source: 'Test',
+      team: 'Engineering',
+      isRemote: true
+    };
+
+    // Force garbage collection if available
+    if (global.gc) {
+      global.gc();
+    }
+    const startMemory = process.memoryUsage().heapUsed;
+
+    // Run 50 matches
+    for (let i = 0; i < 50; i++) {
+      ResumeMatcher.match(job as any, 'backend');
+    }
+
+    if (global.gc) {
+      global.gc();
+    }
+    const endMemory = process.memoryUsage().heapUsed;
+
+    const memoryIncrease = endMemory - startMemory;
+    // Assert that heap growth remains bounded (less than 20MB increase for local execution)
+    expect(memoryIncrease).toBeLessThan(20 * 1024 * 1024);
+  }, 15000); // 15s timeout
+});

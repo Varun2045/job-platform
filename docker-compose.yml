@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  job-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: job_monitor_portal
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - NOTIFICATION_EMAIL_SENDER=${NOTIFICATION_EMAIL_SENDER}
+      - NOTIFICATION_EMAIL_RECIPIENT=${NOTIFICATION_EMAIL_RECIPIENT}
+      - MATCH_THRESHOLD=${MATCH_THRESHOLD}
+      - IS_LOCAL=${IS_LOCAL}
+    volumes:
+      - ./storage:/app/storage
+    restart: always
+    healthcheck:
+      test: ["CMD", "node", "dist/core/Healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

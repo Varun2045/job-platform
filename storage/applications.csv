@@ -1,0 +1,3 @@
+JobHash,Company,JobId,Status,AppliedDate,ResumeUsed,Notes,LastUpdated
+hash-123,"Google",1,Applied,,,"Notes A",2026-07-11T11:15:53.053Z
+hash-123,"Google",1,Interview,,,"Notes B",2026-07-11T11:15:53.053Z

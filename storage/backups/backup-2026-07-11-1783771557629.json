@@ -1,0 +1,43 @@
+{
+  "version": "2.2.0",
+  "timestamp": "2026-07-11T12:05:57.629Z",
+  "companies": [
+    {
+      "id": "test",
+      "name": "Test Corp",
+      "enabled": true,
+      "priority": 3,
+      "interval_minutes": 60,
+      "resume_profiles": [],
+      "avg_response_time_ms": 0,
+      "total_scrapes": 10,
+      "total_failures": 1,
+      "detected_ats": "fallback",
+      "detected_ats_at": "2026-07-11T12:05:48.038Z",
+      "last_failed_scrape": "2026-07-11T12:05:57.488Z",
+      "consecutive_failures": 1
+    }
+  ],
+  "applications": [
+    {
+      "jobHash": "hash-123",
+      "company": "Google",
+      "jobId": "1",
+      "status": "Applied",
+      "notes": "Notes A",
+      "lastUpdated": "2026-07-11T11:15:53.053Z",
+      "userId": "user-a-uuid"
+    },
+    {
+      "jobHash": "hash-123",
+      "company": "Google",
+      "jobId": "1",
+      "status": "Interview",
+      "notes": "Notes B",
+      "lastUpdated": "2026-07-11T11:15:53.053Z",
+      "userId": "user-b-uuid"
+    }
+  ],
+  "extendedSettings": null,
+  "analyses": []
+}

@@ -1,0 +1,83 @@
+name: Job Monitor - Priority 3 (6-Hourly)
+
+on:
+  schedule:
+    - cron: '30 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: monitor-p3
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers (Cache Miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright dependencies (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Build TypeScript Project
+        run: npm run build
+
+      - name: Run Scraper
+        run: npm run monitor priority 3
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NOTIFICATION_EMAIL_SENDER: ${{ secrets.NOTIFICATION_EMAIL_SENDER }}
+          NOTIFICATION_EMAIL_RECIPIENT: ${{ secrets.NOTIFICATION_EMAIL_RECIPIENT }}
+          FEATURE_RESUME_MATCHING: true
+          FEATURE_DASHBOARD: true
+          FEATURE_SCREENSHOTS: true
+          FEATURE_PLAYWRIGHT: true
+          FEATURE_EMAIL: true
+
+      - name: Upload Logs Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-priority-3
+          path: |
+            logs/
+            storage/screenshots/
+            storage/summary.json
+            storage/status.json
+          retention-days: 7
+
+      - name: Upload Dashboard Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-priority-3
+          path: |
+            storage/dashboard.html
+            storage/dashboard.json
+            storage/metrics.prom
+          retention-days: 7

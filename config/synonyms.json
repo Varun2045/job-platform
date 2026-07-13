@@ -1,0 +1,20 @@
+{
+  "node": "Node.js",
+  "nodejs": "Node.js",
+  "js": "JavaScript",
+  "javascript": "JavaScript",
+  "ts": "TypeScript",
+  "typescript": "TypeScript",
+  "reactjs": "React",
+  "react": "React",
+  "postgres": "PostgreSQL",
+  "postgresql": "PostgreSQL",
+  "spring": "Spring Boot",
+  "springboot": "Spring Boot",
+  "spring boot": "Spring Boot",
+  "llm": "Large Language Model",
+  "large language model": "Large Language Model",
+  "golang": "Go",
+  "gcp": "Google Cloud",
+  "aws": "Amazon Web Services"
+}

@@ -1,0 +1,14 @@
+{
+  "minMatchScore": 70,
+  "experienceMinYears": null,
+  "experienceMaxYears": null,
+  "workplaceTypes": [],
+  "cities": [],
+  "states": [],
+  "countries": [],
+  "employmentTypes": [],
+  "internship": true,
+  "newGrad": true,
+  "fullTime": true,
+  "contract": true
+}

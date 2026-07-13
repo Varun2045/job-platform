@@ -1,0 +1,37 @@
+[
+  {
+    "key": "AI",
+    "enabled": true,
+    "description": "AI Services"
+  },
+  {
+    "key": "Email",
+    "enabled": true,
+    "description": "Email Notifications"
+  },
+  {
+    "key": "Reports",
+    "enabled": true,
+    "description": "Reporting Generators"
+  },
+  {
+    "key": "Dashboard",
+    "enabled": true,
+    "description": "Real-time Dashboard"
+  },
+  {
+    "key": "Notifications",
+    "enabled": true,
+    "description": "In-app Notifications"
+  },
+  {
+    "key": "Analytics",
+    "enabled": true,
+    "description": "Analytics Charts"
+  },
+  {
+    "key": "ai_suggestions",
+    "enabled": true,
+    "description": "ai_suggestions dynamic flag"
+  }
+]

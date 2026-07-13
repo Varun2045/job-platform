@@ -1,0 +1,29 @@
+Varun Kumar
+Software Engineer (Backend)
+Email: varun@example.com | GitHub: github.com/varun | LinkedIn: linkedin.com/in/varun
+
+SUMMARY
+Result-oriented Software Engineer with 2+ years of experience designing and developing enterprise-grade backend systems. Proficient in TypeScript, Node.js, Java, Spring Boot, and distributed database systems. Experienced in cloud deployments (AWS, GCP) and container orchestration.
+
+TECHNICAL SKILLS
+- Languages: TypeScript, JavaScript, Java, Go, SQL
+- Backend: Node.js, Express, NestJS, Spring Boot, Microservices, REST APIs, GraphQL
+- Databases: PostgreSQL, MongoDB, Redis, Elasticsearch
+- Cloud & DevOps: Amazon Web Services (AWS), Google Cloud Platform (GCP), Docker, Kubernetes, CI/CD pipelines
+- Concepts: Distributed Systems, System Design, Data Structures, OOP, Caching, Messaging (RabbitMQ, Kafka)
+
+EXPERIENCE
+Software Engineer - TechCorp Solutions (2024 - Present)
+- Designed and implemented microservices using Node.js and NestJS, handling 50k+ monthly active users.
+- Migrated legacy Java systems to a modern Spring Boot architecture, reducing response times by 35%.
+- Optimised PostgreSQL database queries and implemented Redis caching, lowering query latency by 50%.
+- Integrated AWS services (S3, RDS, ECS, Lambda) for scalable cloud-native operations.
+
+Associate Developer - StartupHub (2022 - 2024)
+- Built backend APIs for web applications using Node.js, Express, and MongoDB.
+- Written comprehensive unit and integration tests using Jest, achieving 90% code coverage.
+- Assisted in setting up GitHub Actions pipelines for automated testing and deployments.
+
+EDUCATION
+Bachelor of Technology in Computer Science
+Graduated: May 2022

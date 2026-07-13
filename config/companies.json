@@ -1,0 +1,349 @@
+[
+  {
+    "id": "google",
+    "name": "Google",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "detected_ats": "google",
+    "resume_profiles": ["backend", "ai"]
+  },
+  {
+    "id": "microsoft",
+    "name": "Microsoft",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "detected_ats": "microsoft",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "amazon",
+    "name": "Amazon",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "detected_ats": "amazon",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "nvidia",
+    "name": "NVIDIA",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite",
+    "resume_profiles": ["backend", "ai"]
+  },
+  {
+    "id": "adobe",
+    "name": "Adobe",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/ExternalCareers",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "apple",
+    "name": "Apple",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "detected_ats": "apple",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "meta",
+    "name": "Meta",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "detected_ats": "meta",
+    "resume_profiles": ["backend", "ai"]
+  },
+  {
+    "id": "oracle",
+    "name": "Oracle",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "sap",
+    "name": "SAP",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "cisco",
+    "name": "Cisco",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "amd",
+    "name": "AMD",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://amd.wd1.myworkdayjobs.com/wday/cxs/amd/AMDExternalSite",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "intel",
+    "name": "Intel",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "qualcomm",
+    "name": "Qualcomm",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://qualcomm.wd5.myworkdayjobs.com/wday/cxs/qualcomm/External",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "atlassian",
+    "name": "Atlassian",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://atlassian.wd3.myworkdayjobs.com/wday/cxs/atlassian/Careers",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "servicenow",
+    "name": "ServiceNow",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://servicenow.wd5.myworkdayjobs.com/wday/cxs/servicenow/ServiceNowCareers",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "uber",
+    "name": "Uber",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "salesforce",
+    "name": "Salesforce",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://salesforce.wd1.myworkdayjobs.com/wday/cxs/salesforce/External_Career_Site",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "databricks",
+    "name": "Databricks",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "greenhouse",
+    "api_endpoint": "databricks",
+    "resume_profiles": ["backend", "ai"]
+  },
+  {
+    "id": "snowflake",
+    "name": "Snowflake",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://snowflake.wd5.myworkdayjobs.com/wday/cxs/snowflake/Snowflake_Careers",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "mongodb",
+    "name": "MongoDB",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "greenhouse",
+    "api_endpoint": "mongodb",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "browserstack",
+    "name": "BrowserStack",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "workday",
+    "api_endpoint": "https://browserstack.wd3.myworkdayjobs.com/wday/cxs/browserstack/External",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "postman",
+    "name": "Postman",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "greenhouse",
+    "api_endpoint": "postman",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "freshworks",
+    "name": "Freshworks",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "lever",
+    "api_endpoint": "freshworks",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "razorpay",
+    "name": "Razorpay",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "greenhouse",
+    "api_endpoint": "razorpaysoftwareprivatelimited",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "phonepe",
+    "name": "PhonePe",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "greenhouse",
+    "api_endpoint": "phonepe",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "groww",
+    "name": "Groww",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "lever",
+    "api_endpoint": "groww",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "cred",
+    "name": "CRED",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "lever",
+    "api_endpoint": "cred",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "flipkart",
+    "name": "Flipkart",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "meesho",
+    "name": "Meesho",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "lever",
+    "api_endpoint": "meesho",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "zoho",
+    "name": "Zoho",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "jpmorgan",
+    "name": "JPMorgan",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://jpmorgan.wd5.myworkdayjobs.com/wday/cxs/jpmorgan/JPM_Careers",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "goldmansachs",
+    "name": "Goldman Sachs",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "paypal",
+    "name": "PayPal",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://paypal.wd5.myworkdayjobs.com/wday/cxs/paypal/jobs",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "visa",
+    "name": "Visa",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://visa.wd5.myworkdayjobs.com/wday/cxs/visa/VisaRecruiting",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "mastercard",
+    "name": "Mastercard",
+    "enabled": true,
+    "priority": 2,
+    "interval_minutes": 180,
+    "detected_ats": "workday",
+    "api_endpoint": "https://mastercard.wd1.myworkdayjobs.com/wday/cxs/mastercard/MastercardCareers",
+    "resume_profiles": ["backend"]
+  },
+  {
+    "id": "hsbc",
+    "name": "HSBC",
+    "enabled": true,
+    "priority": 3,
+    "interval_minutes": 360,
+    "detected_ats": "fallback",
+    "resume_profiles": ["backend"]
+  }
+]
