@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { RecruiterManager, RecruiterContact } from '../core/RecruiterManager.js';
+import { RecruiterManager } from '../core/RecruiterManager.js';
 import { StorageProvider } from '../storage/StorageProvider.js';
 
 describe('RecruiterManager', () => {

@@ -1963,7 +1963,6 @@ app.post('/api/profile-builder/generate-website', authMiddleware, async (req, re
                 : isDark
                   ? '#3b82f6'
                   : '#2563eb';
-    const bgColor = isDark ? '#0f172a' : '#f8fafc';
     const cardBg = isDark ? '#1e293b' : '#ffffff';
     const textMain = isDark ? '#f8fafc' : '#0f172a';
     const textMuted = isDark ? '#94a3b8' : '#64748b';
@@ -2018,7 +2017,7 @@ app.post('/api/profile-builder/generate-website', authMiddleware, async (req, re
         if (section.content && section.content.trim()) {
           try {
             projectsArray = JSON.parse(section.content);
-          } catch (e) {
+          } catch {
             projectsArray = null;
           }
         } else {

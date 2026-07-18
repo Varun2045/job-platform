@@ -21,7 +21,7 @@ export class CheatsheetGenerator {
    */
   public static async generate(
     topic: string,
-    options?: { difficulty?: string; mode?: string; company?: string }
+    options?: { difficulty?: string; mode?: string; company?: string },
   ): Promise<any> {
     // Reload dotenv dynamically to capture newly saved .env file settings immediately
     dotenv.config();

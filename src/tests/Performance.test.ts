@@ -59,7 +59,7 @@ describe('Performance and Scale Verification Tests', () => {
         ) {
           try {
             fs.renameSync(path.join(storageDir, file), path.join(storageDir, file + '.tmpbak'));
-          } catch (e) {}
+          } catch {}
         }
       }
     }
@@ -90,7 +90,7 @@ describe('Performance and Scale Verification Tests', () => {
               fs.unlinkSync(dest);
             }
             fs.renameSync(path.join(storageDir, file), dest);
-          } catch (e) {}
+          } catch {}
         }
       }
     }
