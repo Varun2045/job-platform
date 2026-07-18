@@ -5,7 +5,7 @@ import { StorageProvider } from '../storage/StorageProvider.js';
 import { config } from '../config/config.js';
 import { Logger } from '../core/Logger.js';
 import { ResumeMatcher } from '../core/ResumeMatcher.js';
-import { StatsReporter } from '../core/StatsReporter.js';
+import { StatsReporter } from '../core/Telemetry.js';
 
 async function main() {
   const args = process.argv.slice(2);

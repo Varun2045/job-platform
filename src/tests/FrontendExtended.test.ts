@@ -1,4 +1,4 @@
-import { AiAnalyzer } from '../core/AiAnalyzer.js';
+import { AiAnalyzer } from '../core/ResumeMatcher.js';
 import { ResumeTailor } from '../core/ResumeTailor.js';
 import { CoverLetterGenerator } from '../core/CoverLetterGenerator.js';
 import { InterviewGenerator } from '../core/InterviewGenerator.js';

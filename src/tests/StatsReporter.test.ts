@@ -1,4 +1,4 @@
-import { StatsReporter } from '../core/StatsReporter.js';
+import { StatsReporter } from '../core/Telemetry.js';
 import { CompanyConfig } from '../companies/Scraper.js';
 
 describe('StatsReporter Unit Tests', () => {

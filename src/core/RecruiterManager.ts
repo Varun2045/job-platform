@@ -19,6 +19,45 @@ export interface RecruiterContact {
 
 export class RecruiterManager {
   /**
+   * Helper to parse notes field into details.
+   */
+  private static parseNotes(notesStr: string | undefined): {
+    phone?: string;
+    notes?: string;
+    conversation_history: RecruiterContact['conversation_history'];
+  } {
+    if (!notesStr) {
+      return { conversation_history: [] };
+    }
+    try {
+      if (notesStr.trim().startsWith('{')) {
+        const parsed = JSON.parse(notesStr);
+        return {
+          phone: parsed.phone,
+          notes: parsed.notes,
+          conversation_history: parsed.conversation_history || [],
+        };
+      }
+    } catch {}
+    return { notes: notesStr, conversation_history: [] };
+  }
+
+  /**
+   * Helper to serialize details into notes string.
+   */
+  private static serializeNotes(
+    phone: string | undefined,
+    notes: string | undefined,
+    history: RecruiterContact['conversation_history'],
+  ): string {
+    return JSON.stringify({
+      phone: phone || '',
+      notes: notes || '',
+      conversation_history: history,
+    });
+  }
+
+  /**
    * Adds a new recruiter contact to CRM.
    */
   public static async addContact(
@@ -26,11 +65,26 @@ export class RecruiterManager {
     userId: string,
     contact: Omit<RecruiterContact, 'conversation_history'>,
   ): Promise<void> {
-    const record: RecruiterContact = {
-      ...contact,
-      conversation_history: [],
+    const notesStr = this.serializeNotes(contact.phone, contact.notes, []);
+    const referral = {
+      id: contact.id || Math.random().toString(36).substring(2, 11),
+      userId,
+      name: contact.name,
+      role: 'Recruiter',
+      category: 'Recruiter' as const,
+      company: contact.company,
+      linkedInUrl: contact.linkedin,
+      email: contact.email,
+      notes: notesStr,
+      tags: [],
+      connectionStatus: 'Connected' as const,
+      referralStatus: 'Connected',
+      nextFollowUp: contact.follow_up_date,
+      lastContacted: contact.last_contacted,
+      createdAt: contact.last_contacted || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-    await storage.saveRecruiter(userId, record);
+    await storage.saveReferral(userId, referral);
   }
 
   /**
@@ -43,22 +97,25 @@ export class RecruiterManager {
     message: string,
     direction: 'incoming' | 'outgoing',
   ): Promise<void> {
-    const recruiters = await storage.getRecruiters(userId);
-    const recruiter = recruiters.find((r) => r.id === recruiterId);
+    const referrals = await storage.getReferrals(userId);
+    const referral = referrals.find((r) => r.id === recruiterId);
 
-    if (!recruiter) {
+    if (!referral) {
       throw new Error(`Recruiter with ID ${recruiterId} not found`);
     }
 
+    const { phone, notes, conversation_history } = this.parseNotes(referral.notes);
     const timestamp = new Date().toISOString();
-    recruiter.conversation_history.push({ timestamp, message, direction });
-    recruiter.last_contacted = timestamp;
+    conversation_history.push({ timestamp, message, direction });
 
     // Automatically suggest next follow-up in 7 days
     const followUp = new Date();
     followUp.setDate(followUp.getDate() + 7);
-    recruiter.follow_up_date = followUp.toISOString();
 
-    await storage.saveRecruiter(userId, recruiter);
+    referral.notes = this.serializeNotes(phone, notes, conversation_history);
+    referral.lastContacted = timestamp;
+    referral.nextFollowUp = followUp.toISOString();
+
+    await storage.saveReferral(userId, referral);
   }
 }

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { RawJob, Job, CompanyConfig } from '../companies/Scraper.js';
-import { SkillNormalizer } from './SkillNormalizer.js';
+import { SkillNormalizer } from './ResumeMatcher.js';
 
 export class JobNormalizer {
   /**

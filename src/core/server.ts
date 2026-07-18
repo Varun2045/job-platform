@@ -18,7 +18,7 @@ import { EmailNotificationProvider } from '../notifications/EmailNotificationPro
 import { ResumeMatcher } from './ResumeMatcher.js';
 import { SearchEngine } from './SearchEngine.js';
 import { Logger } from './Logger.js';
-import { AiAnalyzer } from './AiAnalyzer.js';
+import { AiAnalyzer } from './ResumeMatcher.js';
 import { ResumeTailor } from './ResumeTailor.js';
 import { CoverLetterGenerator } from './CoverLetterGenerator.js';
 import { InterviewGenerator } from './InterviewGenerator.js';
@@ -47,7 +47,7 @@ import { AutoApplyEngine } from './AutoApplyEngine.js';
 import { ResumeOptimizationService } from './ResumeOptimizationService.js';
 import { CalendarService } from './CalendarService.js';
 import { RecruiterManager } from './RecruiterManager.js';
-import { OpportunityEngine } from './OpportunityEngine.js';
+import { OpportunityEngine } from './RecommendationEngine.js';
 import { PortfolioRecommendation } from './PortfolioRecommendation.js';
 import { ExportService } from './ExportService.js';
 import { PlaywrightScraper } from '../companies/PlaywrightScraper.js';

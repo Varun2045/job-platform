@@ -1,4 +1,4 @@
-import { SkillNormalizer } from '../core/SkillNormalizer.js';
+import { SkillNormalizer } from '../core/ResumeMatcher.js';
 
 describe('SkillNormalizer', () => {
   it('should normalize individual skills correctly', () => {

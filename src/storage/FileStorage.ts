@@ -599,31 +599,23 @@ export class FileStorage implements StorageProvider {
 
   // Recruiters CRM
   public async getRecruiters(userId: string): Promise<any[]> {
-    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'recruiters.json'), []);
-    return list.filter((r) => r.user_id === userId);
+    const list = await this.getReferrals(userId);
+    return list.filter((r) => r.category === 'Recruiter');
   }
 
   public async saveRecruiter(userId: string, recruiter: any): Promise<void> {
-    let list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'recruiters.json'), []);
-    const idx = list.findIndex((r) => r.id === recruiter.id && r.user_id === userId);
-    const record = {
+    const referral = {
       ...recruiter,
-      id: recruiter.id || Math.random().toString(36).substring(2, 11),
-      user_id: userId,
-      created_at: recruiter.created_at || new Date().toISOString(),
+      userId,
+      category: 'Recruiter',
+      role: recruiter.role || 'Recruiter',
+      linkedin_url: recruiter.linkedin_url || recruiter.linkedin,
     };
-    if (idx !== -1) {
-      list[idx] = record;
-    } else {
-      list.push(record);
-    }
-    this.writeJsonFile(path.join(process.cwd(), 'storage', 'recruiters.json'), list);
+    await this.saveReferral(userId, referral);
   }
 
   public async deleteRecruiter(userId: string, id: string): Promise<void> {
-    let list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'recruiters.json'), []);
-    list = list.filter((r) => !(r.id === id && r.user_id === userId));
-    this.writeJsonFile(path.join(process.cwd(), 'storage', 'recruiters.json'), list);
+    await this.deleteReferral(userId, id);
   }
 
   // Referrals CRM

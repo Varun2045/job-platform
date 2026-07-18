@@ -938,27 +938,69 @@ export class SupabaseStorage implements StorageProvider {
 
   // Recruiters CRM
   public async getRecruiters(userId: string): Promise<any[]> {
-    const { data, error } = await this.client.from('job_monitor_recruiters').select('*').eq('user_id', userId);
+    const { data, error } = await this.client
+      .from('job_monitor_referrals')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('category', 'Recruiter');
     if (error) {
       Logger.error(`Error fetching recruiters for ${userId}`, error);
       return [];
     }
-    return data || [];
+    return (data || []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      company: row.company,
+      email: row.email,
+      linkedin: row.linkedin_url,
+      ...this.parseRecruiterNotes(row.notes),
+      follow_up_date: row.next_follow_up,
+      last_contacted: row.last_contacted,
+    }));
+  }
+
+  private parseRecruiterNotes(notesStr: string | undefined): any {
+    if (!notesStr) return {};
+    try {
+      if (notesStr.trim().startsWith('{')) {
+        const parsed = JSON.parse(notesStr);
+        return {
+          phone: parsed.phone,
+          notes: parsed.notes,
+          conversation_history: parsed.conversation_history || [],
+        };
+      }
+    } catch {}
+    return { notes: notesStr, conversation_history: [] };
   }
 
   public async saveRecruiter(userId: string, recruiter: any): Promise<void> {
     const payload = {
-      ...recruiter,
+      id: recruiter.id,
       user_id: userId,
+      name: recruiter.name,
+      role: 'Recruiter',
+      category: 'Recruiter',
+      company: recruiter.company,
+      linkedin_url: recruiter.linkedin || recruiter.linkedin_url,
+      email: recruiter.email,
+      notes: JSON.stringify({
+        phone: recruiter.phone || '',
+        notes: recruiter.notes || '',
+        conversation_history: recruiter.conversation_history || [],
+      }),
+      connection_status: 'Connected',
+      next_follow_up: recruiter.follow_up_date || recruiter.next_follow_up,
+      last_contacted: recruiter.last_contacted,
     };
-    const { error } = await this.client.from('job_monitor_recruiters').upsert(payload);
+    const { error } = await this.client.from('job_monitor_referrals').upsert(payload, { onConflict: 'id' });
     if (error) {
       Logger.error(`Error saving recruiter for ${userId}`, error);
     }
   }
 
   public async deleteRecruiter(userId: string, id: string): Promise<void> {
-    const { error } = await this.client.from('job_monitor_recruiters').delete().eq('id', id).eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_referrals').delete().eq('id', id).eq('user_id', userId);
     if (error) {
       Logger.error(`Error deleting recruiter ${id}`, error);
     }
