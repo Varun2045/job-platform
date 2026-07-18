@@ -10,7 +10,7 @@ import { ResumeManager } from './features/resumes/ResumeManager.js';
 import { CompanyMonitor } from './features/companies/CompanyMonitor.js';
 import { Settings } from './features/settings/Settings.js';
 import { AdminPanel } from './features/admin/AdminPanel.js';
-import { ResumeBuilder } from './features/resume-builder/ResumeBuilder.js';
+import { ResumeBuilder } from './features/resumes/resume-builder/ResumeBuilder.js';
 import { AutomationHub } from './features/automation/AutomationHub.js';
 import { Referrals } from './features/referrals/Referrals.js';
 import { AICareerAssistant } from './features/career-assistant/AICareerAssistant.js';
