@@ -56,7 +56,7 @@ export class SalaryAnalyzer {
         negotiationMin,
         negotiationMax,
         growthPotential,
-        marketAverage
+        marketAverage,
       };
     } catch (e) {
       Logger.error(`Failed to analyze salary expected range for user ${userId}`, e as Error);
@@ -66,7 +66,7 @@ export class SalaryAnalyzer {
         negotiationMin: 100000,
         negotiationMax: 125000,
         growthPotential: 'Moderate',
-        marketAverage: 105000
+        marketAverage: 105000,
       };
     }
   }

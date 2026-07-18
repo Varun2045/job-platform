@@ -16,11 +16,14 @@ export const CompanyMonitor: React.FC = () => {
   const [newAts, setNewAts] = useState('none');
   const [newEndpoint, setNewEndpoint] = useState('');
   const [newProfiles, setNewProfiles] = useState('backend');
+  const [newEnableResume, setNewEnableResume] = useState(true);
 
   // Inline edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editInterval, setEditInterval] = useState('');
   const [editPriority, setEditPriority] = useState('');
+  const [editEnableResume, setEditEnableResume] = useState(true);
+  const [editProfiles, setEditProfiles] = useState('');
 
   const { data: companies, isLoading } = useQuery({
     queryKey: ['companies'],
@@ -55,11 +58,11 @@ export const CompanyMonitor: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, interval_minutes, priority }: { id: string; interval_minutes: number; priority: number }) => {
+    mutationFn: async ({ id, interval_minutes, priority, resume_profiles }: { id: string; interval_minutes: number; priority: number; resume_profiles?: string[] }) => {
       const res = await fetch(`/api/companies/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interval_minutes, priority })
+        body: JSON.stringify({ interval_minutes, priority, resume_profiles })
       });
       if (!res.ok) throw new Error('Failed to update company');
       return res.json();
@@ -82,7 +85,9 @@ export const CompanyMonitor: React.FC = () => {
           interval_minutes: Number(newInterval),
           api_endpoint: newEndpoint || null,
           detected_ats: newAts,
-          resume_profiles: newProfiles.split(',').map(s => s.trim())
+          resume_profiles: newEnableResume
+            ? newProfiles.split(',').map(s => s.trim()).filter(Boolean)
+            : ['_skip_']
         })
       });
       if (!res.ok) {
@@ -95,6 +100,7 @@ export const CompanyMonitor: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       setNewId(''); setNewName(''); setNewPriority('2'); setNewInterval('180');
       setNewAts('none'); setNewEndpoint(''); setNewProfiles('backend');
+      setNewEnableResume(true);
       setShowAddForm(false);
       alert('Company scraper registered successfully!');
     },
@@ -162,27 +168,42 @@ export const CompanyMonitor: React.FC = () => {
                 <option value="greenhouse">Greenhouse API</option>
                 <option value="lever">Lever API</option>
                 <option value="workday">Workday API</option>
+                <option value="google">Google API</option>
+                <option value="microsoft">Microsoft API</option>
+                <option value="amazon">Amazon API</option>
+                <option value="apple">Apple API</option>
+                <option value="meta">Meta API</option>
               </select>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs text-[#94a3b8] font-semibold">Assigned Resume Profiles (comma-separated)</label>
-              <input type="text" value={newProfiles} onChange={(e) => setNewProfiles(e.target.value)} placeholder="backend, ai" className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors" />
-              <p className="text-[10px] text-[#6b7280] mt-1">
-                This resume will be used for:
-              </p>
+            <div className="space-y-2 flex flex-col justify-end pb-1">
+              <label className="flex items-center gap-2 text-xs text-[#94a3b8] font-semibold cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={newEnableResume}
+                  onChange={(e) => setNewEnableResume(e.target.checked)}
+                  className="rounded border-[#232d3f] text-indigo-600 focus:ring-indigo-500 bg-[#1b2535]"
+                />
+                Enable Resume Matching
+              </label>
               <p className="text-[10px] text-[#6b7280]">
-                • AI job matching
-              </p>
-              <p className="text-[10px] text-[#6b7280]">
-                • Resume tailoring
-              </p>
-              <p className="text-[10px] text-[#6b7280]">
-                • Auto Apply
-              </p>
-              <p className="text-[10px] text-[#6b7280]">
-                • Cover Letter generation
+                If disabled, all postings are imported with 100% match score without resume matching.
               </p>
             </div>
+            {newEnableResume && (
+              <div className="space-y-1 animate-in fade-in duration-200">
+                <label className="text-xs text-[#94a3b8] font-semibold">Assigned Resume Profiles (comma-separated)</label>
+                <input type="text" value={newProfiles} onChange={(e) => setNewProfiles(e.target.value)} placeholder="backend, ai" className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors" />
+                <p className="text-[10px] text-[#6b7280] mt-1">
+                  This resume will be used for:
+                </p>
+                <p className="text-[10px] text-[#6b7280]">
+                  • AI job matching & tailoring
+                </p>
+                <p className="text-[10px] text-[#6b7280]">
+                  • Auto Apply & Cover Letters
+                </p>
+              </div>
+            )}
             <div className="md:col-span-2 space-y-1">
               <label className="text-xs text-[#94a3b8] font-semibold">API Endpoint or Careers Page URL</label>
               <input type="text" value={newEndpoint} onChange={(e) => setNewEndpoint(e.target.value)} placeholder="https://netflix.wd5.myworkdayjobs.com/wday/cxs/netflix/ExternalCareers" className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors" />
@@ -231,10 +252,13 @@ export const CompanyMonitor: React.FC = () => {
                           setEditingId(c.id);
                           setEditInterval(String(c.interval_minutes || 180));
                           setEditPriority(String(c.priority || 2));
+                          const hasResume = !(c.resume_profiles?.includes('_skip_') || c.resume_profiles?.includes('none') || c.resume_profiles?.length === 0);
+                          setEditEnableResume(hasResume);
+                          setEditProfiles(c.resume_profiles?.filter((p: string) => p !== '_skip_' && p !== 'none').join(', ') || 'backend');
                         }
                       }}
                       className="p-1 hover:bg-[#232d3f] rounded text-[#94a3b8] hover:text-indigo-400 cursor-pointer transition-colors"
-                      title={isEditing ? 'Cancel edit' : 'Edit interval & priority'}
+                      title={isEditing ? 'Cancel edit' : 'Edit settings'}
                     >
                       {isEditing ? <X className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
                     </button>
@@ -273,9 +297,40 @@ export const CompanyMonitor: React.FC = () => {
                           <option value="3">Low (3)</option>
                         </select>
                       </div>
+                      <div className="flex items-center gap-2 py-1">
+                        <input
+                          type="checkbox"
+                          id={`edit-resume-${c.id}`}
+                          checked={editEnableResume}
+                          onChange={e => setEditEnableResume(e.target.checked)}
+                          className="rounded border-[#232d3f] text-indigo-600 focus:ring-indigo-500 bg-[#131a26]"
+                        />
+                        <label htmlFor={`edit-resume-${c.id}`} className="text-[10px] text-[#94a3b8] font-semibold select-none cursor-pointer">
+                          Enable Resume Matching
+                        </label>
+                      </div>
+                      {editEnableResume && (
+                        <div>
+                          <label className="text-[10px] text-[#94a3b8] font-semibold block mb-1">Assigned Resume Profiles</label>
+                          <input
+                            type="text"
+                            value={editProfiles}
+                            onChange={e => setEditProfiles(e.target.value)}
+                            placeholder="backend, ai"
+                            className="w-full bg-[#131a26] border border-[#232d3f] rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      )}
                     </div>
                     <button
-                      onClick={() => updateMutation.mutate({ id: c.id, interval_minutes: Number(editInterval), priority: Number(editPriority) })}
+                      onClick={() => updateMutation.mutate({
+                        id: c.id,
+                        interval_minutes: Number(editInterval),
+                        priority: Number(editPriority),
+                        resume_profiles: editEnableResume
+                          ? editProfiles.split(',').map(s => s.trim()).filter(Boolean)
+                          : ['_skip_']
+                      })}
                       disabled={updateMutation.isPending}
                       className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-xs font-bold py-1.5 rounded-lg cursor-pointer transition-colors"
                     >

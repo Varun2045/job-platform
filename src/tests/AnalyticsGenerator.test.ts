@@ -25,7 +25,7 @@ describe('Analytics and Report Generators', () => {
         jobsFound: 10,
         newJobs: 2,
         durationMs: 5000,
-        failures: 0
+        failures: 0,
       },
       {
         id: 'facebook',
@@ -34,9 +34,9 @@ describe('Analytics and Report Generators', () => {
         jobsFound: 5,
         newJobs: 1,
         durationMs: 2000,
-        failures: 0
-      }
-    ]
+        failures: 0,
+      },
+    ],
   };
 
   const applications: Application[] = [
@@ -48,8 +48,8 @@ describe('Analytics and Report Generators', () => {
       appliedDate: '2026-07-01T00:00:00Z',
       resumeUsed: 'resume.pdf',
       notes: 'Final round scheduled.',
-      lastUpdated: new Date().toISOString()
-    }
+      lastUpdated: new Date().toISOString(),
+    },
   ];
 
   beforeAll(() => {
@@ -57,15 +57,19 @@ describe('Analytics and Report Generators', () => {
       originalStatsContent = fs.readFileSync(statsPath, 'utf-8');
     }
     // Write clean mock stats for the test run
-    fs.writeFileSync(statsPath, JSON.stringify([
-      {
-        timestamp: new Date().toISOString(),
-        jobsScraped: 10,
-        matchesFound: 2,
-        companiesChecked: 1,
-        failuresCount: 0
-      }
-    ]), 'utf-8');
+    fs.writeFileSync(
+      statsPath,
+      JSON.stringify([
+        {
+          timestamp: new Date().toISOString(),
+          jobsScraped: 10,
+          matchesFound: 2,
+          companiesChecked: 1,
+          failuresCount: 0,
+        },
+      ]),
+      'utf-8',
+    );
   });
 
   afterAll(() => {
@@ -96,11 +100,11 @@ describe('Analytics and Report Generators', () => {
       if (p.toString().endsWith('storage')) return false;
       return true;
     });
-    const mkdirSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation((p: any) => null as any);
+    const mkdirSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation((_p: any) => null as any);
 
     WeeklyReportGenerator.generate(metrics, applications, [
       { job: { title: 'Engineer' }, score: 85 },
-      { job: { title: 'Architect' }, score: 95 }
+      { job: { title: 'Architect' }, score: 95 },
     ]);
 
     expect(mkdirSpy).toHaveBeenCalled();
@@ -109,9 +113,7 @@ describe('Analytics and Report Generators', () => {
     mkdirSpy.mockRestore();
 
     // Verify it actually writes file successfully when not mocked
-    WeeklyReportGenerator.generate(metrics, applications, [
-      { job: { title: 'Engineer' }, score: 85 }
-    ]);
+    WeeklyReportGenerator.generate(metrics, applications, [{ job: { title: 'Engineer' }, score: 85 }]);
     const reportPath = path.join(process.cwd(), 'storage', 'weekly-report.md');
     expect(fs.existsSync(reportPath)).toBe(true);
 

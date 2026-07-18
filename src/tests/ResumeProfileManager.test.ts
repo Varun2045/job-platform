@@ -10,7 +10,7 @@ describe('ResumeProfileManager', () => {
     isRemote: true,
     location: '',
     datePosted: '',
-    description: 'Looking for a frontend specialist with extensive React and TypeScript skills.'
+    description: 'Looking for a frontend specialist with extensive React and TypeScript skills.',
   } as unknown as Job;
 
   test('should return default profile Backend if profiles list is empty', () => {
@@ -21,7 +21,7 @@ describe('ResumeProfileManager', () => {
   test('should recommend Frontend profile when matching frontend job requirements', () => {
     const profiles = [
       { profile_name: 'Backend', content: 'Node.js, Postgres, Kubernetes backend developer.' },
-      { profile_name: 'Frontend', content: 'React, TypeScript, CSS, UI frontend specialist developer.' }
+      { profile_name: 'Frontend', content: 'React, TypeScript, CSS, UI frontend specialist developer.' },
     ];
 
     const rec = ResumeProfileManager.recommendProfile(mockJob, profiles);

@@ -8,14 +8,14 @@ describe('RecruiterManager', () => {
   const mockStorage = {
     getRecruiters: (jest.fn() as any).mockImplementation(() => Promise.resolve(list)),
     saveRecruiter: (jest.fn() as any).mockImplementation((userId: string, contact: any) => {
-      const idx = list.findIndex(r => r.id === contact.id);
+      const idx = list.findIndex((r) => r.id === contact.id);
       if (idx !== -1) {
         list[idx] = contact;
       } else {
         list.push({ ...contact, id: contact.id || 'r1' });
       }
       return Promise.resolve();
-    })
+    }),
   } as unknown as StorageProvider;
 
   beforeEach(() => {
@@ -26,7 +26,7 @@ describe('RecruiterManager', () => {
     await RecruiterManager.addContact(mockStorage, 'u1', {
       name: 'John Recruiter',
       company: 'Stripe',
-      email: 'john@stripe.com'
+      email: 'john@stripe.com',
     });
 
     expect(list.length).toBe(1);
@@ -39,7 +39,7 @@ describe('RecruiterManager', () => {
       id: 'rec_stripe',
       name: 'John Recruiter',
       company: 'Stripe',
-      conversation_history: []
+      conversation_history: [],
     });
 
     await RecruiterManager.logTouchpoint(mockStorage, 'u1', 'rec_stripe', 'Had a quick phone intro call.', 'outgoing');

@@ -5,12 +5,12 @@ const options = {
   port: process.env.PORT || 3001,
   path: '/health',
   method: 'GET',
-  timeout: 5000
+  timeout: 5000,
 };
 
 const req = http.request(options, (res) => {
   let body = '';
-  res.on('data', chunk => body += chunk);
+  res.on('data', (chunk) => (body += chunk));
   res.on('end', () => {
     if (res.statusCode === 200) {
       process.exit(0);

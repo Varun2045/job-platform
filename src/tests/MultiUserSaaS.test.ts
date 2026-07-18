@@ -19,14 +19,14 @@ describe('Version 3.0.0 SaaS Multi-Tenant & Security Integration', () => {
       'user_notifications.json',
       'audit_logs.json',
       'feature_flags.json',
-      'extended_settings.json'
+      'extended_settings.json',
     ];
     for (const f of testFiles) {
       const fp = path.join(process.cwd(), 'storage', f);
       if (fs.existsSync(fp)) {
         try {
           fs.unlinkSync(fp);
-        } catch (e) {}
+        } catch {}
       }
     }
 
@@ -42,7 +42,7 @@ describe('Version 3.0.0 SaaS Multi-Tenant & Security Integration', () => {
       jobId: '1',
       status: 'Applied' as const,
       notes: 'Notes A',
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
     const appB = {
       jobHash: 'hash-123',
@@ -50,7 +50,7 @@ describe('Version 3.0.0 SaaS Multi-Tenant & Security Integration', () => {
       jobId: '1',
       status: 'Interview' as const,
       notes: 'Notes B',
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     await storage.saveApplication(appA, userIdA);
@@ -103,11 +103,11 @@ describe('Version 3.0.0 SaaS Multi-Tenant & Security Integration', () => {
 
     const notifs = await storage.getUserNotifications(userIdA);
     expect(notifs.length).toBe(2);
-    expect(notifs.filter(n => !n.is_read).length).toBe(2);
+    expect(notifs.filter((n) => !n.is_read).length).toBe(2);
 
     await storage.markNotificationRead(userIdA, notifs[0].id);
     const updatedNotifs = await storage.getUserNotifications(userIdA);
-    expect(updatedNotifs.find(n => n.id === notifs[0].id)?.is_read).toBe(true);
+    expect(updatedNotifs.find((n) => n.id === notifs[0].id)?.is_read).toBe(true);
 
     await storage.clearUserNotifications(userIdA);
     const emptyNotifs = await storage.getUserNotifications(userIdA);
@@ -118,7 +118,7 @@ describe('Version 3.0.0 SaaS Multi-Tenant & Security Integration', () => {
     await AuditLogger.log(userIdA, 'Login', { browser: 'Chrome' }, '192.168.1.1');
     const logs = await storage.getAuditLogs();
     expect(logs.length).toBeGreaterThan(0);
-    const match = logs.find(l => l.user_id === userIdA && l.action === 'Login');
+    const match = logs.find((l) => l.user_id === userIdA && l.action === 'Login');
     expect(match).toBeDefined();
     expect(match?.ip_address).toBe('192.168.1.1');
   });

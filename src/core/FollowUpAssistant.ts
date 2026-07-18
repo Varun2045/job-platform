@@ -17,7 +17,7 @@ export class FollowUpAssistant {
       const applications = await storage.getApplications(userId);
       const recommendations: FollowUpRecommendation[] = [];
 
-      applications.forEach(app => {
+      applications.forEach((app) => {
         const lastUpdated = new Date(app.lastUpdated || 0);
         const days = Math.round((Date.now() - lastUpdated.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -29,7 +29,7 @@ export class FollowUpAssistant {
             actionRequired: 'Send Recruiter Follow-up Email',
             recommendedDate: new Date(lastUpdated.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             reason: `It has been ${days} days since you submitted your application without receiving feedback.`,
-            daysDelayed: days - 7
+            daysDelayed: days - 7,
           });
         } else if (app.status === 'Interview' && days >= 3) {
           recommendations.push({
@@ -39,7 +39,7 @@ export class FollowUpAssistant {
             actionRequired: 'Send Post-Interview Thank-You Note',
             recommendedDate: new Date(lastUpdated.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(),
             reason: `Send a quick thank-you email to check in on the next steps of the interview loop.`,
-            daysDelayed: days - 1
+            daysDelayed: days - 1,
           });
         } else if (app.status === 'Offer' && days >= 2) {
           recommendations.push({
@@ -49,7 +49,7 @@ export class FollowUpAssistant {
             actionRequired: 'Review Offer Package & Respond',
             recommendedDate: new Date(lastUpdated.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
             reason: `It has been ${days} days since you received the offer letter. Review key negotiation variables.`,
-            daysDelayed: days - 2
+            daysDelayed: days - 2,
           });
         }
       });

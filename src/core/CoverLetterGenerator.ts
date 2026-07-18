@@ -1,10 +1,12 @@
 import { Job } from '../companies/Scraper.js';
+import { chromium } from 'playwright';
 
 export type CoverLetterTone = 'Professional' | 'Technical' | 'Enthusiastic' | 'Creative';
 
 export interface CoverLetterOptions {
   recruiterName?: string;
   tone?: CoverLetterTone;
+  userName?: string;
 }
 
 export class CoverLetterGenerator {
@@ -15,13 +17,14 @@ export class CoverLetterGenerator {
   public static generate(
     job: Job,
     profileOrOptions?: string | CoverLetterOptions,
-    options: CoverLetterOptions = {}
+    options: CoverLetterOptions = {},
   ): string {
     const company = job.company;
     const role = job.title;
-    
+
     let tone: CoverLetterTone = 'Professional';
     let recruiter = 'Hiring Team';
+    let userName = 'Your Name';
 
     if (typeof profileOrOptions === 'string') {
       // Backward compatible path: profileName passed as string
@@ -30,11 +33,13 @@ export class CoverLetterGenerator {
     } else if (profileOrOptions) {
       recruiter = profileOrOptions.recruiterName || 'Hiring Manager';
       tone = profileOrOptions.tone || 'Professional';
+      userName = profileOrOptions.userName || 'Your Name';
     }
 
     // Direct options take precedence
     if (options.recruiterName) recruiter = options.recruiterName;
     if (options.tone) tone = options.tone;
+    if (options.userName) userName = options.userName;
 
     let body = '';
     switch (tone) {
@@ -62,16 +67,61 @@ In my previous roles, I have focused on building scalable services, improving au
 Thank you for your time and consideration.
 
 Sincerely,
-[Your Name]
+${userName}
 `;
   }
 
   /**
-   * Mock-exports a cover letter to various formats.
+   * Exports a cover letter to various formats (including printing real PDFs via Playwright).
    */
-  public static export(content: string, format: 'PDF' | 'Markdown' | 'DOCX'): Buffer {
+  public static async export(content: string, format: 'PDF' | 'Markdown' | 'DOCX'): Promise<Buffer> {
     if (format === 'Markdown') {
       return Buffer.from(content, 'utf-8');
+    }
+    if (format === 'PDF') {
+      const browser = await chromium.launch({ headless: true });
+      try {
+        const page = await browser.newPage();
+        const html = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body {
+                  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  color: #1e293b;
+                  margin: 0;
+                  padding: 40px;
+                }
+                .container {
+                  max-width: 800px;
+                  margin: 0 auto;
+                }
+                .content {
+                  white-space: pre-wrap;
+                  font-size: 14px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="content">${content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+              </div>
+            </body>
+          </html>
+        `;
+        await page.setContent(html);
+        const pdfBuffer = await page.pdf({
+          format: 'A4',
+          margin: { top: '25mm', bottom: '25mm', left: '25mm', right: '25mm' },
+        });
+        return pdfBuffer;
+      } finally {
+        await browser.close();
+      }
     }
     return Buffer.from(`MOCK-${format}-STREAM\n\n${content}`, 'utf-8');
   }

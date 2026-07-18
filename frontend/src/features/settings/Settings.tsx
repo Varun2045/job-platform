@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Save, Settings as SettingsIcon, Heart, User, Search, Trash2, Plus } from 'lucide-react';
+import { Save, Settings as SettingsIcon, Heart, User, Search, Trash2, Plus, Upload, Layout } from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'searches'>('profile');
-  const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile } = useForm();
+  const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile, setValue, watch } = useForm();
   const { register: registerExt, handleSubmit: handleSubmitExt, reset: resetExt } = useForm();
   const [newSearch, setNewSearch] = useState({ name: '', company: '', tech: '', location: '', remote: 'all' });
   const [newWatch, setNewWatch] = useState({ name: '', company: '', tech: '', location: '', remote: 'all' });
@@ -21,13 +21,16 @@ export const Settings: React.FC = () => {
       resetProfile({
         name: data.name || '',
         photo_url: data.photo_url || '',
+        banner_url: data.banner_url || '',
         experience_level: data.experience_level || 'Mid Level',
         preferred_roles: (data.preferred_roles || []).join(', '),
         preferred_cities: (data.preferred_cities || []).join(', '),
         tech_stack: (data.tech_stack || []).join(', '),
         linkedin: data.linkedin || '',
         github: data.github || '',
-        portfolio: data.portfolio || ''
+        portfolio: data.portfolio || '',
+        email: data.email || '',
+        phone: data.phone || ''
       });
       return data;
     }
@@ -77,13 +80,16 @@ export const Settings: React.FC = () => {
       const body = {
         name: formData.name,
         photo_url: formData.photo_url,
+        banner_url: formData.banner_url,
         experience_level: formData.experience_level,
         preferred_roles: formData.preferred_roles.split(',').map((s: string) => s.trim()).filter(Boolean),
         preferred_cities: formData.preferred_cities.split(',').map((s: string) => s.trim()).filter(Boolean),
         tech_stack: formData.tech_stack.split(',').map((s: string) => s.trim()).filter(Boolean),
         linkedin: formData.linkedin,
         github: formData.github,
-        portfolio: formData.portfolio
+        portfolio: formData.portfolio,
+        email: formData.email,
+        phone: formData.phone
       };
       const res = await fetch('/api/profile', {
         method: 'POST',
@@ -178,7 +184,7 @@ export const Settings: React.FC = () => {
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-4xl mx-auto">
+    <div className="p-8 space-y-8 max-w-2xl mx-auto">
       <div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
           <SettingsIcon className="w-8 h-8 text-indigo-400" /> Account Settings
@@ -206,9 +212,9 @@ export const Settings: React.FC = () => {
         ))}
       </div>
 
-      <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
+      <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 max-w-2xl">
         {activeTab === 'profile' && (
-          <form onSubmit={handleSubmitProfile(formData => saveProfileMutation.mutate(formData))} className="space-y-4 max-w-xl">
+          <form onSubmit={handleSubmitProfile(formData => saveProfileMutation.mutate(formData))} className="space-y-4 w-full">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider block mb-2">User Profile Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5 col-span-2">
@@ -221,13 +227,108 @@ export const Settings: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col gap-1.5 col-span-2">
-                <label className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Photo URL</label>
-                <input
-                  type="text"
-                  placeholder="https://example.com/photo.jpg"
-                  {...registerProfile('photo_url')}
-                  className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
-                />
+                <label className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Profile Photo</label>
+                <div className="flex items-center gap-4 bg-[#1b2535] border border-[#232d3f] rounded-xl p-3.5">
+                  {watch('photo_url') ? (
+                    <img
+                      src={watch('photo_url')}
+                      alt="Avatar Preview"
+                      className="w-12 h-12 rounded-xl object-cover border border-[#232d3f] shadow-md shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-[#131a26] border border-[#232d3f] flex items-center justify-center text-[#475569] shrink-0">
+                      <User className="w-6 h-6" />
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1.5">
+                    <label
+                      htmlFor="photo-upload-input"
+                      className="cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl py-2 px-4 text-xs font-bold transition flex items-center gap-2 w-fit shadow-sm"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload from computer
+                    </label>
+                    <input
+                      type="file"
+                      id="photo-upload-input"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setValue('photo_url', reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                      className="hidden"
+                    />
+                    <p className="text-[10px] text-[#94a3b8]">PNG, JPG, or GIF (max. 2MB)</p>
+                  </div>
+                  {watch('photo_url') && (
+                    <button
+                      type="button"
+                      onClick={() => setValue('photo_url', '')}
+                      className="ml-auto bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-bold px-3 py-2 rounded-xl text-xs transition duration-200 cursor-pointer border border-red-500/20"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5 col-span-2">
+                <label className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Hero Banner Image (Optional)</label>
+                <div className="flex flex-col gap-3 bg-[#1b2535] border border-[#232d3f] rounded-xl p-3.5">
+                  {watch('banner_url') ? (
+                    <img
+                      src={watch('banner_url')}
+                      alt="Banner Preview"
+                      className="w-full h-24 rounded-lg object-cover border border-[#232d3f] shadow-md"
+                    />
+                  ) : (
+                    <div className="w-full h-24 rounded-lg bg-[#131a26] border border-[#232d3f] border-dashed flex flex-col items-center justify-center text-[#475569] gap-1 select-none">
+                      <Layout className="w-6 h-6" />
+                      <span className="text-[10px]">No banner image uploaded (Optional)</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label
+                        htmlFor="banner-upload-input"
+                        className="cursor-pointer bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl py-2 px-4 text-xs font-bold transition flex items-center gap-2 w-fit shadow-sm"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Upload banner image
+                      </label>
+                      <input
+                        type="file"
+                        id="banner-upload-input"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setValue('banner_url', reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="hidden"
+                      />
+                      <p className="text-[9px] text-[#94a3b8]">Recommended aspect ratio: 4:1 (e.g. 1200x300 pixels)</p>
+                    </div>
+                    {watch('banner_url') && (
+                      <button
+                        type="button"
+                        onClick={() => setValue('banner_url', '')}
+                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-bold px-3 py-2 rounded-xl text-xs transition duration-200 cursor-pointer border border-red-500/20"
+                      >
+                        Remove Banner
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Preferred Roles</label>
@@ -269,8 +370,28 @@ export const Settings: React.FC = () => {
               </div>
             </div>
 
+            {/* Contact Information */}
             <div className="border-t border-[#232d3f] pt-4 space-y-4">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Social profiles links</h4>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Contact Information</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="email"
+                  placeholder="Contact Email"
+                  {...registerProfile('email')}
+                  className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none"
+                />
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  {...registerProfile('phone')}
+                  className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Social Profiles */}
+            <div className="border-t border-[#232d3f] pt-4 space-y-4">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Social Profiles</h4>
               <div className="grid grid-cols-3 gap-4">
                 <input
                   type="text"
@@ -303,7 +424,7 @@ export const Settings: React.FC = () => {
         )}
 
         {activeTab === 'preferences' && (
-          <form onSubmit={handleSubmitExt(formData => saveExtMutation.mutate(formData))} className="space-y-4 max-w-xl">
+          <form onSubmit={handleSubmitExt(formData => saveExtMutation.mutate(formData))} className="space-y-4 w-full">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider block mb-2">Extended Scraper Preferences</h3>
             
             <div className="flex flex-col gap-1.5">

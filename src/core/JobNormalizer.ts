@@ -41,7 +41,10 @@ export class JobNormalizer {
     // Heuristics for country
     let country = raw.country || 'India';
     if (!raw.country) {
-      if (/india/i.test(cleanedLocation) || /bangalore|bengaluru|hyderabad|pune|gurugram|noida|chennai|mumbai/i.test(cleanedLocation)) {
+      if (
+        /india/i.test(cleanedLocation) ||
+        /bangalore|bengaluru|hyderabad|pune|gurugram|noida|chennai|mumbai/i.test(cleanedLocation)
+      ) {
         country = 'India';
       } else if (isRemote) {
         country = 'India'; // default remote jobs to target location
@@ -55,7 +58,10 @@ export class JobNormalizer {
     if (!raw.experience) {
       const descLower = cleanedDescription.toLowerCase();
       const titleLower = cleanedTitle.toLowerCase();
-      if (/graduate|intern|new grad|university graduate|early career|entry level/i.test(titleLower) || /graduate|intern|new grad/i.test(descLower)) {
+      if (
+        /graduate|intern|new grad|university graduate|early career|entry level/i.test(titleLower) ||
+        /graduate|intern|new grad/i.test(descLower)
+      ) {
         experience = 'Early Career';
       } else if (/senior|sr\.|lead|principal/i.test(titleLower)) {
         experience = 'Senior';
@@ -72,10 +78,7 @@ export class JobNormalizer {
     // Generate unique Job Hash (Deduplication Key)
     const normalizedCompany = raw.company.trim().toLowerCase();
     const normalizedId = raw.id.trim();
-    const jobHash = crypto
-      .createHash('sha256')
-      .update(`${normalizedCompany}_${normalizedId}`)
-      .digest('hex');
+    const jobHash = crypto.createHash('sha256').update(`${normalizedCompany}_${normalizedId}`).digest('hex');
 
     return {
       company: raw.company,
@@ -92,7 +95,7 @@ export class JobNormalizer {
       isRemote: isRemote,
       salary: raw.salary || 'Not Specified',
       description: cleanedDescription,
-      jobHash: jobHash
+      jobHash: jobHash,
     };
   }
 }

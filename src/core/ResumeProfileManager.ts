@@ -1,17 +1,8 @@
 import { Job } from '../companies/Scraper.js';
-import { ResumeMatcher } from './ResumeMatcher.js';
 
-export const SUPPORTED_PROFILES = [
-  'Backend',
-  'Frontend',
-  'FullStack',
-  'AI',
-  'ML',
-  'Data',
-  'BusinessAnalyst'
-] as const;
+export const SUPPORTED_PROFILES = ['Backend', 'Frontend', 'FullStack', 'AI', 'ML', 'Data', 'BusinessAnalyst'] as const;
 
-export type ResumeProfileName = typeof SUPPORTED_PROFILES[number];
+export type ResumeProfileName = (typeof SUPPORTED_PROFILES)[number];
 
 export class ResumeProfileManager {
   /**
@@ -19,7 +10,7 @@ export class ResumeProfileManager {
    */
   public static recommendProfile(
     job: Job,
-    profiles: { profile_name: string; content: string }[]
+    profiles: { profile_name: string; content: string }[],
   ): { recommendedProfile: string; score: number } {
     if (profiles.length === 0) {
       return { recommendedProfile: 'Backend', score: 0 };
@@ -48,15 +39,32 @@ export class ResumeProfileManager {
 
     // Check for exact skill keyword matches
     const commonKeywords = [
-      'typescript', 'javascript', 'node.js', 'react', 'python', 'java', 'c++', 
-      'go', 'golang', 'aws', 'docker', 'kubernetes', 'postgres', 'sql', 'nosql',
-      'machine learning', 'artificial intelligence', 'tensor', 'pytorch', 'statistics'
+      'typescript',
+      'javascript',
+      'node.js',
+      'react',
+      'python',
+      'java',
+      'c++',
+      'go',
+      'golang',
+      'aws',
+      'docker',
+      'kubernetes',
+      'postgres',
+      'sql',
+      'nosql',
+      'machine learning',
+      'artificial intelligence',
+      'tensor',
+      'pytorch',
+      'statistics',
     ];
 
     let matchCount = 0;
     let checkedKeywordsCount = 0;
 
-    commonKeywords.forEach(kw => {
+    commonKeywords.forEach((kw) => {
       if (jobText.includes(kw)) {
         checkedKeywordsCount++;
         if (resumeText.includes(kw)) {

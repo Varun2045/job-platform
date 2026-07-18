@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FileText } from "lucide-react";
+import { FileText, Undo, Redo, Save } from "lucide-react";
 
 import { LivePreview } from "./components/LivePreview";
 import { PreviewHeader } from "./components/PreviewHeader";
 import { useResumePreview } from "./hooks/useResumePreview";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useAutosave } from "./hooks/useAutosave";
 
 export type ResumeType = "backend" | "fullstack" | "ai-ml" | "data" | "custom";
 
@@ -677,6 +678,56 @@ export const ResumeBuilder: React.FC = () => {
   const [latexCode, setLatexCode] = useState<string>(DEFAULT_LATEX);
   const [resumeData, setResumeData] = useState<ResumeData>(() => parseLatexToResumeData(DEFAULT_LATEX));
 
+  // Undo/Redo stack state
+  const [history, setHistory] = useState<string[]>([DEFAULT_LATEX]);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const isHistoryAction = useRef(false);
+  const historyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEditorChange = (newVal: string) => {
+    setLatexCode(newVal);
+
+    if (isHistoryAction.current) {
+      isHistoryAction.current = false;
+      return;
+    }
+
+    if (historyTimeoutRef.current) {
+      clearTimeout(historyTimeoutRef.current);
+    }
+
+    historyTimeoutRef.current = setTimeout(() => {
+      setHistory(prev => {
+        const nextHist = prev.slice(0, historyIndex + 1);
+        if (nextHist[nextHist.length - 1] === newVal) return prev;
+        if (nextHist.length >= 50) {
+          nextHist.shift();
+        }
+        const updated = [...nextHist, newVal];
+        setHistoryIndex(updated.length - 1);
+        return updated;
+      });
+    }, 800);
+  };
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      isHistoryAction.current = true;
+      const prevIndex = historyIndex - 1;
+      setHistoryIndex(prevIndex);
+      setLatexCode(history[prevIndex]);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      isHistoryAction.current = true;
+      const nextIndex = historyIndex + 1;
+      setHistoryIndex(nextIndex);
+      setLatexCode(history[nextIndex]);
+    }
+  };
+
   const { isCompiling, compileError } = useResumePreview({
     resumeData,
     generateLatex: () => latexCode,
@@ -749,6 +800,8 @@ export const ResumeBuilder: React.FC = () => {
           const parsed = JSON.parse(matched.content);
           if (parsed.latex) {
             setLatexCode(parsed.latex);
+            setHistory([parsed.latex]);
+            setHistoryIndex(0);
           }
         } catch (e) {
           console.error("Failed to parse loaded resume content", e);
@@ -774,8 +827,17 @@ export const ResumeBuilder: React.FC = () => {
     onError: () => alert("Failed to save resume"),
   });
 
+  // Autosave configuration
+  const { status: saveStatus, forceSave: autosaveForceSave } = useAutosave({
+    data: latexCode,
+    onSave: async (currentLatex) => {
+      await saveMutation.mutateAsync(currentLatex);
+    },
+    debounceMs: 2000,
+  });
+
   const forceSave = async () => {
-    await saveMutation.mutateAsync(latexCode);
+    await autosaveForceSave();
   };
 
   // --- Fit Width Calculation ---
@@ -822,11 +884,13 @@ export const ResumeBuilder: React.FC = () => {
 
   // --- Keyboard Shortcuts hook ---
   useKeyboardShortcuts({
-    onSave: forceSave,
+    onSave: autosaveForceSave,
     onResetZoom: handleFitWidth,
     onZoomIn: () => setZoom((prev) => Math.min(400, prev + 10)),
     onZoomOut: () => setZoom((prev) => Math.max(40, prev - 10)),
     onFitHeight: handleFitHeight,
+    onUndo: handleUndo,
+    onRedo: handleRedo,
   });
 
   const handleRefresh = async () => {
@@ -903,7 +967,7 @@ export const ResumeBuilder: React.FC = () => {
       <textarea
         ref={textareaRef}
         value={latexCode}
-        onChange={(e) => setLatexCode(e.target.value)}
+        onChange={(e) => handleEditorChange(e.target.value)}
         onScroll={handleTextareaScroll}
         spellCheck={false}
         className="flex-1 bg-transparent text-gray-200 font-mono text-sm leading-relaxed p-4 outline-none resize-none overflow-y-auto whitespace-pre leading-[20px]"
@@ -1039,8 +1103,40 @@ export const ResumeBuilder: React.FC = () => {
             {/* Left Panel: Raw Code Editor */}
             <div className={`${isPresentationMode ? "hidden" : "w-[48%]"} h-full bg-[#131a26] border border-[#232d3f] rounded-2xl shadow-xl overflow-hidden flex flex-col`}>
               <div className="h-10 bg-[#171f2d] border-b border-[#232d3f] px-4 flex items-center justify-between text-xs text-gray-400 font-semibold select-none flex-shrink-0">
-                <span>latex_resume.tex</span>
-                <span className="text-[10px] text-gray-500 font-mono">UTF-8</span>
+                <div className="flex items-center gap-2">
+                  <span>latex_resume.tex</span>
+                  <span className="text-[10px] text-gray-500 font-mono">UTF-8</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`text-[10px] ${
+                    saveStatus === 'saved' ? 'text-emerald-400' : saveStatus === 'saving' ? 'text-indigo-400 animate-pulse' : 'text-amber-400'
+                  }`}>
+                    {saveStatus === 'saved' ? 'Saved' : saveStatus === 'saving' ? 'Saving...' : 'Unsaved Changes'}
+                  </span>
+                  <button
+                    onClick={handleUndo}
+                    disabled={historyIndex <= 0}
+                    className="p-1 hover:bg-[#1b2535] rounded disabled:opacity-30 disabled:hover:bg-transparent text-gray-400 hover:text-white transition cursor-pointer"
+                    title="Undo (Ctrl+Z)"
+                  >
+                    <Undo className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={handleRedo}
+                    disabled={historyIndex >= history.length - 1}
+                    className="p-1 hover:bg-[#1b2535] rounded disabled:opacity-30 disabled:hover:bg-transparent text-gray-400 hover:text-white transition cursor-pointer"
+                    title="Redo (Ctrl+Y)"
+                  >
+                    <Redo className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={autosaveForceSave}
+                    className="p-1 hover:bg-[#1b2535] rounded text-gray-400 hover:text-white transition cursor-pointer"
+                    title="Save (Ctrl+S)"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               {renderCodeEditor()}
             </div>

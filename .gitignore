@@ -18,6 +18,13 @@ storage/*.json
 !storage/companies_state.json
 !storage/feature_flags.json
 
+# Generated reports, metrics, & screenshots
+storage/*.csv
+storage/*.md
+storage/*.html
+storage/*.prom
+storage/screenshots/
+
 # Environment files
 .env
 .env.local

@@ -7,17 +7,17 @@ export const metadata = {
   id: 'microsoft',
   version: '1.0.0',
   ats: 'microsoft',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class MicrosoftPlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: true,
     supportsIncrementalSync: false,
     supportsJobDescriptions: false, // Search API returns snippet only
-    supportsRemoteFiltering: true
+    supportsRemoteFiltering: true,
   };
 
   private static requestQueue: (() => Promise<void>)[] = [];
@@ -34,7 +34,7 @@ export class MicrosoftPlugin implements ScraperPlugin {
           if (timeSinceLast < MicrosoftPlugin.RATE_LIMIT_MS) {
             const waitTime = MicrosoftPlugin.RATE_LIMIT_MS - timeSinceLast;
             Logger.debug(`Microsoft rate-limiting: queue throttling for ${waitTime}ms...`);
-            await new Promise(r => setTimeout(r, waitTime));
+            await new Promise((r) => setTimeout(r, waitTime));
           }
           MicrosoftPlugin.lastRequestTime = Date.now();
           resolve();
@@ -66,7 +66,7 @@ export class MicrosoftPlugin implements ScraperPlugin {
 
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
     const allPositions: any[] = [];
-    
+
     // Fetch 5 pages of 20 positions to gather up to 100 jobs (matching original limit)
     for (let start = 0; start < 100; start += 20) {
       const url = `https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=India&start=${start}`;
@@ -92,13 +92,10 @@ export class MicrosoftPlugin implements ScraperPlugin {
     const rawJobs = allPositions.map((job: any) => {
       const jobId = String(job.id);
       const jobUrl = `https://jobs.careers.microsoft.com/global/en/share/${jobId}`;
-      const locationsList = Array.isArray(job.locations)
-        ? job.locations.join(', ')
-        : 'India';
+      const locationsList = Array.isArray(job.locations) ? job.locations.join(', ') : 'India';
 
-      const dateVal = typeof job.postedTs === 'number'
-        ? new Date(job.postedTs * 1000).toISOString()
-        : new Date().toISOString();
+      const dateVal =
+        typeof job.postedTs === 'number' ? new Date(job.postedTs * 1000).toISOString() : new Date().toISOString();
 
       return {
         company: company.name,
@@ -111,7 +108,7 @@ export class MicrosoftPlugin implements ScraperPlugin {
         employmentType: job.workLocationOption ?? 'Full-time',
         source: 'microsoft',
         description: '', // Empty initially, filled in enrich stage
-        raw: job
+        raw: job,
       };
     });
 
@@ -120,7 +117,7 @@ export class MicrosoftPlugin implements ScraperPlugin {
 
   public async enrich(rawJob: RawJob, httpClient: HttpClient): Promise<RawJob> {
     const detailUrl = `https://apply.careers.microsoft.com/api/pcsx/position_details?position_id=${rawJob.id}&domain=microsoft.com&hl=en`;
-    
+
     let attempt = 0;
     const maxAttempts = 4;
     let delayMs = 1000; // 1s initial backoff
@@ -130,11 +127,13 @@ export class MicrosoftPlugin implements ScraperPlugin {
       await this.throttle();
 
       try {
-        Logger.debug(`Microsoft fetching description from detail API (Attempt ${attempt}/${maxAttempts}): ${detailUrl}`);
+        Logger.debug(
+          `Microsoft fetching description from detail API (Attempt ${attempt}/${maxAttempts}): ${detailUrl}`,
+        );
         const response = await httpClient.request<any>(detailUrl, {
           method: 'GET',
           retries: 1, // Disable HttpClient's built-in retries
-          timeoutMs: 10000
+          timeoutMs: 10000,
         });
 
         if (response.status === 200 && response.data && response.data.data) {
@@ -153,7 +152,7 @@ export class MicrosoftPlugin implements ScraperPlugin {
 
         // Determine wait time
         let waitTimeMs = delayMs;
-        
+
         // Check if err is HttpError with status 429
         if (err.name === 'HttpError' || err.status === 429) {
           const status = err.status;
@@ -181,7 +180,7 @@ export class MicrosoftPlugin implements ScraperPlugin {
           }
         }
 
-        await new Promise(resolve => setTimeout(resolve, waitTimeMs));
+        await new Promise((resolve) => setTimeout(resolve, waitTimeMs));
         delayMs *= 2; // Double backoff for next round
       }
     }

@@ -14,7 +14,7 @@ export class FeatureFlagsService {
         return true;
       }
       return await this.storage.getFeatureFlag(key);
-    } catch (e) {
+    } catch {
       Logger.warn(`Error resolving feature flag: ${key}. Defaulting to true.`);
       return true;
     }

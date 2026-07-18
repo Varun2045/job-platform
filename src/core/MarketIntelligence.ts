@@ -24,7 +24,7 @@ export class MarketIntelligence {
         companyJobsCount[comp.name] = jobs.length;
         totalJobs += jobs.length;
 
-        jobs.forEach(j => {
+        jobs.forEach((j) => {
           // Track regions
           const loc = j.location || 'Remote';
           regionalCounts[loc] = (regionalCounts[loc] || 0) + 1;
@@ -36,8 +36,19 @@ export class MarketIntelligence {
 
           // Track technologies
           const desc = (j.description || '').toLowerCase();
-          const techList = ['typescript', 'node.js', 'react', 'go', 'golang', 'kubernetes', 'docker', 'postgresql', 'aws', 'python'];
-          techList.forEach(t => {
+          const techList = [
+            'typescript',
+            'node.js',
+            'react',
+            'go',
+            'golang',
+            'kubernetes',
+            'docker',
+            'postgresql',
+            'aws',
+            'python',
+          ];
+          techList.forEach((t) => {
             if (desc.includes(t)) {
               techDemandCounts[t] = (techDemandCounts[t] || 0) + 1;
             }
@@ -55,7 +66,7 @@ export class MarketIntelligence {
       const technologyDemand = Object.entries(techDemandCounts)
         .map(([name, count]) => ({
           name: name.charAt(0).toUpperCase() + name.slice(1),
-          percentage: totalJobs > 0 ? Math.round((count / totalJobs) * 100) : 0
+          percentage: totalJobs > 0 ? Math.round((count / totalJobs) * 100) : 0,
         }))
         .sort((a, b) => b.percentage - a.percentage)
         .slice(0, 5);
@@ -83,7 +94,7 @@ export class MarketIntelligence {
         technologyDemand,
         hiringVelocity,
         regionalDemand,
-        roleSaturationIndex
+        roleSaturationIndex,
       };
     } catch (e) {
       Logger.error('Failed to run MarketIntelligence analysis', e as Error);
@@ -92,7 +103,7 @@ export class MarketIntelligence {
         technologyDemand: [],
         hiringVelocity: 'Moderate',
         regionalDemand: [],
-        roleSaturationIndex: 50
+        roleSaturationIndex: 50,
       };
     }
   }

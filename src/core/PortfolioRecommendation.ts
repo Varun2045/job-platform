@@ -28,7 +28,7 @@ export class PortfolioRecommendation {
       let relevanceScore = 0;
 
       // Calculate matches based on technologies list
-      item.technologies.forEach(tech => {
+      item.technologies.forEach((tech) => {
         const lowerTech = tech.toLowerCase();
         if (jobText.includes(lowerTech)) {
           matchedTech.push(tech);
@@ -39,7 +39,7 @@ export class PortfolioRecommendation {
       // Boost score if description contains matches
       const itemDescWords = item.description.toLowerCase().split(/\s+/);
       let descMatches = 0;
-      itemDescWords.forEach(word => {
+      itemDescWords.forEach((word) => {
         if (word.length > 3 && jobText.includes(word)) {
           descMatches++;
         }
@@ -53,7 +53,7 @@ export class PortfolioRecommendation {
         recommendations.push({
           item,
           relevanceScore,
-          reason: `Matches key technologies requested in the posting: ${matchedTech.join(', ')}.`
+          reason: `Matches key technologies requested in the posting: ${matchedTech.join(', ')}.`,
         });
       }
     }

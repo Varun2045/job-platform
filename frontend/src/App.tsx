@@ -15,6 +15,14 @@ import { AutomationHub } from './features/automation/AutomationHub.js';
 import { Referrals } from './features/referrals/Referrals.js';
 import { AICareerAssistant } from './features/career-assistant/AICareerAssistant.js';
 import { CoverLetterBuilder } from './features/cover-letter-builder/CoverLetterBuilder.js';
+import { CopilotDashboard } from './features/_experimental/CopilotDashboard.js';
+import { ScraperBuilder } from './features/scraper-builder/ScraperBuilder.js';
+import { OfferComparison } from './features/offer-comparison/OfferComparison.js';
+import { GithubAnalyzer } from './features/github-analyzer/GithubAnalyzer.js';
+import { FlashcardDashboard } from './features/flashcards/FlashcardDashboard.js';
+import { FlashcardAchievements } from './features/flashcards/FlashcardAchievements.js';
+import { CheatsheetDashboard } from './features/flashcards/CheatsheetDashboard.js';
+import { ProfileBuilder } from './features/profile-builder/ProfileBuilder.js';
 import { ErrorBoundary } from './components/ErrorBoundary.js';
 import { Menu } from 'lucide-react';
 
@@ -37,6 +45,19 @@ export const App: React.FC = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('email');
   };
+
+  useEffect(() => {
+    // Parse Supabase OAuth Hash Params: #access_token=...
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token=')) {
+      const params = new URLSearchParams(hash.substring(1)); // remove '#'
+      const jwt = params.get('access_token');
+      if (jwt) {
+        handleLogin(jwt, 'oauth-user@jobmonitor.com');
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const originalFetch = window.fetch;
@@ -98,7 +119,18 @@ export const App: React.FC = () => {
                 <Route path="/resume-builder" element={<ResumeBuilder />} />
                 <Route path="/career-assistant" element={<AICareerAssistant />} />
                 <Route path="/admin" element={<AdminPanel />} />
-                <Route path="/automation" element={<AutomationHub />} />
+                <Route path="/automation" element={<AutomationHub tab="monitoring" />} />
+                <Route path="/automation/monitoring" element={<AutomationHub tab="monitoring" />} />
+                <Route path="/automation/email" element={<AutomationHub tab="email" />} />
+                <Route path="/automation/calendar" element={<AutomationHub tab="calendar" />} />
+                <Route path="/career-copilot" element={<CopilotDashboard />} />
+                <Route path="/scraper-builder" element={<ScraperBuilder />} />
+                <Route path="/offer-comparison" element={<OfferComparison />} />
+                <Route path="/github-analyzer" element={<GithubAnalyzer />} />
+                <Route path="/cheatsheets" element={<CheatsheetDashboard />} />
+                <Route path="/flashcards" element={<FlashcardDashboard />} />
+                <Route path="/flashcard-achievements" element={<FlashcardAchievements />} />
+                <Route path="/profile-builder" element={<ProfileBuilder />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

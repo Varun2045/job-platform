@@ -29,7 +29,7 @@ export class EmailNotificationProvider implements NotificationProvider {
     const sortedJobs = [...digest.jobs].sort((a, b) => b.matchScore - a.matchScore);
 
     const subject = `NEW JOBS ALERT | ${digest.totalNewJobs} Match${digest.totalNewJobs > 1 ? 'es' : ''} Found (Highest Score: ${sortedJobs[0].matchScore}%)`;
-    
+
     const htmlContent = this.buildHtml(digest, sortedJobs);
     const textContent = this.buildPlainText(digest, sortedJobs);
 
@@ -39,7 +39,9 @@ export class EmailNotificationProvider implements NotificationProvider {
 
     while (attempts > 0) {
       try {
-        Logger.info(`Sending multipart email digest to ${config.recipientEmail} via Resend... (Attempt ${4 - attempts}/3)`);
+        Logger.info(
+          `Sending multipart email digest to ${config.recipientEmail} via Resend... (Attempt ${4 - attempts}/3)`,
+        );
         const response = await this.resendClient.emails.send({
           from: config.senderEmail,
           to: config.recipientEmail,
@@ -60,7 +62,10 @@ export class EmailNotificationProvider implements NotificationProvider {
         lastError = e;
         attempts--;
         if (attempts > 0) {
-          Logger.warn(`Failed to send email alert via Resend. Retrying in 2 seconds... (Attempts remaining: ${attempts})`, e);
+          Logger.warn(
+            `Failed to send email alert via Resend. Retrying in 2 seconds... (Attempts remaining: ${attempts})`,
+            e,
+          );
           await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       }
@@ -90,24 +95,26 @@ export class EmailNotificationProvider implements NotificationProvider {
       }
     }
 
-    const jobListingsHtml = companyNames.map((companyName) => {
-      const companyJobs = grouped[companyName];
-      const companyJobsHtml = companyJobs.map((job) => {
-        // Color coding for match score badge
-        let badgeColor = '#EF4444'; // Red for low
-        let badgeBg = '#FEE2E2';
-        if (job.matchScore >= 85) {
-          badgeColor = '#059669'; // Emerald for excellent
-          badgeBg = '#D1FAE5';
-        } else if (job.matchScore >= 70) {
-          badgeColor = '#3B82F6'; // Blue for good
-          badgeBg = '#DBEAFE';
-        } else if (job.matchScore >= 50) {
-          badgeColor = '#D97706'; // Amber for medium
-          badgeBg = '#FEF3C7';
-        }
+    const jobListingsHtml = companyNames
+      .map((companyName) => {
+        const companyJobs = grouped[companyName];
+        const companyJobsHtml = companyJobs
+          .map((job) => {
+            // Color coding for match score badge
+            let badgeColor = '#EF4444'; // Red for low
+            let badgeBg = '#FEE2E2';
+            if (job.matchScore >= 85) {
+              badgeColor = '#059669'; // Emerald for excellent
+              badgeBg = '#D1FAE5';
+            } else if (job.matchScore >= 70) {
+              badgeColor = '#3B82F6'; // Blue for good
+              badgeBg = '#DBEAFE';
+            } else if (job.matchScore >= 50) {
+              badgeColor = '#D97706'; // Amber for medium
+              badgeBg = '#FEF3C7';
+            }
 
-        return `
+            return `
           <div style="background-color: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
               <div>
@@ -130,11 +137,15 @@ export class EmailNotificationProvider implements NotificationProvider {
               <span style="display: inline-flex; align-items: center; background-color: #f1f5f9; color: #334155; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; margin-right: 8px; margin-bottom: 6px;">
                 🎓 ${job.experience || 'Not Specified'}
               </span>
-              ${job.isRemote ? `
+              ${
+                job.isRemote
+                  ? `
                 <span style="display: inline-flex; align-items: center; background-color: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 6px; margin-bottom: 6px;">
                   🌐 Remote
                 </span>
-              ` : ''}
+              `
+                  : ''
+              }
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 14px; margin-top: 14px;">
@@ -147,9 +158,10 @@ export class EmailNotificationProvider implements NotificationProvider {
             </div>
           </div>
         `;
-      }).join('');
+          })
+          .join('');
 
-      return `
+        return `
         <div style="margin-bottom: 30px;">
           <h2 style="font-size: 20px; font-weight: 800; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 15px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em;">
             ${companyName}
@@ -157,7 +169,8 @@ export class EmailNotificationProvider implements NotificationProvider {
           ${companyJobsHtml}
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     return `
       <!DOCTYPE html>
@@ -221,7 +234,7 @@ export class EmailNotificationProvider implements NotificationProvider {
 
   private buildPlainText(digest: JobDigest, jobs: typeof digest.jobs): string {
     const header = `=== JOB ALERT DIGEST ===\nRun Timestamp: ${new Date(digest.runTimestamp).toLocaleString()}\nCompanies Checked: ${digest.totalCompaniesChecked}\nTotal Jobs Found: ${digest.totalJobsFound}\nNew Matches Found: ${digest.totalNewJobs}\n\n`;
-    
+
     // Group jobs by company name
     const grouped: Record<string, typeof jobs> = {};
     for (const job of jobs) {
@@ -238,10 +251,12 @@ export class EmailNotificationProvider implements NotificationProvider {
       }
     }
 
-    const body = companyNames.map((companyName) => {
-      const companyJobs = grouped[companyName];
-      const jobsStr = companyJobs.map((job, idx) => {
-        return `  ${idx + 1}. ${job.title} (Match: ${job.matchScore}%)
+    const body = companyNames
+      .map((companyName) => {
+        const companyJobs = grouped[companyName];
+        const jobsStr = companyJobs
+          .map((job, idx) => {
+            return `  ${idx + 1}. ${job.title} (Match: ${job.matchScore}%)
      Location: ${job.location}
      Experience: ${job.experience || 'Not Specified'}
      Type: ${job.employmentType || 'Full-time'}
@@ -249,10 +264,12 @@ export class EmailNotificationProvider implements NotificationProvider {
      Posted: ${job.datePosted || 'Just now'}
      Apply Link: ${job.applyUrl}
      Job ID: ${job.jobId}`;
-      }).join('\n\n');
+          })
+          .join('\n\n');
 
-      return `[${companyName.toUpperCase()}]\n${'-'.repeat(companyName.length + 2)}\n${jobsStr}`;
-    }).join('\n\n=============================================\n\n');
+        return `[${companyName.toUpperCase()}]\n${'-'.repeat(companyName.length + 2)}\n${jobsStr}`;
+      })
+      .join('\n\n=============================================\n\n');
 
     const footer = `\n\nJob Monitor Platform - Serverless Automation Pipeline`;
 

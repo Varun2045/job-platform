@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { Logger, LogLevel } from '../core/Logger.js';
+import { Logger } from '../core/Logger.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -15,7 +15,7 @@ describe('Logger Unit Tests', () => {
       for (const f of files) {
         try {
           fs.unlinkSync(path.join(logsDir, f));
-        } catch (e) {}
+        } catch {}
       }
     }
   });
@@ -54,7 +54,7 @@ describe('Logger Unit Tests', () => {
       jobsFound: 5,
       newJobs: 2,
       scraper: 'GreenhouseScraper',
-      status: 'success'
+      status: 'success',
     });
 
     expect(logSpy).toHaveBeenCalled();

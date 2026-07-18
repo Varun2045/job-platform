@@ -20,12 +20,12 @@ describe('Version 2.1.0 Logic Modules Verification', () => {
     isRemote: true,
     salary: 'Competitive',
     description: 'Looking for a Senior software engineer with strong TypeScript, React, and Node.js skills.',
-    jobHash: 'hash999'
+    jobHash: 'hash999',
   };
 
   it('should verify AI Job Analyzer outputs', async () => {
     const analysis = await AiAnalyzer.analyze(mockJob, 'backend');
-    
+
     expect(analysis.jobHash).toBe('hash999');
     expect(analysis.summary).toContain('TestCorp');
     expect(analysis.summary).toContain('Senior TypeScript Developer');
@@ -65,7 +65,7 @@ describe('Version 2.1.0 Logic Modules Verification', () => {
     const mockCompany: any = {
       id: 'comp-1',
       name: 'TestCorp',
-      priority: 2 // High quality priority config
+      priority: 2, // High quality priority config
     };
 
     const mockSettings: any = {
@@ -74,7 +74,7 @@ describe('Version 2.1.0 Logic Modules Verification', () => {
       preferredCities: ['Bangalore'],
       remotePreference: 'remote',
       notificationFrequency: 'daily',
-      digestFormat: 'markdown'
+      digestFormat: 'markdown',
     };
 
     const result = RecommendationEngine.calculateOpportunityScore(mockJob, 85, mockCompany, mockSettings);

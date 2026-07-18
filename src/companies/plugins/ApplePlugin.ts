@@ -8,17 +8,17 @@ export const metadata = {
   id: 'apple',
   version: '1.0.0',
   ats: 'apple',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class ApplePlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: true,
     supportsIncrementalSync: false,
     supportsJobDescriptions: false, // Search API returns snippet
-    supportsRemoteFiltering: true
+    supportsRemoteFiltering: true,
   };
 
   public supports(company: CompanyConfig): boolean {
@@ -28,7 +28,7 @@ export class ApplePlugin implements ScraperPlugin {
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
     // Apple Careers API (Filtered to India)
     const url = 'https://jobs.apple.com/api/v1/search/role?site=us-en&query=&location=india';
-    
+
     Logger.debug(`Apple Careers API request: ${url}`);
     const response = await httpClient.get<any>(url);
 
@@ -53,7 +53,7 @@ export class ApplePlugin implements ScraperPlugin {
         team: job.team ?? 'Software Engineering',
         source: 'apple',
         description: job.postingDescription ?? '', // Snippet/Summary
-        raw: job
+        raw: job,
       };
     });
 
@@ -65,10 +65,10 @@ export class ApplePlugin implements ScraperPlugin {
     try {
       Logger.debug(`Apple fetching description HTML from: ${rawJob.url}`);
       const response = await httpClient.get<string>(rawJob.url);
-      
+
       const $ = cheerio.load(response.data);
       const descElement = $('#jd-description');
-      
+
       if (descElement.length > 0) {
         rawJob.description = descElement.html() ?? descElement.text();
       } else {

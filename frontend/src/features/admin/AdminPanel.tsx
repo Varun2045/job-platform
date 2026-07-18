@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, Activity, Cpu, Database, Mail, RefreshCw, Download, Upload, Server, CheckCircle, ToggleRight, List } from 'lucide-react';
+import { Shield, Activity, Cpu, Database, Mail, RefreshCw, Download, Upload, Server, CheckCircle, ToggleRight, List, AlertTriangle } from 'lucide-react';
 
 export const AdminPanel: React.FC = () => {
   const queryClient = useQueryClient();
@@ -20,13 +20,34 @@ export const AdminPanel: React.FC = () => {
     enabled: activeTab === 'health'
   });
 
+  // 1b. Scraper Watchdog Query
+  const { data: watchdogData, refetch: refetchWatchdog } = useQuery({
+    queryKey: ['admin-scraper-watchdog'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/scraper-watchdog');
+      if (!res.ok) throw new Error('Failed to load scraper watchdog data');
+      return res.json();
+    },
+    refetchInterval: 15000,
+    enabled: activeTab === 'health'
+  });
+
   // 2. Feature Flags Query
   const { data: flags = {}, refetch: refetchFlags } = useQuery<Record<string, boolean>>({
     queryKey: ['admin-flags'],
     queryFn: async () => {
       const res = await fetch('/api/admin/feature-flags');
       if (!res.ok) throw new Error('Failed to load feature flags');
-      return res.json();
+      const list = await res.json();
+      const record: Record<string, boolean> = {};
+      if (Array.isArray(list)) {
+        list.forEach((item: any) => {
+          if (item && item.key) {
+            record[item.key] = item.enabled !== false;
+          }
+        });
+      }
+      return record;
     },
     enabled: activeTab === 'flags'
   });
@@ -100,7 +121,10 @@ export const AdminPanel: React.FC = () => {
   });
 
   const handleRefresh = () => {
-    if (activeTab === 'health') refetchTelemetry();
+    if (activeTab === 'health') {
+      refetchTelemetry();
+      refetchWatchdog();
+    }
     if (activeTab === 'flags') refetchFlags();
     if (activeTab === 'audits') refetchAudits();
   };
@@ -265,86 +289,125 @@ export const AdminPanel: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-6">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <Database className="w-4 h-4 text-emerald-400" /> Configuration Backups
-                  </h3>
+                <div className="space-y-8">
+                  {/* Configuration Backups */}
+                  <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-6">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Database className="w-4 h-4 text-emerald-400" /> Configuration Backups
+                    </h3>
 
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 text-xs text-[#94a3b8]">
-                      <div className="bg-[#1b2535] p-3 rounded-xl border border-[#232d3f] flex justify-between items-center">
-                        <span>Last Backup:</span>
-                        <span className="text-white font-bold">{telemetryData?.lastBackupTime || 'Never'}</span>
-                      </div>
-                      <div className="bg-[#1b2535] p-3 rounded-xl border border-[#232d3f] flex justify-between items-center">
-                        <span>Backup Size:</span>
-                        <span className="text-white font-bold">{telemetryData?.backupSize || 'N/A'}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => exportMutation.mutate()}
-                        className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition duration-200 cursor-pointer"
-                      >
-                        <Download className="w-4 h-4" /> Export Configuration
-                      </button>
-                      <button
-                        onClick={() => {
-                          const input = document.createElement('input');
-                          input.type = 'file';
-                          input.accept = '.json';
-                          input.onchange = (e) => {
-                            const file = (e.target as HTMLInputElement).files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (evt) => {
-                                setImportJson(evt.target?.result as string);
-                              };
-                              reader.readAsText(file);
-                            }
-                          };
-                          input.click();
-                        }}
-                        className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl transition duration-200 cursor-pointer"
-                      >
-                        <Upload className="w-4 h-4" /> Import Configuration
-                      </button>
-                    </div>
-
-                    {importJson && (
-                      <div className="border-t border-[#232d3f] pt-4 space-y-3">
-                        <span className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider block">Restore Preview</span>
-                        
-                        {successMsg && (
-                          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold p-3 rounded-xl flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4" /> {successMsg}
-                          </div>
-                        )}
-
-                        <div className="bg-[#1b2535] p-3 rounded-xl border border-[#232d3f] max-h-40 overflow-y-auto">
-                          <pre className="text-[9px] text-[#94a3b8] font-mono whitespace-pre-wrap">{importJson.substring(0, 500)}{importJson.length > 500 ? '...' : ''}</pre>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-xs text-[#94a3b8]">
+                        <div className="bg-[#1b2535] p-3 rounded-xl border border-[#232d3f] flex justify-between items-center">
+                          <span>Last Backup:</span>
+                          <span className="text-white font-bold">{telemetryData?.lastBackupTime || 'Never'}</span>
                         </div>
+                        <div className="bg-[#1b2535] p-3 rounded-xl border border-[#232d3f] flex justify-between items-center">
+                          <span>Backup Size:</span>
+                          <span className="text-white font-bold">{telemetryData?.backupSize || 'N/A'}</span>
+                        </div>
+                      </div>
 
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => importMutation.mutate(importJson)}
-                            disabled={importMutation.isPending}
-                            className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl transition duration-200 cursor-pointer disabled:opacity-50"
-                          >
-                            {importMutation.isPending ? 'Restoring...' : 'Confirm Restore'}
-                          </button>
-                          <button
-                            onClick={() => setImportJson('')}
-                            className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2 rounded-xl transition duration-200 cursor-pointer"
-                          >
-                            Cancel
-                          </button>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => exportMutation.mutate()}
+                          className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition duration-200 cursor-pointer"
+                        >
+                          <Download className="w-4 h-4" /> Export Configuration
+                        </button>
+                        <button
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = '.json';
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (evt) => {
+                                  setImportJson(evt.target?.result as string);
+                                };
+                                reader.readAsText(file);
+                              }
+                            };
+                            input.click();
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl transition duration-200 cursor-pointer"
+                        >
+                          <Upload className="w-4 h-4" /> Import Configuration
+                        </button>
+                      </div>
+
+                      {importJson && (
+                        <div className="border-t border-[#232d3f] pt-4 space-y-3">
+                          <span className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider block">Restore Preview</span>
+                          
+                          {successMsg && (
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold p-3 rounded-xl flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4" /> {successMsg}
+                            </div>
+                          )}
+
+                          <div className="bg-[#1b2535] p-3 rounded-xl border border-[#232d3f] max-h-40 overflow-y-auto">
+                            <pre className="text-[9px] text-[#94a3b8] font-mono whitespace-pre-wrap">{importJson.substring(0, 500)}{importJson.length > 500 ? '...' : ''}</pre>
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => importMutation.mutate(importJson)}
+                              disabled={importMutation.isPending}
+                              className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 rounded-xl transition duration-200 cursor-pointer disabled:opacity-50"
+                            >
+                              {importMutation.isPending ? 'Restoring...' : 'Confirm Restore'}
+                            </button>
+                            <button
+                              onClick={() => setImportJson('')}
+                              className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2 rounded-xl transition duration-200 cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Scraper Failure Watchdog Widget */}
+                  <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-6">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-400" /> Scraper Failure Watchdog
+                    </h3>
+                    
+                    {watchdogData && watchdogData.length > 0 ? (
+                      <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                        {watchdogData.map((w: any) => (
+                          <div key={w.id} className="bg-[#1b2535] border border-red-500/20 p-3 rounded-xl space-y-2 text-xs">
+                            <div className="flex justify-between items-start">
+                              <span className="font-bold text-white">{w.name}</span>
+                              <span className="bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
+                                {w.consecutiveFailures} Failures
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-[#94a3b8] space-y-1">
+                              <div><span className="font-semibold text-gray-500">ATS:</span> {w.detectedAts || 'fallback'}</div>
+                              <div><span className="font-semibold text-gray-500">Last Scraper:</span> {w.lastScraperUsed || 'none'}</div>
+                              <div><span className="font-semibold text-gray-500">Failed:</span> {w.lastFailedScrape ? new Date(w.lastFailedScrape).toLocaleString() : 'N/A'}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs p-4 rounded-xl flex items-center gap-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <div>
+                          <p className="font-bold">System Healthy</p>
+                          <p className="text-[10px] text-[#94a3b8] mt-0.5">All configured company scraper routines are executing normally.</p>
                         </div>
                       </div>
                     )}
                   </div>
                 </div>
+
               </div>
             </>
           )}

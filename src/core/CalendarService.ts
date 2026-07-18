@@ -1,8 +1,4 @@
-export type CalendarEventType = 
-  | 'Interview'
-  | 'Assessment'
-  | 'Recruiter Call'
-  | 'Follow-up Reminder';
+export type CalendarEventType = 'Interview' | 'Assessment' | 'Recruiter Call' | 'Follow-up Reminder';
 
 export interface CalendarEventOptions {
   id?: string;
@@ -46,7 +42,7 @@ export class CalendarService {
       `DESCRIPTION:${description}`,
       `LOCATION:${location}`,
       'END:VEVENT',
-      'END:VCALENDAR'
+      'END:VCALENDAR',
     ].join('\r\n');
   }
 }

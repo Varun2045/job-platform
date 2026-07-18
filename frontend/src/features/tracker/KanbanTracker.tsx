@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, X } from 'lucide-react';
+import { Search, X, Download } from 'lucide-react';
 
 type Status = 'New' | 'Saved' | 'Applied' | 'OA Scheduled' | 'OA Completed' | 'Interview' | 'Offer' | 'Rejected' | 'Closed';
 
@@ -8,6 +8,9 @@ const COLUMNS: Status[] = ['New', 'Saved', 'Applied', 'OA Scheduled', 'OA Comple
 
 export const KanbanTracker: React.FC = () => {
   const queryClient = useQueryClient();
+  const handleExportCSV = () => {
+    window.open('/api/backup/export-csv', '_blank');
+  };
   
   // Filter states
   const [filterCompany, setFilterCompany] = useState('');
@@ -74,7 +77,16 @@ export const KanbanTracker: React.FC = () => {
   const filteredApps = (applications || []).filter((app: any) => {
     if (filterCompany && !app.company?.toLowerCase().includes(filterCompany.toLowerCase())) return false;
     if (filterStatus !== 'all' && app.status !== filterStatus) return false;
-    if (searchQuery && !app.company?.toLowerCase().includes(searchQuery.toLowerCase()) && !app.jobId?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (filterJobType && !app.employmentType?.toLowerCase().includes(filterJobType.toLowerCase())) return false;
+    if (filterLocation && !app.location?.toLowerCase().includes(filterLocation.toLowerCase())) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchCompany = app.company?.toLowerCase().includes(q);
+      const matchJobId = app.jobId?.toLowerCase().includes(q);
+      const matchTitle = app.title?.toLowerCase().includes(q);
+      const matchLocation = app.location?.toLowerCase().includes(q);
+      if (!matchCompany && !matchJobId && !matchTitle && !matchLocation) return false;
+    }
     return true;
   }).sort((a: any, b: any) => {
     switch (sortBy) {
@@ -112,9 +124,17 @@ export const KanbanTracker: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 space-y-6 flex flex-col h-full overflow-hidden">
-      <div className="shrink-0">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Applications</h1>
-        <p className="text-sm text-[#94a3b8]">Drag and drop roles across stages to manage your application pipeline</p>
+      <div className="shrink-0 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Applications</h1>
+          <p className="text-sm text-[#94a3b8]">Drag and drop roles across stages to manage your application pipeline</p>
+        </div>
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-2 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] text-white hover:text-indigo-400 font-bold px-4 py-2.5 rounded-xl text-xs transition duration-200 cursor-pointer shadow"
+        >
+          <Download className="w-4 h-4" /> Export CSV
+        </button>
       </div>
 
       {/* Filters */}
@@ -215,8 +235,13 @@ export const KanbanTracker: React.FC = () => {
                       className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 cursor-grab hover:border-indigo-600 active:cursor-grabbing transition duration-200"
                     >
                       <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{a.company}</span>
-                      <h4 className="text-sm font-bold text-white mt-0.5">{a.company} Role</h4>
-                      <p className="text-xs text-[#94a3b8] mt-1 line-clamp-2">ID: {a.jobId}</p>
+                      <h4 className="text-sm font-bold text-white mt-0.5">{a.title || 'Software Engineer'}</h4>
+                      <div className="flex gap-1.5 flex-wrap items-center mt-1.5 text-[10px] text-[#94a3b8]">
+                        {a.location && <span className="bg-[#131a26] px-1.5 py-0.5 rounded border border-[#232d3f] truncate max-w-[120px]" title={a.location}>{a.location}</span>}
+                        {a.employmentType && <span className="bg-[#131a26] px-1.5 py-0.5 rounded border border-[#232d3f]">{a.employmentType}</span>}
+                        {a.isRemote && <span className="bg-indigo-600/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-600/20">Remote</span>}
+                      </div>
+                      <p className="text-[10px] text-[#6b7280] mt-1.5">ID: {a.jobId}</p>
                       {a.notes && (
                         <div className="mt-2 text-[11px] bg-[#131a26] border border-[#232d3f] px-2 py-1 rounded text-[#94a3b8]">
                           {a.notes}

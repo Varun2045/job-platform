@@ -7,17 +7,17 @@ export const metadata = {
   id: 'meta',
   version: '1.0.0',
   ats: 'meta',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class MetaPlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: true,
     supportsIncrementalSync: false,
     supportsJobDescriptions: true, // List endpoint has descriptions
-    supportsRemoteFiltering: true
+    supportsRemoteFiltering: true,
   };
 
   public supports(company: CompanyConfig): boolean {
@@ -27,19 +27,19 @@ export class MetaPlugin implements ScraperPlugin {
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
     // Meta Careers endpoint
     const url = 'https://www.metacareers.com/api/v1/jobs/';
-    
+
     // Search payload for India
     const payload = {
       q: '',
       locations: ['Bangalore, India', 'Gurgaon, India', 'Hyderabad, India', 'Mumbai, India', 'India'],
-      limit: 100
+      limit: 100,
     };
 
     Logger.debug(`Meta Careers API POST request: ${url}`);
-    
+
     try {
       const response = await httpClient.post<any>(url, payload);
-      
+
       if (!response.data || !Array.isArray(response.data.jobs)) {
         throw new Error(`Unexpected Meta API response structure for ${company.name}`);
       }
@@ -61,7 +61,7 @@ export class MetaPlugin implements ScraperPlugin {
           team: job.sub_department ?? job.department ?? 'Engineering',
           source: 'meta',
           description: job.description ?? job.requirements ?? '', // Meta returns full desc
-          raw: job
+          raw: job,
         };
       });
 
@@ -73,7 +73,7 @@ export class MetaPlugin implements ScraperPlugin {
     }
   }
 
-  public async enrich(rawJob: RawJob, httpClient: HttpClient): Promise<RawJob> {
+  public async enrich(rawJob: RawJob, _httpClient: HttpClient): Promise<RawJob> {
     return rawJob;
   }
 

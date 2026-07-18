@@ -35,34 +35,34 @@ export class CareerRoadmap {
         plan6Month = [
           'Master advanced asynchronous programming and memory management in TypeScript.',
           'Contribute to core codebase modules under mentor guidance.',
-          'Complete fundamentals of system design: database schemas and indexing strategies.'
+          'Complete fundamentals of system design: database schemas and indexing strategies.',
         ];
         plan12Month = [
           'Take full ownership of a minor product feature or service component.',
           'Deploy services to containerized environments using Docker and basic Kubernetes.',
-          'Conduct at least 15 technical code reviews.'
+          'Conduct at least 15 technical code reviews.',
         ];
         promotionChecklist = [
           'Demonstrate proficiency in unit testing and test coverage metrics.',
           'Exhibit technical ownership of features.',
-          'Receive positive peer reviews on codebase collaboration.'
+          'Receive positive peer reviews on codebase collaboration.',
         ];
         baseSalary = 90000;
       } else if (experience === 'Mid Level') {
         plan6Month = [
           'Design and implement robust APIs with rate limiting and database connection pooling.',
           'Deploy multi-tenant services with Row Level Security (RLS) configurations.',
-          'Optimize database queries to reduce slow-query latencies by 30%.'
+          'Optimize database queries to reduce slow-query latencies by 30%.',
         ];
         plan12Month = [
           'Lead small feature streams from architecture design to rollout.',
           'Adopt cloud-native infrastructure tooling (Kubernetes, AWS/GCP services).',
-          'Mentor junior team members on system debug operations.'
+          'Mentor junior team members on system debug operations.',
         ];
         promotionChecklist = [
           'Successfully design and ship a high-concurrency backend service.',
           'Drive cross-functional project deliverables.',
-          'Demonstrate clear system troubleshooting skills.'
+          'Demonstrate clear system troubleshooting skills.',
         ];
         baseSalary = 135000;
       } else {
@@ -70,17 +70,17 @@ export class CareerRoadmap {
         plan6Month = [
           'Establish centralized telemetry dashboard systems and alerting pipelines.',
           'Define multi-tenant security architecture principles for the organization.',
-          'Conduct system-wide performance tuning audits on legacy microservices.'
+          'Conduct system-wide performance tuning audits on legacy microservices.',
         ];
         plan12Month = [
           'Define the long-term engineering roadmaps and architectural standards.',
           'Sponsor and drive major infrastructure migrations (e.g. monolith to microservices).',
-          'Represent engineering teams in alignment/planning syncs with product headers.'
+          'Represent engineering teams in alignment/planning syncs with product headers.',
         ];
         promotionChecklist = [
           'Establish clear ROI impact on system availability or developer velocity.',
           'Exhibit technical leadership across multiple engineering pods.',
-          'Mentor senior engineers into architect/managerial tracks.'
+          'Mentor senior engineers into architect/managerial tracks.',
         ];
         baseSalary = 190000;
       }
@@ -88,7 +88,7 @@ export class CareerRoadmap {
       const salaryPath = [
         { year: 1, baseMin: baseSalary, baseMax: Math.round(baseSalary * 1.1) },
         { year: 2, baseMin: Math.round(baseSalary * 1.15), baseMax: Math.round(baseSalary * 1.25) },
-        { year: 3, baseMin: Math.round(baseSalary * 1.3), baseMax: Math.round(baseSalary * 1.45) }
+        { year: 3, baseMin: Math.round(baseSalary * 1.3), baseMax: Math.round(baseSalary * 1.45) },
       ];
 
       const roadmap: RoadmapTimeline = {
@@ -96,7 +96,7 @@ export class CareerRoadmap {
         plan12Month,
         promotionChecklist,
         salaryPath,
-        technologyPath
+        technologyPath,
       };
 
       await storage.saveCareerRoadmap(userId, roadmap);
@@ -108,7 +108,7 @@ export class CareerRoadmap {
         plan12Month: [],
         promotionChecklist: [],
         salaryPath: [],
-        technologyPath: []
+        technologyPath: [],
       };
     }
   }

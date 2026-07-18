@@ -24,7 +24,7 @@ export class RealtimeBroadcaster {
             await channel.send({
               type: 'broadcast',
               event: eventName,
-              payload
+              payload,
             });
             await channel.unsubscribe();
           }

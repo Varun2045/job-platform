@@ -17,7 +17,7 @@ export class OpportunityEngine {
     matchScore: number,
     salaryWeight: number, // 0 to 100 preference score
     remotePreference: string, // 'remote', 'hybrid', 'onsite', 'all'
-    locationPreference: string // preferred location name
+    locationPreference: string, // preferred location name
   ): OpportunityScoreResult {
     let score = 0;
     const strengths: string[] = [];
@@ -25,7 +25,7 @@ export class OpportunityEngine {
 
     // 1. Resume Match Score (30% weight)
     const matchVal = Math.min(Math.max(matchScore, 0), 100);
-    score += matchVal * 0.30;
+    score += matchVal * 0.3;
     if (matchVal >= 85) {
       strengths.push(`High resume technical similarity matching score (${matchVal}%).`);
     } else if (matchVal < 60) {
@@ -60,7 +60,7 @@ export class OpportunityEngine {
       else if (remotePreference === 'hybrid') remoteScore = 80;
       else remoteScore = 20;
     }
-    score += remoteScore * 0.10;
+    score += remoteScore * 0.1;
     if (remoteScore >= 80) {
       strengths.push(`Workplace model matches your remote working preferences (${remotePreference}).`);
     } else {
@@ -74,7 +74,7 @@ export class OpportunityEngine {
     if (jobLoc.includes(prefLoc) || prefLoc.includes(jobLoc)) {
       locationScore = 100;
     }
-    score += locationScore * 0.10;
+    score += locationScore * 0.1;
     if (locationScore === 100) {
       strengths.push(`Geographical location (${job.location}) matches preferred area.`);
     }
@@ -82,7 +82,7 @@ export class OpportunityEngine {
     // 6. Experience Fit Heuristic (10% weight)
     // Assume 100 fit if standard, mock 80% otherwise
     const expScore = 80;
-    score += expScore * 0.10;
+    score += expScore * 0.1;
 
     // 7. Freshness index (10% weight)
     // If posted 'today' or 'yesterday' score high, else lower
@@ -91,7 +91,7 @@ export class OpportunityEngine {
     if (datePosted.includes('today') || datePosted.includes('hour') || datePosted.includes('1 day')) {
       freshnessScore = 100;
     }
-    score += freshnessScore * 0.10;
+    score += freshnessScore * 0.1;
     if (freshnessScore === 100) {
       strengths.push('Fresh job posting, increasing application response probability.');
     }
@@ -105,7 +105,7 @@ export class OpportunityEngine {
       overallScore,
       reasoning,
       strengths,
-      weaknesses
+      weaknesses,
     };
   }
 }

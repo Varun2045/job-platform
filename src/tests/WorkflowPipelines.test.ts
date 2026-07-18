@@ -43,13 +43,17 @@ describe('Workflow Pipelines Integration Tests', () => {
 
   it('should run Resume Workflow (upload, skill-gap, study syllabus, roadmaps)', async () => {
     const userId = 'user-integration-1';
-    
+
     // 1. Save Resume Content
-    await storage.saveUserResume(userId, 'backend', 'Experienced Software Engineer skilled in TypeScript, Node.js, and Express.');
+    await storage.saveUserResume(
+      userId,
+      'backend',
+      'Experienced Software Engineer skilled in TypeScript, Node.js, and Express.',
+    );
 
     // 2. Identify Skill Gap
     const skillGap = await SkillGapEngine.analyzeGap(userId, storage);
-    
+
     expect(skillGap).toHaveProperty('missingSkills');
     expect(skillGap).toHaveProperty('roadmapTasks');
     expect(skillGap.missingSkills.length).toBeGreaterThanOrEqual(0);
@@ -67,7 +71,7 @@ describe('Workflow Pipelines Integration Tests', () => {
       appliedDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
       resumeUsed: 'backend',
       notes: 'Applied through careers website',
-      lastUpdated: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+      lastUpdated: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     };
     await storage.saveApplication(app, userId);
 
@@ -121,7 +125,7 @@ describe('Workflow Pipelines Integration Tests', () => {
       consecutive_failures: 0,
       total_scrapes: 0,
       total_failures: 0,
-      preferred_scraper: 'cheerio_fallback' // force Cheerio fallback to avoid launching Playwright in tests
+      preferred_scraper: 'cheerio_fallback', // force Cheerio fallback to avoid launching Playwright in tests
     };
 
     const companiesPath = path.join(process.cwd(), 'storage', 'companies_state.json');
@@ -141,7 +145,7 @@ describe('Workflow Pipelines Integration Tests', () => {
       status: 200,
       headers: new Headers({ 'content-type': 'text/html' }),
       json: async () => ({}),
-      text: async () => mockHtml
+      text: async () => mockHtml,
     });
 
     // Disable playwright feature flag during this run
@@ -154,8 +158,8 @@ describe('Workflow Pipelines Integration Tests', () => {
         runOrchestrator({
           targetCompanyId: 'mock-google',
           forceAll: true,
-          dryRun: true // dryRun to skip email dispatches and Prom telemetry files
-        })
+          dryRun: true, // dryRun to skip email dispatches and Prom telemetry files
+        }),
       ).resolves.not.toThrow();
     } finally {
       config.features.playwright = originalPlaywright;

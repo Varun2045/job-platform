@@ -12,7 +12,7 @@ describe('API Schema Contract Verification Tests', () => {
   it('should verify Greenhouse API response schema contract', async () => {
     // Query public board for MongoDB to verify contract
     const url = 'https://boards-api.greenhouse.io/v1/boards/mongodb/jobs';
-    
+
     const response = await httpClient.get<any>(url);
     expect(response.status).toBe(200);
     expect(response.data).toBeDefined();
@@ -30,7 +30,7 @@ describe('API Schema Contract Verification Tests', () => {
   it('should verify Lever API response schema contract', async () => {
     // Query public postings for Meesho
     const url = 'https://api.lever.co/v0/postings/meesho';
-    
+
     const response = await httpClient.get<any>(url);
     expect(response.status).toBe(200);
     expect(Array.isArray(response.data)).toBe(true);
@@ -55,7 +55,7 @@ describe('API Schema Contract Verification Tests', () => {
       priority: 1,
       interval_minutes: 60,
       detected_ats: 'google',
-      resume_profiles: ['backend']
+      resume_profiles: ['backend'],
     } as any;
 
     try {

@@ -40,10 +40,27 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
   };
 
-  const handleOAuth = (provider: 'google' | 'github') => {
-    alert(`${provider} login initiated. Redirecting to OAuth callback...`);
-    // Local mock token fallback
-    onLogin(`mock-${provider}-token`, `${provider}-user@jobmonitor.com`);
+  const handleOAuth = async (provider: 'google' | 'github') => {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalhost) {
+      alert(`${provider} login initiated. Redirecting to OAuth callback...`);
+      onLogin(`mock-${provider}-token`, `${provider}-user@jobmonitor.com`);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/auth/oauth/${provider}`);
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || 'Failed to generate OAuth redirect link');
+      }
+      const body = await res.json();
+      if (body.url) {
+        window.location.href = body.url;
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
   };
 
   return (

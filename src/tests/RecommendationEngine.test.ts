@@ -19,7 +19,7 @@ describe('RecommendationEngine Unit Tests', () => {
     salary: 'N/A',
     description: 'Job description text.',
     jobHash: 'hash123',
-    ...extra
+    ...extra,
   });
 
   const mockCompany: CompanyConfig = {
@@ -31,7 +31,7 @@ describe('RecommendationEngine Unit Tests', () => {
     resume_profiles: [],
     avg_response_time_ms: 0,
     total_scrapes: 0,
-    total_failures: 0
+    total_failures: 0,
   };
 
   const mockSettings: ExtendedSettings = {
@@ -40,7 +40,7 @@ describe('RecommendationEngine Unit Tests', () => {
     preferredCities: [],
     remotePreference: 'all',
     notificationFrequency: 'daily',
-    digestFormat: 'markdown'
+    digestFormat: 'markdown',
   };
 
   it('should compute opportunity score with high-growth and priority companies', () => {

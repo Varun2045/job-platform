@@ -7,17 +7,17 @@ export const metadata = {
   id: 'workday',
   version: '1.0.0',
   ats: 'workday',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class WorkdayPlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: true,
     supportsIncrementalSync: false,
     supportsJobDescriptions: true,
-    supportsRemoteFiltering: false
+    supportsRemoteFiltering: false,
   };
 
   public supports(company: CompanyConfig): boolean {
@@ -43,7 +43,7 @@ export class WorkdayPlugin implements ScraperPlugin {
       limit,
       offset,
       searchText: '',
-      appliedFacets: {}
+      appliedFacets: {},
     };
 
     const response = await httpClient.post<any>(searchUrl, requestBody);
@@ -60,7 +60,7 @@ export class WorkdayPlugin implements ScraperPlugin {
     // If more jobs, fetch up to 100 total jobs (5 pages) to avoid timeout/rate limits in hourly cron
     const maxOffset = Math.min(total, 100);
     offset += limit;
-    
+
     while (offset < maxOffset) {
       Logger.debug(`Workday paging for ${company.name}: offset ${offset}/${total}`);
       const pageBody = { limit, offset, searchText: '', appliedFacets: {} };
@@ -84,7 +84,8 @@ export class WorkdayPlugin implements ScraperPlugin {
     const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
 
     postings.forEach((post: any) => {
-      const jobId = post.bulletins?.[0]?.bulletinId ?? post.jobReqId ?? post.externalPath.split('_').pop() ?? post.externalPath;
+      const jobId =
+        post.bulletins?.[0]?.bulletinId ?? post.jobReqId ?? post.externalPath.split('_').pop() ?? post.externalPath;
       const jobUrl = `${baseUrl}${post.externalPath}`;
 
       targetList.push({
@@ -96,7 +97,7 @@ export class WorkdayPlugin implements ScraperPlugin {
         datePosted: post.postedOn,
         employmentType: post.workType,
         source: 'workday',
-        raw: post // save the raw details for enrichment references
+        raw: post, // save the raw details for enrichment references
       });
     });
   }
@@ -118,11 +119,11 @@ export class WorkdayPlugin implements ScraperPlugin {
     // The details endpoint is `baseUrl/wday/cxs/tenant/careerSite/job/job-title_JR12345` (without the tenant/careerSite duplicated or similar).
     // Actually, Workday's standard detail API URL is:
     // `baseUrl/wday/cxs/{tenant}/{careerSite}/job/{jobPath}` where jobPath is the last part of post.externalPath
-    
+
     // Let's resolve the detail URL.
     const urlObj = new URL(rawJob.url);
     const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
-    
+
     // To construct the detail URL safely, let's extract tenant & careerSite from the raw job url or base.
     // For nvidia, rawJob.url is `https://nvidia.wd5.myworkdayjobs.com/job/nvidia/NVIDIA_External_Career_Site/job-title_JR12345` (mapped from externalPath).
     // Detail API is `https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIA_External_Career_Site/job/job-title_JR12345`
@@ -133,7 +134,7 @@ export class WorkdayPlugin implements ScraperPlugin {
     // Let's do a reliable replacement:
     // Split externalPath by '/' -> ['', 'job', 'tenant', 'site', 'job-id']
     // Reconstruct: `/wday/cxs/tenant/site/job/job-id`
-    
+
     const parts = post.externalPath.split('/').filter(Boolean); // ['job', 'tenant', 'site', 'job-id']
     if (parts.length >= 4 && parts[0] === 'job') {
       const tenant = parts[1];

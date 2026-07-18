@@ -1,26 +1,19 @@
-# Security Architecture - Job Monitor Portal
+# Security Policy
 
-This document summarizes security configurations applied to the Job Monitor Portal.
+## Supported Versions
 
-## 1. Network & Header Protections
+Only the latest release version is supported with security updates.
 
-### Helmet Middleware
-The server integrates Helmet middleware to enforce secure HTTP headers:
-- **Content-Security-Policy (CSP)**: Restrictions mapping allowed scripts, font faces, and images domains.
-- **X-Frame-Options**: Enforced to `SAMEORIGIN` to mitigate clickjacking attacks.
-- **X-Content-Type-Options**: Set to `nosniff` preventing MIME type sniffing.
+| Version | Supported |
+| ------- | --------- |
+| v4.1.x  | :white_check_mark: |
+| < v4.1.0| :x: |
 
-### CORS Whitelisting
-Cross-Origin Resource Sharing is locked down to verified origin domains:
-- Allowed development hosts: `localhost:5173`, `127.0.0.1:5173`, `localhost:3000`.
-- Arbitrary untrusted origins are blocked with connection exceptions.
+## Reporting a Vulnerability
 
-## 2. API Rate Limiting
-Rate limiters protect the API gateway `/api/*`:
-- Limits each unique client IP to 100 requests per 15 minutes window.
-- Exceeded rate limits return a standard HTTP 429 status code.
+We take the security of our platform seriously. If you find a vulnerability, please do not report it publicly in a GitHub issue. Instead, follow these steps:
 
-## 3. Input Sanitization
-To prevent XSS, SQL/Script injections, and HTML injection:
-- The server recursively sweeps all strings in `req.body`, `req.query`, and `req.params`.
-- Harmful HTML tags and script elements matching `<[^>]*>` regexes are completely stripped out before routing handlers.
+1. **Email us**: Send a detailed report to `security@jobmonitor.org`.
+2. **Provide Details**: Include a description of the issue, steps to reproduce, and any potential exploit or impact.
+3. **Response**: We will acknowledge your report within 48 hours and work with you to coordinate a security fix.
+4. **Disclosure**: We will release a security advisory and patch within 30 days of validation.

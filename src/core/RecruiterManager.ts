@@ -24,11 +24,11 @@ export class RecruiterManager {
   public static async addContact(
     storage: StorageProvider,
     userId: string,
-    contact: Omit<RecruiterContact, 'conversation_history'>
+    contact: Omit<RecruiterContact, 'conversation_history'>,
   ): Promise<void> {
     const record: RecruiterContact = {
       ...contact,
-      conversation_history: []
+      conversation_history: [],
     };
     await storage.saveRecruiter(userId, record);
   }
@@ -41,11 +41,11 @@ export class RecruiterManager {
     userId: string,
     recruiterId: string,
     message: string,
-    direction: 'incoming' | 'outgoing'
+    direction: 'incoming' | 'outgoing',
   ): Promise<void> {
     const recruiters = await storage.getRecruiters(userId);
-    const recruiter = recruiters.find(r => r.id === recruiterId);
-    
+    const recruiter = recruiters.find((r) => r.id === recruiterId);
+
     if (!recruiter) {
       throw new Error(`Recruiter with ID ${recruiterId} not found`);
     }

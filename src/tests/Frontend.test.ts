@@ -20,10 +20,10 @@ describe('Frontend UI Logic Verification', () => {
           isRemote: true,
           salary: 'Not Specified',
           description: 'Looking for a React developer with Node.js experience.',
-          jobHash: 'hash1'
+          jobHash: 'hash1',
         },
-        score: 90
-      }
+        score: 90,
+      },
     ];
 
     const locResults = SearchEngine.search(jobs, { location: 'Remote' });
@@ -43,7 +43,7 @@ describe('Frontend UI Logic Verification', () => {
       title: 'Senior iOS Software Engineer',
       location: 'Cupertino',
       description: 'Design and build application features for iOS platforms.',
-      url: 'https://apple.com/jobs/123'
+      url: 'https://apple.com/jobs/123',
     };
     const job2: any = {
       id: '456',
@@ -51,7 +51,7 @@ describe('Frontend UI Logic Verification', () => {
       title: 'Senior iOS Software Engineer (Swift)',
       location: 'Cupertino, CA',
       description: 'Design  and  build\napplication features for iOS platforms.',
-      url: 'https://apple.com/jobs/456'
+      url: 'https://apple.com/jobs/456',
     };
 
     expect(DuplicateDetector.isDuplicate(job1, job2)).toBe(true);

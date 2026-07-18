@@ -1,13 +1,13 @@
 /**
  * LinkedIn Integration Layer
- * 
+ *
  * Production-safe LinkedIn integration that never:
  * - Scrapes LinkedIn
  * - Automates browser interactions
  * - Automatically sends connection requests
  * - Automatically sends LinkedIn messages
  * - Circumvents LinkedIn authentication
- * 
+ *
  * Instead, it provides:
  * - Extensible architecture for official LinkedIn integrations
  * - CSV/manual import fallbacks
@@ -22,7 +22,15 @@ export interface LinkedInConnection {
   company: string;
   location: string;
   linkedInProfile: string;
-  relationship: 'Recruiter' | 'Hiring Manager' | 'Engineering Manager' | 'University Alumni' | 'Employee' | 'Talent Acquisition' | 'HR' | 'Other';
+  relationship:
+    | 'Recruiter'
+    | 'Hiring Manager'
+    | 'Engineering Manager'
+    | 'University Alumni'
+    | 'Employee'
+    | 'Talent Acquisition'
+    | 'HR'
+    | 'Other';
   mutualConnections?: number;
   university?: string;
   team?: string;
@@ -76,13 +84,11 @@ export class ManualImportProvider implements LinkedInIntegrationProvider {
   }
 
   async getConnectionsByCompany(company: string): Promise<LinkedInConnection[]> {
-    return this.connections.filter(c => 
-      c.company.toLowerCase().includes(company.toLowerCase())
-    );
+    return this.connections.filter((c) => c.company.toLowerCase().includes(company.toLowerCase()));
   }
 
   async getMutualConnections(contactId: string): Promise<number> {
-    const contact = this.connections.find(c => c.id === contactId);
+    const contact = this.connections.find((c) => c.id === contactId);
     return contact?.mutualConnections || 0;
   }
 
@@ -92,14 +98,13 @@ export class ManualImportProvider implements LinkedInIntegrationProvider {
 
   importFromCSV(csvData: string): LinkedInConnection[] {
     const lines = csvData.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    
+
     const connections: LinkedInConnection[] = [];
-    
+
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',');
       if (values.length < 4) continue;
-      
+
       const connection: LinkedInConnection = {
         id: `manual-${Date.now()}-${i}`,
         name: values[0]?.trim() || '',
@@ -113,12 +118,12 @@ export class ManualImportProvider implements LinkedInIntegrationProvider {
         team: values[8]?.trim(),
         isFirstDegree: values[9]?.trim().toLowerCase() === 'true',
         confidenceScore: 0,
-        recommendationReason: ''
+        recommendationReason: '',
       };
-      
+
       connections.push(connection);
     }
-    
+
     this.connections = [...this.connections, ...connections];
     return connections;
   }
@@ -148,14 +153,12 @@ export class ContactRanker {
     'University Alumni': 75,
     'Same Team Employee': 70,
     'Talent Acquisition': 60,
-    'HR': 50,
-    'Other': 20
+    HR: 50,
+    Other: 20,
   };
 
   rankContacts(contacts: LinkedInConnection[], jobContext: JobContext): ContactRanking[] {
-    return contacts
-      .map(contact => this.calculateScore(contact, jobContext))
-      .sort((a, b) => b.score - a.score);
+    return contacts.map((contact) => this.calculateScore(contact, jobContext)).sort((a, b) => b.score - a.score);
   }
 
   private calculateScore(contact: LinkedInConnection, jobContext: JobContext): ContactRanking {
@@ -163,9 +166,9 @@ export class ContactRanker {
     const reasons: string[] = [];
 
     // Base score from relationship priority
-    const relationshipKey = this.getRelationshipKey(contact, jobContext);
+    const relationshipKey = this.getRelationshipKey(contact);
     score += this.rankingPriorities[relationshipKey] || 20;
-    reasons.push(this.getRelationshipReason(contact, jobContext));
+    reasons.push(this.getRelationshipReason(contact));
 
     // First-degree connection bonus
     if (contact.isFirstDegree) {
@@ -180,15 +183,17 @@ export class ContactRanker {
     }
 
     // University alumni bonus
-    if (contact.university && jobContext.userUniversity && 
-        contact.university.toLowerCase() === jobContext.userUniversity.toLowerCase()) {
+    if (
+      contact.university &&
+      jobContext.userUniversity &&
+      contact.university.toLowerCase() === jobContext.userUniversity.toLowerCase()
+    ) {
       score += 20;
       reasons.push(`University alumni from ${jobContext.userUniversity}`);
     }
 
     // Same team bonus
-    if (contact.team && jobContext.jobTitle && 
-        this.isRelevantTeam(contact.team, jobContext.jobTitle)) {
+    if (contact.team && jobContext.jobTitle && this.isRelevantTeam(contact.team, jobContext.jobTitle)) {
       score += 15;
       reasons.push(`Works in relevant team: ${contact.team}`);
     }
@@ -202,9 +207,7 @@ export class ContactRanker {
     // Skills match bonus (if skills provided)
     if (jobContext.userSkills && jobContext.userSkills.length > 0) {
       const roleLower = contact.currentRole.toLowerCase();
-      const skillMatch = jobContext.userSkills.some(skill => 
-        roleLower.includes(skill.toLowerCase())
-      );
+      const skillMatch = jobContext.userSkills.some((skill) => roleLower.includes(skill.toLowerCase()));
       if (skillMatch) {
         score += 10;
         reasons.push('Role matches your skills');
@@ -219,18 +222,18 @@ export class ContactRanker {
     return {
       contact,
       score: normalizedScore,
-      reasons
+      reasons,
     };
   }
 
-  private getRelationshipKey(contact: LinkedInConnection, jobContext: JobContext): string {
+  private getRelationshipKey(contact: LinkedInConnection): string {
     if (contact.isFirstDegree) {
       return `First-degree ${contact.relationship}`;
     }
     return contact.relationship;
   }
 
-  private getRelationshipReason(contact: LinkedInConnection, jobContext: JobContext): string {
+  private getRelationshipReason(contact: LinkedInConnection): string {
     const degree = contact.isFirstDegree ? 'First-degree' : 'Second-degree';
     return `${degree} ${contact.relationship} at ${contact.company}`;
   }
@@ -238,15 +241,21 @@ export class ContactRanker {
   private isRelevantTeam(team: string, jobTitle: string): string {
     const teamLower = team.toLowerCase();
     const titleLower = jobTitle.toLowerCase();
-    
+
     const relevantTeams = [
-      'engineering', 'software', 'product', 'data', 'machine learning',
-      'frontend', 'backend', 'full stack', 'devops', 'cloud'
+      'engineering',
+      'software',
+      'product',
+      'data',
+      'machine learning',
+      'frontend',
+      'backend',
+      'full stack',
+      'devops',
+      'cloud',
     ];
-    
-    return relevantTeams.some(rt => 
-      teamLower.includes(rt) && titleLower.includes(rt)
-    ) ? team : '';
+
+    return relevantTeams.some((rt) => teamLower.includes(rt) && titleLower.includes(rt)) ? team : '';
   }
 }
 
@@ -305,12 +314,12 @@ export class EmailIntegration {
     const params = new URLSearchParams({
       to: context.to,
       subject: context.subject,
-      body: context.body
+      body: context.body,
     });
-    
+
     if (context.cc) params.append('cc', context.cc);
     if (context.bcc) params.append('bcc', context.bcc);
-    
+
     return `https://mail.google.com/mail/?view=cm&${params.toString()}`;
   }
 
@@ -318,8 +327,11 @@ export class EmailIntegration {
    * Generate .eml file content
    */
   static generateEML(context: EmailContext): string {
-    const date = new Date().toISOString().replace(/T/, ' ').replace(/\.\d+Z/, '');
-    
+    const date = new Date()
+      .toISOString()
+      .replace(/T/, ' ')
+      .replace(/\.\d+Z/, '');
+
     return `From: <>
 To: <${context.to}>
 Subject: ${context.subject}
@@ -337,7 +349,7 @@ ${context.body}`;
     const emlContent = this.generateEML(context);
     const blob = new Blob([emlContent], { type: 'message/rfc822' });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = filename;
@@ -369,73 +381,77 @@ export class MessageTemplates {
   static generateConnectionRequest(contact: LinkedInConnection, jobContext: JobContext): string {
     const { name, company, currentRole } = contact;
     const { jobTitle, userUniversity } = jobContext;
-    
+
     let message = `Hi ${name},\n\n`;
-    
+
     if (userUniversity && contact.university === userUniversity) {
       message += `I noticed we're both alumni from ${userUniversity}. `;
     }
-    
+
     message += `I came across your profile while researching opportunities at ${company}. `;
     message += `I'm interested in the ${jobTitle} position and would love to connect to learn more about your experience as a ${currentRole}.\n\n`;
     message += `Best regards`;
-    
+
     return message;
   }
 
   static generateReferralRequest(contact: LinkedInConnection, jobContext: JobContext): string {
     const { name, company, currentRole } = contact;
     const { jobTitle, jobDescription } = jobContext;
-    
+
     let message = `Hi ${name},\n\n`;
     message += `I hope you're doing well. I'm writing to express my interest in the ${jobTitle} position at ${company}. `;
     message += `Given your experience as a ${currentRole}, I thought you might be able to provide some insights or potentially refer me.\n\n`;
-    
+
     if (jobDescription) {
       message += `The role aligns well with my background in [relevant skills], and I'm particularly excited about [specific aspect from job description].\n\n`;
     }
-    
+
     message += `If you're open to it, I'd appreciate any guidance you could provide. Thank you for considering my request.\n\n`;
     message += `Best regards`;
-    
+
     return message;
   }
 
-  static generateFollowUpMessage(contact: LinkedInConnection, jobContext: JobContext, daysSinceContact: number): string {
+  static generateFollowUpMessage(
+    contact: LinkedInConnection,
+    jobContext: JobContext,
+    daysSinceContact: number,
+  ): string {
     const { name } = contact;
-    
+
     let message = `Hi ${name},\n\n`;
     message += `I hope you're having a good week. I wanted to follow up on my previous message regarding the ${jobContext.jobTitle} position at ${jobContext.company}.\n\n`;
-    
+
     if (daysSinceContact < 7) {
       message += `I understand you're likely busy, but I wanted to reiterate my interest and see if there might be any updates.\n\n`;
     } else {
       message += `It's been a while since we last connected, so I wanted to check in and see if you might have any insights to share.\n\n`;
     }
-    
+
     message += `Thank you again for your time and consideration.\n\n`;
     message += `Best regards`;
-    
+
     return message;
   }
 
   static generateColdEmail(contact: LinkedInConnection, jobContext: JobContext): string {
     const { name, company, currentRole } = contact;
     const { jobTitle, userUniversity } = jobContext;
-    
+
     let message = `Subject: Inquiry about ${jobTitle} position at ${company}\n\n`;
     message += `Dear ${name},\n\n`;
     message += `I hope this email finds you well. I am writing to express my strong interest in the ${jobTitle} position at ${company}.\n\n`;
-    
+
     if (userUniversity) {
       message += `As a graduate from ${userUniversity}, I have developed [relevant skills] that align well with this role. `;
     }
-    
+
     message += `Given your experience as a ${currentRole}, I would value any insights you might share about the team culture or the position.\n\n`;
     message += `I have attached my resume for your review and would welcome the opportunity to discuss how my background might contribute to ${company}.\n\n`;
     message += `Thank you for your time and consideration.\n\n`;
     message += `Best regards`;
-    
+
     return message;
   }
 }

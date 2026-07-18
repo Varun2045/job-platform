@@ -1,10 +1,5 @@
-export type ExportType = 
-  | 'Resume'
-  | 'Cover Letter'
-  | 'Interview Guide'
-  | 'Application History'
-  | 'Weekly Report'
-  | 'Analytics';
+export type ExportType =
+  'Resume' | 'Cover Letter' | 'Interview Guide' | 'Application History' | 'Weekly Report' | 'Analytics';
 
 export type ExportFormat = 'PDF' | 'Markdown' | 'CSV' | 'JSON';
 
@@ -34,7 +29,7 @@ export class ExportService {
 
     return {
       buffer: Buffer.from(contentStr, 'utf-8'),
-      fileName
+      fileName,
     };
   }
 
@@ -47,7 +42,7 @@ export class ExportService {
     const csvRows = [headers.join(',')];
 
     for (const row of data) {
-      const values = headers.map(header => {
+      const values = headers.map((header) => {
         const val = row[header];
         const escaped = ('' + (val ?? '')).replace(/"/g, '""');
         return `"${escaped}"`;

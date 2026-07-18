@@ -7,17 +7,17 @@ export const metadata = {
   id: 'greenhouse',
   version: '1.0.0',
   ats: 'greenhouse',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class GreenhousePlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: false,
     supportsIncrementalSync: false,
     supportsJobDescriptions: true,
-    supportsRemoteFiltering: false
+    supportsRemoteFiltering: false,
   };
 
   public supports(company: CompanyConfig): boolean {
@@ -25,9 +25,15 @@ export class GreenhousePlugin implements ScraperPlugin {
   }
 
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
-    const boardToken = company.api_endpoint || company.id;
+    let boardToken = company.api_endpoint || company.id;
+    if (boardToken.startsWith('http://') || boardToken.startsWith('https://')) {
+      const match = boardToken.match(/boards\.greenhouse\.io\/([^/?#]+)/);
+      if (match) {
+        boardToken = match[1];
+      }
+    }
     const url = `https://boards-api.greenhouse.io/v1/boards/${boardToken}/jobs?content=true`;
-    
+
     Logger.debug(`Greenhouse discovery request for company: ${company.name} [Board: ${boardToken}]`);
     const response = await httpClient.get<any>(url);
 
@@ -45,13 +51,13 @@ export class GreenhousePlugin implements ScraperPlugin {
       team: job.departments?.[0]?.name ?? job.offices?.[0]?.name ?? 'General',
       source: 'greenhouse',
       description: job.content, // greenhouse content is HTML description
-      raw: job
+      raw: job,
     }));
 
     return rawJobs;
   }
 
-  public async enrich(rawJob: RawJob, httpClient: HttpClient): Promise<RawJob> {
+  public async enrich(rawJob: RawJob, _httpClient: HttpClient): Promise<RawJob> {
     // Greenhouse already fetched full description in discover phase because of content=true
     return rawJob;
   }

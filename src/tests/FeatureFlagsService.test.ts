@@ -14,7 +14,7 @@ describe('FeatureFlagsService Unit Tests', () => {
   it('should resolve flags from storage', async () => {
     const mockStorage = {
       getFeatureFlag: async (key: string) => key === 'f-on',
-      setFeatureFlag: jest.fn()
+      setFeatureFlag: jest.fn(),
     } as unknown as StorageProvider;
 
     FeatureFlagsService.initialize(mockStorage);
@@ -33,7 +33,7 @@ describe('FeatureFlagsService Unit Tests', () => {
       },
       setFeatureFlag: async () => {
         throw new Error('Save Error');
-      }
+      },
     } as unknown as StorageProvider;
 
     FeatureFlagsService.initialize(mockStorage);

@@ -1,34 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Download, Clock, Activity, AlertCircle, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type Tab = 'monitoring' | 'email' | 'calendar';
 
-export const AutomationHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<Tab>('monitoring');
+export const AutomationHub: React.FC<{ tab?: Tab }> = ({ tab = 'monitoring' }) => {
+  const [activeTab, setActiveTab] = useState<Tab>(tab);
+
+  useEffect(() => {
+    setActiveTab(tab);
+  }, [tab]);
+
+  const getHeaderInfo = () => {
+    switch (activeTab) {
+      case 'monitoring':
+        return {
+          title: 'Monitoring Hub',
+          desc: 'Live status of job scrapers, database health, and queue telemetry'
+        };
+      case 'email':
+        return {
+          title: 'Email Alerts',
+          desc: 'Configure daily matching job digests and delivery settings'
+        };
+      case 'calendar':
+        return {
+          title: 'Calendar',
+          desc: 'Execution scheduling visualization and ICS calendar export'
+        };
+    }
+  };
+
+  const header = getHeaderInfo();
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Automation Hub</h1>
-        <p className="text-sm text-[#94a3b8]">Automation control center for job monitoring, workflows, and scheduling</p>
-      </div>
-
-      {/* Tabs bar */}
-      <div className="flex border-b border-[#232d3f] gap-2 text-sm overflow-x-auto pb-4">
-        {(['monitoring', 'email', 'calendar'] as Tab[]).map(t => (
-          <button
-            key={t}
-            onClick={() => setActiveTab(t)}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 whitespace-nowrap ${
-              activeTab === t
-                ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400'
-                : 'text-[#94a3b8] hover:bg-[#1b2535] hover:text-white'
-            }`}
-          >
-            {t.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-          </button>
-        ))}
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">{header.title}</h1>
+        <p className="text-sm text-[#94a3b8]">{header.desc}</p>
       </div>
 
       {/* Tab Contents */}

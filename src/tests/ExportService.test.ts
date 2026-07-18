@@ -3,7 +3,7 @@ import { ExportService } from '../core/ExportService.js';
 describe('ExportService', () => {
   const mockData = [
     { company: 'Stripe', role: 'Engineer', appliedDate: '2026-07-01' },
-    { company: 'Google', role: 'Dev', appliedDate: '2026-07-02' }
+    { company: 'Google', role: 'Dev', appliedDate: '2026-07-02' },
   ];
 
   test('should generate JSON file output correctly', () => {
@@ -26,7 +26,11 @@ describe('ExportService', () => {
   });
 
   test('should generate Markdown output summaries', () => {
-    const { buffer, fileName } = ExportService.exportData('Weekly Report', 'Markdown', 'Weekly overview text content summary.');
+    const { buffer, fileName } = ExportService.exportData(
+      'Weekly Report',
+      'Markdown',
+      'Weekly overview text content summary.',
+    );
     expect(fileName.endsWith('.md')).toBe(true);
 
     const mdText = buffer.toString('utf-8');

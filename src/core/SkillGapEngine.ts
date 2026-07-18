@@ -33,10 +33,21 @@ export class SkillGapEngine {
       for (const comp of companies) {
         const jobs = await storage.getCompanyJobs(comp.id);
         totalJobsCount += jobs.length;
-        jobs.forEach(j => {
+        jobs.forEach((j) => {
           const desc = (j.description || '').toLowerCase();
-          const words = ['typescript', 'node.js', 'react', 'go', 'golang', 'kubernetes', 'docker', 'postgresql', 'aws', 'python'];
-          words.forEach(w => {
+          const words = [
+            'typescript',
+            'node.js',
+            'react',
+            'go',
+            'golang',
+            'kubernetes',
+            'docker',
+            'postgresql',
+            'aws',
+            'python',
+          ];
+          words.forEach((w) => {
             if (desc.includes(w)) {
               marketSkills[w] = (marketSkills[w] || 0) + 1;
             }
@@ -49,8 +60,19 @@ export class SkillGapEngine {
       if (userResumes.length > 0) {
         // Simple heuristic: extract skills found in the first resume content
         const resumeContent = userResumes[0].content.toLowerCase();
-        const commonSkills = ['typescript', 'node.js', 'react', 'go', 'golang', 'kubernetes', 'docker', 'postgresql', 'aws', 'python'];
-        commonSkills.forEach(s => {
+        const commonSkills = [
+          'typescript',
+          'node.js',
+          'react',
+          'go',
+          'golang',
+          'kubernetes',
+          'docker',
+          'postgresql',
+          'aws',
+          'python',
+        ];
+        commonSkills.forEach((s) => {
           if (resumeContent.includes(s)) {
             userSkills.add(s);
           }
@@ -61,18 +83,29 @@ export class SkillGapEngine {
       const roadmapTasks: any[] = [];
 
       // Detect gaps
-      const allPossibleSkills = ['typescript', 'node.js', 'react', 'go', 'golang', 'kubernetes', 'docker', 'postgresql', 'aws', 'python'];
-      allPossibleSkills.forEach(skill => {
+      const allPossibleSkills = [
+        'typescript',
+        'node.js',
+        'react',
+        'go',
+        'golang',
+        'kubernetes',
+        'docker',
+        'postgresql',
+        'aws',
+        'python',
+      ];
+      allPossibleSkills.forEach((skill) => {
         const normalizedSkill = skill === 'golang' ? 'go' : skill;
         if (!userSkills.has(normalizedSkill)) {
           const marketDemand = marketSkills[skill] || 0;
           let priority: 'High' | 'Medium' | 'Low' = 'Low';
           let effortWeeks = 2;
 
-          if (marketDemand > (totalJobsCount * 0.3)) {
+          if (marketDemand > totalJobsCount * 0.3) {
             priority = 'High';
             effortWeeks = 4;
-          } else if (marketDemand > (totalJobsCount * 0.1)) {
+          } else if (marketDemand > totalJobsCount * 0.1) {
             priority = 'Medium';
             effortWeeks = 3;
           }
@@ -81,7 +114,7 @@ export class SkillGapEngine {
             skill: skill.charAt(0).toUpperCase() + skill.slice(1),
             priority,
             effortWeeks,
-            trendingTrend: priority === 'High' ? 'Up' : 'Stable'
+            trendingTrend: priority === 'High' ? 'Up' : 'Stable',
           });
 
           // Generate task steps
@@ -90,14 +123,14 @@ export class SkillGapEngine {
             title: `Learn ${skill.toUpperCase()} fundamentals`,
             description: `Review official documentation, setup a Hello World environment, and build a prototype project.`,
             estimatedHours: effortWeeks * 10,
-            completed: false
+            completed: false,
           });
         }
       });
 
       const roadmap: LearningRoadmap = {
         missingSkills,
-        roadmapTasks
+        roadmapTasks,
       };
 
       await storage.saveLearningRoadmap(userId, roadmap);

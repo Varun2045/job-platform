@@ -4,7 +4,6 @@ import { HealthService } from '../core/HealthService.js';
 import { FileStorage } from '../storage/FileStorage.js';
 import { StorageProvider } from '../storage/StorageProvider.js';
 import fs from 'fs';
-import path from 'path';
 
 describe('Version 2.2.0 Production Engineering Checks', () => {
   const storage = new FileStorage();
@@ -51,7 +50,7 @@ describe('Version 2.2.0 Production Engineering Checks', () => {
     const brokenStorage = {
       getEnabledCompanies: async () => {
         throw new Error('Network timeout');
-      }
+      },
     } as unknown as StorageProvider;
 
     const readyReport = await HealthService.checkReady(brokenStorage);
@@ -134,7 +133,7 @@ describe('Version 2.2.0 Production Engineering Checks', () => {
       getEnabledCompanies: async () => [{ id: '1', name: 'C', enabled: true }],
       getAllCompanies: async () => {
         throw new Error('Query error');
-      }
+      },
     } as unknown as StorageProvider;
 
     const healthReport = await HealthService.checkHealth(brokenStorage);

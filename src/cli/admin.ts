@@ -23,10 +23,12 @@ async function main() {
     case 'monitor': {
       const target = args[1];
       if (!target) {
-        console.error('ERROR: Missing target. Specify a company ID, "all", or "priority <number>". Example: npm run monitor google');
+        console.error(
+          'ERROR: Missing target. Specify a company ID, "all", or "priority <number>". Example: npm run monitor google',
+        );
         process.exit(1);
       }
-      
+
       if (target.toLowerCase() === 'all') {
         Logger.info('CLI Triggered: Running monitor for all due companies...');
         await runOrchestrator();
@@ -54,12 +56,17 @@ async function main() {
       }
 
       console.log(
-        String('COMPANY').padEnd(15) + ' | ' +
-        String('ATS/SCRAPER').padEnd(12) + ' | ' +
-        String('STATUS').padEnd(10) + ' | ' +
-        String('RUNS').padEnd(8) + ' | ' +
-        String('ERRORS').padEnd(8) + ' | ' +
-        'LAST SCRAPE'
+        String('COMPANY').padEnd(15) +
+          ' | ' +
+          String('ATS/SCRAPER').padEnd(12) +
+          ' | ' +
+          String('STATUS').padEnd(10) +
+          ' | ' +
+          String('RUNS').padEnd(8) +
+          ' | ' +
+          String('ERRORS').padEnd(8) +
+          ' | ' +
+          'LAST SCRAPE',
       );
       console.log('-'.repeat(80));
 
@@ -68,19 +75,26 @@ async function main() {
         .forEach((c) => {
           const status = !c.enabled
             ? '\x1b[90mDISABLED\x1b[0m'
-            : (c.total_failures > 0 && c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)))
+            : c.total_failures > 0 &&
+                c.last_failed_scrape &&
+                (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape))
               ? '\x1b[31mDEGRADED\x1b[0m'
-              : (c.last_scraper_used && c.last_scraper_used !== 'none' && c.last_scraper_used !== c.detected_ats)
+              : c.last_scraper_used && c.last_scraper_used !== 'none' && c.last_scraper_used !== c.detected_ats
                 ? '\x1b[33mDEGRADED\x1b[0m'
                 : '\x1b[32mHEALTHY\x1b[0m';
 
           console.log(
-            c.name.padEnd(15) + ' | ' +
-            (c.detected_ats || 'auto').padEnd(12) + ' | ' +
-            status.padEnd(19) + ' | ' + // adjusted for ansi escape chars padding
-            String(c.total_scrapes ?? 0).padEnd(8) + ' | ' +
-            String(c.total_failures ?? 0).padEnd(8) + ' | ' +
-            (c.last_successful_scrape ? new Date(c.last_successful_scrape).toLocaleString() : 'Never')
+            c.name.padEnd(15) +
+              ' | ' +
+              (c.detected_ats || 'auto').padEnd(12) +
+              ' | ' +
+              status.padEnd(19) +
+              ' | ' + // adjusted for ansi escape chars padding
+              String(c.total_scrapes ?? 0).padEnd(8) +
+              ' | ' +
+              String(c.total_failures ?? 0).padEnd(8) +
+              ' | ' +
+              (c.last_successful_scrape ? new Date(c.last_successful_scrape).toLocaleString() : 'Never'),
           );
         });
       console.log('=========================================================\n');
@@ -103,7 +117,9 @@ async function main() {
     case 'resume-score': {
       const target = args[1];
       if (!target) {
-        console.error('ERROR: Missing target. Specify a company ID to score existing jobs. Example: npm run resume-score microsoft');
+        console.error(
+          'ERROR: Missing target. Specify a company ID to score existing jobs. Example: npm run resume-score microsoft',
+        );
         process.exit(1);
       }
 
@@ -142,8 +158,18 @@ async function main() {
         process.exit(1);
       }
 
-      const validStatuses = ['New', 'Saved', 'Applied', 'OA Scheduled', 'OA Completed', 'Interview', 'Offer', 'Rejected', 'Closed'];
-      const normalizedStatus = validStatuses.find(s => s.toLowerCase() === status.toLowerCase());
+      const validStatuses = [
+        'New',
+        'Saved',
+        'Applied',
+        'OA Scheduled',
+        'OA Completed',
+        'Interview',
+        'Offer',
+        'Rejected',
+        'Closed',
+      ];
+      const normalizedStatus = validStatuses.find((s) => s.toLowerCase() === status.toLowerCase());
       if (!normalizedStatus) {
         console.error(`ERROR: Invalid status. Must be one of: ${validStatuses.join(', ')}`);
         process.exit(1);
@@ -154,7 +180,7 @@ async function main() {
       let foundJob = null;
       for (const comp of companies) {
         const jobs = await storage.getCompanyJobs(comp.id);
-        const j = jobs.find(x => x.jobHash === jobHash);
+        const j = jobs.find((x) => x.jobHash === jobHash);
         if (j) {
           foundJob = j;
           break;
@@ -170,7 +196,7 @@ async function main() {
         jobId,
         status: normalizedStatus as any,
         notes,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       });
 
       Logger.info(`Successfully tracked application for job hash ${jobHash} as "${normalizedStatus}".`);
@@ -182,7 +208,9 @@ async function main() {
       const val = args[2];
 
       if (!queryType || !val) {
-        console.error('ERROR: Missing arguments. Usage: node dist/cli/admin.js search <company|tech|score|location|remote|date> <value>');
+        console.error(
+          'ERROR: Missing arguments. Usage: node dist/cli/admin.js search <company|tech|score|location|remote|date> <value>',
+        );
         process.exit(1);
       }
 
@@ -191,9 +219,9 @@ async function main() {
 
       for (const comp of companies) {
         const jobs = await storage.getCompanyJobs(comp.id);
-        const scored = jobs.map(j => {
+        const scored = jobs.map((j) => {
           const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : ['backend'];
-          const bestScore = Math.max(...profiles.map(p => ResumeMatcher.match(j, p)));
+          const bestScore = Math.max(...profiles.map((p) => ResumeMatcher.match(j, p)));
           return { job: j, score: bestScore };
         });
         allScoredJobs.push(...scored);

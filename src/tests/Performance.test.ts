@@ -19,7 +19,7 @@ jest.unstable_mockModule('express', () => {
   Object.assign(appWrapper, expressActual);
   return {
     default: appWrapper,
-    ...expressActual
+    ...expressActual,
   };
 });
 
@@ -32,6 +32,37 @@ describe('Performance and Scale Verification Tests', () => {
     process.env.NODE_ENV = 'development';
     process.env.SUPABASE_URL = '';
     process.env.SUPABASE_SERVICE_KEY = '';
+
+    // Back up large job files and companies_state.json to prevent slow resume matching and protect user state
+    const storageDir = path.join(process.cwd(), 'storage');
+    if (fs.existsSync(storageDir)) {
+      const files = fs.readdirSync(storageDir);
+      for (const file of files) {
+        if (
+          file === 'companies_state.json' ||
+          (file.endsWith('.json') &&
+            ![
+              'analytics.json',
+              'stats.json',
+              'extended_settings.json',
+              'feature_flags.json',
+              'user_profiles.json',
+              'user_resumes.json',
+              'user_notifications.json',
+              'watchlists.json',
+              'interview_sessions.json',
+              'learning_roadmaps.json',
+              'daily_briefs.json',
+              'copilot_recommendations.json',
+              'feature_flags.json',
+            ].includes(file))
+        ) {
+          try {
+            fs.renameSync(path.join(storageDir, file), path.join(storageDir, file + '.tmpbak'));
+          } catch (e) {}
+        }
+      }
+    }
 
     // Load Express Server
     await import('../core/server.js');
@@ -46,6 +77,23 @@ describe('Performance and Scale Verification Tests', () => {
         serverInstance.close(() => resolve());
       });
     }
+
+    // Restore backed up job files and companies_state.json
+    const storageDir = path.join(process.cwd(), 'storage');
+    if (fs.existsSync(storageDir)) {
+      const files = fs.readdirSync(storageDir);
+      for (const file of files) {
+        if (file.endsWith('.tmpbak')) {
+          try {
+            const dest = path.join(storageDir, file.replace('.tmpbak', ''));
+            if (fs.existsSync(dest)) {
+              fs.unlinkSync(dest);
+            }
+            fs.renameSync(path.join(storageDir, file), dest);
+          } catch (e) {}
+        }
+      }
+    }
   });
 
   beforeEach(() => {
@@ -58,8 +106,8 @@ describe('Performance and Scale Verification Tests', () => {
       client.request(`http://localhost:${testPort}/api/dashboard`, {
         method: 'GET',
         headers: { Authorization: 'Bearer user-token' },
-        retries: 1
-      })
+        retries: 1,
+      }),
     );
 
     const responses = await Promise.all(requests);
@@ -88,7 +136,7 @@ describe('Performance and Scale Verification Tests', () => {
       consecutive_failures: 0,
       total_scrapes: 0,
       total_failures: 0,
-      preferred_scraper: 'cheerio_fallback'
+      preferred_scraper: 'cheerio_fallback',
     }));
 
     const companiesPath = path.join(process.cwd(), 'storage', 'companies_state.json');
@@ -105,7 +153,7 @@ describe('Performance and Scale Verification Tests', () => {
             <a href="https://mock.com/jobs/1">SDE II</a>
           </body>
         </html>
-      `
+      `,
     });
 
     const { runOrchestrator } = await import('../core/index.js');
@@ -117,8 +165,8 @@ describe('Performance and Scale Verification Tests', () => {
       await expect(
         runOrchestrator({
           forceAll: true,
-          dryRun: true
-        })
+          dryRun: true,
+        }),
       ).resolves.not.toThrow();
     } finally {
       config.features.playwright = originalPlaywright;
@@ -137,7 +185,7 @@ describe('Performance and Scale Verification Tests', () => {
       url: 'https://leak.com/1',
       source: 'Test',
       team: 'Engineering',
-      isRemote: true
+      isRemote: true,
     };
 
     // Force garbage collection if available

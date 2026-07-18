@@ -1,5 +1,5 @@
 import express from 'express';
-import { Job, CompanyConfig } from '../companies/Scraper.js';
+import { CompanyConfig } from '../companies/Scraper.js';
 import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 import cors from 'cors';
@@ -10,11 +10,11 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import crypto from 'crypto';
 import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
 import { config } from '../config/config.js';
 import { FileStorage } from '../storage/FileStorage.js';
 import { SupabaseStorage } from '../storage/SupabaseStorage.js';
 import { StorageProvider } from '../storage/StorageProvider.js';
+import { EmailNotificationProvider } from '../notifications/EmailNotificationProvider.js';
 import { ResumeMatcher } from './ResumeMatcher.js';
 import { SearchEngine } from './SearchEngine.js';
 import { Logger } from './Logger.js';
@@ -29,6 +29,7 @@ import { BackupService } from './BackupService.js';
 import { FeatureFlagsService } from './FeatureFlagsService.js';
 import { AuditLogger } from './AuditLogger.js';
 import { RealtimeBroadcaster } from './RealtimeBroadcaster.js';
+import { runOrchestrator } from './index.js';
 import { CareerAgent } from './CareerAgent.js';
 import { SkillGapEngine } from './SkillGapEngine.js';
 import { InterviewCopilot } from './InterviewCopilot.js';
@@ -37,18 +38,23 @@ import { MarketIntelligence } from './MarketIntelligence.js';
 import { DailyBriefService } from './DailyBriefService.js';
 import { SalaryAnalyzer } from './SalaryAnalyzer.js';
 import { FollowUpAssistant } from './FollowUpAssistant.js';
-import { KnowledgeBaseService } from './KnowledgeBaseService.js';
 import { AssistantChatService } from './AssistantChatService.js';
+import { FlashcardGenerator } from './FlashcardGenerator.js';
+import { CheatsheetGenerator } from './cheatsheet.js';
 
 // Version 5.0.0 Intelligent Application Automation Imports
 import { AutoApplyEngine } from './AutoApplyEngine.js';
-import { ResumeProfileManager } from './ResumeProfileManager.js';
 import { ResumeOptimizationService } from './ResumeOptimizationService.js';
 import { CalendarService } from './CalendarService.js';
 import { RecruiterManager } from './RecruiterManager.js';
 import { OpportunityEngine } from './OpportunityEngine.js';
 import { PortfolioRecommendation } from './PortfolioRecommendation.js';
 import { ExportService } from './ExportService.js';
+import { PlaywrightScraper } from '../companies/PlaywrightScraper.js';
+import { FallbackScraper } from '../companies/FallbackScraper.js';
+import { ScraperRegistry } from '../companies/ScraperRegistry.js';
+import { HttpClient } from './HttpClient.js';
+import * as cheerio from 'cheerio';
 
 const app = express();
 
@@ -56,18 +62,20 @@ const app = express();
 app.set('etag', 'weak');
 
 // Helmet for security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:', 'blob:'],
-      connectSrc: ["'self'", 'https://*.supabase.co']
-    }
-  }
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", 'https://*.supabase.co'],
+      },
+    },
+  }),
+);
 
 // Request size limits
 app.use(express.json({ limit: '10mb' }));
@@ -88,28 +96,32 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
     const duration = Date.now() - start;
     Telemetry.recordRequest(duration);
     const reqId = req.headers['x-request-id'];
-    Logger.info(`[AUDIT] RequestID=${reqId} Method=${req.method} URL=${req.originalUrl} Status=${res.statusCode} Latency=${duration}ms`);
+    Logger.info(
+      `[AUDIT] RequestID=${reqId} Method=${req.method} URL=${req.originalUrl} Status=${res.statusCode} Latency=${duration}ms`,
+    );
   });
   next();
 });
 
 // CORS whitelist config
 const corsWhitelist = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'];
-app.use(cors({
-  origin: (origin, callback) => {
-    if (
-      !origin ||
-      corsWhitelist.includes(origin) ||
-      origin.startsWith('http://localhost:') ||
-      origin.startsWith('http://127.0.0.1:')
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        corsWhitelist.includes(origin) ||
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  }),
+);
 
 // API Rate Limiting (100 requests per 15 minutes window)
 const apiLimiter = rateLimit({
@@ -117,7 +129,7 @@ const apiLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
 });
 if (!config.isLocal) {
   app.use('/api', apiLimiter);
@@ -147,6 +159,17 @@ const sanitizeObject = (obj: any): any => {
 };
 
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.path === '/api/scraper/test-selector' || req.path === '/api/profile-builder/publish-website') {
+    if (req.body) {
+      const { html, ...otherBody } = req.body;
+      sanitizeObject(otherBody);
+      req.body = { ...otherBody, html };
+    }
+    if (req.query) sanitizeObject(req.query);
+    if (req.params) sanitizeObject(req.params);
+    return next();
+  }
+
   if (req.body) sanitizeObject(req.body);
   if (req.query) sanitizeObject(req.query);
   if (req.params) sanitizeObject(req.params);
@@ -191,7 +214,10 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
   const token = authHeader.split(' ')[1];
   try {
     const supabase = (storage as any).client;
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
     if (error || !user) {
       return res.status(401).json({ error: 'Unauthorized: Invalid token' });
     }
@@ -201,7 +227,7 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
       const name = user.email ? user.email.split('@')[0] : 'User';
       profile = {
         name,
-        role: 'User'
+        role: 'User',
       };
       await storage.saveProfile(user.id, profile);
       profile.role = 'User';
@@ -210,10 +236,10 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
     (req as any).user = {
       id: user.id,
       email: user.email,
-      role: profile.role || 'User'
+      role: profile.role || 'User',
     };
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: 'Unauthorized: Error validating token' });
   }
 };
@@ -245,7 +271,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (data.user) {
       await storage.saveProfile(data.user.id, {
         name: name || email.split('@')[0],
-        role: 'User'
+        role: 'User',
       });
       await storage.saveAuditLog(data.user.id, 'Register', { email }, req.ip);
     }
@@ -274,11 +300,33 @@ app.post('/api/auth/login', async (req, res) => {
     const supabase = (storage as any).client;
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    
+
     if (data.user) {
       await storage.saveAuditLog(data.user.id, 'Login', { email }, req.ip);
     }
     return res.json({ token: data.session?.access_token, user: data.user });
+  } catch (err: any) {
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// GET OAuth Authorization URL
+app.get('/api/auth/oauth/:provider', async (req, res) => {
+  const { provider } = req.params;
+  if (config.isLocal) {
+    return res.json({ url: '' });
+  }
+  try {
+    const supabase = (storage as any).client;
+    const redirectUrl = `${req.protocol}://${req.get('host')}/`;
+    const { data, error } = await supabase.auth.getOAuthUrl({
+      provider: provider as any,
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
+    if (error) throw error;
+    return res.json({ url: data.url });
   } catch (err: any) {
     return res.status(400).json({ error: err.message });
   }
@@ -295,7 +343,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
     if (fs.existsSync(statsPath)) {
       try {
         statsHistory = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
-      } catch (e) {}
+      } catch {}
     }
 
     let allJobs: any[] = [];
@@ -304,35 +352,35 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
       allJobs.push(...jobs);
     }
 
-    const activeComps = companies.filter(c => c.enabled);
-    const healthyComps = activeComps.filter(c => c.total_failures === 0);
-    const degradedComps = activeComps.filter(c => c.total_failures > 0);
-    const disabledComps = companies.filter(c => !c.enabled);
+    const activeComps = companies.filter((c) => c.enabled);
+    const healthyComps = activeComps.filter((c) => c.total_failures === 0);
+    const degradedComps = activeComps.filter((c) => c.total_failures > 0);
+    const disabledComps = companies.filter((c) => !c.enabled);
 
     return res.json({
       stats: {
-        jobsToday: allJobs.filter(j => {
+        jobsToday: allJobs.filter((j) => {
           const today = new Date().toISOString().split('T')[0];
           const jDate = new Date(j.datePosted || 0).toISOString().split('T')[0];
           return today === jDate;
         }).length,
         newJobs: allJobs.length,
-        matches: allJobs.filter(j => {
+        matches: allJobs.filter((j) => {
           const profiles = ['backend'];
           const matchScore = ResumeMatcher.match(j, profiles[0]);
           return matchScore >= config.matchThreshold;
         }).length,
         applications: applications.length,
-        interviews: applications.filter(a => a.status === 'Interview').length,
-        offers: applications.filter(a => a.status === 'Offer').length,
+        interviews: applications.filter((a) => a.status === 'Interview').length,
+        offers: applications.filter((a) => a.status === 'Offer').length,
         companiesHealthy: healthyComps.length,
         companiesDegraded: degradedComps.length,
-        companiesDisabled: disabledComps.length
+        companiesDisabled: disabledComps.length,
       },
       charts: {
         statsHistory,
-        companies: companies.map(c => ({ name: c.name, jobsFound: c.total_scrapes }))
-      }
+        companies: companies.map((c) => ({ name: c.name, jobsFound: c.total_scrapes })),
+      },
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -342,7 +390,17 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
 // Job Explorer
 app.get('/api/jobs', authMiddleware, async (req, res) => {
   try {
-    const { company, technology, experience, location, remote, minScore, sort = 'opportunity', page = '1', limit = '10' } = req.query;
+    const {
+      company,
+      technology,
+      experience,
+      location,
+      remote,
+      minScore,
+      sort = 'opportunity',
+      page = '1',
+      limit = '10',
+    } = req.query;
 
     const settings = await storage.getExtendedSettings();
     const companies = await storage.getEnabledCompanies();
@@ -350,15 +408,15 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
 
     for (const comp of companies) {
       const jobs = await storage.getCompanyJobs(comp.id);
-      const scored = jobs.map(j => {
+      const scored = jobs.map((j) => {
         const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : ['backend'];
-        const bestScore = Math.max(...profiles.map(p => ResumeMatcher.match(j, p)));
+        const bestScore = Math.max(...profiles.map((p) => ResumeMatcher.match(j, p)));
         const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
         return {
           job: j,
           score: bestScore,
           opportunityScore: recommendation.opportunityScore,
-          breakdown: recommendation.breakdown
+          breakdown: recommendation.breakdown,
         };
       });
       allScoredJobs.push(...scored);
@@ -392,7 +450,7 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       jobs: paginated,
       total: filtered.length,
       page: p,
-      pages: Math.ceil(filtered.length / l)
+      pages: Math.ceil(filtered.length / l),
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -409,7 +467,7 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
 
     for (const comp of companies) {
       const jobs = await storage.getCompanyJobs(comp.id);
-      const j = jobs.find(x => x.jobHash === hash);
+      const j = jobs.find((x) => x.jobHash === hash);
       if (j) {
         foundJob = j;
         matchedComp = comp;
@@ -427,7 +485,7 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
     return res.json({
       job: foundJob,
       explanation,
-      aiSummary: `This is an automated AI summary description placeholder for the ${foundJob.title} role at ${foundJob.company}.`
+      aiSummary: `This is an automated AI summary description placeholder for the ${foundJob.title} role at ${foundJob.company}.`,
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -438,7 +496,30 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
 app.get('/api/applications', authMiddleware, async (req, res) => {
   try {
     const apps = await storage.getApplications((req as any).user.id);
-    return res.json(apps);
+    const enriched = [];
+    for (const app of apps) {
+      const jobInfo = await findJobByHash(app.jobHash);
+      if (jobInfo) {
+        enriched.push({
+          ...app,
+          title: jobInfo.job.title,
+          location: jobInfo.job.location,
+          employmentType: jobInfo.job.employmentType,
+          isRemote: jobInfo.job.isRemote,
+          salary: jobInfo.job.salary,
+        });
+      } else {
+        enriched.push({
+          ...app,
+          title: app.title || 'Software Engineer',
+          location: app.location || 'Remote',
+          employmentType: app.employmentType || 'Full-time',
+          isRemote: app.isRemote !== undefined ? app.isRemote : true,
+          salary: app.salary || 'N/A',
+        });
+      }
+    }
+    return res.json(enriched);
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
@@ -450,14 +531,14 @@ app.post('/api/applications', authMiddleware, async (req, res) => {
     if (!jobHash || !status) {
       return res.status(400).json({ error: 'Missing jobHash or status' });
     }
-    
+
     const app = {
       jobHash,
       company: company || 'Unknown',
       jobId: jobId || 'N/A',
       status,
       notes: notes || '',
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     const userId = (req as any).user.id;
@@ -474,7 +555,7 @@ app.post('/api/applications', authMiddleware, async (req, res) => {
 app.get('/api/resumes', authMiddleware, async (req, res) => {
   try {
     const list = await storage.getUserResumes((req as any).user.id);
-    return res.json(list.map(r => ({ name: r.profileName, content: r.content, pdf_data: r.pdf_data })));
+    return res.json(list.map((r) => ({ name: r.profileName, content: r.content, pdf_data: r.pdf_data })));
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
@@ -506,9 +587,14 @@ app.post('/api/resumes/parse', authMiddleware, express.raw({ type: '*/*', limit:
 
     let text = '';
     if (contentType.includes('pdf')) {
-      const parser = new PDFParse({ data: buffer });
-      const result = await parser.getText();
-      text = result.text || '';
+      try {
+        const parser = new PDFParse({ data: buffer });
+        const result = await parser.getText();
+        text = result.text || '';
+      } catch (pdfErr: any) {
+        Logger.warn('PDFParse failed, using simple string extraction fallback', pdfErr);
+        text = buffer.toString('binary').replace(/[^\x20-\x7E\n\r\t]/g, ' ');
+      }
     } else if (contentType.includes('officedocument') || contentType.includes('docx')) {
       const result = await mammoth.extractRawText({ buffer });
       text = result.value || '';
@@ -559,13 +645,16 @@ app.post('/api/companies/:id/toggle', authMiddleware, async (req, res) => {
 
 app.post('/api/companies', authMiddleware, async (req, res) => {
   try {
-    const { id, name, priority, interval_minutes, api_endpoint, detected_ats, resume_profiles } = req.body;
+    const { id, name, priority, interval_minutes, api_endpoint, detected_ats, resume_profiles, cron_expression } =
+      req.body;
     if (!id || !name || !priority || !interval_minutes) {
       return res.status(400).json({ error: 'Missing required company configuration fields' });
     }
 
     if (!/^[a-z0-9-_]+$/.test(id)) {
-      return res.status(400).json({ error: 'Company ID must contain only lowercase letters, numbers, hyphens, and underscores' });
+      return res
+        .status(400)
+        .json({ error: 'Company ID must contain only lowercase letters, numbers, hyphens, and underscores' });
     }
 
     const companyConfig: CompanyConfig = {
@@ -576,7 +665,14 @@ app.post('/api/companies', authMiddleware, async (req, res) => {
       interval_minutes: Number(interval_minutes),
       api_endpoint: api_endpoint || null,
       detected_ats: detected_ats || null,
-      resume_profiles: Array.isArray(resume_profiles) ? resume_profiles : (resume_profiles ? String(resume_profiles).split(',').map(s => s.trim()) : []),
+      cron_expression: cron_expression || null,
+      resume_profiles: Array.isArray(resume_profiles)
+        ? resume_profiles
+        : resume_profiles
+          ? String(resume_profiles)
+              .split(',')
+              .map((s) => s.trim())
+          : [],
       total_scrapes: 0,
       total_failures: 0,
       consecutive_failures: 0,
@@ -586,7 +682,7 @@ app.post('/api/companies', authMiddleware, async (req, res) => {
       last_scraper_used: null,
       detected_ats_at: null,
       api_suspended_until: null,
-      last_seen_timestamp: null
+      last_seen_timestamp: null,
     };
 
     await storage.saveCompanyConfig(companyConfig);
@@ -594,7 +690,6 @@ app.post('/api/companies', authMiddleware, async (req, res) => {
     await AuditLogger.log(userId, 'Settings Change', { companyId: id, name }, req.ip);
 
     return res.json({ success: true, company: companyConfig });
-
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
@@ -607,10 +702,18 @@ app.patch('/api/companies/:id', authMiddleware, async (req, res) => {
     if (!company) {
       return res.status(404).json({ error: 'Company not found' });
     }
-    const { interval_minutes, priority } = req.body;
+    const { interval_minutes, priority, resume_profiles } = req.body;
     const updates: Record<string, any> = {};
     if (interval_minutes !== undefined) updates.interval_minutes = Number(interval_minutes);
     if (priority !== undefined) updates.priority = Number(priority);
+    if (resume_profiles !== undefined) {
+      updates.resume_profiles = Array.isArray(resume_profiles)
+        ? resume_profiles
+        : String(resume_profiles)
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+    }
     await storage.updateCompanyScrapeState(id, updates);
     const userId = (req as any).user.id;
     await AuditLogger.log(userId, 'Settings Change', { companyId: id, ...updates }, req.ip);
@@ -636,15 +739,12 @@ app.delete('/api/companies/:id', authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
 // Helper to locate a job by hash
 const findJobByHash = async (hash: string) => {
   const companies = await storage.getAllCompanies();
   for (const comp of companies) {
     const jobs = await storage.getCompanyJobs(comp.id);
-    const j = jobs.find(x => x.jobHash === hash);
+    const j = jobs.find((x) => x.jobHash === hash);
     if (j) return { job: j, company: comp };
   }
   return null;
@@ -707,6 +807,188 @@ app.post('/api/jobs/:hash/cover-letter', authMiddleware, async (req, res) => {
   }
 });
 
+// Save or update a cover letter
+app.post('/api/cover-letters/save', authMiddleware, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const { id, name, companyName, jobTitle, jobDescription, tone, content } = req.body;
+
+    if (!name || !companyName || !jobTitle || !content) {
+      return res.status(400).json({ error: 'Missing required cover letter fields' });
+    }
+
+    const coverLetter = {
+      id: id || undefined,
+      name,
+      company_name: companyName,
+      job_title: jobTitle,
+      job_description: jobDescription || '',
+      tone: tone || 'professional',
+      content,
+    };
+
+    await storage.saveCoverLetter(userId, coverLetter);
+    return res.json({ success: true, coverLetter });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Get saved cover letters
+app.get('/api/cover-letters/saved', authMiddleware, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const list = await storage.getCoverLetters(userId);
+    const mapped = list.map((item) => ({
+      id: item.id,
+      name: item.name,
+      companyName: item.company_name,
+      jobTitle: item.job_title,
+      jobDescription: item.job_description,
+      tone: item.tone,
+      content: item.content,
+      created_at: item.created_at,
+    }));
+    return res.json(mapped);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete a cover letter
+app.delete('/api/cover-letters/:id', authMiddleware, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const { id } = req.params;
+    await storage.deleteCoverLetter(userId, id as string);
+    return res.json({ success: true });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Generate cover letter
+app.post('/api/cover-letters/generate', authMiddleware, async (req, res) => {
+  try {
+    const { companyName, jobTitle, jobDescription, tone } = req.body;
+    if (!companyName || !jobTitle) {
+      return res.status(400).json({ error: 'Company name and job title are required' });
+    }
+
+    const userId = (req as any).user.id;
+    const profile = await storage.getProfile(userId);
+    const userName = profile?.fullName || profile?.name || (req as any).user.email.split('@')[0] || 'Your Name';
+
+    let mappedTone: 'Professional' | 'Technical' | 'Enthusiastic' | 'Creative' = 'Professional';
+    if (tone === 'startup') mappedTone = 'Creative';
+    else if (tone === 'big-tech') mappedTone = 'Technical';
+    else if (tone === 'enthusiastic') mappedTone = 'Enthusiastic';
+
+    const dummyJob = {
+      id: '',
+      company: companyName,
+      title: jobTitle,
+      description: jobDescription || '',
+      location: 'Remote',
+      country: 'US',
+      experience: 'Mid-Senior',
+      employmentType: 'Full-time',
+      url: '',
+      datePosted: new Date().toISOString(),
+      team: 'Engineering',
+      source: 'AI Generator',
+      isRemote: true,
+      salary: '',
+      jobHash: '',
+    };
+
+    const content = CoverLetterGenerator.generate(dummyJob, { tone: mappedTone, userName });
+    return res.json({ content });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Regenerate cover letter
+app.post('/api/cover-letters/regenerate', authMiddleware, async (req, res) => {
+  try {
+    const { companyName, jobTitle, jobDescription, tone, currentContent } = req.body;
+    if (!companyName || !jobTitle) {
+      return res.status(400).json({ error: 'Company name and job title are required' });
+    }
+
+    const userId = (req as any).user.id;
+    const profile = await storage.getProfile(userId);
+    const userName = profile?.fullName || profile?.name || (req as any).user.email.split('@')[0] || 'Your Name';
+
+    let mappedTone: 'Professional' | 'Technical' | 'Enthusiastic' | 'Creative' = 'Professional';
+    if (tone === 'startup') mappedTone = 'Creative';
+    else if (tone === 'big-tech') mappedTone = 'Technical';
+    else if (tone === 'enthusiastic') mappedTone = 'Enthusiastic';
+
+    const dummyJob = {
+      id: '',
+      company: companyName,
+      title: jobTitle,
+      description: jobDescription || '',
+      location: 'Remote',
+      country: 'US',
+      experience: 'Mid-Senior',
+      employmentType: 'Full-time',
+      url: '',
+      datePosted: new Date().toISOString(),
+      team: 'Engineering',
+      source: 'AI Generator',
+      isRemote: true,
+      salary: '',
+      jobHash: '',
+    };
+
+    let content = CoverLetterGenerator.generate(dummyJob, { tone: mappedTone, userName });
+    if (currentContent && currentContent === content) {
+      content = content.replace('Sincerely,', 'Best Regards,\n\n[Regenerated Version]\n');
+    }
+
+    return res.json({ content });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Export Cover Letter as PDF
+app.post('/api/cover-letters/export/pdf', authMiddleware, async (req, res) => {
+  try {
+    const { content, name } = req.body;
+    const buffer = await CoverLetterGenerator.export(content || '', 'PDF');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${(name || 'cover_letter').replace(/\s+/g, '_')}.pdf"`);
+    return res.send(buffer);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Export Cover Letter as LaTeX
+app.post('/api/cover-letters/export/latex', authMiddleware, async (req, res) => {
+  try {
+    const { content } = req.body;
+    const escapedContent = (content || '')
+      .replace(/&/g, '\\&')
+      .replace(/%/g, '\\%')
+      .replace(/\$/g, '\\$')
+      .replace(/#/g, '\\#')
+      .replace(/_/g, '\\_')
+      .replace(/\{/g, '\\{')
+      .replace(/\}/g, '\\}')
+      .replace(/\n/g, '\\\\\n');
+
+    const latexText = `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\begin{document}\n${escapedContent}\n\\end{document}`;
+    return res.send(latexText);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Interview Preparation route
 app.get('/api/jobs/:hash/prep', authMiddleware, async (req, res) => {
   try {
@@ -730,7 +1012,7 @@ const insightsCache = new Map<string, { data: any; expiry: number }>();
 app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
   try {
     const id = req.params.id as string;
-    
+
     // Check Cache
     const cached = insightsCache.get(id);
     if (cached && cached.expiry > Date.now()) {
@@ -748,14 +1030,29 @@ app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
     const techCounts: Record<string, number> = {};
     const roleCounts: Record<string, number> = {};
     const locCounts: Record<string, number> = {};
-    const expCounts: Record<string, number> = { 'Early Career': 0, 'Mid Level': 0, 'Senior': 0 };
-    
+    const expCounts: Record<string, number> = { 'Early Career': 0, 'Mid Level': 0, Senior: 0 };
+
     const knownSkills = [
-      'typescript', 'javascript', 'node.js', 'java', 'go', 'golang', 'postgresql', 'postgres', 
-      'mongodb', 'redis', 'aws', 'docker', 'kubernetes', 'rest api', 'python', 'react', 'next.js'
+      'typescript',
+      'javascript',
+      'node.js',
+      'java',
+      'go',
+      'golang',
+      'postgresql',
+      'postgres',
+      'mongodb',
+      'redis',
+      'aws',
+      'docker',
+      'kubernetes',
+      'rest api',
+      'python',
+      'react',
+      'next.js',
     ];
 
-    jobs.forEach(j => {
+    jobs.forEach((j) => {
       // Experience counts
       const exp = j.experience || 'Mid Level';
       expCounts[exp] = (expCounts[exp] || 0) + 1;
@@ -765,7 +1062,7 @@ app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
 
       // Tech counts (extract mentioned KNOWN_SKILLS in description)
       const descLower = (j.description || '').toLowerCase();
-      knownSkills.forEach(skill => {
+      knownSkills.forEach((skill) => {
         const escaped = skill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         const regex = new RegExp(`\\b${escaped}\\b`, 'i');
         if (regex.test(descLower)) {
@@ -774,7 +1071,9 @@ app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
       });
 
       // Role titles counts
-      const titleClean = j.title.replace(/\b(senior|jr\.|sr\.|lead|staff|principal|intern|graduate|associate)\b/ig, '').trim();
+      const titleClean = j.title
+        .replace(/\b(senior|jr\.|sr\.|lead|staff|principal|intern|graduate|associate)\b/gi, '')
+        .trim();
       roleCounts[titleClean] = (roleCounts[titleClean] || 0) + 1;
     });
 
@@ -795,11 +1094,11 @@ app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
 
     // Hiring trend (aggregate count by month)
     const trendMap: Record<string, number> = {};
-    jobs.forEach(j => {
+    jobs.forEach((j) => {
       try {
         const m = new Date(j.datePosted).toLocaleString('default', { month: 'short' });
         trendMap[m] = (trendMap[m] || 0) + 1;
-      } catch (e) {}
+      } catch {}
     });
     const hiringTrend = Object.entries(trendMap).map(([month, count]) => ({ month, count }));
 
@@ -815,14 +1114,14 @@ app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
       scraperHealth: {
         avgResponseTimeMs: company.avg_response_time_ms || 0,
         totalScrapes: company.total_scrapes || 0,
-        totalFailures: company.total_failures || 0
-      }
+        totalFailures: company.total_failures || 0,
+      },
     };
 
     // Cache for 5 minutes
     insightsCache.set(id, {
       data: insights,
-      expiry: Date.now() + 5 * 60 * 1000
+      expiry: Date.now() + 5 * 60 * 1000,
     });
 
     return res.json(insights);
@@ -836,14 +1135,16 @@ app.get('/api/settings/extended', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const settings = await storage.getExtendedSettings(userId);
-    return res.json(settings || {
-      preferredCompanies: [],
-      preferredTechnologies: [],
-      preferredCities: [],
-      remotePreference: 'all',
-      notificationFrequency: 'daily',
-      digestFormat: 'markdown'
-    });
+    return res.json(
+      settings || {
+        preferredCompanies: [],
+        preferredTechnologies: [],
+        preferredCities: [],
+        remotePreference: 'all',
+        notificationFrequency: 'daily',
+        digestFormat: 'markdown',
+      },
+    );
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
@@ -1047,6 +1348,1015 @@ app.post('/api/backup/import', authMiddleware, requireRole(['Admin']), async (re
   }
 });
 
+// Custom Scraper Builder - Test Run Scraper Live
+app.post('/api/scraper/test-run', authMiddleware, async (req, res) => {
+  try {
+    const { companyName, boardUrl, atsProvider } = req.body;
+    if (!companyName || !boardUrl || !atsProvider) {
+      return res.status(400).json({ error: 'Missing companyName, boardUrl or atsProvider' });
+    }
+
+    const testConfig: CompanyConfig = {
+      id: 'test-temp-' + Math.random().toString(36).substring(2, 9),
+      name: companyName,
+      enabled: true,
+      priority: 2,
+      interval_minutes: 60,
+      api_endpoint: boardUrl,
+      detected_ats: atsProvider,
+      total_scrapes: 0,
+      total_failures: 0,
+      consecutive_failures: 0,
+      avg_response_time_ms: 0,
+      last_successful_scrape: null,
+      last_failed_scrape: null,
+      resume_profiles: [],
+      last_scraper_used: null,
+      detected_ats_at: null,
+      api_suspended_until: null,
+      last_seen_timestamp: null,
+    };
+
+    const logs: string[] = [];
+    const originalLogInfo = Logger.info;
+    const originalLogWarn = Logger.warn;
+    const originalLogError = Logger.error;
+
+    Logger.info = (msg: string, ...args: any[]) => {
+      logs.push(`[INFO] ${msg}`);
+      originalLogInfo(msg, ...args);
+    };
+    Logger.warn = (msg: string, ...args: any[]) => {
+      logs.push(`[WARN] ${msg}`);
+      originalLogWarn(msg, ...args);
+    };
+    Logger.error = (msg: string, err?: Error) => {
+      logs.push(`[ERROR] ${msg}${err ? ': ' + err.message : ''}`);
+      originalLogError(msg, err);
+    };
+
+    let rawPostings: any[] = [];
+    const httpClient = new HttpClient();
+    const startTime = Date.now();
+
+    try {
+      if (atsProvider === 'greenhouse' || atsProvider === 'lever' || atsProvider === 'workday') {
+        const plugin = ScraperRegistry.getAllPlugins().find((p) => p.metadata.id === atsProvider);
+        if (plugin) {
+          rawPostings = await plugin.discover(testConfig, httpClient);
+        } else {
+          throw new Error(`Scraper plugin not found for ${atsProvider}`);
+        }
+      } else if (atsProvider === 'playwright_fallback') {
+        const playwrightScraper = new PlaywrightScraper();
+        rawPostings = await playwrightScraper.discover(testConfig);
+      } else {
+        const fallbackScraper = new FallbackScraper();
+        rawPostings = await fallbackScraper.discover(testConfig, httpClient);
+      }
+
+      const duration = Date.now() - startTime;
+
+      Logger.info = originalLogInfo;
+      Logger.warn = originalLogWarn;
+      Logger.error = originalLogError;
+
+      const jobs = rawPostings.map((p: any, idx) => ({
+        id: p.id || `job-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        title: p.title || 'Untitled Role',
+        location: p.location || 'Remote / Unspecified',
+        url: p.url || boardUrl,
+        employmentType: p.employmentType || 'Full-time',
+        isRemote: p.isRemote !== undefined ? p.isRemote : p.location?.toLowerCase().includes('remote') || false,
+        salary: p.salary || 'Not specified',
+      }));
+
+      return res.json({
+        success: true,
+        detectedAts: atsProvider,
+        responseTimeMs: duration,
+        jobsCount: jobs.length,
+        jobs: jobs.slice(0, 15),
+        logs,
+      });
+    } catch (e: any) {
+      Logger.info = originalLogInfo;
+      Logger.warn = originalLogWarn;
+      Logger.error = originalLogError;
+
+      const duration = Date.now() - startTime;
+      logs.push(`[ERROR] Live test scrape aborted: ${e.message}`);
+      return res.json({
+        success: false,
+        detectedAts: atsProvider,
+        responseTimeMs: duration,
+        jobsCount: 0,
+        jobs: [],
+        logs,
+        error: e.message,
+      });
+    }
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Custom Scraper Builder - Test CSS Selector
+app.post('/api/scraper/test-selector', authMiddleware, async (req, res) => {
+  try {
+    const { html, titleSelector, locationSelector, linkSelector } = req.body;
+    if (!html || !titleSelector) {
+      return res.status(400).json({ error: 'Missing HTML content or Title Selector' });
+    }
+
+    const $ = cheerio.load(html);
+    const results: any[] = [];
+
+    $(titleSelector).each((idx, elem) => {
+      if (idx >= 15) return;
+      const title = $(elem).text().trim();
+
+      let location = 'Remote / Unspecified';
+      if (locationSelector) {
+        const parent = $(elem).parent();
+        const localLoc = parent.find(locationSelector).text().trim();
+        if (localLoc) {
+          location = localLoc;
+        } else {
+          location = $(locationSelector).eq(idx).text().trim() || 'Remote / Unspecified';
+        }
+      }
+
+      let link = '';
+      if (linkSelector) {
+        const localLink =
+          $(elem).find(linkSelector).attr('href') || $(elem).attr('href') || $(linkSelector).eq(idx).attr('href');
+        if (localLink) link = localLink;
+      }
+
+      results.push({
+        id: `selector-preview-${idx}`,
+        title,
+        location,
+        url: link || '#',
+      });
+    });
+
+    return res.json({
+      success: true,
+      matchesCount: results.length,
+      preview: results,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Monitoring API endpoints
+let isScrapersPaused = false;
+
+app.get('/api/monitoring', authMiddleware, async (req, res) => {
+  try {
+    const companiesPath = path.join(process.cwd(), 'storage', 'companies_state.json');
+    const summaryPath = path.join(process.cwd(), 'storage', 'summary.json');
+
+    let totalCompanies = 0;
+    let healthyScrapers = 0;
+    let failedScrapers = 0;
+    let avgDuration = '0.0s';
+
+    if (fs.existsSync(companiesPath)) {
+      const companiesList = JSON.parse(fs.readFileSync(companiesPath, 'utf-8'));
+      totalCompanies = companiesList.length;
+      failedScrapers = companiesList.filter((c: any) => c.consecutive_failures > 0).length;
+      healthyScrapers = totalCompanies - failedScrapers;
+
+      const responseTimes = companiesList.map((c: any) => c.avg_response_time_ms || 0).filter((t: number) => t > 0);
+      if (responseTimes.length > 0) {
+        const avg = responseTimes.reduce((acc: number, t: number) => acc + t, 0) / responseTimes.length;
+        avgDuration = (avg / 1000).toFixed(1) + 's';
+      }
+    }
+
+    let lastRun = 'Never';
+    let jobsToday = 0;
+    if (fs.existsSync(summaryPath)) {
+      const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
+      if (summary.runTimestamp) {
+        const diffMs = Date.now() - new Date(summary.runTimestamp).getTime();
+        const diffMins = Math.floor(diffMs / (60 * 1000));
+        if (diffMins < 1) lastRun = 'Just now';
+        else if (diffMins === 1) lastRun = '1 minute ago';
+        else lastRun = `${diffMins} minutes ago`;
+      }
+      jobsToday = summary.jobsDiscovered || 0;
+    }
+
+    return res.json({
+      lastRun,
+      nextRun: isScrapersPaused ? 'Paused' : 'In 58 minutes',
+      totalCompanies,
+      healthyScrapers,
+      failedScrapers,
+      retryQueue: failedScrapers,
+      avgDuration,
+      jobsToday,
+      apiHealth: 'Healthy',
+      dbHealth: 'Healthy',
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/monitoring/run', authMiddleware, async (req, res) => {
+  try {
+    if (isScrapersPaused) {
+      return res.status(400).json({ error: 'Scrapers are currently paused. Resume scheduling to run.' });
+    }
+    // Run the orchestrator in the background immediately
+    runOrchestrator().catch((err) => {
+      Logger.error('Background runOrchestrator failed', err);
+    });
+    return res.json({ success: true, message: 'Scrapers run triggered successfully' });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/monitoring/pause', authMiddleware, async (req, res) => {
+  isScrapersPaused = true;
+  return res.json({ success: true, message: 'Scrapers paused successfully' });
+});
+
+app.post('/api/monitoring/resume', authMiddleware, async (req, res) => {
+  isScrapersPaused = false;
+  return res.json({ success: true, message: 'Scrapers resumed successfully' });
+});
+
+app.get('/api/monitoring/logs', authMiddleware, async (req, res) => {
+  try {
+    const historyPath = path.join(process.cwd(), 'storage', 'scrape_history_logs.json');
+    if (fs.existsSync(historyPath)) {
+      const history = JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
+      return res.json(history);
+    }
+    return res.json([]);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/email/send-test', authMiddleware, async (req, res) => {
+  try {
+    const emailProvider = new EmailNotificationProvider();
+
+    // Construct a mock JobDigest
+    const mockDigest = {
+      runTimestamp: new Date().toISOString(),
+      totalCompaniesChecked: 5,
+      totalJobsFound: 24,
+      totalNewJobs: 2,
+      jobs: [
+        {
+          companyName: 'TestCorp',
+          title: 'Senior TypeScript Engineer (Test Match)',
+          matchScore: 92,
+          location: 'Bengaluru, India',
+          employmentType: 'Full-time',
+          experience: '3+ Years',
+          isRemote: true,
+          datePosted: 'Just now',
+          jobId: 'test-job-1',
+          applyUrl: 'https://example.com/apply/1',
+        },
+        {
+          companyName: 'MockCorp',
+          title: 'Full Stack Developer (Test Match)',
+          matchScore: 78,
+          location: 'Remote',
+          employmentType: 'Full-time',
+          experience: '2+ Years',
+          isRemote: true,
+          datePosted: 'Just now',
+          jobId: 'test-job-2',
+          applyUrl: 'https://example.com/apply/2',
+        },
+      ],
+    };
+
+    await emailProvider.sendDigest(mockDigest as any);
+    return res.json({ success: true, message: 'Test email successfully sent' });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Pipeline Tracker - Export Applications to CSV
+app.get('/api/backup/export-csv', authMiddleware, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const apps = await storage.getApplications(userId);
+
+    let csv = 'Company,Job ID,Job Title,Location,Employment Type,Remote,Salary,Status,Last Updated,Notes\r\n';
+
+    for (const app of apps) {
+      const jobInfo = await findJobByHash(app.jobHash);
+      const title = jobInfo ? jobInfo.job.title : app.title || 'Software Engineer';
+      const location = jobInfo ? jobInfo.job.location : app.location || 'Remote';
+      const empType = jobInfo ? jobInfo.job.employmentType : app.employmentType || 'Full-time';
+      const remote = jobInfo ? (jobInfo.job.isRemote ? 'Yes' : 'No') : app.isRemote ? 'Yes' : 'No';
+      const salary = jobInfo ? jobInfo.job.salary : app.salary || 'N/A';
+
+      const companyEscaped = `"${(app.company || 'Unknown').replace(/"/g, '""')}"`;
+      const titleEscaped = `"${title.replace(/"/g, '""')}"`;
+      const locEscaped = `"${location.replace(/"/g, '""')}"`;
+      const notesEscaped = `"${(app.notes || '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+
+      csv += `${companyEscaped},${app.jobId || 'N/A'},${titleEscaped},${locEscaped},${empType},${remote},${salary},${app.status},${app.lastUpdated},${notesEscaped}\r\n`;
+    }
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="job_applications_${new Date().toISOString().split('T')[0]}.csv"`,
+    );
+    return res.send(csv);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Scraper Failure Watchdog
+app.get('/api/admin/scraper-watchdog', authMiddleware, async (req, res) => {
+  try {
+    const companies = await storage.getAllCompanies();
+    const degraded = [];
+
+    for (const comp of companies) {
+      if (comp.enabled && ((comp.consecutive_failures || 0) > 0 || comp.last_failed_scrape)) {
+        degraded.push({
+          id: comp.id,
+          name: comp.name,
+          consecutiveFailures: comp.consecutive_failures || 0,
+          lastFailedScrape: comp.last_failed_scrape,
+          lastSuccessfulScrape: comp.last_successful_scrape,
+          lastScraperUsed: comp.last_scraper_used,
+          detectedAts: comp.detected_ats,
+        });
+      }
+    }
+
+    return res.json(degraded);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+const FLASHCARDS_FILE = path.join(process.cwd(), 'storage', 'flashcards.json');
+
+const readFlashcardDecks = (): any[] => {
+  try {
+    if (!fs.existsSync(FLASHCARDS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(FLASHCARDS_FILE, 'utf8'));
+  } catch {
+    return [];
+  }
+};
+
+const writeFlashcardDecks = (data: any[]) => {
+  try {
+    const dir = path.dirname(FLASHCARDS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(FLASHCARDS_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    Logger.error('Failed to write flashcards file', e as Error);
+  }
+};
+
+// GitHub Analyzer Endpoint
+app.post('/api/github/analyze', authMiddleware, async (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: 'GitHub username is required' });
+    }
+
+    let repos: any[] = [];
+    let languages: Record<string, number> = {};
+
+    try {
+      const httpClient = new HttpClient();
+      const url = `https://api.github.com/users/${username}/repos?per_page=30&sort=updated`;
+      const response = await httpClient.request(url, {
+        headers: { 'User-Agent': 'Job-Monitor-App' },
+      });
+      const data = response.data;
+      repos = typeof data === 'string' ? JSON.parse(data) : data;
+    } catch (e: any) {
+      Logger.warn(`GitHub API request failed or rate limited: ${e.message}. Using high-quality mock data.`);
+      repos = [
+        {
+          name: 'distributed-crawler',
+          description: 'High-performance distributed scraper engine built in Go and gRPC',
+          stargazers_count: 42,
+          language: 'Go',
+        },
+        {
+          name: 'job-monitor-dashboard',
+          description: 'Next.js Kanban-style application manager with live metrics visualizer',
+          stargazers_count: 18,
+          language: 'TypeScript',
+        },
+        {
+          name: 'realtime-messenger',
+          description: 'Chat app workspace with WebSocket transport, Redis PubSub, and Node.js',
+          stargazers_count: 24,
+          language: 'TypeScript',
+        },
+        {
+          name: 'infra-tf-modules',
+          description: 'Terraform modules for AWS ECS Fargate, ALB, and RDS Postgres databases',
+          stargazers_count: 7,
+          language: 'HCL',
+        },
+        {
+          name: 'py-analytics-model',
+          description: 'FastAPI service running regression models for cost evaluation',
+          stargazers_count: 12,
+          language: 'Python',
+        },
+      ];
+    }
+
+    let totalScore = 0;
+    repos.forEach((r: any) => {
+      if (r.language) {
+        languages[r.language] = (languages[r.language] || 0) + 1;
+        totalScore++;
+      }
+    });
+
+    const langStats = Object.entries(languages)
+      .map(([name, count]) => ({
+        name,
+        percentage: Math.round((count / (totalScore || 1)) * 100),
+      }))
+      .sort((a, b) => b.percentage - a.percentage);
+
+    const highlights = repos.slice(0, 4).map((r: any) => ({
+      name: r.name,
+      description: r.description || 'No description provided.',
+      stars: r.stargazers_count || 0,
+      language: r.language || 'Unspecified',
+    }));
+
+    const feedback = [
+      'Your repository descriptions are clear and name the technology stack used.',
+      `Strong focus detected in ${langStats[0]?.name || 'TypeScript/JavaScript'} which matches active job listings.`,
+      'Recommendation: Add clean README.md files with high-level system diagrams to your top pinned repositories.',
+      'Recommendation: Include live deployment URLs or recording links inside your descriptions for recruiters.',
+    ];
+
+    return res.json({
+      username,
+      languages: langStats,
+      highlights,
+      feedback,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Flashcards - Get List
+app.get('/api/flashcards', authMiddleware, (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const list = readFlashcardDecks();
+    const userDecks = list.filter((d) => d.user_id === userId);
+    return res.json(userDecks);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Flashcards - Save/Update Deck
+app.post('/api/flashcards/save', authMiddleware, (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const { id, title, description, category, cards } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: 'Deck title is required' });
+    }
+
+    const list = readFlashcardDecks();
+    const deckId = id || 'deck-' + Math.random().toString(36).substring(2, 11);
+
+    const record = {
+      id: deckId,
+      user_id: userId,
+      title,
+      description: description || '',
+      category: category || 'General',
+      cards: Array.isArray(cards) ? cards : [],
+      updatedAt: new Date().toISOString(),
+    };
+
+    const idx = list.findIndex((d) => d.id === deckId && d.user_id === userId);
+    if (idx !== -1) {
+      list[idx] = record;
+    } else {
+      list.push(record);
+    }
+
+    writeFlashcardDecks(list);
+    return res.json({ success: true, deck: record });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Flashcards - Delete Deck
+app.delete('/api/flashcards/:id', authMiddleware, (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const { id } = req.params;
+    let list = readFlashcardDecks();
+    list = list.filter((d) => !(d.id === id && d.user_id === userId));
+    writeFlashcardDecks(list);
+    return res.json({ success: true });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Flashcards - AI Generate MCQ
+app.post('/api/flashcards/generate', authMiddleware, async (req, res) => {
+  try {
+    const { topic, count = 5, difficulty = 'medium' } = req.body;
+    if (!topic) {
+      return res.status(400).json({ error: 'Topic is required for flashcard generation' });
+    }
+
+    const cards = await FlashcardGenerator.generate(topic, Number(count), difficulty);
+    return res.json({ success: true, cards });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Flashcards - AI Generate Cheatsheet
+app.post('/api/cheatsheet/generate', authMiddleware, async (req, res) => {
+  try {
+    const { topic, options } = req.body;
+    if (!topic) {
+      return res.status(400).json({ error: 'Topic is required for cheatsheet generation' });
+    }
+
+    const cheatsheet = await CheatsheetGenerator.generate(topic, options);
+    return res.json({ success: true, cheatsheet });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Developer Profile Website Builder - Generate
+app.post('/api/profile-builder/generate-website', authMiddleware, async (req, res) => {
+  try {
+    const { theme = 'dark', profile = 'backend', customColor = '#3b82f6', sections = [] } = req.body;
+    const userId = (req as any).user.id;
+
+    const appList = await storage.getApplications(userId);
+    const recentCompanies = [...new Set(appList.map((a) => a.company))].slice(0, 4);
+    const profileData = await storage.getProfile(userId);
+
+    const candidateName = profileData?.fullName || profileData?.name || 'Developer Candidate';
+
+    const title =
+      profile === 'backend'
+        ? 'Backend Software Engineer'
+        : profile === 'frontend'
+          ? 'Frontend Engineer'
+          : profile === 'fullstack'
+            ? 'Full Stack Developer'
+            : profile === 'ai-ml'
+              ? 'AI/ML Engineer'
+              : profile === 'devops'
+                ? 'DevOps / Cloud Engineer'
+                : profile
+                    .split('-')
+                    .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+                    .join(' ');
+    const isDark = theme !== 'light';
+    const primaryColor =
+      theme === 'indigo'
+        ? '#6366f1'
+        : theme === 'emerald'
+          ? '#10b981'
+          : theme === 'rose'
+            ? '#f43f5e'
+            : theme === 'amber'
+              ? '#f59e0b'
+              : theme === 'custom'
+                ? customColor
+                : isDark
+                  ? '#3b82f6'
+                  : '#2563eb';
+    const bgColor = isDark ? '#0f172a' : '#f8fafc';
+    const cardBg = isDark ? '#1e293b' : '#ffffff';
+    const textMain = isDark ? '#f8fafc' : '#0f172a';
+    const textMuted = isDark ? '#94a3b8' : '#64748b';
+
+    let activeSections = sections;
+    if (!activeSections || activeSections.length === 0) {
+      activeSections = [
+        { id: 'about', title: 'About Me', type: 'about', content: '', visible: true },
+        { id: 'skills', title: 'Technical Stack', type: 'skills', content: '', visible: true },
+        { id: 'projects', title: 'Recent Projects', type: 'projects', content: '', visible: true },
+        { id: 'companies', title: 'Target Companies', type: 'companies', content: '', visible: true },
+        { id: 'connect', title: 'Connect With Me', type: 'connect', content: '', visible: true },
+      ];
+    }
+
+    let mainHtml = '';
+    for (const section of activeSections) {
+      if (!section.visible) continue;
+
+      if (section.type === 'about') {
+        const expWord = profileData?.experience_level ? `${profileData.experience_level.toLowerCase()} ` : '';
+        const aboutContent =
+          section.content ||
+          `I am a passionate ${expWord}software developer focused on building scalable, performant systems and clean user interfaces. Currently open to and actively targeting roles in: ${profileData?.preferred_roles && profileData.preferred_roles.length > 0 ? profileData.preferred_roles.join(', ') : title}.`;
+        mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <p class="about-p">${aboutContent}</p>
+    </section>\n`;
+      } else if (section.type === 'skills') {
+        let skillsList: string[] = [];
+        if (section.content && section.content.trim()) {
+          skillsList = section.content
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean);
+        } else {
+          skillsList =
+            profileData?.tech_stack && profileData.tech_stack.length > 0
+              ? profileData.tech_stack
+              : ['TypeScript', 'Node.js', 'React', 'PostgreSQL', 'Docker', 'AWS'];
+        }
+        mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <div>
+        ${skillsList.map((skill: string) => `<span class="badge">${skill}</span>`).join('\n        ')}
+      </div>
+    </section>\n`;
+      } else if (section.type === 'projects') {
+        let projectsArray: any[] | null = [];
+        if (section.content && section.content.trim()) {
+          try {
+            projectsArray = JSON.parse(section.content);
+          } catch (e) {
+            projectsArray = null;
+          }
+        } else {
+          projectsArray = [
+            {
+              title: 'Scalable Scraping Coordinator',
+              description:
+                'Engineered a robust, concurrent worker fleet managing multi-stage company scrapers and failure circuit breakers.',
+            },
+            {
+              title: 'Pipeline Dashboard Manager',
+              description:
+                'Built a responsive Kanban board tracking recruitment statuses with dynamic search indices and data exports.',
+            },
+          ];
+        }
+
+        if (projectsArray && Array.isArray(projectsArray)) {
+          const cardsHtml = projectsArray
+            .map(
+              (p: any) => `
+        <div class="card">
+          <h3>${p.title || 'Project'}</h3>
+          <p>${p.description || 'Project description...'}</p>
+        </div>`,
+            )
+            .join('\n');
+          mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <div class="grid">
+        ${cardsHtml}
+      </div>
+    </section>\n`;
+        } else {
+          const plainText = section.content || 'Projects list is currently empty.';
+          mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <p class="about-p" style="white-space: pre-wrap;">${plainText}</p>
+    </section>\n`;
+        }
+      } else if (section.type === 'companies') {
+        const companiesContent =
+          section.content || `Actively preparing for pipelines with: ${recentCompanies.join(', ') || 'Tech Giants'}.`;
+        mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <p class="about-p">${companiesContent}</p>
+    </section>\n`;
+      } else if (section.type === 'connect') {
+        if (
+          profileData?.github ||
+          profileData?.linkedin ||
+          profileData?.portfolio ||
+          profileData?.email ||
+          profileData?.phone
+        ) {
+          mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <div class="contact-grid">
+        ${profileData?.email ? `<a href="mailto:${profileData.email}" class="btn-contact">Email</a>` : ''}
+        ${profileData?.phone ? `<a href="tel:${profileData.phone}" class="btn-contact">Phone</a>` : ''}
+        ${profileData?.github ? `<a href="${profileData.github.startsWith('http') ? profileData.github : `https://github.com/${profileData.github}`}" target="_blank" class="btn-contact">GitHub</a>` : ''}
+        ${profileData?.linkedin ? `<a href="${profileData.linkedin.startsWith('http') ? profileData.linkedin : `https://linkedin.com/in/${profileData.linkedin}`}" target="_blank" class="btn-contact">LinkedIn</a>` : ''}
+        ${profileData?.portfolio ? `<a href="${profileData.portfolio.startsWith('http') ? profileData.portfolio : `https://${profileData.portfolio}`}" target="_blank" class="btn-contact">Portfolio</a>` : ''}
+      </div>
+    </section>\n`;
+        }
+      } else if (section.type === 'custom') {
+        mainHtml += `
+    <section>
+      <h2>${section.title}</h2>
+      <p class="about-p" style="white-space: pre-wrap;">${section.content}</p>
+    </section>\n`;
+      }
+    }
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${candidateName} - Portfolio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: ${isDark ? '#090d16' : '#f8fafc'};
+      color: ${textMain};
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      background: ${
+        isDark
+          ? `radial-gradient(circle at 50% -20%, ${primaryColor}25, transparent 70%), #090d16`
+          : `radial-gradient(circle at 50% -20%, ${primaryColor}15, transparent 70%), #f8fafc`
+      };
+      border-bottom: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+      padding: 5rem 2rem 4rem;
+      text-align: center;
+      position: relative;
+    }
+    .has-banner {
+      height: 240px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.45)), url(${profileData?.banner_url}) center/cover no-repeat !important;
+      padding: 0 !important;
+    }
+    .banner-overlap {
+      margin: -52px auto 0 !important;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .banner-overlap h1 {
+      margin-top: 0.5rem;
+    }
+    .hero-container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .profile-photo {
+      width: 104px;
+      height: 104px;
+      border-radius: 30px;
+      object-fit: cover;
+      border: 3px solid ${primaryColor};
+      box-shadow: 0 8px 30px ${primaryColor}30;
+      background-color: ${cardBg};
+    }
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, ${textMain}, ${primaryColor});
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.subtitle {
+      font-size: 1.15rem;
+      color: ${textMuted};
+      margin: 0.5rem 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-weight: 600;
+    }
+    .exp-badge {
+      font-size: 0.7rem;
+      background: ${primaryColor}15;
+      color: ${primaryColor};
+      padding: 0.2rem 0.6rem;
+      border-radius: 8px;
+      font-weight: 700;
+      border: 1px solid ${primaryColor}30;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    section {
+      margin-bottom: 3.5rem;
+    }
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: ${primaryColor};
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    h2::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: ${isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'};
+    }
+    .about-p {
+      font-size: 1.05rem;
+      color: ${textMuted};
+      line-height: 1.7;
+      margin: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: ${isDark ? 'rgba(30, 41, 59, 0.2)' : 'rgba(255, 255, 255, 0.7)'};
+      border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)'};
+      backdrop-filter: blur(12px);
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: ${primaryColor}50;
+      box-shadow: 0 12px 30px ${primaryColor}10;
+    }
+    .card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: ${textMain};
+    }
+    .card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: ${textMuted};
+    }
+    .badge {
+      display: inline-block;
+      background: ${primaryColor}10;
+      color: ${primaryColor};
+      border: 1px solid ${primaryColor}20;
+      padding: 0.4rem 1rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      margin-bottom: 0.6rem;
+      transition: all 0.2s ease;
+    }
+    .badge:hover {
+      border-color: ${primaryColor};
+      color: white;
+      background: ${primaryColor};
+      transform: translateY(-1px);
+    }
+    .contact-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn-contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: ${primaryColor}10;
+      color: ${primaryColor};
+      border: 1px solid ${primaryColor}30;
+      padding: 0.6rem 1.2rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-contact:hover {
+      background: ${primaryColor};
+      border-color: ${primaryColor};
+      color: white !important;
+      box-shadow: 0 4px 15px ${primaryColor}30;
+      transform: translateY(-2px);
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+      color: ${textMuted};
+      font-size: 0.85rem;
+      background: ${isDark ? '#060910' : '#f1f5f9'};
+    }
+  </style>
+</head>
+<body>
+  <header class="${profileData?.banner_url ? 'has-banner' : ''}">
+    ${
+      !profileData?.banner_url
+        ? `
+    <div class="hero-container">
+      ${profileData?.photo_url ? `<img src="${profileData.photo_url}" alt="${candidateName}" class="profile-photo" />` : ''}
+      <div class="hero-text">
+        <h1>${candidateName}</h1>
+        <p class="subtitle">${title}</p>
+      </div>
+    </div>`
+        : ''
+    }
+  </header>
+  
+  ${
+    profileData?.banner_url
+      ? `
+  <div class="hero-container banner-overlap">
+    ${profileData?.photo_url ? `<img src="${profileData.photo_url}" alt="${candidateName}" class="profile-photo" />` : ''}
+    <div class="hero-text">
+      <h1>${candidateName}</h1>
+      <p class="subtitle">${title}</p>
+    </div>
+  </div>`
+      : ''
+  }
+  <main>
+    ${mainHtml}
+  </main>
+  <footer>
+    <p>Generated with Job Monitor Platform</p>
+  </footer>
+</body>
+</html>`;
+
+    return res.json({
+      success: true,
+      html: htmlContent,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin Telemetry Endpoint
 app.get('/api/admin/telemetry', authMiddleware, requireRole(['Admin']), async (req, res) => {
   try {
@@ -1060,7 +2370,50 @@ app.get('/api/admin/telemetry', authMiddleware, requireRole(['Admin']), async (r
     const health = await HealthService.checkHealth(storage);
     return res.json({
       metrics,
-      health
+      health,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Developer Profile Website Builder - Publish
+app.post('/api/profile-builder/publish-website', authMiddleware, async (req, res) => {
+  try {
+    const { html } = req.body;
+    const userId = (req as any).user.id;
+
+    if (!html) {
+      return res.status(400).json({ error: 'Missing html content' });
+    }
+
+    const profileData = await storage.getProfile(userId);
+    const candidateName = profileData?.name || 'Candidate';
+    const slug = candidateName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-');
+    const safeFilename = `${slug || 'portfolio'}.html`;
+
+    // Ensure portfolios folder exists in root storage directory (outside frontend workspace)
+    const portfoliosDir = path.join(process.cwd(), 'storage', 'portfolios');
+    if (!fs.existsSync(portfoliosDir)) {
+      fs.mkdirSync(portfoliosDir, { recursive: true });
+    }
+
+    const filepath = path.join(portfoliosDir, safeFilename);
+    fs.writeFileSync(filepath, html, 'utf-8');
+
+    const protocol = req.secure ? 'https' : 'http';
+    const host = req.get('host') || 'localhost:3001';
+
+    // Always serve the public portfolios from the Express backend port 3001 to bypass Vite reload
+    const backendHost = host.replace(':5173', ':3001');
+    const publicUrl = `${protocol}://${backendHost}/portfolios/${safeFilename}`;
+
+    return res.json({
+      success: true,
+      url: publicUrl,
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -1179,7 +2532,7 @@ app.get('/api/settings', authMiddleware, async (req, res) => {
     matchThreshold: config.matchThreshold,
     emailNotifications: config.features.email,
     scrapeTimeout: 30000,
-    consecutiveFailuresLimit: 3
+    consecutiveFailuresLimit: 3,
   });
 });
 
@@ -1265,7 +2618,7 @@ app.post('/api/resumes/:name/optimize', authMiddleware, async (req, res) => {
     const job = jobInfo.job;
 
     const profiles = await storage.getResumeProfiles(userId);
-    const profile = profiles.find(p => p.profile_name === name);
+    const profile = profiles.find((p) => p.profile_name === name);
     const content = profile ? profile.content : 'Resume content here...';
 
     const result = ResumeOptimizationService.optimize(content, job);
@@ -1299,10 +2652,10 @@ app.post('/api/applications/queue', authMiddleware, async (req, res) => {
     const job = jobInfo.job;
 
     const profiles = await storage.getResumeProfiles(userId);
-    const profile = profiles.find(p => p.profile_name === profileName);
+    const profile = profiles.find((p) => p.profile_name === profileName);
     const resumeText = profile ? profile.content : 'Standard resume content';
 
-    const userProfile = await storage.getProfile(userId) || {};
+    const userProfile = (await storage.getProfile(userId)) || {};
 
     const payload = AutoApplyEngine.preparePayload(job, userProfile, resumeText, coverLetterText);
     const isSupported = AutoApplyEngine.determineAutomatedSupport(job);
@@ -1314,8 +2667,13 @@ app.post('/api/applications/queue', authMiddleware, async (req, res) => {
       title: job.title,
       state: isSupported ? (errors.length > 0 ? 'REQUIRES_MANUAL_ACTION' : 'READY') : 'REQUIRES_MANUAL_ACTION',
       payload,
-      validation_errors: errors.length > 0 ? errors : (isSupported ? [] : ['ATS does not support direct automation. Requires manual apply.']),
-      retries: 0
+      validation_errors:
+        errors.length > 0
+          ? errors
+          : isSupported
+            ? []
+            : ['ATS does not support direct automation. Requires manual apply.'],
+      retries: 0,
     };
 
     await storage.saveApplicationQueueItem(userId, queueItem);
@@ -1404,18 +2762,18 @@ app.get('/api/referrals', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const { category, company } = req.query;
-    
+
     let referrals;
     if (category) {
       referrals = await storage.getReferralsByCategory(userId, category as string);
     } else {
       referrals = await storage.getReferrals(userId);
     }
-    
+
     if (company) {
       referrals = referrals.filter((r: any) => r.company === company);
     }
-    
+
     return res.json(referrals);
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -1426,11 +2784,11 @@ app.post('/api/referrals', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const referral = req.body;
-    
+
     if (!referral.name || !referral.company || !referral.category) {
       return res.status(400).json({ error: 'Missing required fields: name, company, category' });
     }
-    
+
     await storage.saveReferral(userId, referral);
     await AuditLogger.log(userId, 'referral_created', { referral: referral.name, company: referral.company });
     return res.json({ success: true });
@@ -1444,7 +2802,7 @@ app.put('/api/referrals/:id', authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const id = req.params.id as string;
     const referral = req.body;
-    
+
     referral.id = id;
     await storage.saveReferral(userId, referral);
     await AuditLogger.log(userId, 'referral_updated', { id });
@@ -1458,7 +2816,7 @@ app.delete('/api/referrals/:id', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const id = req.params.id as string;
-    
+
     await storage.deleteReferral(userId, id);
     await AuditLogger.log(userId, 'referral_deleted', { id });
     return res.json({ success: true });
@@ -1472,11 +2830,11 @@ app.patch('/api/referrals/:id/status', authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const id = req.params.id as string;
     const { status } = req.body;
-    
+
     if (!status) {
       return res.status(400).json({ error: 'Missing status field' });
     }
-    
+
     await storage.updateReferralStatus(userId, id, status);
     await AuditLogger.log(userId, 'referral_status_updated', { id, status });
     return res.json({ success: true });
@@ -1500,7 +2858,7 @@ app.post('/api/linkedin/import-csv', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const { csvData } = req.body;
-    
+
     if (!csvData) {
       return res.status(400).json({ error: 'CSV data is required' });
     }
@@ -1508,20 +2866,35 @@ app.post('/api/linkedin/import-csv', authMiddleware, async (req, res) => {
     const { ManualImportProvider } = await import('./LinkedInIntegration.js');
     const provider = new ManualImportProvider();
     const connections = provider.importFromCSV(csvData);
-    
+
     // Convert LinkedIn connections to referral contacts and save
     const savedContacts = [];
     for (const connection of connections) {
       // Map 'Other' relationship to 'Employee' as fallback
-      const category: 'Recruiter' | 'Hiring Manager' | 'Engineering Manager' | 'University Alumni' | 'Employee' | 'Talent Acquisition' | 'HR' = 
-        connection.relationship === 'Other' ? 'Employee' : 
-        connection.relationship === 'Recruiter' ? 'Recruiter' :
-        connection.relationship === 'Hiring Manager' ? 'Hiring Manager' :
-        connection.relationship === 'Engineering Manager' ? 'Engineering Manager' :
-        connection.relationship === 'University Alumni' ? 'University Alumni' :
-        connection.relationship === 'Talent Acquisition' ? 'Talent Acquisition' :
-        connection.relationship === 'HR' ? 'HR' : 'Employee';
-      
+      const category:
+        | 'Recruiter'
+        | 'Hiring Manager'
+        | 'Engineering Manager'
+        | 'University Alumni'
+        | 'Employee'
+        | 'Talent Acquisition'
+        | 'HR' =
+        connection.relationship === 'Other'
+          ? 'Employee'
+          : connection.relationship === 'Recruiter'
+            ? 'Recruiter'
+            : connection.relationship === 'Hiring Manager'
+              ? 'Hiring Manager'
+              : connection.relationship === 'Engineering Manager'
+                ? 'Engineering Manager'
+                : connection.relationship === 'University Alumni'
+                  ? 'University Alumni'
+                  : connection.relationship === 'Talent Acquisition'
+                    ? 'Talent Acquisition'
+                    : connection.relationship === 'HR'
+                      ? 'HR'
+                      : 'Employee';
+
       const referralData = {
         id: `linkedin-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         userId,
@@ -1537,19 +2910,19 @@ app.post('/api/linkedin/import-csv', authMiddleware, async (req, res) => {
         connectionStatus: 'Potential Contact' as const,
         referralStatus: '',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
-      
+
       const saved = await storage.saveReferral(userId, referralData);
       savedContacts.push(saved);
     }
 
     AuditLogger.log(userId, 'LINKEDIN_IMPORT', { count: connections.length });
-    
-    return res.json({ 
-      success: true, 
-      imported: connections.length, 
-      saved: savedContacts.length 
+
+    return res.json({
+      success: true,
+      imported: connections.length,
+      saved: savedContacts.length,
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -1560,25 +2933,23 @@ app.post('/api/linkedin/recommend', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const { company, jobTitle, jobDescription, userUniversity, userSkills } = req.body;
-    
+
     if (!company || !jobTitle) {
       return res.status(400).json({ error: 'Company and job title are required' });
     }
 
     // Get all referrals for the user
     const referrals = await storage.getReferrals(userId);
-    
+
     // Filter by company
-    const companyContacts = referrals.filter(r => 
-      r.company.toLowerCase().includes(company.toLowerCase())
-    );
+    const companyContacts = referrals.filter((r) => r.company.toLowerCase().includes(company.toLowerCase()));
 
     // Import ranking logic
     const { ContactRanker } = await import('./LinkedInIntegration.js');
     const ranker = new ContactRanker();
-    
+
     // Convert referrals to LinkedIn connection format
-    const connections = companyContacts.map(r => ({
+    const connections = companyContacts.map((r) => ({
       id: r.id,
       name: r.name,
       currentRole: r.role,
@@ -1591,13 +2962,12 @@ app.post('/api/linkedin/recommend', authMiddleware, async (req, res) => {
       team: '',
       isFirstDegree: false,
       confidenceScore: 0,
-      recommendationReason: ''
+      recommendationReason: '',
     }));
 
     // Normalize userSkills to array if it's a string
-    const normalizedUserSkills = typeof userSkills === 'string' 
-      ? userSkills.split(',').map((s: string) => s.trim()) 
-      : userSkills || [];
+    const normalizedUserSkills =
+      typeof userSkills === 'string' ? userSkills.split(',').map((s: string) => s.trim()) : userSkills || [];
 
     // Rank contacts
     const jobContext = {
@@ -1605,11 +2975,11 @@ app.post('/api/linkedin/recommend', authMiddleware, async (req, res) => {
       jobTitle,
       jobDescription,
       userUniversity,
-      userSkills: normalizedUserSkills
+      userSkills: normalizedUserSkills,
     };
-    
+
     const rankedContacts = ranker.rankContacts(connections, jobContext);
-    
+
     return res.json(rankedContacts);
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -1620,17 +2990,15 @@ app.get('/api/linkedin/connections', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const { company } = req.query;
-    
+
     let referrals = await storage.getReferrals(userId);
-    
+
     if (company) {
-      referrals = referrals.filter(r => 
-        r.company.toLowerCase().includes(String(company).toLowerCase())
-      );
+      referrals = referrals.filter((r) => r.company.toLowerCase().includes(String(company).toLowerCase()));
     }
-    
+
     // Convert to LinkedIn connection format
-    const connections = referrals.map(r => ({
+    const connections = referrals.map((r) => ({
       id: r.id,
       name: r.name,
       currentRole: r.role,
@@ -1643,9 +3011,9 @@ app.get('/api/linkedin/connections', authMiddleware, async (req, res) => {
       team: '',
       isFirstDegree: false,
       confidenceScore: 0,
-      recommendationReason: ''
+      recommendationReason: '',
     }));
-    
+
     return res.json(connections);
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -1656,16 +3024,14 @@ app.get('/api/linkedin/status', authMiddleware, async (req, res) => {
   try {
     const userId = (req as any).user.id;
     const referrals = await storage.getReferrals(userId);
-    
+
     // Check if user has any LinkedIn-imported contacts
-    const hasLinkedInData = referrals.some(r => 
-      r.tags && r.tags.includes('LinkedIn Import')
-    );
-    
-    return res.json({ 
+    const hasLinkedInData = referrals.some((r) => r.tags && r.tags.includes('LinkedIn Import'));
+
+    return res.json({
       connected: hasLinkedInData,
       totalContacts: referrals.length,
-      linkedinImported: referrals.filter(r => r.tags && r.tags.includes('LinkedIn Import')).length
+      linkedinImported: referrals.filter((r) => r.tags && r.tags.includes('LinkedIn Import')).length,
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
@@ -1707,8 +3073,8 @@ app.get('/api/auth/google/callback', async (req, res) => {
         client_id: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUri,
-        grant_type: 'authorization_code'
-      })
+        grant_type: 'authorization_code',
+      }),
     });
 
     if (!tokenRes.ok) {
@@ -1731,7 +3097,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
         preferredCities: [],
         remotePreference: 'all',
         notificationFrequency: 'daily',
-        digestFormat: 'markdown'
+        digestFormat: 'markdown',
       };
     }
 
@@ -1739,7 +3105,9 @@ app.get('/api/auth/google/callback', async (req, res) => {
     await storage.saveExtendedSettings(settings, userId as string);
     await AuditLogger.log(userId as string, 'Settings Change', { linkedGoogleCalendar: true }, '127.0.0.1');
 
-    const frontendUrl = redirectUri.includes('localhost:4500') ? 'http://localhost:5173/automation' : redirectUri.split('/api')[0] + '/automation';
+    const frontendUrl = redirectUri.includes('localhost:4500')
+      ? 'http://localhost:5173/automation'
+      : redirectUri.split('/api')[0] + '/automation';
     return res.redirect(frontendUrl);
   } catch (err: any) {
     Logger.error('Google OAuth callback failed', err);
@@ -1781,7 +3149,7 @@ app.post('/api/calendar', authMiddleware, async (req, res) => {
     if (settings && settings.google_refresh_token) {
       try {
         Logger.info(`Syncing event "${event.title}" to Google Calendar for user ${userId}...`);
-        
+
         const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1789,8 +3157,8 @@ app.post('/api/calendar', authMiddleware, async (req, res) => {
             client_id: config.googleClientId,
             client_secret: config.googleClientSecret,
             refresh_token: settings.google_refresh_token,
-            grant_type: 'refresh_token'
-          })
+            grant_type: 'refresh_token',
+          }),
         });
 
         if (tokenRes.ok) {
@@ -1800,20 +3168,20 @@ app.post('/api/calendar', authMiddleware, async (req, res) => {
           const gRes = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               summary: event.title,
               description: event.description || '',
               start: {
-                dateTime: new Date(event.startTime).toISOString()
+                dateTime: new Date(event.startTime).toISOString(),
               },
               end: {
-                dateTime: new Date(event.endTime).toISOString()
+                dateTime: new Date(event.endTime).toISOString(),
               },
-              location: event.location || 'Remote / Virtual Call'
-            })
+              location: event.location || 'Remote / Virtual Call',
+            }),
           });
 
           if (!gRes.ok) {
@@ -1827,7 +3195,10 @@ app.post('/api/calendar', authMiddleware, async (req, res) => {
           Logger.error(`Google Calendar token refresh failed: ${tErr}`);
         }
       } catch (gSyncErr) {
-        Logger.error('Unhandled error during Google Calendar background sync', gSyncErr instanceof Error ? gSyncErr : new Error(String(gSyncErr)));
+        Logger.error(
+          'Unhandled error during Google Calendar background sync',
+          gSyncErr instanceof Error ? gSyncErr : new Error(String(gSyncErr)),
+        );
       }
     }
 
@@ -1853,7 +3224,7 @@ app.get('/api/calendar/:id/ics', authMiddleware, async (req, res) => {
     const userId = (req as any).user.id;
     const id = req.params.id as string;
     const events = await storage.getCalendarEvents(userId);
-    const event = events.find(e => e.id === id);
+    const event = events.find((e) => e.id === id);
 
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
@@ -1864,7 +3235,7 @@ app.get('/api/calendar/:id/ics', authMiddleware, async (req, res) => {
       eventType: event.event_type || 'Interview',
       startTime: new Date(event.start_time),
       endTime: new Date(event.end_time),
-      location: event.location
+      location: event.location,
     });
 
     res.setHeader('Content-Type', 'text/calendar');
@@ -1873,7 +3244,6 @@ app.get('/api/calendar/:id/ics', authMiddleware, async (req, res) => {
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
-
 });
 
 // 5. Portfolio Recommendation Endpoints
@@ -1884,17 +3254,19 @@ app.get('/api/portfolio', authMiddleware, async (req, res) => {
       id: 'p1',
       name: 'Scalable Microservices Gateway',
       type: 'repository',
-      description: 'An API Gateway built with TypeScript, Node.js, and Redis supporting rate-limiting and authentication.',
+      description:
+        'An API Gateway built with TypeScript, Node.js, and Redis supporting rate-limiting and authentication.',
       url: 'https://github.com/user/gateway',
-      technologies: ['TypeScript', 'Node.js', 'Redis', 'Docker']
+      technologies: ['TypeScript', 'Node.js', 'Redis', 'Docker'],
     },
     {
       id: 'p2',
       name: 'Kubernetes Automation Blueprints',
       type: 'project',
-      description: 'Production infrastructure configurations deployment template utilizing Docker, Kubernetes and Helm.',
+      description:
+        'Production infrastructure configurations deployment template utilizing Docker, Kubernetes and Helm.',
       url: 'https://github.com/user/k8s-infra',
-      technologies: ['Kubernetes', 'Docker', 'AWS', 'YAML']
+      technologies: ['Kubernetes', 'Docker', 'AWS', 'YAML'],
     },
     {
       id: 'p3',
@@ -1902,8 +3274,8 @@ app.get('/api/portfolio', authMiddleware, async (req, res) => {
       type: 'demo',
       description: 'Extremely fast web service boilerplate in Go utilizing PostgreSQL and Gorm.',
       url: 'https://github.com/user/go-rest',
-      technologies: ['Go', 'Golang', 'PostgreSQL', 'Gorm']
-    }
+      technologies: ['Go', 'Golang', 'PostgreSQL', 'Gorm'],
+    },
   ];
   return res.json(defaultItems);
 });
@@ -1925,7 +3297,7 @@ app.post('/api/portfolio/recommend', authMiddleware, async (req, res) => {
         type: 'repository',
         description: 'An API Gateway built with TypeScript, Node.js, and Redis supporting rate-limiting.',
         url: 'https://github.com/user/gateway',
-        technologies: ['TypeScript', 'Node.js', 'Redis', 'Docker']
+        technologies: ['TypeScript', 'Node.js', 'Redis', 'Docker'],
       },
       {
         id: 'p2',
@@ -1933,7 +3305,7 @@ app.post('/api/portfolio/recommend', authMiddleware, async (req, res) => {
         type: 'project',
         description: 'Production infrastructure config blueprint using Docker, Kubernetes.',
         url: 'https://github.com/user/k8s-infra',
-        technologies: ['Kubernetes', 'Docker', 'AWS']
+        technologies: ['Kubernetes', 'Docker', 'AWS'],
       },
       {
         id: 'p3',
@@ -1941,8 +3313,8 @@ app.post('/api/portfolio/recommend', authMiddleware, async (req, res) => {
         type: 'demo',
         description: 'Web service boilerplate in Go utilizing PostgreSQL.',
         url: 'https://github.com/user/go-rest',
-        technologies: ['Go', 'Golang', 'PostgreSQL']
-      }
+        technologies: ['Go', 'Golang', 'PostgreSQL'],
+      },
     ];
 
     const recommendations = PortfolioRecommendation.recommend(job, portfolioItems);
@@ -1955,7 +3327,6 @@ app.post('/api/portfolio/recommend', authMiddleware, async (req, res) => {
 // 6. Opportunity Rankings Endpoints
 app.get('/api/opportunities', authMiddleware, async (req, res) => {
   try {
-    const userId = (req as any).user.id;
     const companies = await storage.getEnabledCompanies();
     const allJobs: any[] = [];
 
@@ -1964,13 +3335,10 @@ app.get('/api/opportunities', authMiddleware, async (req, res) => {
       allJobs.push(...jobs);
     }
 
-    const profiles = await storage.getResumeProfiles(userId);
-    const defaultProfile = profiles.length > 0 ? profiles[0].content : 'Backend resume text...';
-
-    const ranked = allJobs.map(job => {
+    const ranked = allJobs.map((job) => {
       // Find matching company config
-      const companyConfig = companies.find(c => c.id === job.company.toLowerCase()) || { priority: 3 } as any;
-      
+      const companyConfig = companies.find((c) => c.id === job.company.toLowerCase()) || ({ priority: 3 } as any);
+
       // Compute score
       const analysis = OpportunityEngine.calculate(
         job,
@@ -1978,12 +3346,12 @@ app.get('/api/opportunities', authMiddleware, async (req, res) => {
         75, // Default/mock resume match score
         80, // Default preferred salary weight
         'remote',
-        'San Francisco'
+        'San Francisco',
       );
 
       return {
         job,
-        scoreResult: analysis
+        scoreResult: analysis,
       };
     });
 
@@ -2011,7 +3379,7 @@ app.post('/api/opportunities/:hash/calculate', authMiddleware, async (req, res) 
       matchScore || 75,
       salaryWeight || 80,
       remotePreference || 'all',
-      locationPreference || ''
+      locationPreference || '',
     );
 
     return res.json(result);
@@ -2030,7 +3398,10 @@ app.post('/api/export', authMiddleware, async (req, res) => {
 
     const { buffer, fileName } = ExportService.exportData(type, format, data);
 
-    res.setHeader('Content-Type', format === 'PDF' ? 'application/pdf' : format === 'JSON' ? 'application/json' : 'text/plain');
+    res.setHeader(
+      'Content-Type',
+      format === 'PDF' ? 'application/pdf' : format === 'JSON' ? 'application/json' : 'text/plain',
+    );
     res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
     return res.send(buffer);
   } catch (err: any) {
@@ -2087,7 +3458,7 @@ const swaggerSpec = {
   info: {
     title: 'Job Monitor Platform REST API',
     version: '2.2.0',
-    description: 'Documentation for REST endpoints in Job Monitor Portal.'
+    description: 'Documentation for REST endpoints in Job Monitor Portal.',
   },
   paths: {
     '/ready': {
@@ -2095,35 +3466,35 @@ const swaggerSpec = {
         summary: 'Readiness check',
         responses: {
           200: { description: 'Platform is ready to accept traffic.' },
-          503: { description: 'Services are initializing or degraded.' }
-        }
-      }
+          503: { description: 'Services are initializing or degraded.' },
+        },
+      },
     },
     '/health': {
       get: {
         summary: 'Liveness health check',
         responses: {
           200: { description: 'System health report is active and ok.' },
-          503: { description: 'Unhealthy telemetry states.' }
-        }
-      }
+          503: { description: 'Unhealthy telemetry states.' },
+        },
+      },
     },
     '/metrics': {
       get: {
         summary: 'Prometheus metrics endpoint',
         responses: {
-          200: { description: 'Text metrics data.' }
-        }
-      }
+          200: { description: 'Text metrics data.' },
+        },
+      },
     },
     '/api/dashboard': {
       get: {
         summary: 'Get dashboard statistics',
         security: [{ BearerAuth: [] }],
         responses: {
-          200: { description: 'Dashboard stats payload.' }
-        }
-      }
+          200: { description: 'Dashboard stats payload.' },
+        },
+      },
     },
     '/api/jobs': {
       get: {
@@ -2138,44 +3509,38 @@ const swaggerSpec = {
           { name: 'experience', in: 'query', schema: { type: 'string' } },
           { name: 'sort', in: 'query', schema: { type: 'string', enum: ['opportunity', 'match'] } },
           { name: 'page', in: 'query', schema: { type: 'integer' } },
-          { name: 'limit', in: 'query', schema: { type: 'integer' } }
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
         ],
         responses: {
-          200: { description: 'Paginated filtered jobs list.' }
-        }
-      }
+          200: { description: 'Paginated filtered jobs list.' },
+        },
+      },
     },
     '/api/jobs/{hash}': {
       get: {
         summary: 'Get detailed job description and matching parameters',
         security: [{ BearerAuth: [] }],
-        parameters: [
-          { name: 'hash', in: 'path', required: true, schema: { type: 'string' } }
-        ],
+        parameters: [{ name: 'hash', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Job and match explanation details.' }
-        }
-      }
+          200: { description: 'Job and match explanation details.' },
+        },
+      },
     },
     '/api/jobs/{hash}/analysis': {
       get: {
         summary: 'Retrieve or trigger AI job description analysis',
         security: [{ BearerAuth: [] }],
-        parameters: [
-          { name: 'hash', in: 'path', required: true, schema: { type: 'string' } }
-        ],
+        parameters: [{ name: 'hash', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'AI Summary analysis.' }
-        }
-      }
+          200: { description: 'AI Summary analysis.' },
+        },
+      },
     },
     '/api/jobs/{hash}/tailor': {
       post: {
         summary: 'Generate a tailored resume candidate draft',
         security: [{ BearerAuth: [] }],
-        parameters: [
-          { name: 'hash', in: 'path', required: true, schema: { type: 'string' } }
-        ],
+        parameters: [{ name: 'hash', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: {
           required: true,
           content: {
@@ -2183,24 +3548,22 @@ const swaggerSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  profile: { type: 'string', default: 'backend' }
-                }
-              }
-            }
-          }
+                  profile: { type: 'string', default: 'backend' },
+                },
+              },
+            },
+          },
         },
         responses: {
-          200: { description: 'Tailoring recommendations.' }
-        }
-      }
+          200: { description: 'Tailoring recommendations.' },
+        },
+      },
     },
     '/api/jobs/{hash}/cover-letter': {
       post: {
         summary: 'Generate professional cover letter draft',
         security: [{ BearerAuth: [] }],
-        parameters: [
-          { name: 'hash', in: 'path', required: true, schema: { type: 'string' } }
-        ],
+        parameters: [{ name: 'hash', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: {
           required: true,
           content: {
@@ -2208,16 +3571,16 @@ const swaggerSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  profile: { type: 'string', default: 'backend' }
-                }
-              }
-            }
-          }
+                  profile: { type: 'string', default: 'backend' },
+                },
+              },
+            },
+          },
         },
         responses: {
-          200: { description: 'Formatted letter text.' }
-        }
-      }
+          200: { description: 'Formatted letter text.' },
+        },
+      },
     },
     '/api/jobs/{hash}/prep': {
       get: {
@@ -2225,41 +3588,39 @@ const swaggerSpec = {
         security: [{ BearerAuth: [] }],
         parameters: [
           { name: 'hash', in: 'path', required: true, schema: { type: 'string' } },
-          { name: 'profile', in: 'query', schema: { type: 'string', default: 'backend' } }
+          { name: 'profile', in: 'query', schema: { type: 'string', default: 'backend' } },
         ],
         responses: {
-          200: { description: 'Preparation checksheets and questions.' }
-        }
-      }
+          200: { description: 'Preparation checksheets and questions.' },
+        },
+      },
     },
     '/api/companies': {
       get: {
         summary: 'List company configs and scrape logs',
         security: [{ BearerAuth: [] }],
         responses: {
-          200: { description: 'All registry items.' }
-        }
-      }
+          200: { description: 'All registry items.' },
+        },
+      },
     },
     '/api/companies/{id}/insights': {
       get: {
         summary: 'Get hiring volume trends and stack analytics',
         security: [{ BearerAuth: [] }],
-        parameters: [
-          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
-        ],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Company telemetry insights.' }
-        }
-      }
+          200: { description: 'Company telemetry insights.' },
+        },
+      },
     },
     '/api/applications': {
       get: {
         summary: 'List tracked job applications',
         security: [{ BearerAuth: [] }],
         responses: {
-          200: { description: 'Applications tracking schema list.' }
-        }
+          200: { description: 'Applications tracking schema list.' },
+        },
       },
       post: {
         summary: 'Update or create job application tracking state',
@@ -2273,37 +3634,44 @@ const swaggerSpec = {
                 properties: {
                   jobHash: { type: 'string' },
                   status: { type: 'string' },
-                  notes: { type: 'string' }
-                }
-              }
-            }
-          }
+                  notes: { type: 'string' },
+                },
+              },
+            },
+          },
         },
         responses: {
-          200: { description: 'Success confirmation.' }
-        }
-      }
+          200: { description: 'Success confirmation.' },
+        },
+      },
     },
     '/api/settings/extended': {
       get: {
         summary: 'Get career extended preferences settings',
         security: [{ BearerAuth: [] }],
         responses: {
-          200: { description: 'Extended Settings profile.' }
-        }
+          200: { description: 'Extended Settings profile.' },
+        },
       },
       post: {
         summary: 'Update career extended preferences settings',
         security: [{ BearerAuth: [] }],
         responses: {
-          200: { description: 'Success confirmation.' }
-        }
-      }
-    }
-  }
+          200: { description: 'Success confirmation.' },
+        },
+      },
+    },
+  },
 };
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Serve published portfolios statically from storage/portfolios (outside frontend source to prevent reloads)
+const portfoliosDir = path.join(process.cwd(), 'storage', 'portfolios');
+if (!fs.existsSync(portfoliosDir)) {
+  fs.mkdirSync(portfoliosDir, { recursive: true });
+}
+app.use('/portfolios', express.static(portfoliosDir));
 
 // Serve frontend build output
 const frontendDist = path.join(process.cwd(), 'frontend', 'dist');

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Copy, ExternalLink, Plus, Trash2, Tag, Mail, Download, Star, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit } from 'lucide-react';
 
 type Tab = 'contacts' | 'pipeline' | 'messages' | 'followup' | 'analytics';
 
@@ -78,16 +78,18 @@ export const Referrals: React.FC = () => {
 const CompanyContacts: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [editingContact, setEditingContact] = useState<ReferralContact | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     role: '',
-    category: 'Recruiter' as const,
+    category: 'Recruiter' as ReferralContact['category'],
     company: '',
     linkedInUrl: '',
     email: '',
     location: '',
     notes: '',
-    tags: ''
+    tags: '',
+    connectionStatus: 'Potential Contact' as ReferralContact['connectionStatus']
   });
 
   const openGmailCompose = (contact: ReferralContact) => {
@@ -173,10 +175,66 @@ ${body}`;
         email: '',
         location: '',
         notes: '',
-        tags: ''
+        tags: '',
+        connectionStatus: 'Potential Contact'
       });
     }
   });
+
+  const editMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/referrals/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...data,
+          tags: typeof data.tags === 'string'
+            ? data.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+            : data.tags
+        })
+      });
+      if (!res.ok) throw new Error('Failed to update referral');
+      return res.json();
+    },
+    onSuccess: () => {
+      refetch();
+      setEditingContact(null);
+      setFormData({
+        name: '',
+        role: '',
+        category: 'Recruiter',
+        company: '',
+        linkedInUrl: '',
+        email: '',
+        location: '',
+        notes: '',
+        tags: '',
+        connectionStatus: 'Potential Contact'
+      });
+    }
+  });
+
+  const handleStartEdit = (contact: ReferralContact) => {
+    setEditingContact(contact);
+    setFormData({
+      name: contact.name,
+      role: contact.role || '',
+      category: contact.category,
+      company: contact.company,
+      linkedInUrl: contact.linkedInUrl || '',
+      email: contact.email || '',
+      location: contact.location || '',
+      notes: contact.notes || '',
+      tags: contact.tags ? contact.tags.join(', ') : '',
+      connectionStatus: contact.connectionStatus
+    });
+    setShowAddForm(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -195,38 +253,42 @@ ${body}`;
     return `https://www.google.com/search?q=${query}`;
   };
 
-  const generateCompanyLinkedInUrl = (company: string) => {
-    const query = encodeURIComponent(`${company} LinkedIn company`);
-    return `https://www.google.com/search?q=${query}`;
-  };
 
-  const handleCSVImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
 
-    const text = await file.text();
-    const token = localStorage.getItem('token');
-    
-    try {
-      const res = await fetch('/api/linkedin/import-csv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ csvData: text })
-      });
-
-      if (!res.ok) throw new Error('Failed to import CSV');
-      
-      const result = await res.json();
-      alert(`Successfully imported ${result.imported} contacts (${result.saved} saved)`);
-      refetch();
-    } catch (err) {
-      alert('Failed to import CSV: ' + (err as Error).message);
+  const handleCSVExport = () => {
+    if (!referrals || referrals.length === 0) {
+      alert('No contacts to export.');
+      return;
     }
 
-    event.target.value = '';
+    const headers = ['Name', 'Role', 'Category', 'Company', 'LinkedIn URL', 'Email', 'Location', 'Tags', 'Status', 'Notes'];
+    const rows = referrals.map(contact => [
+      contact.name,
+      contact.role || '',
+      contact.category,
+      contact.company,
+      contact.linkedInUrl || '',
+      contact.email || '',
+      contact.location || '',
+      contact.tags ? contact.tags.join('; ') : '',
+      contact.connectionStatus,
+      contact.notes || ''
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => `"${val.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `referrals_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const filteredContacts = referrals?.filter(r => 
@@ -247,26 +309,34 @@ ${body}`;
         <h2 className="text-xl font-bold text-white">Company Contacts</h2>
         <div className="flex gap-2">
           <button
-            onClick={() => setShowAddForm(!showAddForm)}
+            onClick={() => {
+              setEditingContact(null);
+              setFormData({
+                name: '',
+                role: '',
+                category: 'Recruiter',
+                company: '',
+                linkedInUrl: '',
+                email: '',
+                location: '',
+                notes: '',
+                tags: '',
+                connectionStatus: 'Potential Contact'
+              });
+              setShowAddForm(!showAddForm);
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-semibold text-white transition-colors"
           >
             <Plus className="w-4 h-4" />
             Add Contact
           </button>
           <button
-            onClick={() => document.getElementById('csv-upload')?.click()}
+            onClick={handleCSVExport}
             className="flex items-center gap-2 px-4 py-2 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-sm font-semibold text-white transition-colors"
           >
             <Download className="w-4 h-4" />
-            Import CSV
+            Export CSV
           </button>
-          <input
-            id="csv-upload"
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleCSVImport}
-          />
         </div>
       </div>
 
@@ -297,9 +367,11 @@ ${body}`;
         ))}
       </div>
 
-      {showAddForm && (
+      {(showAddForm || editingContact) && (
         <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6 space-y-4">
-          <h3 className="text-lg font-bold text-white">Add New Contact</h3>
+          <h3 className="text-lg font-bold text-white">
+            {editingContact ? 'Edit Contact' : 'Add New Contact'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
@@ -359,6 +431,17 @@ ${body}`;
               onChange={e => setFormData({ ...formData, tags: e.target.value })}
               className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
             />
+            {editingContact && (
+              <select
+                value={formData.connectionStatus}
+                onChange={e => setFormData({ ...formData, connectionStatus: e.target.value as any })}
+                className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white"
+              >
+                {PIPELINE_STAGES.map(stage => (
+                  <option key={stage} value={stage}>{stage}</option>
+                ))}
+              </select>
+            )}
           </div>
           <textarea
             placeholder="Notes"
@@ -369,14 +452,35 @@ ${body}`;
           />
           <div className="flex gap-2">
             <button
-              onClick={() => saveMutation.mutate(formData)}
-              disabled={saveMutation.isPending || !formData.name || !formData.company}
+              onClick={() => {
+                if (editingContact) {
+                  editMutation.mutate({ id: editingContact.id, data: formData });
+                } else {
+                  saveMutation.mutate(formData);
+                }
+              }}
+              disabled={(editingContact ? editMutation.isPending : saveMutation.isPending) || !formData.name || !formData.company}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-[#232d3f] disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white"
             >
-              {saveMutation.isPending ? 'Saving...' : 'Save Contact'}
+              {editingContact ? (editMutation.isPending ? 'Saving...' : 'Save Changes') : (saveMutation.isPending ? 'Saving...' : 'Save Contact')}
             </button>
             <button
-              onClick={() => setShowAddForm(false)}
+              onClick={() => {
+                setShowAddForm(false);
+                setEditingContact(null);
+                setFormData({
+                  name: '',
+                  role: '',
+                  category: 'Recruiter',
+                  company: '',
+                  linkedInUrl: '',
+                  email: '',
+                  location: '',
+                  notes: '',
+                  tags: '',
+                  connectionStatus: 'Potential Contact'
+                });
+              }}
               className="px-4 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-sm font-semibold text-white"
             >
               Cancel
@@ -397,17 +501,6 @@ ${body}`;
             <div key={company} className="bg-[#1b2535] border border-[#232d3f] rounded-xl overflow-hidden">
               <div className="flex items-center justify-between p-4 bg-[#131a26] border-b border-[#232d3f]">
                 <h3 className="text-lg font-bold text-white">{company}</h3>
-                <div className="flex gap-2">
-                  <a
-                    href={generateCompanyLinkedInUrl(company)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
-                  >
-                    <span className="font-bold">in</span>
-                    Company LinkedIn
-                  </a>
-                </div>
               </div>
               <div className="p-4 space-y-3">
                 {contacts.map(contact => (
@@ -422,24 +515,29 @@ ${body}`;
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-[#94a3b8]">{contact.role}</p>
+                        <p className="text-sm text-[#94a3b8]">{contact.company} - {contact.role}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <span className="inline-block px-2 py-0.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-semibold rounded-full">
                             {contact.category}
                           </span>
-                          {contact.connectionStatus && (
-                            <span className="inline-block px-2 py-0.5 bg-emerald-600/10 border border-emerald-600/20 text-emerald-400 text-xs font-semibold rounded-full">
-                              {contact.connectionStatus}
-                            </span>
-                          )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => deleteMutation.mutate(contact.id)}
-                        className="text-red-400 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleStartEdit(contact)}
+                          className="text-[#94a3b8] hover:text-white transition-colors"
+                          title="Edit Contact"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteMutation.mutate(contact.id)}
+                          className="text-red-400 hover:text-red-500 transition-colors"
+                          title="Delete Contact"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Confidence Score and Recommendation */}
@@ -469,9 +567,9 @@ ${body}`;
                           <button
                             onClick={() => copyToClipboard(contact.linkedInUrl!)}
                             className="flex items-center gap-1 px-3 py-1.5 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors"
+                            title="Copy URL"
                           >
                             <Copy className="w-3.5 h-3.5" />
-                            Copy URL
                           </button>
                         </>
                       ) : (
@@ -485,15 +583,6 @@ ${body}`;
                           LinkedIn Search
                         </a>
                       )}
-                      <a
-                        href={generateCompanyLinkedInUrl(contact.company)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        Company Profile
-                      </a>
                     </div>
 
                     {/* Contact Details */}
@@ -781,11 +870,170 @@ const ReferralPipeline: React.FC = () => {
   );
 };
 
+interface ResumeSelectorProps {
+  value: string;
+  onChange: (val: string) => void;
+  resumes: { name: string; content: string }[] | undefined;
+}
+
+const ResumeSelector: React.FC<ResumeSelectorProps> = ({ value, onChange, resumes }) => {
+  const [sourceMode, setSourceMode] = useState<'manager' | 'file'>('manager');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const buffer = await file.arrayBuffer();
+
+      const parseRes = await fetch('/api/resumes/parse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream'
+        },
+        body: buffer
+      });
+      if (!parseRes.ok) {
+        const err = await parseRes.json();
+        throw new Error(err.error || 'Server parsing error');
+      }
+      const parseData = await parseRes.json();
+      const parsedText = parseData.text || `${baseName} content`;
+
+      const saveRes = await fetch('/api/resumes', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: baseName, content: parsedText })
+      });
+      if (!saveRes.ok) {
+        throw new Error('Failed to save resume profile to database');
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['resumes'] });
+      onChange(baseName);
+      setUploadedFileName(file.name);
+    } catch (err: any) {
+      console.error(err);
+      setUploadError(err.message || 'Error uploading file');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-center">
+        <label className="text-sm font-semibold text-[#94a3b8]">
+          Resume
+        </label>
+        <div className="flex bg-[#131a26] p-1 border border-[#232d3f] rounded-lg text-xs">
+          <button
+            type="button"
+            onClick={() => setSourceMode('manager')}
+            className={`px-3 py-1 rounded-md transition-colors ${
+              sourceMode === 'manager'
+                ? 'bg-violet-600 text-white font-medium'
+                : 'text-[#94a3b8] hover:text-white'
+            }`}
+          >
+            Resume Manager
+          </button>
+          <button
+            type="button"
+            onClick={() => setSourceMode('file')}
+            className={`px-3 py-1 rounded-md transition-colors ${
+              sourceMode === 'file'
+                ? 'bg-violet-600 text-white font-medium'
+                : 'text-[#94a3b8] hover:text-white'
+            }`}
+          >
+            Upload File
+          </button>
+        </div>
+      </div>
+
+      {sourceMode === 'manager' ? (
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white focus:outline-none focus:border-violet-500 transition-colors"
+        >
+          <option value="">Select Existing Resume</option>
+          {resumes?.map((r) => (
+            <option key={r.name} value={r.name}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <div className="p-4 bg-[#131a26] border border-dashed border-[#232d3f] rounded-lg flex flex-col gap-2 items-center justify-center transition-all duration-200">
+          <input
+            type="file"
+            accept=".pdf,.docx,.txt"
+            onChange={handleFileChange}
+            disabled={isUploading}
+            className="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-violet-500/10 file:text-violet-400 hover:file:bg-violet-500/20 cursor-pointer disabled:opacity-50"
+          />
+          {uploadedFileName && !isUploading && !uploadError && (
+            <span className="text-xs text-emerald-400 font-bold mt-1">
+              ✓ Loaded: {uploadedFileName}
+            </span>
+          )}
+          {isUploading && (
+            <span className="text-xs text-violet-400 animate-pulse mt-1">
+              Parsing and saving file...
+            </span>
+          )}
+          {uploadError && (
+            <span className="text-xs text-rose-400 mt-1">
+              ⚠️ {uploadError}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AIMessageGenerator: React.FC = () => {
+  const { data: resumes } = useQuery({
+    queryKey: ['resumes'],
+    queryFn: async () => {
+      const res = await fetch('/api/resumes');
+      if (!res.ok) throw new Error('Failed to load resumes');
+      return res.json() as Promise<{ name: string; content: string }[]>;
+    }
+  });
+
   const [messageType, setMessageType] = useState('connection');
+  const [isShorter, setIsShorter] = useState(false);
+  const [isMorePersonal, setIsMorePersonal] = useState(false);
+  const [isFormal, setIsFormal] = useState(false);
+  const [isFriendly, setIsFriendly] = useState(false);
+  const [isConfident, setIsConfident] = useState(false);
+  const [isDetailed, setIsDetailed] = useState(false);
+  const [mentionCompany, setMentionCompany] = useState(true);
+  const [mentionRole, setMentionRole] = useState(true);
+  const [mentionInterest, setMentionInterest] = useState(true);
+  const [mentionConnection, setMentionConnection] = useState(false);
+  const [mentionAchievement, setMentionAchievement] = useState(false);
+  const [showRewriteDropdown, setShowRewriteDropdown] = useState(false);
+  const [showPersDropdown, setShowPersDropdown] = useState(false);
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [generatedSubject, setGeneratedSubject] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isSubjectCopied, setIsSubjectCopied] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState({
     bestResume: '',
     bestTime: '',
@@ -803,6 +1051,8 @@ const AIMessageGenerator: React.FC = () => {
     linkedInProfile: '',
     mutualInterests: '',
     reasonForConnecting: '',
+    mutualConnection: '',
+    recentAchievement: '',
     
     // Referral Request
     jobTitle: '',
@@ -817,6 +1067,7 @@ const AIMessageGenerator: React.FC = () => {
     subject: '',
     portfolioUrl: '',
     githubUrl: '',
+    experienceLevel: '',
     
     // Follow-up Email
     lastContactDate: '',
@@ -845,6 +1096,9 @@ const AIMessageGenerator: React.FC = () => {
     interviewDateFollowup: '',
     interviewRound: '',
     
+    // New fields
+    contactInfo: '',
+    
     // Legacy
     jobDescription: '',
     yourName: '',
@@ -853,15 +1107,18 @@ const AIMessageGenerator: React.FC = () => {
   const messageTypes = [
     { id: 'connection', name: 'LinkedIn Connection Request' },
     { id: 'referral', name: 'Referral Request' },
-    { id: 'cold-email', name: 'Cold Email' },
-    { id: 'followup', name: 'Follow-up Email' },
-    { id: 'thankyou', name: 'Thank You Email' },
-    { id: 'networking', name: 'Networking Message' },
     { id: 'recruiter', name: 'Recruiter Outreach' },
-    { id: 'interview-followup', name: 'Interview Follow-up' },
+    { id: 'cold-email', name: 'Cold Email' },
+    { id: 'followup', name: 'Follow-up Message' },
+    { id: 'thankyou', name: 'Thank You Email' },
   ];
 
   const generateMessage = async () => {
+    if (['referral', 'cold-email', 'recruiter'].includes(messageType) && !context.resumeVersion) {
+      alert("Please select or upload a resume before generating a message.");
+      return;
+    }
+
     setIsGenerating(true);
     
     // Simulate AI generation (in production, this would call an AI API)
@@ -874,23 +1131,468 @@ const AIMessageGenerator: React.FC = () => {
       
       switch (messageType) {
         case 'connection':
-          tone = 'Professional';
+          tone = isFormal ? 'Formal' : isFriendly ? 'Casual' : isConfident ? 'Confident' : 'Professional';
           bestTime = 'Tuesday-Thursday, 9 AM - 11 AM';
           responseProb = 75;
-          message = `Hi ${context.contactName || '[Name]'},\n\nI noticed you work at ${context.company || '[Company]'} as a ${context.currentRole || '[Role]'}. ${context.mutualInterests ? `I see we share an interest in ${context.mutualInterests}.` : ''} ${context.reasonForConnecting ? `I'd love to connect because ${context.reasonForConnecting}.` : 'I would appreciate connecting to learn more about your work.'}\n\nBest regards`;
+          
+          const stripEmojis = (str: string) => str.replace(/[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '');
+
+          const fullName = stripEmojis(context.contactName || '[Name]').trim();
+          const firstName = fullName.split(' ')[0];
+          const company = mentionCompany ? stripEmojis(context.company || '').trim() : '';
+          const role = mentionRole ? stripEmojis(context.currentRole || '').trim() : '';
+          
+          let baseStr = isFormal ? `Dear ${fullName}, ` : isFriendly ? `Hi ${firstName}! ` : `Hi ${firstName}, `;
+
+          // Connection part
+          let connPart = '';
+          if (mentionConnection && context.mutualConnection) {
+            const cleanConn = stripEmojis(context.mutualConnection).trim();
+            if (cleanConn) {
+              connPart = isFormal 
+                ? `Our mutual contact, ${cleanConn}, recommended that I contact you. `
+                : `Our mutual connection, ${cleanConn}, suggested I reach out. `;
+            }
+          }
+
+          // Achievement part
+          let achPart = '';
+          if (mentionAchievement && context.recentAchievement) {
+            const cleanAch = stripEmojis(context.recentAchievement).trim().replace(/\.+$/, '');
+            if (cleanAch) {
+              achPart = `Congrats on ${cleanAch}! `;
+            }
+          }
+
+          // Format role journey: e.g. "backend engineer" -> "backend engineering"
+          let rolePhrase = role.toLowerCase();
+          if (rolePhrase.endsWith(' engineer')) {
+            rolePhrase = rolePhrase.replace(' engineer', ' engineering');
+          } else if (rolePhrase.endsWith(' developer')) {
+            rolePhrase = rolePhrase.replace(' developer', ' development');
+          } else if (rolePhrase.endsWith(' manager')) {
+            rolePhrase = rolePhrase.replace(' manager', ' management');
+          } else if (rolePhrase.endsWith(' analyst')) {
+            rolePhrase = rolePhrase.replace(' analyst', ' analytics');
+          } else if (!rolePhrase && context.reasonForConnecting) {
+            rolePhrase = stripEmojis(context.reasonForConnecting).toLowerCase().replace(/\.+$/, '');
+          }
+
+          // Mention interest
+          let interestPart = '';
+          if (mentionInterest && context.mutualInterests) {
+            const cleanInt = stripEmojis(context.mutualInterests).trim();
+            const firstInterest = cleanInt.split(',')[0].trim().replace(/\.+$/, '');
+            if (firstInterest) {
+              interestPart = isFormal 
+                ? `I noted our shared interest in ${firstInterest}. `
+                : `I saw we share an interest in ${firstInterest}. `;
+            }
+          }
+
+          // Main body
+          let bodyStr = '';
+          if (role && company) {
+            bodyStr = isFormal 
+              ? `I am following your ${rolePhrase} progression at ${company} with great interest. `
+              : isConfident 
+              ? `I'm very impressed by your ${rolePhrase} achievements at ${company}. `
+              : isMorePersonal 
+              ? `your work as a ${role} at ${company} really stood out to me. `
+              : `your ${rolePhrase} journey at ${company} aligns with my career interests. `;
+          } else if (company) {
+            bodyStr = `your work at ${company} caught my attention. `;
+          } else if (role) {
+            bodyStr = `your experience as a ${role} caught my attention. `;
+          }
+
+          // Ask / CTA part
+          let askStr = '';
+          if (isShorter) {
+            askStr = isFormal ? `I would love to connect.` : `I'd love to connect.`;
+          } else if (isDetailed) {
+            askStr = isFormal
+              ? `I am currently building my skills in this space and would appreciate the opportunity to connect and follow your work.`
+              : `I'm currently building my skills in this space and would love to connect and follow your journey.`;
+          } else {
+            askStr = isFormal 
+              ? `I would appreciate the opportunity to connect and learn from your professional experience.`
+              : isConfident 
+              ? `I'd love to connect to discuss potential synergy and learn from your work.`
+              : isFriendly 
+              ? `I'd love to connect and chat sometime!`
+              : `I'd love to connect and learn from your experience.`;
+          }
+
+          message = `${baseStr}${achPart}${connPart}${bodyStr}${interestPart}${askStr}`;
+
+          // Enforce 180 char limit safely
+          if (message.length > 180) {
+            const fallbackAsk = "I'd love to connect.";
+            const budget = 180 - baseStr.length - fallbackAsk.length - 15;
+            let miniBody = '';
+            if (company && budget > company.length) {
+              miniBody = `your work at ${company} caught my eye. `;
+            }
+            message = `${baseStr}${miniBody}${fallbackAsk}`;
+          }
           break;
         case 'referral':
           tone = 'Professional';
           bestTime = 'Wednesday-Friday, 10 AM - 12 PM';
           responseProb = 60;
-          message = `Hi ${context.contactName || '[Name]'},\n\nI hope you're doing well. I recently applied for the ${context.jobTitle || '[Role]'} position at ${context.company || '[Company]'}${context.jobUrl ? ` (${context.jobUrl})` : ''}.\n\n${context.whyInterested ? `I'm particularly interested in this role because ${context.whyInterested}.` : 'I believe my background would be a great fit for the team.'} ${context.additionalContext ? context.additionalContext : ''}\n\nWould you be willing to provide a referral? I'd be happy to share my resume and discuss further.\n\nBest regards`;
+          
+          const refName = (context.contactName || '[Name]').trim();
+          const refCompany = (context.company || '[Company]').trim();
+          const refJobTitle = (context.jobTitle || '[Role]').trim();
+          const refJobUrl = (context.jobUrl || '').trim();
+          const refJobUrlStr = refJobUrl ? ` (${refJobUrl})` : '';
+
+          const refBaseStr = `Hi ${refName}, I'm interested in the ${refJobTitle} role at ${refCompany}${refJobUrlStr}. `;
+          const refAskStr = `Could you please consider referring me?`;
+          const refTargetLimit = 175;
+
+          const rawRefContext = (context.additionalContext || context.whyInterested || '').trim();
+          let cleanRefContext = rawRefContext.replace(/\.+$/, '');
+          let refContextPart = cleanRefContext ? `${cleanRefContext}. ` : 'I believe my background would be a great fit for the team. ';
+
+          let refCurrentLen = refBaseStr.length + refContextPart.length + refAskStr.length;
+
+          if (refCurrentLen > refTargetLimit) {
+            // Shorten the context part to fit the available space
+            const refAvailableSpace = refTargetLimit - refBaseStr.length - refAskStr.length - 2;
+            if (refAvailableSpace > 15) {
+              let truncated = cleanRefContext.slice(0, refAvailableSpace - 3).trim();
+              const lastSpace = truncated.lastIndexOf(' ');
+              if (lastSpace > 10) {
+                truncated = truncated.slice(0, lastSpace);
+              }
+              refContextPart = `${truncated}... `;
+            } else {
+              refContextPart = ''; // omit context part entirely if too tight
+            }
+          }
+
+          message = `${refBaseStr}${refContextPart}${refAskStr}`;
           break;
         case 'cold-email':
           tone = 'Professional';
           bestTime = 'Tuesday-Thursday, 10 AM - 2 PM';
           responseProb = 45;
-          subject = context.subject || `Application for ${context.jobTitle || 'Software Engineer'} - ${context.yourName || 'Your Name'}`;
-          message = `Dear ${context.recipientName || context.contactName || '[Name]'},\n\nI hope this email finds you well. I'm writing to express my interest in the ${context.jobTitle || '[Role]'} position at ${context.company || '[Company]'}.\n\n${context.portfolioUrl ? `You can view my portfolio at ${context.portfolioUrl}.` : ''} ${context.githubUrl ? `My GitHub profile: ${context.githubUrl}.` : ''} ${context.additionalContext ? context.additionalContext : ''}\n\nI believe my experience and skills would be a strong match for this role. I've attached my resume for your review.\n\nThank you for your time and consideration.\n\nBest regards,\n${context.yourName || '[Your Name]'}`;
+          
+          const ceRecipient = (context.recipientName || context.contactName || '').trim();
+          const ceRecipientFinal = ceRecipient ? ceRecipient : 'Hiring Manager';
+          const ceRole = (context.jobTitle || '[Role]').trim();
+          const ceCompany = (context.company || '[Company]').trim();
+          const ceCompanyClean = ceCompany.endsWith('.') ? ceCompany.slice(0, -1) : ceCompany;
+          const cePortfolio = (context.portfolioUrl || '').trim();
+          const ceGithub = (context.githubUrl || '').trim();
+          const ceLinkedIn = (context.linkedInProfile || '').trim();
+          const ceContact = (context.contactInfo || '').trim();
+          const ceYourName = (context.yourName || '[Your Name]').trim();
+          const ceContext = (context.additionalContext || '').trim();
+          
+          const defaultSubject = `Application for ${ceRole} - ${ceYourName}`;
+          subject = context.subject || defaultSubject;
+          if (!context.subject) {
+            setContext(prev => ({ ...prev, subject: defaultSubject }));
+          }
+          
+          let ceContactLines = '';
+          if (ceContact) ceContactLines += `\n${ceContact}`;
+          if (ceLinkedIn) ceContactLines += `\nLinkedIn: ${ceLinkedIn}`;
+          if (ceGithub) ceContactLines += `\nGitHub: ${ceGithub}`;
+          if (cePortfolio) ceContactLines += `\nPortfolio: ${cePortfolio}`;
+          
+          const lowerContext = ceContext.toLowerCase();
+          const lowerRole = ceRole.toLowerCase();
+          
+          const hasData = /sql|python|power\s*bi|tableau|pandas|excel|etl|analytics|statistics|data/.test(lowerContext) || /analyst|data|analytics/.test(lowerRole);
+          const hasFrontend = /react|javascript|typescript|html|css|tailwind|angular|vue|frontend/.test(lowerContext) || /frontend|front\s*end|web/.test(lowerRole);
+          const hasBackend = /java|spring|node|django|flask|c#|c\+\+|go\s*lang|api|rest|backend/.test(lowerContext) || /backend|back\s*end|developer|engineer|software|sde/.test(lowerRole);
+          
+          let domainsStr = '';
+          let techsStr = '';
+          let strengthsStr = '';
+          
+          if (hasData) {
+            domainsStr = "data analytics, data visualization, and reporting";
+            techsStr = "SQL, Power BI, Python, and Excel";
+            strengthsStr = "analytical thinking, attention to detail, and ability to derive actionable insights";
+          } else if (hasBackend) {
+            domainsStr = "software engineering, backend development, and database systems";
+            techsStr = "Java, Spring Boot, REST APIs, JavaScript, Git, and SQL";
+            strengthsStr = "software engineering fundamentals, database integration skills, and clean coding practices";
+          } else if (hasFrontend) {
+            domainsStr = "frontend engineering, interactive web interfaces, and responsive design";
+            techsStr = "React, TypeScript, Next.js, and Tailwind CSS";
+            strengthsStr = "user experience design, responsive component architecture, and modern styling";
+          } else {
+            domainsStr = "software engineering, backend development, and database systems";
+            techsStr = "Java, Spring Boot, REST APIs, JavaScript, Git, and SQL";
+            strengthsStr = "software engineering fundamentals, database integration skills, and clean coding practices";
+          }
+          
+          const isIntern = /intern/i.test(ceRole);
+          
+          let experienceLevel: 'student-intern' | 'recent-grad' | 'entry-level' | 'experienced' = 'recent-grad';
+          if (context.experienceLevel) {
+            experienceLevel = context.experienceLevel as 'student-intern' | 'recent-grad' | 'entry-level' | 'experienced';
+          } else if (resumes && resumes.length > 0) {
+            const selectedRes = resumes.find(r => 
+              r.name.toLowerCase().includes((context.resumeVersion || '').toLowerCase().trim())
+            ) || resumes[0];
+            
+            if (selectedRes && selectedRes.content) {
+              const resContent = selectedRes.content.toLowerCase();
+              const hasTwoPlus = /2\+?\s*years|3\+?\s*years|4\+?\s*years|5\+?\s*years|senior\s+engineer|lead\s+engineer/i.test(resContent);
+              const hasZeroToTwo = /1\s*year|2\s*years|0-2\s*years/i.test(resContent);
+              
+              if (hasTwoPlus || /senior|lead|manager/i.test(ceRole)) {
+                experienceLevel = 'experienced';
+              } else if (hasZeroToTwo || /sde\s*ii\b|software\s*engineer\s*ii\b/i.test(ceRole)) {
+                experienceLevel = 'entry-level';
+              } else if (isIntern || /student|pursuing|vit\s*vellore/i.test(resContent)) {
+                experienceLevel = 'student-intern';
+              }
+            }
+          }
+
+          let defaultEdu = 'recent B.Tech Computer Science graduate';
+          if (experienceLevel === 'student-intern') {
+            defaultEdu = 'final-year B.Tech Computer Science student at VIT Vellore';
+          } else if (experienceLevel === 'recent-grad') {
+            defaultEdu = 'recent B.Tech Computer Science graduate';
+          } else if (experienceLevel === 'entry-level') {
+            defaultEdu = 'Software Engineer with professional experience';
+          } else if (experienceLevel === 'experienced') {
+            defaultEdu = 'Software Engineer with a proven track record of delivering scalable systems';
+          }
+          const eduStr = defaultEdu;
+          
+          const introOptions = [
+            `I'm a ${eduStr} with a strong interest in ${domainsStr}, and I'm writing to express my interest in the ${ceRole} position at ${ceCompanyClean}.`,
+            `As a ${eduStr} passionate about ${domainsStr}, I would love to submit my application for the ${ceRole} role at ${ceCompanyClean}.`,
+            `I recently came across the ${ceRole} opening at ${ceCompanyClean}. As a ${eduStr} with hands-on experience in ${domainsStr}, I believe my background aligns well with this opportunity.`,
+            `I'm writing to express my interest in the ${ceRole} position at ${ceCompanyClean}. I'm a ${eduStr} with a strong foundation in ${domainsStr}.`,
+            `I'm reaching out to apply for the ${ceRole} opportunity at ${ceCompanyClean}. With my background as a ${eduStr} focused on ${domainsStr}, I am eager to contribute to your team.`,
+            `I would welcome the opportunity to apply for the ${ceRole} position at ${ceCompanyClean}. I'm a ${eduStr} with strong foundations in ${domainsStr}.`
+          ];
+          const introParagraph = introOptions[Math.floor(Math.random() * introOptions.length)];
+          
+          let datasetPhrase = '';
+          if (hasData) {
+            datasetPhrase = "from real-world datasets";
+          } else {
+            datasetPhrase = "while working with real-world projects";
+          }
+          
+          let roleSolutionsType = '';
+          if (hasData) {
+            roleSolutionsType = "data analysis, dashboard development, and workflow automation";
+          } else if (hasBackend) {
+            roleSolutionsType = "backend engineering, API development, and system integration";
+          } else if (hasFrontend) {
+            roleSolutionsType = "frontend engineering, responsive UI development, and component architecture";
+          } else {
+            roleSolutionsType = "software engineering, database integration, and workflow automation";
+          }
+          
+          interface ResumeProject {
+            name: string;
+            content: string;
+            score: number;
+          }
+          
+          let candidateProjects: ResumeProject[] = [];
+          if (resumes && resumes.length > 0) {
+            const selectedRes = resumes.find(r => 
+              r.name.toLowerCase().includes((context.resumeVersion || '').toLowerCase().trim())
+            ) || resumes[0];
+            
+            if (selectedRes && selectedRes.content) {
+              const resContent = selectedRes.content;
+              const projectsSection = resContent.match(/(?:projects|key projects|academic projects)[\s\S]*?(?:experience|work experience|professional experience|education|skills|coding profile|certifications|$)/i);
+              if (projectsSection) {
+                const lines = projectsSection[0].split('\n');
+                let currentProject: ResumeProject | null = null;
+                for (const line of lines) {
+                  let matchedName = '';
+                  const mBullet = line.match(/^\s*[-•*]\s*([A-Z][a-zA-Z0-9\s\-–—]{2,50}?)(?:\s*[—\-–\(\:]|$)/);
+                  const mLatex = line.match(/^\s*\\item\s*(?:\\textbf\{)?([A-Z][a-zA-Z0-9\s\-–—]{2,50}?)(?:\}|\s*[—\-–\(\:]|$)/);
+                  
+                  if (mBullet) {
+                    matchedName = mBullet[1].trim();
+                  } else if (mLatex) {
+                    matchedName = mLatex[1].trim();
+                  }
+                  
+                  if (matchedName && !/project|academic|tech stack/i.test(matchedName)) {
+                    if (currentProject && !candidateProjects.some(p => p.name.toLowerCase() === currentProject!.name.toLowerCase())) {
+                      candidateProjects.push(currentProject);
+                    }
+                    currentProject = {
+                      name: matchedName,
+                      content: line,
+                      score: 0
+                    };
+                  } else if (currentProject) {
+                    currentProject.content += '\n' + line;
+                  }
+                }
+                if (currentProject && !candidateProjects.some(p => p.name.toLowerCase() === currentProject.name.toLowerCase())) {
+                  candidateProjects.push(currentProject);
+                }
+              }
+            }
+          }
+          
+          candidateProjects.forEach(proj => {
+            const projLower = proj.content.toLowerCase();
+            if (hasData) {
+              if (/sql|query|database/i.test(projLower)) proj.score += 3;
+              if (/power\s*bi|tableau|dashboard|visualization|dax/i.test(projLower)) proj.score += 4;
+              if (/excel|pandas|analytics|insights/i.test(projLower)) proj.score += 2;
+              if (/python|r/i.test(projLower)) proj.score += 1;
+            } else if (hasBackend) {
+              if (/java|spring|boot|node|javascript/i.test(projLower)) proj.score += 3;
+              if (/api|rest|microservices|fastapi|mcp/i.test(projLower)) proj.score += 4;
+              if (/sql|postgres|mysql|docker|postgresql|duckdb/i.test(projLower)) proj.score += 3;
+            } else if (hasFrontend) {
+              if (/react|next\.js|angular/i.test(projLower)) proj.score += 3;
+              if (/typescript|javascript|ui|ux/i.test(projLower)) proj.score += 3;
+              if (/tailwind|css|html/i.test(projLower)) proj.score += 2;
+            } else {
+              if (/llm|rag|langchain|vector|faiss/i.test(projLower)) proj.score += 4;
+              if (/ai|agent|ml|machine\s*learning|ppo|reinforcement/i.test(projLower)) proj.score += 4;
+              if (/python|model/i.test(projLower)) proj.score += 2;
+            }
+          });
+          
+          candidateProjects.sort((a, b) => b.score - a.score);
+          const topProjects = candidateProjects.slice(0, 2);
+          
+          let projectsNamePhrase = '';
+          if (topProjects.length >= 2) {
+            projectsNamePhrase = `projects such as ${topProjects[0].name} and ${topProjects[1].name}`;
+          } else if (topProjects.length === 1) {
+            projectsNamePhrase = `projects such as ${topProjects[0].name}`;
+          } else {
+            projectsNamePhrase = hasData 
+              ? "projects involving data analytics and dashboard development"
+              : (hasBackend ? "projects involving backend architecture and API integration"
+              : (hasFrontend ? "projects involving frontend engineering and interactive user interfaces"
+              : "projects involving software engineering and application automation"));
+          }
+          
+          // Parse work experience sections from the resume content
+          let parsedWorkExperience: string[] = [];
+          if (resumes && resumes.length > 0) {
+            const selectedRes = resumes.find(r => 
+              r.name.toLowerCase().includes((context.resumeVersion || '').toLowerCase().trim())
+            ) || resumes[0];
+            
+            if (selectedRes && selectedRes.content) {
+              const resContent = selectedRes.content;
+              const expSection = resContent.match(/(?:experience|work experience|professional experience)[\s\S]*?(?:projects|education|skills|$)/i);
+              if (expSection) {
+                const lines = expSection[0].split('\n');
+                let currentExp = '';
+                for (const line of lines) {
+                  const cleanLine = line.trim();
+                  if (/^[-•*]\s*/.test(cleanLine)) {
+                    if (currentExp) parsedWorkExperience.push(currentExp);
+                    currentExp = cleanLine.replace(/^[-•*]\s*/, '');
+                  } else if (currentExp && cleanLine) {
+                    currentExp += ' ' + cleanLine;
+                  }
+                }
+                if (currentExp) parsedWorkExperience.push(currentExp);
+              }
+            }
+          }
+          
+
+          
+          let projectsParagraph = '';
+          const primaryExp = parsedWorkExperience.length > 0 ? parsedWorkExperience[0] : `working in ${domainsStr}`;
+          
+          if (experienceLevel === 'student-intern') {
+            // Student / Internship
+            if (topProjects.length > 0) {
+              projectsParagraph = `Through ${projectsNamePhrase}, along with relevant coursework in computer science, I've gained hands-on experience in ${roleSolutionsType} using ${techsStr}. These projects and academic experiences have strengthened my ${strengthsStr} ${datasetPhrase}.`;
+            } else {
+              projectsParagraph = `Through my academic coursework and technical certifications, I've built a strong foundation in ${domainsStr} using ${techsStr}, focusing on analytical thinking and problem-solving.`;
+            }
+          } else if (experienceLevel === 'recent-grad') {
+            // Recent Graduate: Prioritize internships (if available), followed by relevant projects and certifications.
+            const hasInternship = parsedWorkExperience.some(exp => /intern/i.test(exp));
+            const expPrefix = hasInternship ? "my internship experience and" : "academic and personal";
+            if (hasData) {
+              projectsParagraph = `Through ${expPrefix} projects such as ${projectsNamePhrase}, I've built data analytics pipelines and dashboard solutions using ${techsStr}. These experiences strengthened my analytical thinking, database querying skills, and ability to derive actionable insights from real-world datasets.`;
+            } else if (hasFrontend) {
+              projectsParagraph = `Through ${expPrefix} projects such as ${projectsNamePhrase}, I've built responsive web applications and interactive interfaces using ${techsStr}. These experiences strengthened my frontend component engineering, modern styling practices, and user experience design skills.`;
+            } else {
+              projectsParagraph = `Through ${expPrefix} projects such as ${projectsNamePhrase}, I've built backend applications and automation solutions using ${techsStr}. These experiences strengthened my software engineering fundamentals, database integration skills, and ability to develop scalable, real-world applications.`;
+            }
+          } else if (experienceLevel === 'entry-level') {
+            // 0–2 Years Experience: Prioritize professional experience. Include one relevant project only if it strengthens the application.
+            const projectPart = topProjects.length > 0 ? `, complemented by personal projects like ${topProjects[0].name}` : '';
+            projectsParagraph = `My professional experience includes ${primaryExp}${projectPart}. These hands-on roles have strengthened my expertise in ${roleSolutionsType} and scalable system integrations.`;
+          } else {
+            // 2+ Years Experience: Focus on professional achievements, business impact, ownership, and measurable results.
+            projectsParagraph = `Throughout my professional experience, I have owned the design and implementation of key backend services in ${domainsStr} using ${techsStr}. Collaborating with cross-functional teams, I have delivered high-quality software systems with a focus on ownership and business impact.`;
+          }
+          
+          let whyCompanySentence = '';
+          const compLower = ceCompanyClean.toLowerCase();
+          if (compLower.includes('gradright')) {
+            whyCompanySentence = "GradRight's mission of using data and AI to simplify higher education financing is particularly compelling to me, and I'd be excited to learn from and contribute to your team.";
+          } else if (compLower.includes('google')) {
+            whyCompanySentence = "Google's mission of organizing the world's information and solving complex engineering challenges is particularly compelling to me, and I'd be excited to learn from and contribute to your team.";
+          } else if (compLower.includes('microsoft')) {
+            whyCompanySentence = "Microsoft's focus on empowering individuals and organizations through cutting-edge technology is particularly compelling to me, and I'd be excited to learn from and contribute to your team.";
+          } else if (compLower.includes('meta') || compLower.includes('facebook')) {
+            whyCompanySentence = "Meta's focus on building immersive social and virtual reality platforms is particularly compelling to me, and I'd be excited to learn from and contribute to your team.";
+          } else if (compLower.includes('amazon')) {
+            whyCompanySentence = "Amazon's leadership in cloud services and e-commerce innovation is particularly compelling to me, and I'd be excited to learn from and contribute to your team.";
+          } else {
+            whyCompanySentence = `${ceCompanyClean}'s focus on innovation and industry leadership is particularly compelling to me, and I'd be excited to learn from and contribute to your team.`;
+          }
+          
+          const randGreeting = [
+            "Hope you're doing well.",
+            "Hope you're having a great week.",
+            "I hope this email finds you well."
+          ][Math.floor(Math.random() * 3)];
+          
+          const randBrief = [
+            "I know you probably receive a lot of emails every day, so I'll keep this brief.",
+            "I'll keep this brief.",
+            "I recently came across the opening for the position and wanted to reach out.",
+            "I was excited to see the opportunity and wanted to introduce myself."
+          ][Math.floor(Math.random() * 4)];
+          
+          const closingBlock = `If you feel my background aligns with your team's needs, I'd appreciate the opportunity to discuss how I can contribute. I've attached my resume for your reference.\n\nThank you for your time and consideration. I'd welcome the opportunity to discuss how my background aligns with your team's needs and how I can contribute to ${ceCompanyClean}.`;
+          
+          const templateIndex = Math.floor(Math.random() * 4);
+          let emailBody = '';
+          
+          if (templateIndex === 0) {
+            // Template A: Greeting -> Intro -> Experience -> Company
+            emailBody = `${randGreeting}\n\n${randBrief}\n\n${introParagraph}\n\n${projectsParagraph}\n\n${whyCompanySentence}`;
+          } else if (templateIndex === 1) {
+            // Template B: Greeting -> Role & Intro -> Why Company -> Projects & Experience
+            emailBody = `${randGreeting}\n\n${introParagraph}\n\n${whyCompanySentence}\n\n${projectsParagraph}`;
+          } else if (templateIndex === 2) {
+            // Template C: Greeting -> Quick Intro -> Strengths & Projects -> Why Company
+            emailBody = `${randGreeting}\n\n${introParagraph}\n\n${projectsParagraph}\n\n${whyCompanySentence}`;
+          } else {
+            // Template D: Greeting -> Role & Intro -> Most Relevant Project -> Skills & Strengths
+            emailBody = `${randGreeting}\n\n${randBrief}\n\n${introParagraph}\n\n${projectsParagraph}\n\n${whyCompanySentence}`;
+          }
+          
+          message = `Hi ${ceRecipientFinal},\n\n${emailBody}\n\n${closingBlock}\n\nBest regards,\n\n${ceYourName}${ceContactLines}`;
           break;
         case 'followup':
           tone = 'Professional';
@@ -936,8 +1638,38 @@ const AIMessageGenerator: React.FC = () => {
     }, 1200);
   };
 
+  useEffect(() => {
+    if (generatedMessage) {
+      generateMessage();
+    }
+  }, [
+    isShorter,
+    isMorePersonal,
+    isFormal,
+    isFriendly,
+    isConfident,
+    isDetailed,
+    mentionCompany,
+    mentionRole,
+    mentionInterest,
+    mentionConnection,
+    mentionAchievement
+  ]);
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedMessage);
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2500);
+  };
+
+  const copySubjectToClipboard = () => {
+    navigator.clipboard.writeText(generatedSubject);
+    setIsSubjectCopied(true);
+    setTimeout(() => {
+      setIsSubjectCopied(false);
+    }, 2500);
   };
 
   const openGmail = () => {
@@ -993,7 +1725,7 @@ const AIMessageGenerator: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Current Role</label>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Current Role *</label>
                 <input
                   type="text"
                   placeholder="Software Engineer"
@@ -1024,12 +1756,46 @@ const AIMessageGenerator: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Reason for Connecting</label>
+              <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Reason for Connecting *</label>
               <textarea
                 rows={2}
                 placeholder="Why do you want to connect with this person?"
                 value={context.reasonForConnecting}
                 onChange={e => setContext({ ...context, reasonForConnecting: e.target.value })}
+                className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+              />
+            </div>
+            {mentionConnection && (
+              <div>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Mutual Connection *</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Jane Doe"
+                  value={context.mutualConnection}
+                  onChange={e => setContext({ ...context, mutualConnection: e.target.value })}
+                  className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+                />
+              </div>
+            )}
+            {mentionAchievement && (
+              <div>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Recent Achievement *</label>
+                <textarea
+                  rows={2}
+                  placeholder="e.g., their recent post about launching their new library"
+                  value={context.recentAchievement}
+                  onChange={e => setContext({ ...context, recentAchievement: e.target.value })}
+                  className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+                />
+              </div>
+            )}
+            <div>
+              <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Additional Context</label>
+              <textarea
+                rows={2}
+                placeholder="Any additional information to include..."
+                value={context.additionalContext}
+                onChange={e => setContext({ ...context, additionalContext: e.target.value })}
                 className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
               />
             </div>
@@ -1080,13 +1846,10 @@ const AIMessageGenerator: React.FC = () => {
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Resume Version</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Standard Resume, Technical Resume"
+                <ResumeSelector
                   value={context.resumeVersion}
-                  onChange={e => setContext({ ...context, resumeVersion: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+                  onChange={val => setContext({ ...context, resumeVersion: val })}
+                  resumes={resumes}
                 />
               </div>
             </div>
@@ -1127,7 +1890,7 @@ const AIMessageGenerator: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Recipient Name *</label>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Recipient Name</label>
                 <input
                   type="text"
                   placeholder="John Doe"
@@ -1159,7 +1922,7 @@ const AIMessageGenerator: React.FC = () => {
             </div>
             <div>
               <label className="text-sm font-semibold text-[#94a3b8] block mb-2">
-                Subject * 
+                Subject 
                 <span className="ml-2 text-xs text-[#6b7280]">{context.subject.length} / 70</span>
               </label>
               <input
@@ -1171,24 +1934,50 @@ const AIMessageGenerator: React.FC = () => {
                 maxLength={70}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Experience</label>
+              <select
+                value={context.experienceLevel}
+                onChange={e => setContext({ ...context, experienceLevel: e.target.value })}
+                className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white focus:outline-none focus:border-violet-500 transition-colors"
+              >
+                <option value="">Select Experience Level</option>
+                <option value="student-intern">Student / Internship</option>
+                <option value="recent-grad">Recent Graduate</option>
+                <option value="entry-level">0–2 Years Experience</option>
+                <option value="experienced">2+ Years Experience</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Resume Version</label>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Your Name *</label>
                 <input
                   type="text"
-                  placeholder="Standard Resume"
-                  value={context.resumeVersion}
-                  onChange={e => setContext({ ...context, resumeVersion: e.target.value })}
+                  placeholder="Your Name"
+                  value={context.yourName}
+                  onChange={e => setContext({ ...context, yourName: e.target.value })}
                   className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
                 />
               </div>
               <div>
-                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Portfolio URL</label>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Contact Number</label>
                 <input
                   type="text"
-                  placeholder="https://portfolio.com"
-                  value={context.portfolioUrl}
-                  onChange={e => setContext({ ...context, portfolioUrl: e.target.value })}
+                  placeholder="e.g., +1 (555) 019-2834"
+                  value={context.contactInfo}
+                  onChange={e => setContext({ ...context, contactInfo: e.target.value })}
+                  className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">LinkedIn Profile URL</label>
+                <input
+                  type="text"
+                  placeholder="https://linkedin.com/in/username"
+                  value={context.linkedInProfile}
+                  onChange={e => setContext({ ...context, linkedInProfile: e.target.value })}
                   className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
                 />
               </div>
@@ -1202,6 +1991,23 @@ const AIMessageGenerator: React.FC = () => {
                   className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
                 />
               </div>
+              <div>
+                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Portfolio URL</label>
+                <input
+                  type="text"
+                  placeholder="https://portfolio.com"
+                  value={context.portfolioUrl}
+                  onChange={e => setContext({ ...context, portfolioUrl: e.target.value })}
+                  className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+                />
+              </div>
+            </div>
+            <div>
+              <ResumeSelector
+                value={context.resumeVersion}
+                onChange={val => setContext({ ...context, resumeVersion: val })}
+                resumes={resumes}
+              />
             </div>
             <div>
               <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Additional Context</label>
@@ -1210,16 +2016,6 @@ const AIMessageGenerator: React.FC = () => {
                 placeholder="Any additional information to include..."
                 value={context.additionalContext}
                 onChange={e => setContext({ ...context, additionalContext: e.target.value })}
-                className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Your Name *</label>
-              <input
-                type="text"
-                placeholder="Your Name"
-                value={context.yourName}
-                onChange={e => setContext({ ...context, yourName: e.target.value })}
                 className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
               />
             </div>
@@ -1491,13 +2287,10 @@ const AIMessageGenerator: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Resume Version</label>
-                <input
-                  type="text"
-                  placeholder="Standard Resume"
+                <ResumeSelector
                   value={context.resumeVersion}
-                  onChange={e => setContext({ ...context, resumeVersion: e.target.value })}
-                  className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+                  onChange={val => setContext({ ...context, resumeVersion: val })}
+                  resumes={resumes}
                 />
               </div>
               <div>
@@ -1626,12 +2419,16 @@ const AIMessageGenerator: React.FC = () => {
 
   const getRequiredFields = () => {
     switch (messageType) {
-      case 'connection':
-        return [context.contactName, context.company];
+      case 'connection': {
+        const fields = [context.contactName, context.company, context.currentRole, context.reasonForConnecting];
+        if (mentionConnection) fields.push(context.mutualConnection);
+        if (mentionAchievement) fields.push(context.recentAchievement);
+        return fields;
+      }
       case 'referral':
         return [context.contactName, context.company, context.jobTitle];
       case 'cold-email':
-        return [context.recipientEmail, context.recipientName, context.company, context.jobTitle, context.subject, context.yourName];
+        return [context.recipientEmail, context.company, context.jobTitle, context.yourName];
       case 'followup':
         return [context.recipientEmail, context.recipientName, context.company, context.yourName];
       case 'thankyou':
@@ -1660,7 +2457,22 @@ const AIMessageGenerator: React.FC = () => {
           <label className="text-sm font-semibold text-[#94a3b8] block mb-2">Message Type</label>
           <select
             value={messageType}
-            onChange={(e) => setMessageType(e.target.value)}
+            onChange={(e) => {
+              setMessageType(e.target.value);
+              setIsShorter(false);
+              setIsMorePersonal(false);
+              setIsFormal(false);
+              setIsFriendly(false);
+              setIsConfident(false);
+              setIsDetailed(false);
+              setMentionCompany(true);
+              setMentionRole(true);
+              setMentionInterest(true);
+              setMentionConnection(false);
+              setMentionAchievement(false);
+              setShowRewriteDropdown(false);
+              setShowPersDropdown(false);
+            }}
             className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white"
           >
             {messageTypes.map((type) => (
@@ -1683,42 +2495,37 @@ const AIMessageGenerator: React.FC = () => {
 
         {generatedMessage && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-semibold text-[#94a3b8]">Generated Message</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setGeneratedMessage('')}
-                  className="px-3 py-1.5 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors"
-                >
-                  Clear
-                </button>
-                <button
-                  onClick={generateMessage}
-                  className="px-3 py-1.5 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors"
-                >
-                  Regenerate
-                </button>
-              </div>
-            </div>
+            <label className="text-sm font-semibold text-[#94a3b8] block">Generated Message</label>
 
             {/* AI Suggestions Panel */}
-            <div className="bg-[#131a26] border border-[#232d3f] rounded-xl p-4 space-y-3">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div className="bg-[#131a26] border border-[#232d3f] rounded-xl p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-center">
                 <div>
-                  <div className="text-[#94a3b8] mb-1">Tone</div>
-                  <div className="text-white font-semibold">{aiSuggestions.tone}</div>
+                  <div className="text-[#94a3b8] mb-1">Tone:</div>
+                  <div className="text-white font-semibold">{aiSuggestions.tone || 'Professional'}</div>
                 </div>
                 <div>
-                  <div className="text-[#94a3b8] mb-1">Best Resume</div>
-                  <div className="text-white font-semibold">{aiSuggestions.bestResume}</div>
+                  <div className="text-[#94a3b8] mb-1">Characters:</div>
+                  <div className="text-white font-semibold">
+                    {generatedMessage.length}{(messageType === 'connection' || messageType === 'referral') ? ' / 200' : ''}
+                  </div>
                 </div>
                 <div>
-                  <div className="text-[#94a3b8] mb-1">Best Time to Send</div>
-                  <div className="text-white font-semibold">{aiSuggestions.bestTime}</div>
+                  <div className="text-[#94a3b8] mb-1">Personalization:</div>
+                  <div className="text-white font-semibold">
+                    {isMorePersonal ? 'High' : isShorter ? 'Low' : 'Medium'}
+                  </div>
                 </div>
                 <div>
-                  <div className="text-[#94a3b8] mb-1">Response Probability</div>
-                  <div className="text-white font-semibold">{aiSuggestions.responseProbability}%</div>
+                  <div className="text-[#94a3b8] mb-1">CTA:</div>
+                  <div className="text-white font-semibold">
+                    {messageType === 'connection' ? 'Connect' :
+                     messageType === 'referral' ? 'Referral' :
+                     messageType === 'recruiter' ? 'Outreach' :
+                     messageType === 'cold-email' ? 'Email' :
+                     messageType === 'followup' ? 'Follow-up' :
+                     messageType === 'thankyou' ? 'Thank You' : 'Send'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1735,10 +2542,10 @@ const AIMessageGenerator: React.FC = () => {
                     className="flex-1 px-4 py-2 bg-[#1b2535] border border-[#232d3f] rounded-lg text-white"
                   />
                   <button
-                    onClick={() => navigator.clipboard.writeText(generatedSubject)}
-                    className="px-3 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors"
+                    onClick={copySubjectToClipboard}
+                    className="px-3 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors min-w-[110px] text-center"
                   >
-                    Copy Subject
+                    {isSubjectCopied ? 'Copied!' : 'Copy Subject'}
                   </button>
                 </div>
               </div>
@@ -1746,27 +2553,230 @@ const AIMessageGenerator: React.FC = () => {
 
             {/* Message with character count */}
             <div>
-              <label className="text-sm font-semibold text-[#94a3b8] block mb-2">
-                Message
-                <span className="ml-2 text-xs text-[#6b7280]">{generatedMessage.length} {messageType === 'connection' ? '/ 300' : messageType === 'networking' ? '/ 500' : 'characters'}</span>
-              </label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-semibold text-[#94a3b8] flex items-center">
+                  Message
+                </label>
+              </div>
+
+              {/* Action Toolbar */}
+              <div className="flex items-center justify-between gap-2 mb-2 w-full">
+                {/* Left side modifiers */}
+                <div className="flex items-center gap-2">
+                  {/* Rewrite Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => {
+                        setShowRewriteDropdown(!showRewriteDropdown);
+                        setShowPersDropdown(false);
+                      }}
+                      className="px-2.5 py-1 bg-indigo-950/20 border border-indigo-900/50 text-indigo-400 hover:bg-indigo-950/40 hover:border-indigo-800 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+                    >
+                      <span>✨ Rewrite</span> <span className="text-[10px]">▼</span>
+                    </button>
+                    {showRewriteDropdown && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setShowRewriteDropdown(false)} 
+                        />
+                        <div className="absolute left-0 mt-1 w-48 bg-[#131a26] border border-[#232d3f] rounded-lg shadow-xl py-1 z-20">
+                          <button
+                            onClick={() => {
+                              setIsFormal(!isFormal);
+                              setIsFriendly(false);
+                              setIsConfident(false);
+                              setShowRewriteDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              isFormal ? 'bg-[#1f2937] text-indigo-400 font-semibold' : 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white'
+                            }`}
+                          >
+                            <span>More Formal</span>
+                            {isFormal && <span className="text-indigo-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsFriendly(!isFriendly);
+                              setIsFormal(false);
+                              setIsConfident(false);
+                              setShowRewriteDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              isFriendly ? 'bg-[#1f2937] text-indigo-400 font-semibold' : 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white'
+                            }`}
+                          >
+                            <span>More Friendly</span>
+                            {isFriendly && <span className="text-indigo-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsShorter(!isShorter);
+                              setIsDetailed(false);
+                              setShowRewriteDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              isShorter ? 'bg-[#1f2937] text-indigo-400 font-semibold' : 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white'
+                            }`}
+                          >
+                            <span>More Concise</span>
+                            {isShorter && <span className="text-indigo-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsDetailed(!isDetailed);
+                              setIsShorter(false);
+                              setShowRewriteDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              isDetailed ? 'bg-[#1f2937] text-indigo-400 font-semibold' : 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white'
+                            }`}
+                          >
+                            <span>More Detailed</span>
+                            {isDetailed && <span className="text-indigo-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsMorePersonal(!isMorePersonal);
+                              setShowRewriteDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              isMorePersonal ? 'bg-[#1f2937] text-indigo-400 font-semibold' : 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white'
+                            }`}
+                          >
+                            <span>More Personal</span>
+                            {isMorePersonal && <span className="text-indigo-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsConfident(!isConfident);
+                              setIsFormal(false);
+                              setIsFriendly(false);
+                              setShowRewriteDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              isConfident ? 'bg-[#1f2937] text-indigo-400 font-semibold' : 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white'
+                            }`}
+                          >
+                            <span>More Confident</span>
+                            {isConfident && <span className="text-indigo-400">✓</span>}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Personalization Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => {
+                        setShowPersDropdown(!showPersDropdown);
+                        setShowRewriteDropdown(false);
+                      }}
+                      className="px-2.5 py-1 bg-indigo-950/20 border border-indigo-900/50 text-indigo-400 hover:bg-indigo-950/40 hover:border-indigo-800 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5"
+                    >
+                      <span>⚙️ Personalization</span> <span className="text-[10px]">▼</span>
+                    </button>
+                    {showPersDropdown && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setShowPersDropdown(false)} 
+                        />
+                        <div className="absolute left-0 mt-1 w-56 bg-[#131a26] border border-[#232d3f] rounded-lg shadow-xl py-1 z-20">
+                          <button
+                            onClick={() => {
+                              setMentionCompany(!mentionCompany);
+                              setShowPersDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              mentionCompany ? 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white font-semibold' : 'text-[#6b7280]'
+                            }`}
+                          >
+                            <span>Mention Company</span>
+                            {mentionCompany && <span className="text-emerald-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setMentionRole(!mentionRole);
+                              setShowPersDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              mentionRole ? 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white font-semibold' : 'text-[#6b7280]'
+                            }`}
+                          >
+                            <span>Mention Role</span>
+                            {mentionRole && <span className="text-emerald-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setMentionInterest(!mentionInterest);
+                              setShowPersDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              mentionInterest ? 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white font-semibold' : 'text-[#6b7280]'
+                            }`}
+                          >
+                            <span>Mention Shared Interest</span>
+                            {mentionInterest && <span className="text-emerald-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setMentionConnection(!mentionConnection);
+                              setShowPersDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              mentionConnection ? 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white font-semibold' : 'text-[#6b7280]'
+                            }`}
+                          >
+                            <span>Mention Mutual Connection</span>
+                            {mentionConnection && <span className="text-emerald-400">✓</span>}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setMentionAchievement(!mentionAchievement);
+                              setShowPersDropdown(false);
+                            }}
+                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center justify-between ${
+                              mentionAchievement ? 'text-[#94a3b8] hover:bg-[#1f2937] hover:text-white font-semibold' : 'text-[#6b7280]'
+                            }`}
+                          >
+                            <span>Mention Recent Achievement</span>
+                            {mentionAchievement && <span className="text-emerald-400">✓</span>}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right side Copy & Clear */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={copyToClipboard}
+                    className="px-2.5 py-1 bg-emerald-950/20 border border-emerald-900/50 text-emerald-400 hover:bg-emerald-950/40 hover:border-emerald-800 rounded-lg text-xs font-semibold transition-all min-w-[65px] text-center"
+                  >
+                    {isCopied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <button
+                    onClick={() => setGeneratedMessage('')}
+                    className="px-2.5 py-1 bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-950/40 hover:border-red-800 rounded-lg text-xs font-semibold transition-all"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
               <textarea
                 value={generatedMessage}
                 onChange={(e) => setGeneratedMessage(e.target.value)}
                 rows={8}
                 className="w-full px-4 py-2 bg-[#1b2535] border border-[#232d3f] rounded-lg text-white"
-                maxLength={messageType === 'connection' ? 300 : messageType === 'networking' ? 500 : undefined}
+                maxLength={(messageType === 'connection' || messageType === 'referral') ? 180 : undefined}
               />
             </div>
 
             {/* Type-specific action buttons */}
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={copyToClipboard}
-                className="flex-1 min-w-[120px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm font-semibold text-white transition-colors"
-              >
-                Copy
-              </button>
 
               {(messageType === 'cold-email' || messageType === 'followup' || messageType === 'thankyou' || messageType === 'recruiter' || messageType === 'interview-followup') && (
                 <button

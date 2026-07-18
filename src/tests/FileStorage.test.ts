@@ -15,7 +15,7 @@ describe('FileStorage Unit Tests', () => {
     if (fs.existsSync(tempFile)) {
       try {
         fs.unlinkSync(tempFile);
-      } catch (e) {}
+      } catch {}
     }
   });
 
@@ -53,16 +53,16 @@ describe('FileStorage Unit Tests', () => {
       resume_profiles: [],
       avg_response_time_ms: 0,
       total_scrapes: 0,
-      total_failures: 0
+      total_failures: 0,
     };
-    
+
     // Seed company list
     const companiesPath = path.join(process.cwd(), 'storage', 'companies_state.json');
     fs.writeFileSync(companiesPath, JSON.stringify([companyConfig]), 'utf-8');
 
     await storage.saveCompanyJobs('test', []);
     await storage.updateCompanyScrapeState('test', { total_scrapes: 10 });
-    
+
     const c = await storage.getCompanyConfig('test');
     expect(c?.total_scrapes).toBe(10);
   });

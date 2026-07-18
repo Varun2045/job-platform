@@ -42,7 +42,7 @@ export class AnalyticsGenerator {
         matchesPerDay[dateStr] = (matchesPerDay[dateStr] ?? 0) + (run.matchesFound ?? 0);
       }
       totalFailures += run.failuresCount ?? 0;
-      totalScrapes += (run.companiesChecked ?? 1);
+      totalScrapes += run.companiesChecked ?? 1;
     });
 
     // Calculate failure rate
@@ -53,32 +53,40 @@ export class AnalyticsGenerator {
     try {
       if (fs.existsSync(scoresPath)) {
         const scoresObj = JSON.parse(fs.readFileSync(scoresPath, 'utf-8'));
-        const scores = Object.values(scoresObj).map((v: any) => typeof v === 'object' ? (v.score ?? 70) : Number(v)).filter(v => !isNaN(v));
+        const scores = Object.values(scoresObj)
+          .map((v: any) => (typeof v === 'object' ? (v.score ?? 70) : Number(v)))
+          .filter((v) => !isNaN(v));
         if (scores.length > 0) {
           averageScore = Math.round(scores.reduce((sum, s) => sum + s, 0) / scores.length);
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
 
     // Active companies, fastest, and slowest scrapers
     const sortedByJobs = [...metrics.companies].sort((a, b) => b.jobsFound - a.jobsFound);
-    const mostActiveCompanies = sortedByJobs.slice(0, 5).map(c => ({
+    const mostActiveCompanies = sortedByJobs.slice(0, 5).map((c) => ({
       name: c.name,
-      jobsCount: c.jobsFound
+      jobsCount: c.jobsFound,
     }));
 
-    const durations = metrics.companies.filter(c => c.durationMs > 0);
-    const fastest = [...durations].sort((a, b) => a.durationMs - b.durationMs).slice(0, 5).map(c => ({
-      name: c.name,
-      avgRuntimeMs: c.durationMs
-    }));
+    const durations = metrics.companies.filter((c) => c.durationMs > 0);
+    const fastest = [...durations]
+      .sort((a, b) => a.durationMs - b.durationMs)
+      .slice(0, 5)
+      .map((c) => ({
+        name: c.name,
+        avgRuntimeMs: c.durationMs,
+      }));
 
-    const slowest = [...durations].sort((a, b) => b.durationMs - a.durationMs).slice(0, 5).map(c => ({
-      name: c.name,
-      avgRuntimeMs: c.durationMs
-    }));
+    const slowest = [...durations]
+      .sort((a, b) => b.durationMs - a.durationMs)
+      .slice(0, 5)
+      .map((c) => ({
+        name: c.name,
+        avgRuntimeMs: c.durationMs,
+      }));
 
     const analyticsJson: AnalyticsTrend = {
       jobsPerDay,
@@ -87,7 +95,7 @@ export class AnalyticsGenerator {
       mostActiveCompanies,
       fastestScrapers: fastest,
       slowestScrapers: slowest,
-      failureRate
+      failureRate,
     };
 
     fs.writeFileSync(analyticsPath, JSON.stringify(analyticsJson, null, 2), 'utf-8');

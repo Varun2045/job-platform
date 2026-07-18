@@ -38,7 +38,7 @@ export class BackupService {
       companies,
       applications,
       extendedSettings,
-      analyses
+      analyses,
     };
   }
 
@@ -63,7 +63,7 @@ export class BackupService {
         if (fs.existsSync(configPath)) {
           current = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
         }
-        const idx = current.findIndex(c => c.id === company.id);
+        const idx = current.findIndex((c) => c.id === company.id);
         if (idx !== -1) {
           current[idx] = company;
         } else {
@@ -101,9 +101,10 @@ export class BackupService {
       fs.writeFileSync(backupPath, JSON.stringify(backup, null, 2), 'utf-8');
       Logger.info(`Automatic daily backup successfully saved to: ${backupPath}`);
 
-      const files = fs.readdirSync(backupDir)
-        .filter(f => f.startsWith('backup-') && f.endsWith('.json'))
-        .map(f => ({ name: f, time: fs.statSync(path.join(backupDir, f)).mtime.getTime() }))
+      const files = fs
+        .readdirSync(backupDir)
+        .filter((f) => f.startsWith('backup-') && f.endsWith('.json'))
+        .map((f) => ({ name: f, time: fs.statSync(path.join(backupDir, f)).mtime.getTime() }))
         .sort((a, b) => b.time - a.time);
 
       if (files.length > 5) {

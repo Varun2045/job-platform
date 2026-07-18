@@ -12,7 +12,7 @@ describe('CalendarService', () => {
       eventType: 'Interview',
       startTime: start,
       endTime: end,
-      location: 'Google Meet virtual link'
+      location: 'Google Meet virtual link',
     };
 
     const ics = CalendarService.generateICS(options);

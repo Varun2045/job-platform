@@ -24,7 +24,7 @@ describe('HttpClient Unit Tests', () => {
       status: 200,
       headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => ({ ok: true }),
-      text: async () => '{"ok": true}'
+      text: async () => '{"ok": true}',
     };
     global.fetch = (jest.fn() as any).mockResolvedValue(mockResponse);
 
@@ -39,14 +39,14 @@ describe('HttpClient Unit Tests', () => {
       status: 201,
       headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => ({ created: true }),
-      text: async () => '{"created": true}'
+      text: async () => '{"created": true}',
     };
     global.fetch = (jest.fn() as any).mockResolvedValue(mockResponse);
 
     const res = await client.request('https://api.test/post', {
       method: 'POST',
       body: { name: 'test' },
-      retries: 1
+      retries: 1,
     });
     expect(res.status).toBe(201);
     expect(res.data).toEqual({ created: true });
@@ -57,14 +57,14 @@ describe('HttpClient Unit Tests', () => {
       ok: true,
       status: 200,
       headers: new Headers(),
-      text: async () => 'text-response'
+      text: async () => 'text-response',
     };
     global.fetch = (jest.fn() as any).mockResolvedValue(mockResponse);
 
     const res = await client.request('https://api.test/post-string', {
       method: 'POST',
       body: 'plain-text',
-      retries: 1
+      retries: 1,
     });
     expect(res.data).toBe('text-response');
   });
@@ -74,7 +74,7 @@ describe('HttpClient Unit Tests', () => {
       ok: false,
       status: 404,
       statusText: 'Not Found',
-      headers: new Headers()
+      headers: new Headers(),
     };
     global.fetch = (jest.fn() as any).mockResolvedValue(mockResponse);
 
@@ -87,14 +87,14 @@ describe('HttpClient Unit Tests', () => {
       ok: false,
       status: 500,
       statusText: 'Internal Error',
-      headers: new Headers()
+      headers: new Headers(),
     };
     const mockSuccessResponse = {
       ok: true,
       status: 200,
       headers: new Headers({ 'content-type': 'application/json' }),
       json: async () => ({ retryOk: true }),
-      text: async () => '{"retryOk": true}'
+      text: async () => '{"retryOk": true}',
     };
 
     global.fetch = (jest.fn() as any)
@@ -108,7 +108,7 @@ describe('HttpClient Unit Tests', () => {
   });
 
   it('should abort fetch on timeout', async () => {
-    global.fetch = (jest.fn() as any).mockImplementation(async (url: any, init: any) => {
+    global.fetch = (jest.fn() as any).mockImplementation(async () => {
       throw new DOMException('The user aborted a request.', 'AbortError');
     });
 

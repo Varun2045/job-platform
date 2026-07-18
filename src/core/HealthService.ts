@@ -32,7 +32,9 @@ export class HealthService {
     return { ready, checks };
   }
 
-  public static async checkHealth(storage: StorageProvider): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; checks: Record<string, any> }> {
+  public static async checkHealth(
+    storage: StorageProvider,
+  ): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; checks: Record<string, any> }> {
     const checks: Record<string, any> = {};
     let failedChecks = 0;
     let warningChecks = 0;
@@ -53,9 +55,14 @@ export class HealthService {
         const data = JSON.parse(fs.readFileSync(statusFilePath, 'utf-8'));
         const lastRun = new Date(data.lastRun).getTime();
         const diffMinutes = (Date.now() - lastRun) / (60 * 1000);
-        
-        if (diffMinutes > 180) { // Stale for more than 3 hours
-          checks.scheduler = { status: 'degraded', lastRun: data.lastRun, minutesSinceLastRun: Math.round(diffMinutes) };
+
+        if (diffMinutes > 180) {
+          // Stale for more than 3 hours
+          checks.scheduler = {
+            status: 'degraded',
+            lastRun: data.lastRun,
+            minutesSinceLastRun: Math.round(diffMinutes),
+          };
           warningChecks++;
         } else {
           checks.scheduler = { status: 'healthy', lastRun: data.lastRun };
@@ -72,19 +79,19 @@ export class HealthService {
     // 3. Email key check
     checks.emailProvider = {
       status: config.resendApiKey ? 'healthy' : 'disabled',
-      configured: !!config.resendApiKey
+      configured: !!config.resendApiKey,
     };
 
     // 4. Scrapers health overview
     try {
       const companies = await storage.getAllCompanies();
-      const disabledCount = companies.filter(c => !c.enabled).length;
-      const degradedCount = companies.filter(c => (c.consecutive_failures ?? 0) > 0).length;
+      const disabledCount = companies.filter((c) => !c.enabled).length;
+      const degradedCount = companies.filter((c) => (c.consecutive_failures ?? 0) > 0).length;
       checks.scrapers = {
         total: companies.length,
         disabled: disabledCount,
         degraded: degradedCount,
-        healthy: companies.length - disabledCount - degradedCount
+        healthy: companies.length - disabledCount - degradedCount,
       };
     } catch (err: any) {
       checks.scrapers = { status: 'unknown', error: err.message };
@@ -95,7 +102,7 @@ export class HealthService {
     checks.system = {
       memoryHeapUsedMb: Math.round(usage.heapUsed / (1024 * 1024)),
       memoryHeapTotalMb: Math.round(usage.heapTotal / (1024 * 1024)),
-      uptimeSeconds: Math.round(process.uptime())
+      uptimeSeconds: Math.round(process.uptime()),
     };
 
     // Aggregated Health Rating

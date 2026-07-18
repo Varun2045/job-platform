@@ -53,7 +53,9 @@ export class MetricsExporter {
       lines.push('# HELP job_monitor_company_scrape_duration_seconds Scrape duration for the company in seconds');
       lines.push('# TYPE job_monitor_company_scrape_duration_seconds gauge');
       metrics.companies.forEach((c) => {
-        lines.push(`job_monitor_company_scrape_duration_seconds{company="${c.id}",name="${c.name}"} ${(c.durationMs / 1000).toFixed(3)}`);
+        lines.push(
+          `job_monitor_company_scrape_duration_seconds{company="${c.id}",name="${c.name}"} ${(c.durationMs / 1000).toFixed(3)}`,
+        );
       });
 
       lines.push('# HELP job_monitor_company_scrape_failures_total Total scraper failures for this company');
@@ -75,19 +77,22 @@ export class MetricsExporter {
   public static exportStatus(metrics: GlobalMetrics): void {
     try {
       const filePath = path.join(process.cwd(), 'storage', 'status.json');
-      
-      const failedCompanies = metrics.companies
-        .filter((c) => c.status === 'failed')
-        .map((c) => c.name);
+
+      const failedCompanies = metrics.companies.filter((c) => c.status === 'failed').map((c) => c.name);
 
       const statusObj = {
-        status: metrics.totalFailures === metrics.companiesChecked ? 'unhealthy' : (metrics.totalFailures > 0 ? 'degraded' : 'healthy'),
+        status:
+          metrics.totalFailures === metrics.companiesChecked
+            ? 'unhealthy'
+            : metrics.totalFailures > 0
+              ? 'degraded'
+              : 'healthy',
         lastRun: metrics.runTimestamp,
         totalDurationMs: metrics.totalDurationMs,
         companiesChecked: metrics.companiesChecked,
         failuresCount: metrics.totalFailures,
         failedCompanies,
-        newJobsFound: metrics.totalNewMatches
+        newJobsFound: metrics.totalNewMatches,
       };
 
       fs.writeFileSync(filePath, JSON.stringify(statusObj, null, 2), 'utf-8');

@@ -19,21 +19,21 @@ export class SkillNormalizer {
     } catch (e) {
       Logger.error('Failed to load synonyms.json', e as any);
       this.synonyms = {
-        'node': 'Node.js',
-        'nodejs': 'Node.js',
-        'js': 'JavaScript',
-        'javascript': 'JavaScript',
-        'ts': 'TypeScript',
-        'typescript': 'TypeScript',
-        'reactjs': 'React',
-        'react': 'React',
-        'postgres': 'PostgreSQL',
-        'postgresql': 'PostgreSQL',
-        'spring': 'Spring Boot',
-        'springboot': 'Spring Boot',
+        node: 'Node.js',
+        nodejs: 'Node.js',
+        js: 'JavaScript',
+        javascript: 'JavaScript',
+        ts: 'TypeScript',
+        typescript: 'TypeScript',
+        reactjs: 'React',
+        react: 'React',
+        postgres: 'PostgreSQL',
+        postgresql: 'PostgreSQL',
+        spring: 'Spring Boot',
+        springboot: 'Spring Boot',
         'spring boot': 'Spring Boot',
-        'llm': 'Large Language Model',
-        'large language model': 'Large Language Model'
+        llm: 'Large Language Model',
+        'large language model': 'Large Language Model',
       };
     }
   }
@@ -55,7 +55,7 @@ export class SkillNormalizer {
     const keys = Object.keys(this.synonyms).sort((a, b) => b.length - a.length);
     if (keys.length === 0) return text;
 
-    const escapedKeys = keys.map(k => k.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+    const escapedKeys = keys.map((k) => k.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
     const regex = new RegExp(`\\b(${escapedKeys.join('|')})\\b`, 'gi');
 
     return text.replace(regex, (match) => {

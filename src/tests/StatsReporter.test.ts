@@ -13,7 +13,7 @@ describe('StatsReporter Unit Tests', () => {
     total_scrapes: 0,
     total_failures: 0,
     avg_response_time_ms: 0,
-    ...overrides
+    ...overrides,
   });
 
   it('should return default zero metrics for an empty registry', () => {
@@ -28,7 +28,7 @@ describe('StatsReporter Unit Tests', () => {
   it('should handle companies with no statistics (undefined or zero values)', () => {
     const companies = [
       createMockCompany({ total_scrapes: undefined, total_failures: undefined, avg_response_time_ms: undefined }),
-      createMockCompany({ total_scrapes: 0, total_failures: 0, avg_response_time_ms: 0 })
+      createMockCompany({ total_scrapes: 0, total_failures: 0, avg_response_time_ms: 0 }),
     ];
 
     const stats = StatsReporter.calculate(companies);
@@ -42,7 +42,7 @@ describe('StatsReporter Unit Tests', () => {
   it('should correctly calculate metrics for companies with partial statistics', () => {
     const companies = [
       createMockCompany({ total_scrapes: 5, total_failures: undefined, avg_response_time_ms: 2000 }),
-      createMockCompany({ total_scrapes: undefined, total_failures: 2, avg_response_time_ms: undefined })
+      createMockCompany({ total_scrapes: undefined, total_failures: 2, avg_response_time_ms: undefined }),
     ];
 
     const stats = StatsReporter.calculate(companies);
@@ -57,7 +57,7 @@ describe('StatsReporter Unit Tests', () => {
     const companies = [
       createMockCompany({ total_scrapes: 10, total_failures: 2, avg_response_time_ms: 1500 }),
       createMockCompany({ total_scrapes: 20, total_failures: 5, avg_response_time_ms: 2500 }),
-      createMockCompany({ total_scrapes: 0, total_failures: 0, avg_response_time_ms: 0 })
+      createMockCompany({ total_scrapes: 0, total_failures: 0, avg_response_time_ms: 0 }),
     ];
 
     const stats = StatsReporter.calculate(companies);
@@ -70,9 +70,7 @@ describe('StatsReporter Unit Tests', () => {
 
   it('should avoid divide-by-zero errors when total scrapes are zero but failures are positive', () => {
     // Edge case that shouldn't happen normally, but tests robustness
-    const companies = [
-      createMockCompany({ total_scrapes: 0, total_failures: 5, avg_response_time_ms: 1000 })
-    ];
+    const companies = [createMockCompany({ total_scrapes: 0, total_failures: 5, avg_response_time_ms: 1000 })];
 
     const stats = StatsReporter.calculate(companies);
     expect(stats.totalScrapes).toBe(0);

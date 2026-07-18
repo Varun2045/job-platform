@@ -69,7 +69,7 @@ try {
   const weightsPath = path.join(__dirname, 'weights.json');
   // Fallback to searching relative to project root
   const rootWeightsPath = path.join(process.cwd(), 'config', 'weights.json');
-  const targetPath = fs.existsSync(weightsPath) ? weightsPath : (fs.existsSync(rootWeightsPath) ? rootWeightsPath : '');
+  const targetPath = fs.existsSync(weightsPath) ? weightsPath : fs.existsSync(rootWeightsPath) ? rootWeightsPath : '';
 
   if (targetPath) {
     const raw = fs.readFileSync(targetPath, 'utf-8');
@@ -82,7 +82,7 @@ try {
       tfidf: Number(process.env.WEIGHT_TFIDF ?? parsed.tfidf ?? defaultWeights.tfidf),
     };
   }
-} catch (e) {
+} catch {
   // Ignore and use default / env
   loadedWeights = {
     skills: Number(process.env.WEIGHT_SKILLS ?? defaultWeights.skills),
@@ -94,13 +94,15 @@ try {
 }
 
 // Normalize weights to sum to 1
-const sum = loadedWeights.skills + loadedWeights.title + loadedWeights.experience + loadedWeights.location + loadedWeights.tfidf;
+const sum =
+  loadedWeights.skills + loadedWeights.title + loadedWeights.experience + loadedWeights.location + loadedWeights.tfidf;
 if (sum !== 100) {
   loadedWeights.skills = Math.round((loadedWeights.skills / sum) * 100);
   loadedWeights.title = Math.round((loadedWeights.title / sum) * 100);
   loadedWeights.experience = Math.round((loadedWeights.experience / sum) * 100);
   loadedWeights.location = Math.round((loadedWeights.location / sum) * 100);
-  loadedWeights.tfidf = 100 - (loadedWeights.skills + loadedWeights.title + loadedWeights.experience + loadedWeights.location);
+  loadedWeights.tfidf =
+    100 - (loadedWeights.skills + loadedWeights.title + loadedWeights.experience + loadedWeights.location);
 }
 
 // Determine if we are running in local/offline mode
@@ -136,7 +138,7 @@ export const config: Config = {
     playwright: process.env.FEATURE_PLAYWRIGHT !== 'false',
     email: process.env.FEATURE_EMAIL !== 'false' && hasResend,
   },
-  isLocal: !hasSupabase,
+  isLocal: process.env.IS_LOCAL === 'true' || !hasSupabase,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   googleRedirectUri: process.env.GOOGLE_REDIRECT_URI,

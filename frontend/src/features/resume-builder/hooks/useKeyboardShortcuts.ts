@@ -6,6 +6,8 @@ interface KeyboardShortcutsProps {
   onZoomIn?: () => void; // Ctrl +
   onZoomOut?: () => void; // Ctrl -
   onFitHeight?: () => void; // Ctrl 9: Fit to height
+  onUndo?: () => void; // Ctrl Z
+  onRedo?: () => void; // Ctrl Y / Ctrl Shift Z
 }
 
 export function useKeyboardShortcuts({
@@ -14,6 +16,8 @@ export function useKeyboardShortcuts({
   onZoomIn,
   onZoomOut,
   onFitHeight,
+  onUndo,
+  onRedo,
 }: KeyboardShortcutsProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -46,11 +50,23 @@ export function useKeyboardShortcuts({
         e.preventDefault();
         onZoomOut?.();
       }
+
+      // Check for Ctrl+Z (Undo)
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        onUndo?.();
+      }
+
+      // Check for Ctrl+Y or Ctrl+Shift+Z (Redo)
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === "y" || (e.shiftKey && e.key.toLowerCase() === "z"))) {
+        e.preventDefault();
+        onRedo?.();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onSave, onResetZoom, onZoomIn, onZoomOut, onFitHeight]);
+  }, [onSave, onResetZoom, onZoomIn, onZoomOut, onFitHeight, onUndo, onRedo]);
 }

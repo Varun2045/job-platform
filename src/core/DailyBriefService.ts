@@ -16,7 +16,6 @@ export interface DailyBrief {
 export class DailyBriefService {
   public static async compileDailyBrief(userId: string, storage: StorageProvider): Promise<DailyBrief> {
     try {
-      const profile = await storage.getProfile(userId);
       const applications = await storage.getApplications(userId);
       const companies = await storage.getAllCompanies();
 
@@ -33,29 +32,29 @@ export class DailyBriefService {
 
       // 1. Calculate new jobs today
       const todayStr = new Date().toISOString().split('T')[0];
-      const newJobsCount = allJobs.filter(j => {
+      const newJobsCount = allJobs.filter((j) => {
         const dateStr = new Date(j.datePosted || 0).toISOString().split('T')[0];
         return dateStr === todayStr;
       }).length;
 
       // 2. Fetch best opportunities (simulated query scores)
-      const bestOpportunities = allJobs.slice(0, 3).map(j => ({
+      const bestOpportunities = allJobs.slice(0, 3).map((j) => ({
         title: j.title,
         company: j.company,
         score: 85 + Math.round(Math.random() * 10), // mock matching score
-        url: j.url
+        url: j.url,
       }));
 
       // 3. Applications requiring follow-up
       const applicationsToFollowUp: any[] = [];
-      applications.forEach(app => {
+      applications.forEach((app) => {
         if (app.status === 'Applied') {
           const days = Math.round((Date.now() - new Date(app.lastUpdated || 0).getTime()) / (1000 * 60 * 60 * 24));
           if (days >= 7) {
             applicationsToFollowUp.push({
               company: app.company,
               status: app.status,
-              daysSinceApplied: days
+              daysSinceApplied: days,
             });
           }
         }
@@ -63,18 +62,18 @@ export class DailyBriefService {
 
       // 4. Interview reminders
       const interviewReminders = applications
-        .filter(app => app.status === 'Interview' || app.status === 'OA Scheduled')
-        .map(app => ({
+        .filter((app) => app.status === 'Interview' || app.status === 'OA Scheduled')
+        .map((app) => ({
           company: app.company,
           status: app.status,
-          date: app.lastUpdated || new Date().toISOString()
+          date: app.lastUpdated || new Date().toISOString(),
         }));
 
       // 5. Learning recommendations
-      const learningRecommendations = gaps.roadmapTasks.slice(0, 2).map(t => t.title);
+      const learningRecommendations = gaps.roadmapTasks.slice(0, 2).map((t) => t.title);
 
       // 6. Career insights
-      const careerInsights = recs.slice(0, 2).map(r => r.description);
+      const careerInsights = recs.slice(0, 2).map((r) => r.description);
 
       const brief: DailyBrief = {
         userId,
@@ -83,7 +82,7 @@ export class DailyBriefService {
         applicationsToFollowUp,
         interviewReminders,
         learningRecommendations,
-        careerInsights
+        careerInsights,
       };
 
       await storage.saveDailyBrief(userId, brief);

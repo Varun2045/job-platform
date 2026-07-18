@@ -2,13 +2,7 @@ import { Job } from '../companies/Scraper.js';
 import { StorageProvider } from '../storage/StorageProvider.js';
 import { Logger } from './Logger.js';
 
-export type AutoApplyState = 
-  | 'NEW'
-  | 'READY'
-  | 'QUEUED'
-  | 'SUBMITTED'
-  | 'FAILED'
-  | 'REQUIRES_MANUAL_ACTION';
+export type AutoApplyState = 'NEW' | 'READY' | 'QUEUED' | 'SUBMITTED' | 'FAILED' | 'REQUIRES_MANUAL_ACTION';
 
 export interface ApplicationQueueItem {
   id?: string;
@@ -34,7 +28,9 @@ export class AutoApplyEngine {
 
   public static detectExternalRedirect(url: string): boolean {
     const lower = url.toLowerCase();
-    return lower.includes('workday') || lower.includes('myworkdayjobs') || lower.includes('icims') || lower.includes('taleo');
+    return (
+      lower.includes('workday') || lower.includes('myworkdayjobs') || lower.includes('icims') || lower.includes('taleo')
+    );
   }
 
   public static preparePayload(job: Job, profile: any, resumeContent: string, coverLetter?: string): any {
@@ -48,7 +44,7 @@ export class AutoApplyEngine {
       phone: profile.phone || '',
       resumeText: resumeContent,
       coverLetterText: coverLetter || '',
-      submittedAt: null
+      submittedAt: null,
     };
   }
 
@@ -69,7 +65,7 @@ export class AutoApplyEngine {
   public static async processQueue(storage: StorageProvider, userId: string): Promise<void> {
     Logger.info(`AutoApplyEngine: Initiating application queue run for user: ${userId}`);
     const items = await storage.getApplicationQueue(userId);
-    const queuedItems = items.filter(item => item.state === 'QUEUED' || item.state === 'NEW');
+    const queuedItems = items.filter((item) => item.state === 'QUEUED' || item.state === 'NEW');
 
     for (const item of queuedItems) {
       try {
@@ -86,7 +82,9 @@ export class AutoApplyEngine {
         // Simulate submission (external redirects require manual steps)
         if (this.detectExternalRedirect(item.payload.applyUrl)) {
           item.state = 'REQUIRES_MANUAL_ACTION';
-          item.validation_errors = ['Redirects to external Workday/Applicant Tracking system. Manual submission required.'];
+          item.validation_errors = [
+            'Redirects to external Workday/Applicant Tracking system. Manual submission required.',
+          ];
           await storage.saveApplicationQueueItem(userId, item);
           continue;
         }
@@ -97,16 +95,19 @@ export class AutoApplyEngine {
         await storage.saveApplicationQueueItem(userId, item);
 
         // Save status in tracking pipeline
-        await storage.saveApplication({
-          jobHash: item.job_hash,
-          company: item.company,
-          jobId: item.payload.applyUrl,
-          status: 'Applied',
-          appliedDate: new Date().toISOString().split('T')[0],
-          resumeUsed: 'Optimized Version',
-          notes: 'Auto-submitted by Career Copilot Engine.',
-          lastUpdated: new Date().toISOString()
-        }, userId);
+        await storage.saveApplication(
+          {
+            jobHash: item.job_hash,
+            company: item.company,
+            jobId: item.payload.applyUrl,
+            status: 'Applied',
+            appliedDate: new Date().toISOString().split('T')[0],
+            resumeUsed: 'Optimized Version',
+            notes: 'Auto-submitted by Career Copilot Engine.',
+            lastUpdated: new Date().toISOString(),
+          },
+          userId,
+        );
 
         Logger.info(`Successfully auto-applied to ${item.company} for ${item.title}`);
       } catch (err: any) {

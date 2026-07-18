@@ -29,10 +29,10 @@ export class CsvExporter {
       j.status,
       this.escape(j.url),
       j.datePosted,
-      j.dateFound
+      j.dateFound,
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     fs.writeFileSync(filePath, csvContent, 'utf-8');
   }
 

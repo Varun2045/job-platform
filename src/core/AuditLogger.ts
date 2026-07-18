@@ -12,10 +12,12 @@ export class AuditLogger {
     userId: string | null,
     action: string,
     details: Record<string, any>,
-    ipAddress?: string
+    ipAddress?: string,
   ): Promise<void> {
     try {
-      Logger.info(`[AUDIT LOG] User=${userId || 'system'} Action=${action} Details=${JSON.stringify(details)} IP=${ipAddress || 'N/A'}`);
+      Logger.info(
+        `[AUDIT LOG] User=${userId || 'system'} Action=${action} Details=${JSON.stringify(details)} IP=${ipAddress || 'N/A'}`,
+      );
       if (this.storage) {
         await this.storage.saveAuditLog(userId, action, details, ipAddress);
       }

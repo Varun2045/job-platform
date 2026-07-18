@@ -7,17 +7,17 @@ export const metadata = {
   id: 'amazon',
   version: '1.0.0',
   ats: 'amazon',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class AmazonPlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: true,
     supportsIncrementalSync: false,
     supportsJobDescriptions: true, // Search API returns full description
-    supportsRemoteFiltering: true
+    supportsRemoteFiltering: true,
   };
 
   public supports(company: CompanyConfig): boolean {
@@ -27,7 +27,7 @@ export class AmazonPlugin implements ScraperPlugin {
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
     // Amazon Search API sorting by recent
     const url = 'https://www.amazon.jobs/en/search.json?loc_query=India&result_limit=100&sort=recent';
-    
+
     Logger.debug(`Amazon Jobs API request: ${url}`);
     const response = await httpClient.get<any>(url);
 
@@ -53,14 +53,14 @@ export class AmazonPlugin implements ScraperPlugin {
         employmentType: job.schedule ?? 'Full-time',
         source: 'amazon',
         description: job.description ?? job.description_short ?? '',
-        raw: job
+        raw: job,
       };
     });
 
     return rawJobs;
   }
 
-  public async enrich(rawJob: RawJob, httpClient: HttpClient): Promise<RawJob> {
+  public async enrich(rawJob: RawJob, _httpClient: HttpClient): Promise<RawJob> {
     // Amazon search API already returns descriptions in search JSON
     return rawJob;
   }

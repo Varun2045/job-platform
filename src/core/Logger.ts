@@ -35,7 +35,7 @@ export class Logger {
 
   private static log(level: LogLevel, message: string, meta: Record<string, any> = {}) {
     const timestamp = new Date().toISOString();
-    
+
     // Construct structured log object
     const structuredLog: StructuredLog = {
       timestamp,
@@ -47,7 +47,7 @@ export class Logger {
     // Human-readable console log format
     const metaString = Object.keys(meta).length > 0 ? ` | ${JSON.stringify(meta)}` : '';
     const consoleMessage = `[${timestamp}] [${level}] ${message}${metaString}`;
-    
+
     if (level === LogLevel.ERROR || level === LogLevel.CRITICAL) {
       console.error(consoleMessage);
     } else if (level === LogLevel.WARN) {
@@ -78,28 +78,27 @@ export class Logger {
   }
 
   public static error(message: string, error?: Error | string, meta?: Record<string, any>) {
-    const errorMeta = error instanceof Error 
-      ? { error: error.message, stack: error.stack }
-      : error ? { error } : {};
+    const errorMeta = error instanceof Error ? { error: error.message, stack: error.stack } : error ? { error } : {};
     Logger.log(LogLevel.ERROR, message, { ...errorMeta, ...meta });
   }
 
   public static critical(message: string, error?: Error | string, meta?: Record<string, any>) {
-    const errorMeta = error instanceof Error 
-      ? { error: error.message, stack: error.stack }
-      : error ? { error } : {};
+    const errorMeta = error instanceof Error ? { error: error.message, stack: error.stack } : error ? { error } : {};
     Logger.log(LogLevel.CRITICAL, message, { ...errorMeta, ...meta });
   }
 
   // Helper for company-specific metrics logging
-  public static logCompanyRun(company: string, stats: {
-    durationMs: number;
-    jobsFound: number;
-    newJobs: number;
-    scraper: string;
-    status: string;
-    error?: string;
-  }) {
+  public static logCompanyRun(
+    company: string,
+    stats: {
+      durationMs: number;
+      jobsFound: number;
+      newJobs: number;
+      scraper: string;
+      status: string;
+      error?: string;
+    },
+  ) {
     Logger.info(`Scraped company: ${company}`, {
       company,
       ...stats,

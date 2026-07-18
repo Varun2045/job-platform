@@ -38,15 +38,15 @@ export class PlaywrightScraper {
     try {
       browser = await chromium.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
 
       const page = await browser.newPage();
       await page.setViewportSize({ width: 1280, height: 800 });
-      
+
       // Navigate with timeout
       await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-      
+
       // Wait another 3s for hydration/rendering of lists
       await page.waitForTimeout(3000);
 
@@ -54,25 +54,22 @@ export class PlaywrightScraper {
       const rawJobs: RawJob[] = [];
       const links = await page.evaluate(() => {
         const anchors = Array.from(document.querySelectorAll('a'));
-        return anchors.map(a => ({
-          href: a.href,
-          text: a.innerText.trim()
-        })).filter(a => a.href && a.text);
+        return anchors
+          .map((a) => ({
+            href: a.href,
+            text: a.innerText.trim(),
+          }))
+          .filter((a) => a.href && a.text);
       });
 
-      const jobLinkPatterns = [
-        /\/jobs?\//i,
-        /\/postings?\//i,
-        /\/careers?\//i,
-        /\/positions?\//i,
-        /detail/i
-      ];
+      const jobLinkPatterns = [/\/jobs?\//i, /\/postings?\//i, /\/careers?\//i, /\/positions?\//i, /detail/i];
 
       for (const link of links) {
         if (link.text.length < 5 || link.text.length > 100) continue;
 
         const isJobLink = jobLinkPatterns.some((pattern) => pattern.test(link.href));
-        const hasSoftwareKeyword = /engineer|developer|sde|backend|frontend|fullstack|programmer|technologist|data/i.test(link.text);
+        const hasSoftwareKeyword =
+          /engineer|developer|sde|backend|frontend|fullstack|programmer|technologist|data/i.test(link.text);
 
         if (isJobLink && hasSoftwareKeyword) {
           const jobId = Buffer.from(link.href).toString('base64').substring(0, 16);
@@ -82,14 +79,13 @@ export class PlaywrightScraper {
             title: link.text,
             location: 'India',
             url: link.href,
-            source: 'playwright_fallback'
+            source: 'playwright_fallback',
           });
         }
       }
 
       Logger.info(`Playwright scraper found ${rawJobs.length} potential jobs for ${company.name}`);
       return rawJobs;
-
     } catch (e: any) {
       Logger.error(`Playwright discovery failed for ${company.name}: ${e.message}`);
       // Take screenshot of failure before throwing
@@ -99,7 +95,7 @@ export class PlaywrightScraper {
           if (pages.length > 0) {
             await this.captureError(company.id, pages[0]);
           }
-        } catch (screenshotErr) {
+        } catch {
           // Ignore
         }
       }
@@ -113,7 +109,7 @@ export class PlaywrightScraper {
 
   public async enrich(rawJob: RawJob): Promise<RawJob> {
     Logger.info(`Playwright enriching job description for ${rawJob.id} at URL: ${rawJob.url}`);
-    
+
     let browser: Browser | null = null;
     try {
       browser = await chromium.launch({ headless: true });
@@ -125,8 +121,8 @@ export class PlaywrightScraper {
       const pageText = await page.evaluate(() => {
         // Remove noise
         const removeSelectors = ['script', 'style', 'header', 'footer', 'nav'];
-        removeSelectors.forEach(sel => {
-          document.querySelectorAll(sel).forEach(el => el.remove());
+        removeSelectors.forEach((sel) => {
+          document.querySelectorAll(sel).forEach((el) => el.remove());
         });
         return document.body.innerText.trim();
       });

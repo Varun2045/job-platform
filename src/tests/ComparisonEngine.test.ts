@@ -18,15 +18,12 @@ describe('ComparisonEngine Unit Tests', () => {
     salary: 'Not Specified',
     description: 'Mock description for test.',
     jobHash: `hash_${id}`,
-    ...extra
+    ...extra,
   });
 
   it('should detect added jobs', () => {
     const previous: Job[] = [];
-    const current = [
-      createMockJob('1', 'Software Engineer', 'India'),
-      createMockJob('2', 'Backend Engineer', 'India')
-    ];
+    const current = [createMockJob('1', 'Software Engineer', 'India'), createMockJob('2', 'Backend Engineer', 'India')];
 
     const result = ComparisonEngine.compare(previous, current);
     expect(result.added.length).toBe(2);
@@ -37,11 +34,9 @@ describe('ComparisonEngine Unit Tests', () => {
   it('should detect expired jobs', () => {
     const previous = [
       createMockJob('1', 'Software Engineer', 'India'),
-      createMockJob('2', 'Backend Engineer', 'India')
+      createMockJob('2', 'Backend Engineer', 'India'),
     ];
-    const current = [
-      createMockJob('1', 'Software Engineer', 'India')
-    ];
+    const current = [createMockJob('1', 'Software Engineer', 'India')];
 
     const result = ComparisonEngine.compare(previous, current);
     expect(result.expired.length).toBe(1);
@@ -55,8 +50,8 @@ describe('ComparisonEngine Unit Tests', () => {
         experience: 'Entry Level',
         salary: '100k',
         description: 'First version',
-        url: 'https://prev.com'
-      })
+        url: 'https://prev.com',
+      }),
     ];
     const current = [
       createMockJob('1', 'SDE 1', 'Remote', {
@@ -64,8 +59,8 @@ describe('ComparisonEngine Unit Tests', () => {
         experience: 'Mid Level',
         salary: '120k',
         description: 'Second version',
-        url: 'https://curr.com'
-      })
+        url: 'https://curr.com',
+      }),
     ];
 
     const result = ComparisonEngine.compare(previous, current);
@@ -83,14 +78,14 @@ describe('ComparisonEngine Unit Tests', () => {
   it('should detect fuzzy match duplicate reposts', () => {
     const previous = [
       createMockJob('1', 'Software Engineer', 'India', {
-        description: 'We need a software engineer proficient in Node.js.'
-      })
+        description: 'We need a software engineer proficient in Node.js.',
+      }),
     ];
     const current = [
       createMockJob('100', 'Software Engineer', 'India', {
         description: 'We need a software engineer proficient in Node.js.',
-        url: 'https://repost.com'
-      })
+        url: 'https://repost.com',
+      }),
     ];
 
     const result = ComparisonEngine.compare(previous, current);

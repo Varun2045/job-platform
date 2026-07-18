@@ -26,37 +26,38 @@ export class InterviewCopilot {
   private static codingQuestions: string[] = [
     'Implement a thread-safe rate limiter in TypeScript supporting sliding window logging.',
     'Write a function to detect cycles in a directed graph using topological sort.',
-    'Optimize a high-throughput payload parser to minimize memory heap fragmentation in Node.js.'
+    'Optimize a high-throughput payload parser to minimize memory heap fragmentation in Node.js.',
   ];
 
   private static designQuestions: string[] = [
     'Design a real-time analytics counter system (e.g. video view count) handling 100K write operations per second.',
     'Design a secure multi-tenant notification engine distributing messages via Email, WebSockets, and SMS.',
-    'Design a distributed job processing queue with execution deduplication, retries, and dead-letter channels.'
+    'Design a distributed job processing queue with execution deduplication, retries, and dead-letter channels.',
   ];
 
   private static behavioralQuestions: string[] = [
     'Tell me about a time when you had to optimize code performance under a tight deadline. What compromises did you make?',
     'Describe a technical conflict you had with a team member or architect. How did you resolve it?',
-    'Explain a situation where a production system failed on your watch. How did you diagnose and mitigate the incident?'
+    'Explain a situation where a production system failed on your watch. How did you diagnose and mitigate the incident?',
   ];
 
   public static async startSession(
     userId: string,
     type: 'Coding' | 'System Design' | 'Behavioral',
-    storage: StorageProvider
+    storage: StorageProvider,
   ): Promise<InterviewSession> {
     try {
-      const questionsList = type === 'Coding' 
-        ? this.codingQuestions 
-        : type === 'System Design' 
-        ? this.designQuestions 
-        : this.behavioralQuestions;
+      const questionsList =
+        type === 'Coding'
+          ? this.codingQuestions
+          : type === 'System Design'
+            ? this.designQuestions
+            : this.behavioralQuestions;
 
       const selectedQuestions: InterviewQuestion[] = questionsList.map((q, idx) => ({
         id: `q-${type.toLowerCase()}-${idx}`,
         question: q,
-        category: type
+        category: type,
       }));
 
       const session: InterviewSession = {
@@ -68,10 +69,10 @@ export class InterviewCopilot {
         feedback: {
           overallFeedback: 'Awaiting submission.',
           starCritique: {},
-          weaknesses: []
+          weaknesses: [],
         },
         score: 0,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       await storage.saveInterviewSession(userId, session);
@@ -86,11 +87,11 @@ export class InterviewCopilot {
     userId: string,
     sessionId: string,
     responses: Record<string, string>,
-    storage: StorageProvider
+    storage: StorageProvider,
   ): Promise<InterviewSession> {
     try {
       const sessions = await storage.getInterviewSessions(userId);
-      const session = sessions.find(s => s.id === sessionId);
+      const session = sessions.find((s) => s.id === sessionId);
 
       if (!session) {
         throw new Error('Interview session not found');
@@ -138,7 +139,7 @@ export class InterviewCopilot {
           situation,
           action,
           result,
-          rating
+          rating,
         };
 
         totalRatingSum += rating;
@@ -148,11 +149,12 @@ export class InterviewCopilot {
       const avgScore = count > 0 ? Math.round((totalRatingSum / (count * 5)) * 100) : 0;
       session.score = avgScore;
       session.feedback = {
-        overallFeedback: avgScore >= 80 
-          ? 'Excellent structural details. Met target criteria for the role.' 
-          : 'Good effort. Review missing competencies and focus on structural STAR format details.',
+        overallFeedback:
+          avgScore >= 80
+            ? 'Excellent structural details. Met target criteria for the role.'
+            : 'Good effort. Review missing competencies and focus on structural STAR format details.',
         starCritique,
-        weaknesses
+        weaknesses,
       };
 
       await storage.saveInterviewSession(userId, session);

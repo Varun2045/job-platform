@@ -22,35 +22,47 @@
 
 ```text
 job-monitor/ (Root)
-├── .github/                   # GitHub integration configuration workflows [Core]
-├── .vscode/                   # VS Code workspaces configurations [Optional]
+├── .env.example               # Template environment configuration variables file
+├── .gitignore                 # Files excluded from git tracking
+├── .prettierrc                # Prettier code formatting rules config
+├── Dockerfile                 # Docker containerization description config
+├── LICENSE                    # Software license terms document
+├── README.md                  # Main entry point documentation
+├── docker-compose.yml         # Containerized services orchestrator config
+├── eslint.config.js           # ESLint linting specifications rules
+├── jest.config.js             # Jest unit/integration test runner configurations
+├── package-lock.json          # Dependency lockfile containing exact packages versions
+├── package.json               # Backend Node.js package description configuration
+├── tsconfig.json              # TypeScript compilation rules config
 ├── config/                    # Default weights and system config files [Core] [Never Delete]
 ├── coverage/                  # Jest test coverage metrics reports [Generated] [Safe to Delete]
 ├── dist/                      # Backend TypeScript compile output [Generated] [Safe to Delete]
 ├── docs/                      # Unified project markdown reference documents [Core]
+│   ├── PRD.md                 # Product Requirements Document
+│   ├── ARCHITECTURE.md        # System architecture guide
+│   ├── API.md                 # REST API reference guide
+│   ├── DATABASE.md            # Database schemas, RLS, and indices reference
+│   ├── FEATURES.md            # Features inventory mapping
+│   ├── DESIGN.md              # UI/UX design tokens and aesthetics reference
+│   ├── RULES.md               # Coding rules, styles, and guidelines
+│   ├── PHASES.md              # Historical milestones and future phases roadmap
+│   ├── TECH_STACK.md          # Technical frameworks and packages catalog
+│   ├── MEMORY.md              # Project status and bug ledgers
+│   ├── FOLDER_STRUCTURE.md    # Directory maps and classifications guide (this file)
+│   ├── CHANGELOG.md           # Unified historical release logs
+│   ├── ROADMAP.md             # Long-term feature goals and strategies
+│   ├── SECURITY.md            # Headers, rates limiters, and response codes
+│   ├── CONTRIBUTING.md        # Developer setup and contribution guides
+│   ├── CODE_OF_CONDUCT.md     # Community guidelines and behavior rules
+│   ├── SUPPORT.md             # Support request guidelines and emails
 │   └── archive/               # Consolidated legacy and deprecated reports [Core]
 ├── frontend/                  # React 19 SPA client application [Core]
-│   ├── src/
-│   │   ├── assets/            # Static media resources [Optional]
-│   │   ├── components/        # Shared presentation wrappers [Core]
-│   │   └── features/          # Modularized view panels and state controls [Core]
-│   └── dist/                  # Vite production build assets [Generated] [Safe to Delete]
 ├── logs/                      # System logging target directories [Generated] [Safe to Delete]
 ├── node_modules/              # Node package manager dependencies [Generated]
 ├── resumes/                   # Local target resume PDF/Word uploads [Optional]
 ├── src/                       # Backend TypeScript source directory [Core] [Never Delete]
-│   ├── cli/                   # Administrative command-line scripts [Core]
-│   ├── companies/             # ATS scraper plugins registry [Core]
-│   │   └── plugins/           # Custom company crawler modules [Core]
-│   ├── config/                # Environment variable schemas [Core]
-│   ├── core/                  # Main boots, engines, and routes server handlers [Core]
-│   ├── notifications/         # Multi-channel notification templates [Core]
-│   ├── storage/               # FileStorage vs SupabaseStorage adapters [Core]
-│   └── tests/                 # Sequential integration and E2E Jest test files [Core]
 ├── storage/                   # Local FileStorage JSON output database [Core/Generated]
-│   └── backups/               # Automated state backup files [Generated]
 └── supabase/                  # Database schema migrations [Core]
-    └── migrations/            # SQL setup files (001_setup to 006_referrals) [Core]
 ```
 
 ---

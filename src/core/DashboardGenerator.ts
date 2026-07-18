@@ -56,7 +56,7 @@ export class DashboardGenerator {
     metrics: GlobalMetrics,
     newMatches: { job: Job; score: number }[],
     updatedMatches: { job: Job; score: number }[],
-    applications: Application[]
+    applications: Application[],
   ): void {
     const storageDir = path.join(process.cwd(), 'storage');
     if (!fs.existsSync(storageDir)) {
@@ -64,7 +64,7 @@ export class DashboardGenerator {
     }
 
     const healthRate = Math.round(
-      ((metrics.companiesChecked - metrics.totalFailures) / metrics.companiesChecked) * 100
+      ((metrics.companiesChecked - metrics.totalFailures) / metrics.companiesChecked) * 100,
     );
 
     const dashboardJson: DashboardData = {
@@ -95,7 +95,7 @@ export class DashboardGenerator {
         matchScore: m.score,
         isRemote: m.job.isRemote,
         explanation: (m.job as any).explanation || null,
-        jobHash: m.job.jobHash
+        jobHash: m.job.jobHash,
       })),
       updatedMatches: updatedMatches.map((m) => ({
         company: m.job.company,
@@ -109,9 +109,9 @@ export class DashboardGenerator {
         isRemote: m.job.isRemote,
         changes: (m.job as any).changes || [],
         explanation: (m.job as any).explanation || null,
-        jobHash: m.job.jobHash
+        jobHash: m.job.jobHash,
       })),
-      applications: applications || []
+      applications: applications || [],
     };
 
     const jsonPath = path.join(storageDir, 'dashboard.json');

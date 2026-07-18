@@ -18,7 +18,7 @@ jest.unstable_mockModule('express', () => {
   Object.assign(appWrapper, expressActual);
   return {
     default: appWrapper,
-    ...expressActual
+    ...expressActual,
   };
 });
 
@@ -38,7 +38,7 @@ describe('Playwright E2E Browser Flows', () => {
 
     // Launch headless chromium browser
     browser = await chromium.launch({ headless: true });
-  });
+  }, 30000);
 
   afterAll(async () => {
     if (browser) {
@@ -73,17 +73,20 @@ describe('Playwright E2E Browser Flows', () => {
     // In local mode, the frontend can be mock-guided, or we can directly inject
     // mock authorization token into localStorage to simulate an authenticated state
     await page.evaluate(() => {
-      localStorage.setItem('supabase.auth.token', JSON.stringify({
-        currentSession: {
-          access_token: 'user-token',
-          user: { id: '11111111-1111-1111-1111-111111111111', email: 'user@jobmonitor.com' }
-        }
-      }));
+      localStorage.setItem(
+        'supabase.auth.token',
+        JSON.stringify({
+          currentSession: {
+            access_token: 'user-token',
+            user: { id: '11111111-1111-1111-1111-111111111111', email: 'user@jobmonitor.com' },
+          },
+        }),
+      );
     });
 
     // 3. Reload to load the authenticated Dashboard UI
     await page.goto(`http://localhost:${testPort}/`);
-    
+
     // Allow UI to render
     await page.waitForTimeout(500);
 

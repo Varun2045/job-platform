@@ -266,6 +266,8 @@ describe('SupabaseStorage Unit Tests', () => {
     expect(apps.length).toBe(1);
 
     mockResolveValue = { error: null };
-    await expect(storage.saveApplication({ jobHash: 'h', company: 'G', jobId: '1', status: 'Applied' }, 'user-id')).resolves.not.toThrow();
+    await expect(
+      storage.saveApplication({ jobHash: 'h', company: 'G', jobId: '1', status: 'Applied' }, 'user-id'),
+    ).resolves.not.toThrow();
   });
 });

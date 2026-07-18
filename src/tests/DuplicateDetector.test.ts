@@ -17,7 +17,7 @@ describe('DuplicateDetector', () => {
     isRemote: false,
     salary: 'Not Specified',
     description: 'We are looking for a Node.js and TypeScript developer.',
-    jobHash: 'hash123'
+    jobHash: 'hash123',
   };
 
   it('should flag jobs with exact same ID or URL as duplicates', () => {
@@ -34,7 +34,7 @@ describe('DuplicateDetector', () => {
       id: '99999',
       url: 'https://another-url.com',
       title: 'Backend Software Engineer',
-      description: 'We are looking for a Node.js and TypeScript developer. Join us.'
+      description: 'We are looking for a Node.js and TypeScript developer. Join us.',
     };
     expect(DuplicateDetector.isDuplicate(jobBase, job2)).toBe(true);
   });
@@ -45,7 +45,7 @@ describe('DuplicateDetector', () => {
       id: '99999',
       url: 'https://another-url.com',
       title: 'Product Manager',
-      description: 'We are looking for a PM with Agile and Scrum experience to manage products.'
+      description: 'We are looking for a PM with Agile and Scrum experience to manage products.',
     };
     expect(DuplicateDetector.isDuplicate(jobBase, job2)).toBe(false);
   });

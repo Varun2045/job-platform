@@ -18,7 +18,7 @@ export class ScraperRegistry {
     metaPlugin,
     workdayPlugin,
     greenhousePlugin,
-    leverPlugin
+    leverPlugin,
   ];
 
   /**
@@ -37,7 +37,7 @@ export class ScraperRegistry {
       return null;
     }
 
-    const plugin = this.plugins.find(p => p.metadata.id === company.detected_ats);
+    const plugin = this.plugins.find((p) => p.metadata.id === company.detected_ats);
     if (!plugin) {
       Logger.warn(`No registered scraper plugin matches detected_ats: "${company.detected_ats}" for ${company.name}`);
       return null;

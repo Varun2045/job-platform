@@ -46,7 +46,7 @@ export interface StorageProvider {
       last_seen_timestamp?: string | null;
       interval_minutes?: number;
       priority?: number;
-    }
+    },
   ): Promise<void>;
 
   /**
@@ -77,12 +77,23 @@ export interface StorageProvider {
   /**
    * Retrieves a cached score for a job against a specific resume profile.
    */
-  getCachedScore(jobHash: string, resumeProfile: string, matcherVersion: string, userId?: string): Promise<number | null>;
+  getCachedScore(
+    jobHash: string,
+    resumeProfile: string,
+    matcherVersion: string,
+    userId?: string,
+  ): Promise<number | null>;
 
   /**
    * Caches a calculated resume match score.
    */
-  saveCachedScore(jobHash: string, resumeProfile: string, score: number, matcherVersion: string, userId?: string): Promise<void>;
+  saveCachedScore(
+    jobHash: string,
+    resumeProfile: string,
+    score: number,
+    matcherVersion: string,
+    userId?: string,
+  ): Promise<void>;
 
   /**
    * Saves run execution metrics.
@@ -206,6 +217,11 @@ export interface StorageProvider {
   getExports(userId: string): Promise<any[]>;
   saveExport(userId: string, exportItem: any): Promise<void>;
   deleteExport(userId: string, id: string): Promise<void>;
+
+  // Cover Letters
+  getCoverLetters(userId: string): Promise<any[]>;
+  saveCoverLetter(userId: string, coverLetter: any): Promise<void>;
+  deleteCoverLetter(userId: string, id: string): Promise<void>;
 }
 
 export interface JobAnalysis {
@@ -234,14 +250,30 @@ export interface ReferralContact {
   userId: string;
   name: string;
   role: string;
-  category: 'Recruiter' | 'Hiring Manager' | 'Engineering Manager' | 'University Alumni' | 'Employee' | 'Talent Acquisition' | 'HR';
+  category:
+    | 'Recruiter'
+    | 'Hiring Manager'
+    | 'Engineering Manager'
+    | 'University Alumni'
+    | 'Employee'
+    | 'Talent Acquisition'
+    | 'HR';
   company: string;
   linkedInUrl?: string;
   email?: string;
   location?: string;
   notes?: string;
   tags: string[];
-  connectionStatus: 'Potential Contact' | 'LinkedIn Opened' | 'Connection Sent' | 'Connected' | 'Referral Requested' | 'Referral Submitted' | 'Applied' | 'Interview' | 'Offer';
+  connectionStatus:
+    | 'Potential Contact'
+    | 'LinkedIn Opened'
+    | 'Connection Sent'
+    | 'Connected'
+    | 'Referral Requested'
+    | 'Referral Submitted'
+    | 'Applied'
+    | 'Interview'
+    | 'Offer';
   referralStatus: string;
   lastContacted?: string;
   nextFollowUp?: string;

@@ -54,7 +54,7 @@ export class Telemetry {
       schedulerStatus: this.schedulerStatus,
       cpuUsage: os.loadavg()[0],
       memoryUsageBytes: mem.heapUsed,
-      uptimeSeconds: Math.round(process.uptime())
+      uptimeSeconds: Math.round(process.uptime()),
     };
   }
 

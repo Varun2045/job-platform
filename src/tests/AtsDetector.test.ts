@@ -12,7 +12,7 @@ describe('AtsDetector Unit Tests', () => {
     resume_profiles: ['backend'],
     avg_response_time_ms: 0,
     total_scrapes: 0,
-    total_failures: 0
+    total_failures: 0,
   };
 
   it('should evaluate shouldDetect properly', () => {
@@ -54,8 +54,8 @@ describe('AtsDetector Unit Tests', () => {
         data: '<html><body>wday/cxs/jobs</body></html>',
         status: 200,
         headers: new Headers(),
-        durationMs: 120
-      })
+        durationMs: 120,
+      }),
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
@@ -69,8 +69,8 @@ describe('AtsDetector Unit Tests', () => {
         data: '<html><body><script src="https://boards.greenhouse.io/embed/client"></script></body></html>',
         status: 200,
         headers: new Headers(),
-        durationMs: 120
-      })
+        durationMs: 120,
+      }),
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
@@ -84,8 +84,8 @@ describe('AtsDetector Unit Tests', () => {
         data: '<html><body><div id="lever-jobs-container"><a href="https://lever.co/test/job-1">Job</a></div></body></html>',
         status: 200,
         headers: new Headers(),
-        durationMs: 120
-      })
+        durationMs: 120,
+      }),
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
@@ -99,8 +99,8 @@ describe('AtsDetector Unit Tests', () => {
         data: '<html><body>smartrecruiters.com/test</body></html>',
         status: 200,
         headers: new Headers(),
-        durationMs: 120
-      })
+        durationMs: 120,
+      }),
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
@@ -114,8 +114,8 @@ describe('AtsDetector Unit Tests', () => {
         data: '<html><body>ashbyhq.com/test-careers</body></html>',
         status: 200,
         headers: new Headers(),
-        durationMs: 120
-      })
+        durationMs: 120,
+      }),
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
@@ -129,8 +129,8 @@ describe('AtsDetector Unit Tests', () => {
         data: '<html><body>generic careers site</body></html>',
         status: 200,
         headers: new Headers(),
-        durationMs: 120
-      })
+        durationMs: 120,
+      }),
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
@@ -142,7 +142,7 @@ describe('AtsDetector Unit Tests', () => {
     const mockHttpClient = {
       get: async () => {
         throw new Error('Connection refused');
-      }
+      },
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);

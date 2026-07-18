@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 describe('Config Module Tests', () => {
   const originalEnv = { ...process.env };
 
@@ -30,9 +28,7 @@ describe('Config Module Tests', () => {
     process.env.SUPABASE_SERVICE_KEY = 'secret';
 
     const importPath = '../config/config.js?cachebust=2';
-    await expect(import(importPath as any)).rejects.toThrow(
-      'Environment variable "SUPABASE_URL" is required'
-    );
+    await expect(import(importPath as any)).rejects.toThrow('Environment variable "SUPABASE_URL" is required');
   });
 
   it('should normalize weights correctly if they do not sum to 100', async () => {

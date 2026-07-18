@@ -14,10 +14,7 @@ export class SearchEngine {
   /**
    * Filters a list of jobs based on search criteria.
    */
-  public static search(
-    jobs: { job: Job; score: number }[],
-    criteria: SearchCriteria
-  ): { job: Job; score: number }[] {
+  public static search(jobs: { job: Job; score: number }[], criteria: SearchCriteria): { job: Job; score: number }[] {
     return jobs.filter((item) => {
       const { job, score } = item;
 

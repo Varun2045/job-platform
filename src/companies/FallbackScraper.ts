@@ -18,13 +18,7 @@ export class FallbackScraper {
     const rawJobs: RawJob[] = [];
 
     // Heuristics to find job links in static HTML
-    const jobLinkPatterns = [
-      /\/jobs?\//i,
-      /\/postings?\//i,
-      /\/careers?\//i,
-      /\/positions?\//i,
-      /detail/i
-    ];
+    const jobLinkPatterns = [/\/jobs?\//i, /\/postings?\//i, /\/careers?\//i, /\/positions?\//i, /detail/i];
 
     $('a').each((_, elem) => {
       const href = $(elem).attr('href');
@@ -33,7 +27,9 @@ export class FallbackScraper {
       if (!href || !text || text.length < 5 || text.length > 100) return;
 
       const isJobLink = jobLinkPatterns.some((pattern) => pattern.test(href));
-      const hasSoftwareKeyword = /engineer|developer|sde|backend|frontend|fullstack|programmer|technologist|data/i.test(text);
+      const hasSoftwareKeyword = /engineer|developer|sde|backend|frontend|fullstack|programmer|technologist|data/i.test(
+        text,
+      );
 
       if (isJobLink && hasSoftwareKeyword) {
         // Resolve absolute URL
@@ -42,7 +38,7 @@ export class FallbackScraper {
           try {
             const parsedUrl = new URL(url);
             resolvedUrl = `${parsedUrl.protocol}//${parsedUrl.host}${href}`;
-          } catch (e) {
+          } catch {
             // Ignore
           }
         }
@@ -55,7 +51,7 @@ export class FallbackScraper {
           title: text,
           location: 'India', // fallback assumption
           url: resolvedUrl,
-          source: 'cheerio_fallback'
+          source: 'cheerio_fallback',
         });
       }
     });
@@ -68,7 +64,7 @@ export class FallbackScraper {
     try {
       const response = await httpClient.get<string>(rawJob.url);
       const $ = cheerio.load(response.data);
-      
+
       // Remove scripts, styles and metadata
       $('script, style, nav, footer, header').remove();
       rawJob.description = $('body').text().trim().replace(/\s+/g, ' ');

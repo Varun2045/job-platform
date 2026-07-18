@@ -6,8 +6,8 @@ describe('SalaryAnalyzer Unit Tests', () => {
     const mockStorage = {
       getProfile: async () => ({
         experience_level: 'Early Career',
-        tech_stack: []
-      })
+        tech_stack: [],
+      }),
     } as unknown as StorageProvider;
 
     const res = await SalaryAnalyzer.analyzeSalary('u1', mockStorage);
@@ -20,8 +20,8 @@ describe('SalaryAnalyzer Unit Tests', () => {
     const mockStorage = {
       getProfile: async () => ({
         experience_level: 'Senior',
-        tech_stack: ['Go', 'Kubernetes', 'TypeScript']
-      })
+        tech_stack: ['Go', 'Kubernetes', 'TypeScript'],
+      }),
     } as unknown as StorageProvider;
 
     const res = await SalaryAnalyzer.analyzeSalary('u1', mockStorage);
@@ -36,8 +36,8 @@ describe('SalaryAnalyzer Unit Tests', () => {
     const mockStorage = {
       getProfile: async () => ({
         experience_level: 'Mid Level',
-        tech_stack: ['Golang', 'Node.js']
-      })
+        tech_stack: ['Golang', 'Node.js'],
+      }),
     } as unknown as StorageProvider;
 
     const res = await SalaryAnalyzer.analyzeSalary('u1', mockStorage);
@@ -51,7 +51,7 @@ describe('SalaryAnalyzer Unit Tests', () => {
     const mockStorage = {
       getProfile: async () => {
         throw new Error('Database disconnected');
-      }
+      },
     } as unknown as StorageProvider;
 
     const res = await SalaryAnalyzer.analyzeSalary('u1', mockStorage);

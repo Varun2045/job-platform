@@ -12,13 +12,13 @@ describe('AutoApplyEngine', () => {
     isRemote: true,
     location: 'Remote',
     datePosted: 'Today',
-    description: 'We are looking for a Node.js developer with TypeScript experience.'
+    description: 'We are looking for a Node.js developer with TypeScript experience.',
   } as unknown as Job;
 
   const mockProfile = {
     fullName: 'Jane Doe',
     email: 'jane@example.com',
-    phone: '12345678'
+    phone: '12345678',
   };
 
   test('should determine automated support correctly', () => {
@@ -34,7 +34,11 @@ describe('AutoApplyEngine', () => {
   });
 
   test('should validate application payloads correctly', () => {
-    const payload = AutoApplyEngine.preparePayload(mockJob, mockProfile, 'Jane Doe Resume with extensive Node.js, React and TypeScript engineering experience.'.repeat(5));
+    const payload = AutoApplyEngine.preparePayload(
+      mockJob,
+      mockProfile,
+      'Jane Doe Resume with extensive Node.js, React and TypeScript engineering experience.'.repeat(5),
+    );
     const errors = AutoApplyEngine.validatePayload(payload);
     expect(errors.length).toBe(0);
 
@@ -50,20 +54,24 @@ describe('AutoApplyEngine', () => {
         company: 'TestCorp',
         title: 'Software Engineer',
         state: 'QUEUED',
-        payload: AutoApplyEngine.preparePayload(mockJob, mockProfile, 'Jane Doe Resume with extensive Node.js, React and TypeScript engineering experience.'.repeat(5)),
+        payload: AutoApplyEngine.preparePayload(
+          mockJob,
+          mockProfile,
+          'Jane Doe Resume with extensive Node.js, React and TypeScript engineering experience.'.repeat(5),
+        ),
         validation_errors: [],
-        retries: 0
-      }
+        retries: 0,
+      },
     ];
 
     const mockStorage = {
       getApplicationQueue: (jest.fn() as any).mockResolvedValue(queue),
       saveApplicationQueueItem: (jest.fn() as any).mockImplementation((userId: string, item: any) => {
-        const idx = queue.findIndex(q => q.id === item.id);
+        const idx = queue.findIndex((q) => q.id === item.id);
         if (idx !== -1) queue[idx] = item;
         return Promise.resolve();
       }),
-      saveApplication: (jest.fn() as any).mockResolvedValue(undefined)
+      saveApplication: (jest.fn() as any).mockResolvedValue(undefined),
     } as unknown as StorageProvider;
 
     await AutoApplyEngine.processQueue(mockStorage, 'u1');

@@ -7,7 +7,7 @@ export class WeeklyReportGenerator {
   public static generate(
     metrics: GlobalMetrics,
     applications: Application[],
-    newMatches: { job: any; score: number }[]
+    newMatches: { job: any; score: number }[],
   ): void {
     const storageDir = path.join(process.cwd(), 'storage');
     if (!fs.existsSync(storageDir)) {
@@ -15,23 +15,24 @@ export class WeeklyReportGenerator {
     }
 
     const reportPath = path.join(storageDir, 'weekly-report.md');
-    
+
     // 1. Compile Match statistics
     const totalNewMatches = newMatches.length;
-    const avgMatchScore = newMatches.length > 0
-      ? Math.round(newMatches.reduce((sum, m) => sum + m.score, 0) / newMatches.length)
-      : 0;
+    const avgMatchScore =
+      newMatches.length > 0 ? Math.round(newMatches.reduce((sum, m) => sum + m.score, 0) / newMatches.length) : 0;
 
     // 2. Compile Application Tracking Pipeline
     const appsCount = applications.length;
-    const interviewsCount = applications.filter(a => a.status === 'Interview').length;
-    const offersCount = applications.filter(a => a.status === 'Offer').length;
-    const pendingCount = applications.filter(a => ['Saved', 'Applied', 'OA Scheduled', 'OA Completed'].includes(a.status)).length;
-    const rejectedCount = applications.filter(a => a.status === 'Rejected').length;
+    const interviewsCount = applications.filter((a) => a.status === 'Interview').length;
+    const offersCount = applications.filter((a) => a.status === 'Offer').length;
+    const pendingCount = applications.filter((a) =>
+      ['Saved', 'Applied', 'OA Scheduled', 'OA Completed'].includes(a.status),
+    ).length;
+    const rejectedCount = applications.filter((a) => a.status === 'Rejected').length;
 
     // 3. Top Companies
     const companyJobsMap: Record<string, number> = {};
-    metrics.companies.forEach(c => {
+    metrics.companies.forEach((c) => {
       companyJobsMap[c.name] = (companyJobsMap[c.name] ?? 0) + c.jobsFound;
     });
     const topCompanies = Object.entries(companyJobsMap)
@@ -40,9 +41,8 @@ export class WeeklyReportGenerator {
       .map(([name, count]) => `- **${name}**: ${count} jobs discovered`);
 
     // 4. Scraper Performance Metrics
-    const failureRate = metrics.companiesChecked > 0
-      ? Math.round((metrics.totalFailures / metrics.companiesChecked) * 100)
-      : 0;
+    const failureRate =
+      metrics.companiesChecked > 0 ? Math.round((metrics.totalFailures / metrics.companiesChecked) * 100) : 0;
 
     // 5. Build weekly-report.md content
     const reportContent = `# Weekly Job Monitor Report
@@ -62,7 +62,15 @@ export class WeeklyReportGenerator {
 - **Rejections/Closed**: ${rejectedCount}
 
 ### Current Pipeline Details
-${applications.map(a => `- **${a.company}** (ID: ${a.jobId}) -> **${a.status}** (Last Updated: ${new Date(a.lastUpdated).toLocaleDateString()})`).slice(0, 15).join('\n') || '- No applications tracked yet.'}
+${
+  applications
+    .map(
+      (a) =>
+        `- **${a.company}** (ID: ${a.jobId}) -> **${a.status}** (Last Updated: ${new Date(a.lastUpdated).toLocaleDateString()})`,
+    )
+    .slice(0, 15)
+    .join('\n') || '- No applications tracked yet.'
+}
 
 ## Top Hiring Companies This Week
 ${topCompanies.join('\n') || '- No jobs discovered.'}

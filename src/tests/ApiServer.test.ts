@@ -17,7 +17,7 @@ jest.unstable_mockModule('express', () => {
   Object.assign(appWrapper, expressActual);
   return {
     default: appWrapper,
-    ...expressActual
+    ...expressActual,
   };
 });
 
@@ -62,8 +62,8 @@ describe('Express REST API Server Integration Tests', () => {
       await expect(
         client.request(`http://localhost:${testPort}/api/dashboard`, {
           method: 'GET',
-          retries: 1
-        })
+          retries: 1,
+        }),
       ).rejects.toThrow();
     } finally {
       config.isLocal = true;
@@ -76,9 +76,9 @@ describe('Express REST API Server Integration Tests', () => {
       method: 'POST',
       body: {
         email: 'user@jobmonitor.com',
-        password: 'user123'
+        password: 'user123',
       },
-      retries: 1
+      retries: 1,
     });
 
     expect(res.status).toBe(200);
@@ -92,10 +92,10 @@ describe('Express REST API Server Integration Tests', () => {
         method: 'POST',
         body: {
           email: 'user@jobmonitor.com',
-          password: 'wrongpassword'
+          password: 'wrongpassword',
         },
-        retries: 1
-      })
+        retries: 1,
+      }),
     ).rejects.toThrow();
   });
 
@@ -104,9 +104,9 @@ describe('Express REST API Server Integration Tests', () => {
     const res = await client.request(`http://localhost:${testPort}/api/dashboard`, {
       method: 'GET',
       headers: {
-        Authorization: 'Bearer user-token'
+        Authorization: 'Bearer user-token',
       },
-      retries: 1
+      retries: 1,
     });
 
     expect(res.status).toBe(200);
@@ -119,10 +119,10 @@ describe('Express REST API Server Integration Tests', () => {
       method: 'POST',
       headers: {
         Authorization: 'Bearer user-token',
-        'Content-Type': 'text/plain'
+        'Content-Type': 'text/plain',
       },
       body: rawContent,
-      retries: 1
+      retries: 1,
     });
 
     expect(res.status).toBe(200);

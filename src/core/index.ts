@@ -25,19 +25,21 @@ import { WeeklyReportGenerator } from './WeeklyReportGenerator.js';
 import { Telemetry } from './Telemetry.js';
 import { BackupService } from './BackupService.js';
 
-export async function runOrchestrator(options: {
-  targetCompanyId?: string;
-  targetPriority?: number;
-  forceAll?: boolean;
-  dryRun?: boolean;
-} = {}): Promise<void> {
+export async function runOrchestrator(
+  options: {
+    targetCompanyId?: string;
+    targetPriority?: number;
+    forceAll?: boolean;
+    dryRun?: boolean;
+  } = {},
+): Promise<void> {
   const startTime = Date.now();
   Telemetry.schedulerStatus = 'running';
   Logger.info('Initializing Job Monitor Platform...');
 
   // 1. Select Storage Provider
   const storage: StorageProvider = config.isLocal ? new FileStorage() : new SupabaseStorage();
-  
+
   try {
     await storage.initialize();
     Logger.info(`Storage initialized successfully using: ${storage.constructor.name}`);
@@ -47,16 +49,15 @@ export async function runOrchestrator(options: {
   }
 
   // 2. Distributed Advisory Locking (Production Supabase Only)
-  let acquiredLock = true;
   if (!config.isLocal) {
     try {
       Logger.info('Acquiring distributed Postgres advisory lock...');
       const supabase = (storage as any).client;
       // Acquire session-level lock (8675309 is the lock ID key)
       const { data, error } = await supabase.rpc('pg_try_advisory_lock', { '': 8675309 });
-      
+
       if (error) throw error;
-      
+
       const lockResult = data ?? (await supabase.select('pg_try_advisory_lock(8675309)')).data;
       if (!lockResult) {
         Logger.warn('Another monitor instance is currently running. Exiting to prevent execution race.');
@@ -64,7 +65,9 @@ export async function runOrchestrator(options: {
       }
       Logger.info('Distributed lock acquired successfully.');
     } catch (e) {
-      Logger.warn(`Failed to execute distributed lock check: ${e instanceof Error ? e.message : String(e)}. Proceeding with caution.`);
+      Logger.warn(
+        `Failed to execute distributed lock check: ${e instanceof Error ? e.message : String(e)}. Proceeding with caution.`,
+      );
     }
   }
 
@@ -74,17 +77,17 @@ export async function runOrchestrator(options: {
     Logger.info(`Loaded ${companies.length} active companies from registry.`);
 
     if (options.targetCompanyId) {
-      companies = companies.filter(c => c.id === options.targetCompanyId);
+      companies = companies.filter((c) => c.id === options.targetCompanyId);
       Logger.info(`Targeted company override: ${options.targetCompanyId} (Matches: ${companies.length})`);
     } else {
       if (options.targetPriority) {
-        companies = companies.filter(c => c.priority === options.targetPriority);
+        companies = companies.filter((c) => c.priority === options.targetPriority);
         Logger.info(`Targeted priority filter: ${options.targetPriority} (Matches: ${companies.length})`);
       }
-      
+
       if (!options.forceAll) {
         // Scheduler logic: Check if due based on interval_minutes
-        companies = companies.filter(c => {
+        companies = companies.filter((c) => {
           if (!c.last_successful_scrape) return true;
           const lastRun = new Date(c.last_successful_scrape).getTime();
           const diffMinutes = (Date.now() - lastRun) / (60 * 1000);
@@ -95,11 +98,13 @@ export async function runOrchestrator(options: {
     }
 
     if (!options.targetCompanyId) {
-      companies = companies.filter(c => {
+      companies = companies.filter((c) => {
         if (c.api_suspended_until) {
           const suspendedUntil = new Date(c.api_suspended_until).getTime();
           if (suspendedUntil > Date.now()) {
-            Logger.info(`[${c.name}] Scraper suspended until ${new Date(c.api_suspended_until).toLocaleString()} due to circuit breaker. Skipping.`);
+            Logger.info(
+              `[${c.name}] Scraper suspended until ${new Date(c.api_suspended_until).toLocaleString()} due to circuit breaker. Skipping.`,
+            );
             return false;
           }
         }
@@ -148,7 +153,6 @@ export async function runOrchestrator(options: {
             let newJobsCount = 0;
             let finalScraperUsed = 'none';
             let rawPostings: RawJob[] = [];
-            let errorMsg: string | undefined;
 
             try {
               // A. ATS Discovery check
@@ -159,7 +163,7 @@ export async function runOrchestrator(options: {
                 company.detected_ats_at = new Date().toISOString();
                 await storage.updateCompanyScrapeState(company.id, {
                   detected_ats: company.detected_ats,
-                  detected_ats_at: company.detected_ats_at
+                  detected_ats_at: company.detected_ats_at,
                 });
               }
 
@@ -178,7 +182,7 @@ export async function runOrchestrator(options: {
                     return await fallbackScraper.discover(company, httpClient);
                   } else {
                     const specificPlugin = ScraperRegistry.getPlugin(company);
-                    return specificPlugin 
+                    return specificPlugin
                       ? await specificPlugin.discover(company, httpClient)
                       : await fallbackScraper.discover(company, httpClient);
                   }
@@ -218,7 +222,10 @@ export async function runOrchestrator(options: {
               // Apply scrape_timeout if specified
               if (company.scrape_timeout && company.scrape_timeout > 0) {
                 const timeoutPromise = new Promise<RawJob[]>((_, reject) =>
-                  setTimeout(() => reject(new Error(`Scrape timeout exceeded after ${company.scrape_timeout}ms`)), company.scrape_timeout!)
+                  setTimeout(
+                    () => reject(new Error(`Scrape timeout exceeded after ${company.scrape_timeout}ms`)),
+                    company.scrape_timeout!,
+                  ),
                 );
                 rawPostings = await Promise.race([runScraperPromise, timeoutPromise]);
               } else {
@@ -229,12 +236,12 @@ export async function runOrchestrator(options: {
               totalJobsFoundCount += jobsFound;
 
               // D. Job Normalization Layer
-              let currentJobs = rawPostings.map(raw =>
-                plugin ? plugin.normalize(raw, company) : JobNormalizer.normalize(raw, company)
+              let currentJobs = rawPostings.map((raw) =>
+                plugin ? plugin.normalize(raw, company) : JobNormalizer.normalize(raw, company),
               );
 
               // Apply Advanced Filtering (workplace, category, remote status, location)
-              currentJobs = currentJobs.filter(j => JobFilter.matches(j));
+              currentJobs = currentJobs.filter((j) => JobFilter.matches(j));
 
               // Limit jobs to fetch if company.max_jobs_to_fetch is set
               if (company.max_jobs_to_fetch && company.max_jobs_to_fetch > 0) {
@@ -246,7 +253,9 @@ export async function runOrchestrator(options: {
               const delta = ComparisonEngine.compare(previousJobs, currentJobs);
 
               newJobsCount = delta.added.length;
-              Logger.info(`[${company.name}] Scraped: ${jobsFound} jobs found, ${newJobsCount} new matches after filtering.`);
+              Logger.info(
+                `[${company.name}] Scraped: ${jobsFound} jobs found, ${newJobsCount} new matches after filtering.`,
+              );
 
               // F. Two-Stage Enrichment Pipeline: Only enrich new matching candidates
               const enrichedNewJobs: Job[] = [];
@@ -263,10 +272,14 @@ export async function runOrchestrator(options: {
                     url: newJob.url,
                     source: newJob.source,
                     description: newJob.description,
-                    raw: rawPostings.find(rp => rp.id === newJob.id)?.raw
+                    raw: rawPostings.find((rp) => rp.id === newJob.id)?.raw,
                   };
 
-                  if (pluginToEnrich && company.detected_ats !== 'fallback' && finalScraperUsed === pluginToEnrich.metadata.id) {
+                  if (
+                    pluginToEnrich &&
+                    company.detected_ats !== 'fallback' &&
+                    finalScraperUsed === pluginToEnrich.metadata.id
+                  ) {
                     rawJob = await pluginToEnrich.enrich(rawJob, httpClient);
                   } else if (finalScraperUsed === 'playwright_fallback') {
                     rawJob = await playwrightScraper.enrich(rawJob);
@@ -277,7 +290,9 @@ export async function runOrchestrator(options: {
                   const normalizedEnrichedJob = JobNormalizer.normalize(rawJob, company);
                   enrichedNewJobs.push(normalizedEnrichedJob);
                 } catch (enrichErr: any) {
-                  Logger.error(`[${company.name}] Failed to enrich job details for ${newJob.title} (${newJob.id}): ${enrichErr.message}. Continuing.`);
+                  Logger.error(
+                    `[${company.name}] Failed to enrich job details for ${newJob.title} (${newJob.id}): ${enrichErr.message}. Continuing.`,
+                  );
                   const fallbackRaw: RawJob = {
                     company: newJob.company,
                     id: newJob.id,
@@ -286,7 +301,7 @@ export async function runOrchestrator(options: {
                     url: newJob.url,
                     source: newJob.source,
                     description: newJob.description,
-                    raw: rawPostings.find(rp => rp.id === newJob.id)?.raw
+                    raw: rawPostings.find((rp) => rp.id === newJob.id)?.raw,
                   };
                   const normalizedFallbackJob = JobNormalizer.normalize(fallbackRaw, company);
                   enrichedNewJobs.push(normalizedFallbackJob);
@@ -297,13 +312,23 @@ export async function runOrchestrator(options: {
               const verifiedNewJobs: Job[] = [];
               for (const enrichedJob of enrichedNewJobs) {
                 const excludeKeywords = [
-                  'Director', 'Vice President', 'VP', 'Sales', 'Partner Development',
-                  'Account Executive', 'Customer Success', 'Business Development',
-                  'Marketing', 'Finance', 'Legal', 'HR', 'Recruiter'
+                  'Director',
+                  'Vice President',
+                  'VP',
+                  'Sales',
+                  'Partner Development',
+                  'Account Executive',
+                  'Customer Success',
+                  'Business Development',
+                  'Marketing',
+                  'Finance',
+                  'Legal',
+                  'HR',
+                  'Recruiter',
                 ];
 
                 const titleLower = enrichedJob.title.toLowerCase();
-                const shouldExclude = excludeKeywords.some(keyword => {
+                const shouldExclude = excludeKeywords.some((keyword) => {
                   const kwLower = keyword.toLowerCase();
                   if (keyword === 'VP' || keyword === 'HR') {
                     const regex = new RegExp(`\\b${kwLower}\\b`, 'i');
@@ -341,7 +366,9 @@ export async function runOrchestrator(options: {
                   enrichedJob.explanation = ResumeMatcher.explain(enrichedJob, profiles[0]);
                   allMatchesToNotify.push({ job: enrichedJob, score: highestScore });
                   verifiedNewJobs.push(enrichedJob);
-                  Logger.info(`[${company.name}] Job matched threshold! [${enrichedJob.title}] Score: ${highestScore}%`);
+                  Logger.info(
+                    `[${company.name}] Job matched threshold! [${enrichedJob.title}] Score: ${highestScore}%`,
+                  );
                 }
               }
 
@@ -374,20 +401,18 @@ export async function runOrchestrator(options: {
                   (enrichedJob as any).changes = mod.changes;
                   allUpdatedMatchesToNotify.push({ job: enrichedJob, score: highestScore });
                   enrichedUpdatedJobs.push(enrichedJob);
-                  Logger.info(`[${company.name}] Updated job matched threshold! [${enrichedJob.title}] Score: ${highestScore}%`);
+                  Logger.info(
+                    `[${company.name}] Updated job matched threshold! [${enrichedJob.title}] Score: ${highestScore}%`,
+                  );
                 }
               }
 
               // H. Save updated company state
               if (!options.dryRun) {
-                const remainingPrevJobs = previousJobs.filter(pj => 
-                  !delta.expired.some(ej => ej.id === pj.id) && 
-                  !delta.modified.some(mj => mj.previous.id === pj.id)
-                );
-                const updatedCurrJobs = currentJobs.map(cj => {
-                  const enrichedNew = enrichedNewJobs.find(ej => ej.id === cj.id);
+                const updatedCurrJobs = currentJobs.map((cj) => {
+                  const enrichedNew = enrichedNewJobs.find((ej) => ej.id === cj.id);
                   if (enrichedNew) return enrichedNew;
-                  const enrichedUpd = enrichedUpdatedJobs.find(ej => ej.id === cj.id);
+                  const enrichedUpd = enrichedUpdatedJobs.find((ej) => ej.id === cj.id);
                   if (enrichedUpd) return enrichedUpd;
                   return cj;
                 });
@@ -398,7 +423,7 @@ export async function runOrchestrator(options: {
               const duration = Date.now() - compStartTime;
               const nextTotalScrapes = company.total_scrapes + 1;
               const nextAvgResponse = Math.round(
-                (company.avg_response_time_ms * company.total_scrapes + duration) / nextTotalScrapes
+                (company.avg_response_time_ms * company.total_scrapes + duration) / nextTotalScrapes,
               );
 
               if (!options.dryRun) {
@@ -409,14 +434,12 @@ export async function runOrchestrator(options: {
                   total_scrapes: nextTotalScrapes,
                   last_seen_timestamp: new Date().toISOString(),
                   consecutive_failures: 0,
-                  api_suspended_until: null
+                  api_suspended_until: null,
                 });
               }
-
             } catch (err: any) {
               scraperStatus = 'failed';
               totalFailuresCount++;
-              errorMsg = err.message;
               Logger.error(`Scraper execution crashed for company: ${company.name}`, err);
 
               if (!options.dryRun) {
@@ -424,13 +447,13 @@ export async function runOrchestrator(options: {
                 const nextState: Partial<CompanyConfig> = {
                   last_failed_scrape: new Date().toISOString(),
                   total_failures: company.total_failures + 1,
-                  consecutive_failures: nextConsecutiveFailures
+                  consecutive_failures: nextConsecutiveFailures,
                 };
 
-                const isPermanentFailure = 
-                  err.message.includes('HTTP Error 404') || 
+                const isPermanentFailure =
+                  err.message.includes('HTTP Error 404') ||
                   err.message.includes('HTTP Error 410') ||
-                  err.message.includes('ENOTFOUND') || 
+                  err.message.includes('ENOTFOUND') ||
                   err.message.includes('EAI_AGAIN');
 
                 if (isPermanentFailure) {
@@ -440,7 +463,9 @@ export async function runOrchestrator(options: {
                   const cooldownMinutes = 120;
                   const suspendedUntil = new Date(Date.now() + cooldownMinutes * 60 * 1000).toISOString();
                   nextState.api_suspended_until = suspendedUntil;
-                  Logger.warn(`[${company.name}] Circuit breaker tripped! Suspending scraper for ${cooldownMinutes} minutes.`);
+                  Logger.warn(
+                    `[${company.name}] Circuit breaker tripped! Suspending scraper for ${cooldownMinutes} minutes.`,
+                  );
                 }
 
                 await storage.updateCompanyScrapeState(company.id, nextState);
@@ -456,9 +481,9 @@ export async function runOrchestrator(options: {
               jobsFound,
               newJobs: newJobsCount,
               failures: scraperStatus === 'failed' ? 1 : 0,
-              status: scraperStatus
+              status: scraperStatus,
             });
-          }
+          },
         });
       }
 
@@ -467,7 +492,7 @@ export async function runOrchestrator(options: {
 
       if (b < batches.length - 1 && !options.targetCompanyId) {
         Logger.info(`Finished Batch ${b + 1}. Staggering run: waiting 3 minutes before starting Batch ${b + 2}...`);
-        const waitMs = (process.env.NODE_ENV === 'test' || options.dryRun) ? 1 : 3 * 60 * 1000;
+        const waitMs = process.env.NODE_ENV === 'test' || options.dryRun ? 1 : 3 * 60 * 1000;
         await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
     }
@@ -488,27 +513,17 @@ export async function runOrchestrator(options: {
     }
 
     if ((finalAlertList.length > 0 || finalUpdatedAlertList.length > 0) && config.features.email && !options.dryRun) {
-      Logger.info(`Compiling hourly digest notification for ${finalAlertList.length} new matches and ${finalUpdatedAlertList.length} updated matches...`);
+      Logger.info(
+        `Compiling hourly digest notification for ${finalAlertList.length} new matches and ${finalUpdatedAlertList.length} updated matches...`,
+      );
       const emailProvider = new EmailNotificationProvider();
-      
+
       const digest = {
         runTimestamp: new Date().toISOString(),
         totalCompaniesChecked: companies.length,
         totalJobsFound: totalJobsFoundCount,
         totalNewJobs: finalAlertList.length,
-        jobs: finalAlertList.map(m => ({
-          companyName: m.job.company,
-          title: m.job.title,
-          location: m.job.location,
-          experience: m.job.experience,
-          employmentType: m.job.employmentType,
-          datePosted: m.job.datePosted,
-          applyUrl: m.job.url,
-          jobId: m.job.id,
-          matchScore: m.score,
-          isRemote: m.job.isRemote
-        })),
-        updatedJobs: finalUpdatedAlertList.map(m => ({
+        jobs: finalAlertList.map((m) => ({
           companyName: m.job.company,
           title: m.job.title,
           location: m.job.location,
@@ -519,8 +534,20 @@ export async function runOrchestrator(options: {
           jobId: m.job.id,
           matchScore: m.score,
           isRemote: m.job.isRemote,
-          changes: (m.job as any).changes || []
-        }))
+        })),
+        updatedJobs: finalUpdatedAlertList.map((m) => ({
+          companyName: m.job.company,
+          title: m.job.title,
+          location: m.job.location,
+          experience: m.job.experience,
+          employmentType: m.job.employmentType,
+          datePosted: m.job.datePosted,
+          applyUrl: m.job.url,
+          jobId: m.job.id,
+          matchScore: m.score,
+          isRemote: m.job.isRemote,
+          changes: (m.job as any).changes || [],
+        })),
       };
 
       try {
@@ -532,7 +559,9 @@ export async function runOrchestrator(options: {
         Logger.error('Failed to send daily/weekly email digest', e);
       }
     } else {
-      Logger.info(`Email notifications skipped. Matches to alert: ${finalAlertList.length + finalUpdatedAlertList.length}. Feature status: ${config.features.email}`);
+      Logger.info(
+        `Email notifications skipped. Matches to alert: ${finalAlertList.length + finalUpdatedAlertList.length}. Feature status: ${config.features.email}`,
+      );
     }
 
     // 7. Output Dashboards, Status, CSVs, Reports, and Metrics Exporters
@@ -544,25 +573,25 @@ export async function runOrchestrator(options: {
       totalJobs: totalJobsFoundCount,
       totalNewMatches: finalAlertList.length,
       totalFailures: totalFailuresCount,
-      companies: companyMetricsList
+      companies: companyMetricsList,
     };
 
     if (config.features.dashboard && !options.dryRun) {
       MetricsExporter.exportPrometheus(globalMetrics);
       MetricsExporter.exportStatus(globalMetrics);
-      
+
       // Save final stats record to file/DB before generating analytics trends
       await storage.saveRunStats({
         durationMs: totalDurationMs,
         companiesChecked: companies.length,
         jobsScraped: totalJobsFoundCount,
         matchesFound: finalAlertList.length + finalUpdatedAlertList.length,
-        failuresCount: totalFailuresCount
+        failuresCount: totalFailuresCount,
       });
 
       // Generate Exports & Analytics
       AnalyticsGenerator.generate(globalMetrics);
-      
+
       const applications = await storage.getApplications();
       DashboardGenerator.generate(globalMetrics, finalAlertList, finalUpdatedAlertList, applications);
       DailyReportGenerator.generate(globalMetrics, finalAlertList, finalUpdatedAlertList);
@@ -570,10 +599,10 @@ export async function runOrchestrator(options: {
 
       // Generate CSV
       const allMatchedCSV = [
-        ...finalAlertList.map(m => ({ ...m, status: 'New' })),
-        ...finalUpdatedAlertList.map(m => ({ ...m, status: 'Updated' }))
+        ...finalAlertList.map((m) => ({ ...m, status: 'New' })),
+        ...finalUpdatedAlertList.map((m) => ({ ...m, status: 'Updated' })),
       ];
-      const csvJobs = allMatchedCSV.map(m => ({
+      const csvJobs = allMatchedCSV.map((m) => ({
         company: m.job.company,
         title: m.job.title,
         location: m.job.location,
@@ -581,13 +610,22 @@ export async function runOrchestrator(options: {
         status: m.status,
         url: m.job.url,
         datePosted: m.job.datePosted || '',
-        dateFound: new Date().toISOString().split('T')[0]
+        dateFound: new Date().toISOString().split('T')[0],
       }));
       CsvExporter.export(csvJobs);
 
       // Export Applications
-      const appCsvHeaders = ['JobHash', 'Company', 'JobId', 'Status', 'AppliedDate', 'ResumeUsed', 'Notes', 'LastUpdated'];
-      const appCsvRows = applications.map(a => [
+      const appCsvHeaders = [
+        'JobHash',
+        'Company',
+        'JobId',
+        'Status',
+        'AppliedDate',
+        'ResumeUsed',
+        'Notes',
+        'LastUpdated',
+      ];
+      const appCsvRows = applications.map((a) => [
         a.jobHash,
         `"${a.company.replace(/"/g, '""')}"`,
         a.jobId,
@@ -595,15 +633,15 @@ export async function runOrchestrator(options: {
         a.appliedDate || '',
         a.resumeUsed || '',
         `"${(a.notes || '').replace(/"/g, '""')}"`,
-        a.lastUpdated
+        a.lastUpdated,
       ]);
-      const appCsvContent = [appCsvHeaders.join(','), ...appCsvRows.map(r => r.join(','))].join('\n');
+      const appCsvContent = [appCsvHeaders.join(','), ...appCsvRows.map((r) => r.join(','))].join('\n');
       const storageDir = path.join(process.cwd(), 'storage');
       fs.writeFileSync(path.join(storageDir, 'applications.csv'), appCsvContent, 'utf-8');
       fs.writeFileSync(path.join(storageDir, 'applications.json'), JSON.stringify(applications, null, 2), 'utf-8');
-      
+
       let appMd = '# Tracked Applications\n\n';
-      applications.forEach(a => {
+      applications.forEach((a) => {
         appMd += `### ${a.company} - Job ID: ${a.jobId}\n`;
         appMd += `- **Status**: ${a.status}\n`;
         appMd += `- **Applied Date**: ${a.appliedDate || 'N/A'}\n`;
@@ -623,17 +661,45 @@ export async function runOrchestrator(options: {
         newJobs: totalNewJobs,
         matches: globalMetrics.totalNewMatches + finalUpdatedAlertList.length,
         notifications: globalMetrics.totalNewMatches + finalUpdatedAlertList.length,
-        scraperFailures: globalMetrics.totalFailures
+        scraperFailures: globalMetrics.totalFailures,
       };
       fs.writeFileSync(summaryPath, JSON.stringify(runSummary, null, 2), 'utf-8');
       Logger.info(`Run summary saved to: ${summaryPath}`);
+
+      // Save execution logs history for the Automation Hub UI
+      try {
+        const historyPath = path.join(storageDir, 'scrape_history_logs.json');
+        let history: any[] = [];
+        if (fs.existsSync(historyPath)) {
+          try {
+            history = JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
+          } catch {}
+        }
+
+        const newLogs = globalMetrics.companies.map((c) => ({
+          timestamp: globalMetrics.runTimestamp,
+          company: c.name,
+          status: c.status === 'success' ? 'success' : 'error',
+          jobsFound: c.newJobs || 0,
+          duration: (c.durationMs / 1000).toFixed(1) + 's',
+          errors: c.status === 'success' ? 0 : 1,
+          retries: 0,
+        }));
+
+        history = [...newLogs, ...history].slice(0, 100);
+        fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), 'utf-8');
+      } catch (err) {
+        Logger.error('Failed to save scrape history logs', err as any);
+      }
+
       await BackupService.triggerAutoBackup(storage);
     }
 
     Telemetry.lastSchedulerRun = new Date().toISOString();
     Telemetry.schedulerStatus = totalFailuresCount > 0 ? 'degraded' : 'healthy';
-    Logger.info(`Job Monitor Platform run completed in ${(totalDurationMs / 1000).toFixed(1)}s. Total matches: ${finalAlertList.length + finalUpdatedAlertList.length}`);
-
+    Logger.info(
+      `Job Monitor Platform run completed in ${(totalDurationMs / 1000).toFixed(1)}s. Total matches: ${finalAlertList.length + finalUpdatedAlertList.length}`,
+    );
   } finally {
     // 8. Release Advisory Lock
     if (!config.isLocal) {
@@ -650,12 +716,9 @@ export async function runOrchestrator(options: {
 }
 
 // Auto-run if triggered directly
-const isMain = process.argv[1] && (
-  process.argv[1].endsWith('index.ts') || 
-  process.argv[1].endsWith('index.js')
-);
+const isMain = process.argv[1] && (process.argv[1].endsWith('index.ts') || process.argv[1].endsWith('index.js'));
 if (isMain) {
-  runOrchestrator().catch(e => {
+  runOrchestrator().catch((e) => {
     Logger.critical('Orchestrator encountered uncaught startup crash', e);
     process.exit(1);
   });

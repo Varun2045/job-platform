@@ -7,17 +7,17 @@ export const metadata = {
   id: 'lever',
   version: '1.0.0',
   ats: 'lever',
-  author: 'Job Monitor'
+  author: 'Job Monitor',
 };
 
 export class LeverPlugin implements ScraperPlugin {
   public metadata = metadata;
-  
+
   public capabilities = {
     supportsPagination: false,
     supportsIncrementalSync: false,
     supportsJobDescriptions: true,
-    supportsRemoteFiltering: false
+    supportsRemoteFiltering: false,
   };
 
   public supports(company: CompanyConfig): boolean {
@@ -25,9 +25,15 @@ export class LeverPlugin implements ScraperPlugin {
   }
 
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
-    const companyId = company.api_endpoint || company.id;
+    let companyId = company.api_endpoint || company.id;
+    if (companyId.startsWith('http://') || companyId.startsWith('https://')) {
+      const match = companyId.match(/jobs\.lever\.co\/([^/?#]+)/);
+      if (match) {
+        companyId = match[1];
+      }
+    }
     const url = `https://api.lever.co/v0/postings/${companyId}`;
-    
+
     Logger.debug(`Lever discovery request for company: ${company.name} [CompanyId: ${companyId}]`);
     const response = await httpClient.get<any[]>(url);
 
@@ -62,14 +68,14 @@ export class LeverPlugin implements ScraperPlugin {
         source: 'lever',
         description,
         isRemote: job.categories?.location?.toLowerCase().includes('remote') || false,
-        raw: job
+        raw: job,
       };
     });
 
     return rawJobs;
   }
 
-  public async enrich(rawJob: RawJob, httpClient: HttpClient): Promise<RawJob> {
+  public async enrich(rawJob: RawJob, _httpClient: HttpClient): Promise<RawJob> {
     // Lever already returns descriptions in the list query
     return rawJob;
   }

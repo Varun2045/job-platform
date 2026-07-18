@@ -18,7 +18,7 @@ describe('ApplicationTracker (FileStorage)', () => {
       appliedDate: new Date().toISOString(),
       resumeUsed: 'resume_v1.pdf',
       notes: 'First round scheduled.',
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
 
     await storage.saveApplication(app);

@@ -16,6 +16,7 @@ export interface CompanyConfig {
   consecutive_failures?: number;
   resume_profiles: string[];
   avg_response_time_ms: number;
+  cron_expression?: string | null;
   total_scrapes: number;
   total_failures: number;
   last_seen_timestamp?: string | null;
@@ -79,6 +80,11 @@ export interface Application {
   resumeUsed?: string | null;
   notes?: string | null;
   lastUpdated: string;
+  title?: string;
+  location?: string;
+  employmentType?: string;
+  isRemote?: boolean;
+  salary?: string;
 }
 
 export interface PluginCapabilities {

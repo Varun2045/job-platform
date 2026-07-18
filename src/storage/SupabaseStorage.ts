@@ -13,7 +13,7 @@ export class SupabaseStorage implements StorageProvider {
     if (!config.supabaseUrl || !config.supabaseServiceKey) {
       throw new Error('Supabase credentials missing. Cannot initialize SupabaseStorage.');
     }
-    
+
     this.client = createClient(config.supabaseUrl, config.supabaseServiceKey, {
       auth: { persistSession: false },
       global: {
@@ -21,17 +21,17 @@ export class SupabaseStorage implements StorageProvider {
         fetch: (url, options) => {
           return fetch(url, {
             ...options,
-            signal: AbortSignal.timeout(15000)
+            signal: AbortSignal.timeout(15000),
           });
-        }
-      }
+        },
+      },
     });
 
     // 1. Connection retry logic
     let attempts = 3;
     let success = false;
     let lastError: any = null;
-    
+
     while (attempts > 0) {
       try {
         // Run a simple query to verify connection
@@ -44,7 +44,7 @@ export class SupabaseStorage implements StorageProvider {
         attempts--;
         if (attempts > 0) {
           Logger.warn(`Supabase connection failed. Retrying in 2 seconds... (Attempts remaining: ${attempts})`, err);
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise((r) => setTimeout(r, 2000));
         }
       }
     }
@@ -61,7 +61,8 @@ export class SupabaseStorage implements StorageProvider {
       'job_monitor_stats',
       'job_monitor_scores',
       'job_monitor_analyses',
-      'job_monitor_extended_settings'
+      'job_monitor_extended_settings',
+      'job_monitor_cover_letters',
     ];
 
     for (const table of requiredTables) {
@@ -69,7 +70,9 @@ export class SupabaseStorage implements StorageProvider {
         const { error } = await this.client.from(table).select('*').limit(0);
         if (error) {
           if (error.code === '42P01' || (error.message && error.message.includes('does not exist'))) {
-            throw new Error(`Migration check failed: Table "${table}" does not exist in Supabase. Please apply migrations (001_setup.sql).`);
+            throw new Error(
+              `Migration check failed: Table "${table}" does not exist in Supabase. Please apply migrations (001_setup.sql).`,
+            );
           }
           throw error;
         }
@@ -82,7 +85,7 @@ export class SupabaseStorage implements StorageProvider {
 
     // Self-seeding check: if database has 0 companies, seed from local config/companies.json
     try {
-      const { data, error, count } = await this.client
+      const { error, count } = await this.client
         .from('job_monitor_companies')
         .select('id', { count: 'exact', head: true });
 
@@ -96,8 +99,8 @@ export class SupabaseStorage implements StorageProvider {
         if (fs.existsSync(seedPath)) {
           const raw = fs.readFileSync(seedPath, 'utf-8');
           const seedConfigs = JSON.parse(raw) as CompanyConfig[];
-          
-          const dbRows = seedConfigs.map(c => ({
+
+          const dbRows = seedConfigs.map((c) => ({
             id: c.id,
             name: c.name,
             enabled: c.enabled,
@@ -111,12 +114,10 @@ export class SupabaseStorage implements StorageProvider {
             max_pages: c.max_pages ?? null,
             scrape_timeout: c.scrape_timeout ?? null,
             retry_count: c.retry_count ?? null,
-            preferred_scraper: c.preferred_scraper ?? null
+            preferred_scraper: c.preferred_scraper ?? null,
           }));
 
-          const { error: insertError } = await this.client
-            .from('job_monitor_companies')
-            .insert(dbRows);
+          const { error: insertError } = await this.client.from('job_monitor_companies').insert(dbRows);
 
           if (insertError) {
             Logger.error('Failed to seed companies in database', insertError);
@@ -134,11 +135,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async getCompanyConfig(id: string): Promise<CompanyConfig | null> {
-    const { data, error } = await this.client
-      .from('job_monitor_companies')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await this.client.from('job_monitor_companies').select('*').eq('id', id).single();
 
     if (error) {
       if (error.code === 'PGRST116') return null; // not found
@@ -150,10 +147,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async getEnabledCompanies(): Promise<CompanyConfig[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_companies')
-      .select('*')
-      .eq('enabled', true);
+    const { data, error } = await this.client.from('job_monitor_companies').select('*').eq('enabled', true);
 
     if (error) {
       Logger.error('Error fetching enabled companies', error);
@@ -164,9 +158,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async getAllCompanies(): Promise<CompanyConfig[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_companies')
-      .select('*');
+    const { data, error } = await this.client.from('job_monitor_companies').select('*');
 
     if (error) {
       Logger.error('Error fetching all companies', error);
@@ -191,12 +183,10 @@ export class SupabaseStorage implements StorageProvider {
       max_pages: company.max_pages ?? null,
       scrape_timeout: company.scrape_timeout ?? null,
       retry_count: company.retry_count ?? null,
-      preferred_scraper: company.preferred_scraper ?? null
+      preferred_scraper: company.preferred_scraper ?? null,
     };
 
-    const { error } = await this.client
-      .from('job_monitor_companies')
-      .upsert(payload, { onConflict: 'id' });
+    const { error } = await this.client.from('job_monitor_companies').upsert(payload, { onConflict: 'id' });
 
     if (error) {
       Logger.error(`Error saving company config for ${company.id} to Supabase`, error);
@@ -204,14 +194,8 @@ export class SupabaseStorage implements StorageProvider {
     }
   }
 
-  public async updateCompanyScrapeState(
-    id: string,
-    state: Partial<CompanyConfig>
-  ): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_companies')
-      .update(state)
-      .eq('id', id);
+  public async updateCompanyScrapeState(id: string, state: Partial<CompanyConfig>): Promise<void> {
+    const { error } = await this.client.from('job_monitor_companies').update(state).eq('id', id);
 
     if (error) {
       Logger.error(`Error updating company scrape state for ${id}`, error);
@@ -222,10 +206,7 @@ export class SupabaseStorage implements StorageProvider {
     // Remove company jobs first
     await this.client.from('job_monitor_state').delete().eq('company_id', id);
     // Remove company config
-    const { error } = await this.client
-      .from('job_monitor_companies')
-      .delete()
-      .eq('id', id);
+    const { error } = await this.client.from('job_monitor_companies').delete().eq('id', id);
     if (error) {
       Logger.error(`Error deleting company config for ${id}`, error);
     }
@@ -249,13 +230,11 @@ export class SupabaseStorage implements StorageProvider {
 
   public async saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void> {
     // Use upsert to overwrite or create state
-    const { error } = await this.client
-      .from('job_monitor_state')
-      .upsert({
-        company_id: companyId,
-        jobs_data: jobs,
-        updated_at: new Date().toISOString()
-      });
+    const { error } = await this.client.from('job_monitor_state').upsert({
+      company_id: companyId,
+      jobs_data: jobs,
+      updated_at: new Date().toISOString(),
+    });
 
     if (error) {
       Logger.error(`Error saving jobs state for ${companyId}`, error);
@@ -263,7 +242,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async isJobNotified(jobHash: string): Promise<boolean> {
-    const { data, error, count } = await this.client
+    const { error, count } = await this.client
       .from('job_monitor_notifications')
       .select('job_hash', { count: 'exact', head: true })
       .eq('job_hash', jobHash);
@@ -277,12 +256,10 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveJobNotified(jobHash: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_notifications')
-      .insert({
-        job_hash: jobHash,
-        notified_at: new Date().toISOString()
-      });
+    const { error } = await this.client.from('job_monitor_notifications').insert({
+      job_hash: jobHash,
+      notified_at: new Date().toISOString(),
+    });
 
     if (error) {
       // 23505 is standard postgres unique violation code (already exists)
@@ -296,7 +273,7 @@ export class SupabaseStorage implements StorageProvider {
     jobHash: string,
     resumeProfile: string,
     matcherVersion: string,
-    userId?: string
+    userId?: string,
   ): Promise<number | null> {
     let query = this.client
       .from('job_monitor_scores')
@@ -304,7 +281,7 @@ export class SupabaseStorage implements StorageProvider {
       .eq('job_hash', jobHash)
       .eq('resume_profile', resumeProfile)
       .eq('matcher_version', matcherVersion);
-    
+
     if (userId) {
       query = query.eq('user_id', userId);
     } else {
@@ -327,21 +304,19 @@ export class SupabaseStorage implements StorageProvider {
     resumeProfile: string,
     score: number,
     matcherVersion: string,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     const payload: any = {
       job_hash: jobHash,
       resume_profile: resumeProfile,
       score,
       matcher_version: matcherVersion,
-      scored_at: new Date().toISOString()
+      scored_at: new Date().toISOString(),
     };
     if (userId) {
       payload.user_id = userId;
     }
-    const { error } = await this.client
-      .from('job_monitor_scores')
-      .upsert(payload);
+    const { error } = await this.client.from('job_monitor_scores').upsert(payload);
 
     if (error) {
       Logger.error(`Error saving cached score for ${jobHash}`, error);
@@ -349,12 +324,10 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveRunStats(metrics: Record<string, any>): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_stats')
-      .insert({
-        run_metrics: metrics,
-        created_at: new Date().toISOString()
-      });
+    const { error } = await this.client.from('job_monitor_stats').insert({
+      run_metrics: metrics,
+      created_at: new Date().toISOString(),
+    });
 
     if (error) {
       Logger.error('Error saving execution stats to Supabase', error);
@@ -381,7 +354,7 @@ export class SupabaseStorage implements StorageProvider {
       appliedDate: row.applied_date,
       resumeUsed: row.resume_used,
       notes: row.notes,
-      lastUpdated: row.last_updated
+      lastUpdated: row.last_updated,
     }));
   }
 
@@ -394,14 +367,12 @@ export class SupabaseStorage implements StorageProvider {
       applied_date: app.appliedDate || null,
       resume_used: app.resumeUsed || null,
       notes: app.notes || null,
-      last_updated: new Date().toISOString()
+      last_updated: new Date().toISOString(),
     };
     if (userId) {
       payload.user_id = userId;
     }
-    const { error } = await this.client
-      .from('job_monitor_applications')
-      .upsert(payload);
+    const { error } = await this.client.from('job_monitor_applications').upsert(payload);
 
     if (error) {
       Logger.error(`Error saving application for ${app.jobHash} to Supabase`, error);
@@ -409,11 +380,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async getJobAnalysis(jobHash: string): Promise<any | null> {
-    const { data, error } = await this.client
-      .from('job_monitor_analyses')
-      .select('*')
-      .eq('job_hash', jobHash)
-      .single();
+    const { data, error } = await this.client.from('job_monitor_analyses').select('*').eq('job_hash', jobHash).single();
 
     if (error) {
       if (error.code !== 'PGRST116') {
@@ -430,23 +397,21 @@ export class SupabaseStorage implements StorageProvider {
       resumeImprovements: data.resume_improvements || [],
       difficulty: data.difficulty,
       prepTopics: data.prep_topics || [],
-      lastUpdated: data.last_updated
+      lastUpdated: data.last_updated,
     };
   }
 
   public async saveJobAnalysis(analysis: any): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_analyses')
-      .upsert({
-        job_hash: analysis.jobHash,
-        summary: analysis.summary,
-        why_matches: analysis.whyMatches,
-        missing_skills: analysis.missing_skills || [],
-        resume_improvements: analysis.resumeImprovements || [],
-        difficulty: analysis.difficulty,
-        prep_topics: analysis.prepTopics || [],
-        last_updated: new Date().toISOString()
-      });
+    const { error } = await this.client.from('job_monitor_analyses').upsert({
+      job_hash: analysis.jobHash,
+      summary: analysis.summary,
+      why_matches: analysis.whyMatches,
+      missing_skills: analysis.missing_skills || [],
+      resume_improvements: analysis.resumeImprovements || [],
+      difficulty: analysis.difficulty,
+      prep_topics: analysis.prepTopics || [],
+      last_updated: new Date().toISOString(),
+    });
 
     if (error) {
       Logger.error(`Error saving job analysis for ${analysis.jobHash} to Supabase`, error);
@@ -475,7 +440,7 @@ export class SupabaseStorage implements StorageProvider {
       preferredCities: data.preferred_cities || [],
       remotePreference: data.remote_preference || 'all',
       notificationFrequency: data.notification_frequency || 'daily',
-      digestFormat: data.digest_format || 'markdown'
+      digestFormat: data.digest_format || 'markdown',
     };
   }
 
@@ -487,16 +452,14 @@ export class SupabaseStorage implements StorageProvider {
       remote_preference: settings.remotePreference || 'all',
       notification_frequency: settings.notificationFrequency || 'daily',
       digest_format: settings.digestFormat || 'markdown',
-      last_updated: new Date().toISOString()
+      last_updated: new Date().toISOString(),
     };
     if (userId) {
       payload.user_id = userId;
     } else {
       payload.id = 'default';
     }
-    const { error } = await this.client
-      .from('job_monitor_extended_settings')
-      .upsert(payload);
+    const { error } = await this.client.from('job_monitor_extended_settings').upsert(payload);
 
     if (error) {
       Logger.error('Error saving extended settings to Supabase', error);
@@ -505,11 +468,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Profile Management
   public async getProfile(userId: string): Promise<any | null> {
-    const { data, error } = await this.client
-      .from('job_monitor_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await this.client.from('job_monitor_profiles').select('*').eq('id', userId).single();
 
     if (error) {
       if (error.code === 'PGRST116') return null;
@@ -520,21 +479,19 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveProfile(userId: string, profile: any): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_profiles')
-      .upsert({
-        id: userId,
-        name: profile.name,
-        photo_url: profile.photo_url || null,
-        preferred_roles: profile.preferred_roles || [],
-        preferred_cities: profile.preferred_cities || [],
-        experience_level: profile.experience_level || null,
-        tech_stack: profile.tech_stack || [],
-        linkedin: profile.linkedin || null,
-        github: profile.github || null,
-        portfolio: profile.portfolio || null,
-        role: profile.role || 'User'
-      });
+    const { error } = await this.client.from('job_monitor_profiles').upsert({
+      id: userId,
+      name: profile.name,
+      photo_url: profile.photo_url || null,
+      preferred_roles: profile.preferred_roles || [],
+      preferred_cities: profile.preferred_cities || [],
+      experience_level: profile.experience_level || null,
+      tech_stack: profile.tech_stack || [],
+      linkedin: profile.linkedin || null,
+      github: profile.github || null,
+      portfolio: profile.portfolio || null,
+      role: profile.role || 'User',
+    });
 
     if (error) {
       Logger.error('Error saving profile to Supabase', error);
@@ -542,9 +499,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async getAllProfiles(): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_profiles')
-      .select('*');
+    const { data, error } = await this.client.from('job_monitor_profiles').select('*');
 
     if (error) {
       Logger.error('Error listing all profiles', error);
@@ -555,32 +510,27 @@ export class SupabaseStorage implements StorageProvider {
 
   // User-isolated Resumes
   public async getUserResumes(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_resumes')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_resumes').select('*').eq('user_id', userId);
 
     if (error) {
       Logger.error('Error getting resumes', error);
       return [];
     }
-    return (data || []).map(r => ({
+    return (data || []).map((r) => ({
       profileName: r.profile_name,
       content: r.content,
       pdf_data: r.pdf_data,
-      created_at: r.created_at
+      created_at: r.created_at,
     }));
   }
 
   public async saveUserResume(userId: string, profileName: string, content: string, pdfData?: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_resumes')
-      .upsert({
-        user_id: userId,
-        profile_name: profileName,
-        content,
-        pdf_data: pdfData
-      });
+    const { error } = await this.client.from('job_monitor_resumes').upsert({
+      user_id: userId,
+      profile_name: profileName,
+      content,
+      pdf_data: pdfData,
+    });
 
     if (error) {
       Logger.error('Error saving resume to Supabase', error);
@@ -601,10 +551,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Saved Searches
   public async getSavedSearches(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_saved_searches')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_saved_searches').select('*').eq('user_id', userId);
 
     if (error) {
       Logger.error('Error getting saved searches', error);
@@ -614,13 +561,11 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveSavedSearch(userId: string, name: string, filters: any): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_saved_searches')
-      .insert({
-        user_id: userId,
-        name,
-        filters
-      });
+    const { error } = await this.client.from('job_monitor_saved_searches').insert({
+      user_id: userId,
+      name,
+      filters,
+    });
 
     if (error) {
       Logger.error('Error saving search parameters to Supabase', error);
@@ -628,11 +573,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async deleteSavedSearch(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_saved_searches')
-      .delete()
-      .eq('user_id', userId)
-      .eq('id', id);
+    const { error } = await this.client.from('job_monitor_saved_searches').delete().eq('user_id', userId).eq('id', id);
 
     if (error) {
       Logger.error('Error deleting saved search', error);
@@ -641,10 +582,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Watchlists
   public async getWatchlists(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_watchlists')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_watchlists').select('*').eq('user_id', userId);
 
     if (error) {
       Logger.error('Error getting watchlists', error);
@@ -654,13 +592,11 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveWatchlist(userId: string, name: string, filters: any): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_watchlists')
-      .insert({
-        user_id: userId,
-        name,
-        filters
-      });
+    const { error } = await this.client.from('job_monitor_watchlists').insert({
+      user_id: userId,
+      name,
+      filters,
+    });
 
     if (error) {
       Logger.error('Error saving watchlist to Supabase', error);
@@ -668,11 +604,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async deleteWatchlist(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_watchlists')
-      .delete()
-      .eq('user_id', userId)
-      .eq('id', id);
+    const { error } = await this.client.from('job_monitor_watchlists').delete().eq('user_id', userId).eq('id', id);
 
     if (error) {
       Logger.error('Error deleting watchlist', error);
@@ -695,14 +627,12 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveUserNotification(userId: string, title: string, message: string, priority?: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_user_notifications')
-      .insert({
-        user_id: userId,
-        title,
-        message,
-        priority: priority || 'medium'
-      });
+    const { error } = await this.client.from('job_monitor_user_notifications').insert({
+      user_id: userId,
+      title,
+      message,
+      priority: priority || 'medium',
+    });
 
     if (error) {
       Logger.error('Error generating user notification', error);
@@ -722,10 +652,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async clearUserNotifications(userId: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_user_notifications')
-      .delete()
-      .eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_user_notifications').delete().eq('user_id', userId);
 
     if (error) {
       Logger.error('Error clearing notifications', error);
@@ -748,14 +675,12 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveAuditLog(userId: string | null, action: string, details: any, ipAddress?: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_audit_logs')
-      .insert({
-        user_id: userId,
-        action,
-        details,
-        ip_address: ipAddress || '127.0.0.1'
-      });
+    const { error } = await this.client.from('job_monitor_audit_logs').insert({
+      user_id: userId,
+      action,
+      details,
+      ip_address: ipAddress || '127.0.0.1',
+    });
 
     if (error) {
       Logger.error('Error saving audit log', error);
@@ -764,9 +689,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Feature Flags
   public async getFeatureFlags(): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_feature_flags')
-      .select('*');
+    const { data, error } = await this.client.from('job_monitor_feature_flags').select('*');
 
     if (error) {
       Logger.error('Error getting feature flags', error);
@@ -871,18 +794,16 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async saveInterviewSession(userId: string, session: any): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_interview_sessions')
-      .upsert({
-        id: session.id,
-        user_id: userId,
-        session_type: session.session_type || session.sessionType,
-        questions: session.questions,
-        responses: session.responses,
-        feedback: session.feedback,
-        score: session.score,
-        created_at: session.created_at || new Date().toISOString()
-      });
+    const { error } = await this.client.from('job_monitor_interview_sessions').upsert({
+      id: session.id,
+      user_id: userId,
+      session_type: session.session_type || session.sessionType,
+      questions: session.questions,
+      responses: session.responses,
+      feedback: session.feedback,
+      score: session.score,
+      created_at: session.created_at || new Date().toISOString(),
+    });
 
     if (error) {
       Logger.error(`Error saving interview session for ${userId}`, error);
@@ -909,7 +830,10 @@ export class SupabaseStorage implements StorageProvider {
   public async saveCareerRoadmap(userId: string, roadmap: any): Promise<void> {
     const { error } = await this.client
       .from('job_monitor_career_roadmaps')
-      .upsert({ user_id: userId, roadmap_data: roadmap, created_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      .upsert(
+        { user_id: userId, roadmap_data: roadmap, created_at: new Date().toISOString() },
+        { onConflict: 'user_id' },
+      );
 
     if (error) {
       Logger.error(`Error saving career roadmap for ${userId}`, error);
@@ -945,10 +869,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Resume Profiles
   public async getResumeProfiles(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_resume_profiles')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_resume_profiles').select('*').eq('user_id', userId);
     if (error) {
       Logger.error(`Error fetching resume profiles for ${userId}`, error);
       return [];
@@ -956,21 +877,25 @@ export class SupabaseStorage implements StorageProvider {
     return data || [];
   }
 
-  public async saveResumeProfile(userId: string, profileName: string, content: string, pdfData?: string): Promise<void> {
+  public async saveResumeProfile(
+    userId: string,
+    profileName: string,
+    content: string,
+    pdfData?: string,
+  ): Promise<void> {
     const { error } = await this.client
       .from('job_monitor_resume_profiles')
-      .upsert({ user_id: userId, profile_name: profileName, content, pdf_data: pdfData }, { onConflict: 'user_id,profile_name' });
+      .upsert(
+        { user_id: userId, profile_name: profileName, content, pdf_data: pdfData },
+        { onConflict: 'user_id,profile_name' },
+      );
     if (error) {
       Logger.error(`Error saving resume profile for ${userId}`, error);
     }
   }
 
   public async deleteResumeProfile(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_resume_profiles')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_resume_profiles').delete().eq('id', id).eq('user_id', userId);
     if (error) {
       Logger.error(`Error deleting resume profile ${id}`, error);
     }
@@ -978,10 +903,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Application Queue
   public async getApplicationQueue(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_application_queue')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_application_queue').select('*').eq('user_id', userId);
     if (error) {
       Logger.error(`Error fetching application queue for ${userId}`, error);
       return [];
@@ -993,7 +915,7 @@ export class SupabaseStorage implements StorageProvider {
     const payload = {
       ...item,
       user_id: userId,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
     const { error } = await this.client
       .from('job_monitor_application_queue')
@@ -1016,10 +938,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Recruiters CRM
   public async getRecruiters(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_recruiters')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_recruiters').select('*').eq('user_id', userId);
     if (error) {
       Logger.error(`Error fetching recruiters for ${userId}`, error);
       return [];
@@ -1030,22 +949,16 @@ export class SupabaseStorage implements StorageProvider {
   public async saveRecruiter(userId: string, recruiter: any): Promise<void> {
     const payload = {
       ...recruiter,
-      user_id: userId
+      user_id: userId,
     };
-    const { error } = await this.client
-      .from('job_monitor_recruiters')
-      .upsert(payload);
+    const { error } = await this.client.from('job_monitor_recruiters').upsert(payload);
     if (error) {
       Logger.error(`Error saving recruiter for ${userId}`, error);
     }
   }
 
   public async deleteRecruiter(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_recruiters')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_recruiters').delete().eq('id', id).eq('user_id', userId);
     if (error) {
       Logger.error(`Error deleting recruiter ${id}`, error);
     }
@@ -1053,10 +966,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Referrals CRM
   public async getReferrals(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_referrals')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_referrals').select('*').eq('user_id', userId);
     if (error) {
       Logger.error(`Error fetching referrals for ${userId}`, error);
       return [];
@@ -1068,22 +978,16 @@ export class SupabaseStorage implements StorageProvider {
     const payload = {
       ...referral,
       user_id: userId,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
-    const { error } = await this.client
-      .from('job_monitor_referrals')
-      .upsert(payload, { onConflict: 'id' });
+    const { error } = await this.client.from('job_monitor_referrals').upsert(payload, { onConflict: 'id' });
     if (error) {
       Logger.error(`Error saving referral for ${userId}`, error);
     }
   }
 
   public async deleteReferral(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_referrals')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_referrals').delete().eq('id', id).eq('user_id', userId);
     if (error) {
       Logger.error(`Error deleting referral ${id}`, error);
     }
@@ -1114,10 +1018,7 @@ export class SupabaseStorage implements StorageProvider {
   }
 
   public async getReferralAnalytics(userId: string): Promise<any> {
-    const { data, error } = await this.client
-      .from('job_monitor_referrals')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_referrals').select('*').eq('user_id', userId);
 
     if (error) {
       Logger.error(`Error fetching referral analytics for ${userId}`, error);
@@ -1131,7 +1032,7 @@ export class SupabaseStorage implements StorageProvider {
         offersViaReferrals: 0,
         successRate: 0,
         topCompanies: [],
-        contactsByCategory: {}
+        contactsByCategory: {},
       };
     }
 
@@ -1170,16 +1071,13 @@ export class SupabaseStorage implements StorageProvider {
       offersViaReferrals,
       successRate,
       topCompanies,
-      contactsByCategory: categoryCounts
+      contactsByCategory: categoryCounts,
     };
   }
 
   // Calendar Events
   public async getCalendarEvents(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_calendar_events')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_calendar_events').select('*').eq('user_id', userId);
     if (error) {
       Logger.error(`Error fetching calendar events for ${userId}`, error);
       return [];
@@ -1190,22 +1088,16 @@ export class SupabaseStorage implements StorageProvider {
   public async saveCalendarEvent(userId: string, event: any): Promise<void> {
     const payload = {
       ...event,
-      user_id: userId
+      user_id: userId,
     };
-    const { error } = await this.client
-      .from('job_monitor_calendar_events')
-      .upsert(payload);
+    const { error } = await this.client.from('job_monitor_calendar_events').upsert(payload);
     if (error) {
       Logger.error(`Error saving calendar event for ${userId}`, error);
     }
   }
 
   public async deleteCalendarEvent(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_calendar_events')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_calendar_events').delete().eq('id', id).eq('user_id', userId);
     if (error) {
       Logger.error(`Error deleting calendar event ${id}`, error);
     }
@@ -1213,10 +1105,7 @@ export class SupabaseStorage implements StorageProvider {
 
   // Exports
   public async getExports(userId: string): Promise<any[]> {
-    const { data, error } = await this.client
-      .from('job_monitor_exports')
-      .select('*')
-      .eq('user_id', userId);
+    const { data, error } = await this.client.from('job_monitor_exports').select('*').eq('user_id', userId);
     if (error) {
       Logger.error(`Error fetching exports for ${userId}`, error);
       return [];
@@ -1227,24 +1116,50 @@ export class SupabaseStorage implements StorageProvider {
   public async saveExport(userId: string, exportItem: any): Promise<void> {
     const payload = {
       ...exportItem,
-      user_id: userId
+      user_id: userId,
     };
-    const { error } = await this.client
-      .from('job_monitor_exports')
-      .upsert(payload);
+    const { error } = await this.client.from('job_monitor_exports').upsert(payload);
     if (error) {
       Logger.error(`Error saving export for ${userId}`, error);
     }
   }
 
   public async deleteExport(userId: string, id: string): Promise<void> {
-    const { error } = await this.client
-      .from('job_monitor_exports')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+    const { error } = await this.client.from('job_monitor_exports').delete().eq('id', id).eq('user_id', userId);
     if (error) {
       Logger.error(`Error deleting export ${id}`, error);
+    }
+  }
+
+  // Cover Letters
+  public async getCoverLetters(userId: string): Promise<any[]> {
+    const { data, error } = await this.client
+      .from('job_monitor_cover_letters')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) {
+      Logger.error(`Error fetching cover letters for ${userId}`, error);
+      return [];
+    }
+    return data || [];
+  }
+
+  public async saveCoverLetter(userId: string, coverLetter: any): Promise<void> {
+    const payload = {
+      ...coverLetter,
+      user_id: userId,
+    };
+    const { error } = await this.client.from('job_monitor_cover_letters').upsert(payload);
+    if (error) {
+      Logger.error(`Error saving cover letter for ${userId}`, error);
+    }
+  }
+
+  public async deleteCoverLetter(userId: string, id: string): Promise<void> {
+    const { error } = await this.client.from('job_monitor_cover_letters').delete().eq('id', id).eq('user_id', userId);
+    if (error) {
+      Logger.error(`Error deleting cover letter ${id}`, error);
     }
   }
 }

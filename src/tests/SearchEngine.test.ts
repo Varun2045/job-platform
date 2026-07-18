@@ -19,9 +19,9 @@ describe('SearchEngine', () => {
         isRemote: false,
         salary: 'Not Specified',
         description: 'Node.js and TypeScript backend engineer position.',
-        jobHash: 'hash1'
+        jobHash: 'hash1',
       },
-      score: 95
+      score: 95,
     },
     {
       job: {
@@ -39,10 +39,10 @@ describe('SearchEngine', () => {
         isRemote: true,
         salary: 'Not Specified',
         description: 'React developer position.',
-        jobHash: 'hash2'
+        jobHash: 'hash2',
       },
-      score: 75
-    }
+      score: 75,
+    },
   ];
 
   it('should search by company', () => {

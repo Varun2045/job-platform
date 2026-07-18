@@ -17,13 +17,13 @@ describe('ResumeMatcher Unit Tests', () => {
     isRemote: false,
     salary: 'Not Specified',
     description,
-    jobHash: 'hash_test_1'
+    jobHash: 'hash_test_1',
   });
 
   it('should score a backend developer job highly on the backend profile', () => {
     const job = createMockJob(
       'Software Engineer, Backend (Node.js/TypeScript)',
-      'We are looking for a Software Engineer to join our backend systems team. You will build highly scalable microservices using TypeScript, Node.js, Express, and PostgreSQL. Experience with distributed systems and database queries is required.'
+      'We are looking for a Software Engineer to join our backend systems team. You will build highly scalable microservices using TypeScript, Node.js, Express, and PostgreSQL. Experience with distributed systems and database queries is required.',
     );
 
     const score = ResumeMatcher.match(job, 'backend');
@@ -37,7 +37,7 @@ describe('ResumeMatcher Unit Tests', () => {
   it('should score an AI/ML job highly on the AI profile', () => {
     const job = createMockJob(
       'Machine Learning Engineer (NLP & LLMs)',
-      'Join our team to train, evaluate and deploy machine learning models. You will work with PyTorch, TensorFlow, Transformers, and build RAG pipelines using LangChain and Pinecone vector databases. Experience fine-tuning LLMs is required.'
+      'Join our team to train, evaluate and deploy machine learning models. You will work with PyTorch, TensorFlow, Transformers, and build RAG pipelines using LangChain and Pinecone vector databases. Experience fine-tuning LLMs is required.',
     );
 
     const score = ResumeMatcher.match(job, 'ai');
@@ -51,11 +51,11 @@ describe('ResumeMatcher Unit Tests', () => {
   it('should apply senior experience level penalty for senior target roles', () => {
     const juniorJob = createMockJob(
       'Associate Software Engineer (Graduate)',
-      'Looking for a university graduate or early career backend developer.'
+      'Looking for a university graduate or early career backend developer.',
     );
     const seniorJob = createMockJob(
       'Principal Software Engineering Manager',
-      'Manage a team of engineers. Must have 10+ years of experience leading projects.'
+      'Manage a team of engineers. Must have 10+ years of experience leading projects.',
     );
 
     const juniorScore = ResumeMatcher.match(juniorJob, 'backend');

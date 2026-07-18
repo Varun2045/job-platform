@@ -10,14 +10,14 @@ describe('OpportunityEngine', () => {
     isRemote: true,
     location: 'Remote',
     datePosted: 'Posted today',
-    description: 'Looking for a Senior backend engineer.'
+    description: 'Looking for a Senior backend engineer.',
   } as unknown as Job;
 
   const mockCompany: CompanyConfig = {
     id: 'google',
     name: 'Google',
     priority: 5, // Top priority
-    scrapers: []
+    scrapers: [],
   } as unknown as CompanyConfig;
 
   test('should compute high scores for aligned opportunities', () => {
@@ -27,7 +27,7 @@ describe('OpportunityEngine', () => {
       90, // Match score
       85, // Salary weight preference
       'remote', // Remote preferred
-      'Remote' // Location preferred
+      'Remote', // Location preferred
     );
 
     expect(result.overallScore).toBeGreaterThanOrEqual(80);
@@ -46,7 +46,7 @@ describe('OpportunityEngine', () => {
       40, // Match score
       30, // Salary weight preference
       'remote', // Remote preferred
-      'San Francisco' // Location preferred
+      'San Francisco', // Location preferred
     );
 
     expect(result.overallScore).toBeLessThan(50);

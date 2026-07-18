@@ -25,7 +25,7 @@ export class JobFilter {
       internship: true,
       newGrad: true,
       fullTime: true,
-      contract: true
+      contract: true,
     };
 
     try {
@@ -50,13 +50,18 @@ export class JobFilter {
       const titleLower = job.title.toLowerCase();
 
       let jobWorkplace = 'onsite';
-      if (job.isRemote || locationLower.includes('remote') || descLower.includes('remote') || titleLower.includes('remote')) {
+      if (
+        job.isRemote ||
+        locationLower.includes('remote') ||
+        descLower.includes('remote') ||
+        titleLower.includes('remote')
+      ) {
         jobWorkplace = 'remote';
       } else if (locationLower.includes('hybrid') || descLower.includes('hybrid') || titleLower.includes('hybrid')) {
         jobWorkplace = 'hybrid';
       }
 
-      const isAllowed = filters.workplaceTypes.some(t => t.toLowerCase() === jobWorkplace);
+      const isAllowed = filters.workplaceTypes.some((t) => t.toLowerCase() === jobWorkplace);
       if (!isAllowed) {
         return false;
       }
@@ -67,18 +72,18 @@ export class JobFilter {
     const countryLower = job.country ? job.country.toLowerCase() : '';
 
     if (filters.cities && filters.cities.length > 0) {
-      const matchesCity = filters.cities.some(c => locationLower.includes(c.toLowerCase()));
+      const matchesCity = filters.cities.some((c) => locationLower.includes(c.toLowerCase()));
       if (!matchesCity) return false;
     }
 
     if (filters.states && filters.states.length > 0) {
-      const matchesState = filters.states.some(s => locationLower.includes(s.toLowerCase()));
+      const matchesState = filters.states.some((s) => locationLower.includes(s.toLowerCase()));
       if (!matchesState) return false;
     }
 
     if (filters.countries && filters.countries.length > 0) {
-      const matchesCountry = filters.countries.some(c => 
-        locationLower.includes(c.toLowerCase()) || countryLower.includes(c.toLowerCase())
+      const matchesCountry = filters.countries.some(
+        (c) => locationLower.includes(c.toLowerCase()) || countryLower.includes(c.toLowerCase()),
       );
       if (!matchesCountry) return false;
     }
@@ -88,10 +93,23 @@ export class JobFilter {
     const descLower = job.description.toLowerCase();
     const typeLower = (job.employmentType || '').toLowerCase();
 
-    const isInternship = typeLower.includes('intern') || titleLower.includes('intern') || typeLower.includes('co-op') || descLower.includes('co-op');
-    const isNewGrad = titleLower.includes('new grad') || titleLower.includes('graduate') || titleLower.includes('early career') || titleLower.includes('entry level') || titleLower.includes('university grad');
-    const isContract = typeLower.includes('contract') || typeLower.includes('temp') || titleLower.includes('contractor') || descLower.includes('contractor');
-    
+    const isInternship =
+      typeLower.includes('intern') ||
+      titleLower.includes('intern') ||
+      typeLower.includes('co-op') ||
+      descLower.includes('co-op');
+    const isNewGrad =
+      titleLower.includes('new grad') ||
+      titleLower.includes('graduate') ||
+      titleLower.includes('early career') ||
+      titleLower.includes('entry level') ||
+      titleLower.includes('university grad');
+    const isContract =
+      typeLower.includes('contract') ||
+      typeLower.includes('temp') ||
+      titleLower.includes('contractor') ||
+      descLower.includes('contractor');
+
     // If it doesn't match any of the special categories, we treat it as fullTime/general SDE
     const isFullTime = !isInternship && !isNewGrad && !isContract;
 
@@ -115,13 +133,13 @@ export class JobFilter {
 
   private static parseExperienceYears(job: Job): number | null {
     const text = `${job.title} ${job.experience} ${job.description}`.toLowerCase();
-    
+
     // Search for patterns like "3+ years", "3-5 years", "min 2 years"
     const regexes = [
       /(\d+)\s*(?:to|-)\s*(\d+)\s*(?:years|yrs)/i,
       /(\d+)\s*\+\s*(?:years|yrs)/i,
       /(?:minimum|at least|min)\s*(\d+)\s*(?:years|yrs)/i,
-      /(\d+)\s*(?:years?|yrs?)\s+(?:of\s+)?experience/i
+      /(\d+)\s*(?:years?|yrs?)\s+(?:of\s+)?experience/i,
     ];
 
     for (const rx of regexes) {

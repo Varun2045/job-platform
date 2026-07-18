@@ -61,7 +61,7 @@ export class ComparisonEngine {
           modified.push({
             previous: prevJob,
             current: currJob,
-            changes
+            changes,
           });
         }
       } else {
@@ -93,7 +93,7 @@ export class ComparisonEngine {
           modified.push({
             previous: fuzzyMatch,
             current: currJob,
-            changes
+            changes,
           });
         } else {
           added.push(currJob);
@@ -111,7 +111,7 @@ export class ComparisonEngine {
     return {
       added,
       expired,
-      modified
+      modified,
     };
   }
 }

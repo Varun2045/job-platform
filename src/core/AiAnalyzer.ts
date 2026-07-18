@@ -20,7 +20,11 @@ export class AiAnalyzer {
     let difficulty: 'Easy' | 'Medium' | 'Hard' = 'Medium';
     if (explanation.overallScore >= 85 && explanation.missingSkills.length <= 1) {
       difficulty = 'Easy';
-    } else if (explanation.overallScore < 60 || explanation.missingSkills.length >= 4 || /senior|lead|principal|staff|manager/i.test(titleLower)) {
+    } else if (
+      explanation.overallScore < 60 ||
+      explanation.missingSkills.length >= 4 ||
+      /senior|lead|principal|staff|manager/i.test(titleLower)
+    ) {
       difficulty = 'Hard';
     }
 
@@ -29,7 +33,8 @@ export class AiAnalyzer {
     if (job.isRemote) {
       summary += 'The position supports fully remote work. ';
     }
-    summary += 'The team is responsible for developing robust system components, maintaining codebase health, and working cross-functionally to ship software products at scale.';
+    summary +=
+      'The team is responsible for developing robust system components, maintaining codebase health, and working cross-functionally to ship software products at scale.';
 
     // 3. Generate why matches
     let whyMatches = `Your profile shows a match index of ${explanation.overallScore}%. `;
@@ -43,15 +48,21 @@ export class AiAnalyzer {
     const resumeImprovements: string[] = [];
     if (explanation.missingSkills.length > 0) {
       explanation.missingSkills.slice(0, 3).forEach((skill) => {
-        resumeImprovements.push(`Add a project bullet detail demonstrating practical application of ${skill} to address the team requirements.`);
+        resumeImprovements.push(
+          `Add a project bullet detail demonstrating practical application of ${skill} to address the team requirements.`,
+        );
       });
     } else {
       const mainSkills = explanation.matchedSkills.slice(0, 2);
       if (mainSkills.length > 0) {
-        resumeImprovements.push(`Highlight your advanced competencies in ${mainSkills.join(' and ')} in the profile introduction.`);
+        resumeImprovements.push(
+          `Highlight your advanced competencies in ${mainSkills.join(' and ')} in the profile introduction.`,
+        );
       }
     }
-    resumeImprovements.push('Quantify your metrics (e.g. latency reduction, API throughput increases, cost savings) to emphasize impact.');
+    resumeImprovements.push(
+      'Quantify your metrics (e.g. latency reduction, API throughput increases, cost savings) to emphasize impact.',
+    );
 
     // 5. Generate prep topics
     const prepTopics: string[] = [];
@@ -71,7 +82,7 @@ export class AiAnalyzer {
       missingSkills: explanation.missingSkills,
       resumeImprovements,
       difficulty,
-      prepTopics
+      prepTopics,
     };
   }
 }

@@ -1,4 +1,4 @@
-# Upgrade Guide - v1.0.0 to v1.1.0 (Archived)
+# Upgrade Guide - v1.0.0 to v1.1.0
 
 Follow these steps to upgrade your Job Monitor Platform to v1.1.0.
 

@@ -45,7 +45,9 @@ export class TaskQueue {
 
     Telemetry.queueSize = tasksToProcess.length;
 
-    Logger.info(`Starting priority queue execution. Total tasks: ${tasksToProcess.length}, Concurrency: ${concurrency}`);
+    Logger.info(
+      `Starting priority queue execution. Total tasks: ${tasksToProcess.length}, Concurrency: ${concurrency}`,
+    );
 
     const executeNext = async (): Promise<void> => {
       if (tasksToProcess.length === 0) return;
@@ -53,7 +55,7 @@ export class TaskQueue {
       const task = tasksToProcess.shift()!;
       Telemetry.queueSize = tasksToProcess.length;
       Telemetry.activeWorkers++;
-      
+
       const taskPromise = (async () => {
         try {
           Logger.debug(`Executing task: ${task.id} (Priority: ${task.priority})`);
@@ -102,7 +104,9 @@ export class TaskQueue {
       }
     }
 
-    Logger.info(`Priority queue execution finished. Succeeded: ${results.filter(r => r.status === 'fulfilled').length}, Failed: ${results.filter(r => r.status === 'rejected').length}`);
+    Logger.info(
+      `Priority queue execution finished. Succeeded: ${results.filter((r) => r.status === 'fulfilled').length}, Failed: ${results.filter((r) => r.status === 'rejected').length}`,
+    );
     return results;
   }
 }

@@ -8,10 +8,6 @@
     "resume_profiles": [],
     "avg_response_time_ms": 0,
     "total_scrapes": 10,
-    "total_failures": 1,
-    "detected_ats": "fallback",
-    "detected_ats_at": "2026-07-11T12:05:48.038Z",
-    "last_failed_scrape": "2026-07-11T12:05:57.488Z",
-    "consecutive_failures": 1
+    "total_failures": 0
   }
 ]

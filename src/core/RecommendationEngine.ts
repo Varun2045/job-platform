@@ -22,7 +22,7 @@ export class RecommendationEngine {
     job: Job,
     matchScore: number,
     company: CompanyConfig | null,
-    settings: ExtendedSettings | null
+    settings: ExtendedSettings | null,
   ): ScoredJobRecommendation {
     const titleLower = job.title.toLowerCase();
     const companyLower = job.company.toLowerCase();
@@ -59,12 +59,12 @@ export class RecommendationEngine {
       else if (diffDays <= 3) scoreFreshness = 85;
       else if (diffDays <= 7) scoreFreshness = 65;
       else scoreFreshness = 30;
-    } catch (e) {}
+    } catch {}
 
     // 5. Competition (10%)
     let scoreCompetition = 80;
     const highCompBrands = ['google', 'apple', 'microsoft', 'amazon', 'meta', 'netflix', 'uber', 'airbnb', 'stripe'];
-    const isHighComp = highCompBrands.some(brand => companyLower.includes(brand));
+    const isHighComp = highCompBrands.some((brand) => companyLower.includes(brand));
     if (isHighComp) {
       scoreCompetition = 30;
     }
@@ -84,13 +84,13 @@ export class RecommendationEngine {
     let scoreLocation = 40;
     const preferredCities = settings?.preferredCities || [];
     if (preferredCities.length > 0) {
-      const matchesCity = preferredCities.some(city => locationLower.includes(city.toLowerCase()));
-      if (matchesCity || (job.isRemote && preferredCities.some(c => c.toLowerCase() === 'remote'))) {
+      const matchesCity = preferredCities.some((city) => locationLower.includes(city.toLowerCase()));
+      if (matchesCity || (job.isRemote && preferredCities.some((c) => c.toLowerCase() === 'remote'))) {
         scoreLocation = 100;
       }
     } else {
       const defaults = ['india', 'bangalore', 'bengaluru', 'hyderabad', 'pune', 'remote'];
-      const matchesDefault = defaults.some(city => locationLower.includes(city));
+      const matchesDefault = defaults.some((city) => locationLower.includes(city));
       if (matchesDefault) scoreLocation = 90;
     }
 
@@ -104,15 +104,15 @@ export class RecommendationEngine {
     }
 
     // Calculate final weighted Opportunity Score
-    const finalScore = 
-      (0.35 * scoreMatch) +
-      (0.10 * scoreGrowth) +
-      (0.10 * scoreQuality) +
-      (0.10 * scoreFreshness) +
-      (0.10 * scoreCompetition) +
-      (0.10 * scoreRemote) +
-      (0.10 * scoreLocation) +
-      (0.05 * scoreExperience);
+    const finalScore =
+      0.35 * scoreMatch +
+      0.1 * scoreGrowth +
+      0.1 * scoreQuality +
+      0.1 * scoreFreshness +
+      0.1 * scoreCompetition +
+      0.1 * scoreRemote +
+      0.1 * scoreLocation +
+      0.05 * scoreExperience;
 
     const opportunityScore = Math.min(100, Math.max(0, Math.round(finalScore)));
 
@@ -128,14 +128,14 @@ export class RecommendationEngine {
         competition: scoreCompetition,
         remote: scoreRemote,
         location: scoreLocation,
-        experience: scoreExperience
-      }
+        experience: scoreExperience,
+      },
     };
   }
 
   public static rank(
     recommendations: ScoredJobRecommendation[],
-    sortBy: 'match' | 'opportunity' = 'opportunity'
+    sortBy: 'match' | 'opportunity' = 'opportunity',
   ): ScoredJobRecommendation[] {
     return [...recommendations].sort((a, b) => {
       if (sortBy === 'opportunity') {

@@ -39,7 +39,7 @@ export class HttpClient {
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0',
     'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
-    'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
+    'Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
   ];
 
   private getRandomUserAgent(): string {
@@ -58,11 +58,11 @@ export class HttpClient {
     while (attempt < retries) {
       attempt++;
       const startTime = Date.now();
-      
+
       try {
         const headers: Record<string, string> = {
           'User-Agent': this.getRandomUserAgent(),
-          'Accept': 'application/json, text/plain, */*',
+          Accept: 'application/json, text/plain, */*',
           'Accept-Language': 'en-US,en;q=0.9',
           'Accept-Encoding': 'gzip, deflate, br',
           ...config.headers,
@@ -96,10 +96,18 @@ export class HttpClient {
           if (!response.ok) {
             // If 4xx (except rate limit 429) or other client errors, don't retry, throw immediately.
             if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-              throw new HttpError(`HTTP Error ${response.status}: ${response.statusText}`, response.status, response.headers);
+              throw new HttpError(
+                `HTTP Error ${response.status}: ${response.statusText}`,
+                response.status,
+                response.headers,
+              );
             }
             // For 5xx or 429, retry
-            throw new HttpError(`HTTP Server Error ${response.status}: ${response.statusText}`, response.status, response.headers);
+            throw new HttpError(
+              `HTTP Server Error ${response.status}: ${response.statusText}`,
+              response.status,
+              response.headers,
+            );
           }
 
           // Parse response content type
@@ -118,15 +126,13 @@ export class HttpClient {
             headers: response.headers,
             durationMs,
           };
-
         } catch (error: any) {
           clearTimeout(timeoutId);
           throw error;
         }
-
       } catch (error: any) {
         const durationMs = Date.now() - startTime;
-        
+
         // Log error attempt
         Logger.warn(`Request failed to ${url} (Attempt ${attempt}/${retries}) in ${durationMs}ms: ${error.message}`);
 
@@ -149,11 +155,20 @@ export class HttpClient {
     throw new Error(`Request execution loop exited unexpectedly for ${url}`);
   }
 
-  public async get<T = any>(url: string, headers?: Record<string, string>, config: Omit<HttpRequestConfig, 'method' | 'headers' | 'body'> = {}): Promise<HttpResponse<T>> {
+  public async get<T = any>(
+    url: string,
+    headers?: Record<string, string>,
+    config: Omit<HttpRequestConfig, 'method' | 'headers' | 'body'> = {},
+  ): Promise<HttpResponse<T>> {
     return this.request<T>(url, { method: 'GET', headers, ...config });
   }
 
-  public async post<T = any>(url: string, body?: any, headers?: Record<string, string>, config: Omit<HttpRequestConfig, 'method' | 'headers' | 'body'> = {}): Promise<HttpResponse<T>> {
+  public async post<T = any>(
+    url: string,
+    body?: any,
+    headers?: Record<string, string>,
+    config: Omit<HttpRequestConfig, 'method' | 'headers' | 'body'> = {},
+  ): Promise<HttpResponse<T>> {
     return this.request<T>(url, { method: 'POST', body, headers, ...config });
   }
 }

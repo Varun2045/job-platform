@@ -26,7 +26,7 @@ export class CareerAgent {
             type: 'general',
             title: 'Setup Tech Stack',
             description: 'Define your technology stack in profile settings to refine match accuracy.',
-            priority: 'high'
+            priority: 'high',
           });
         }
 
@@ -34,20 +34,21 @@ export class CareerAgent {
           recommendations.push({
             type: 'skill',
             title: 'Add Node.js competency',
-            description: 'Since you know TypeScript, adding Node.js will significantly broaden your backend opportunities.',
-            priority: 'medium'
+            description:
+              'Since you know TypeScript, adding Node.js will significantly broaden your backend opportunities.',
+            priority: 'medium',
           });
         }
       }
 
       // 2. Process applications follow-up recommendations
-      const activeApps = applications.filter(a => a.status === 'Applied');
+      const activeApps = applications.filter((a) => a.status === 'Applied');
       if (activeApps.length > 0) {
         recommendations.push({
           type: 'application',
           title: 'Review Active Applications',
           description: `You have ${activeApps.length} active applications. We recommend checking in on their statuses.`,
-          priority: 'medium'
+          priority: 'medium',
         });
       }
 
@@ -57,18 +58,18 @@ export class CareerAgent {
           type: 'general',
           title: 'Upload Target Resume',
           description: 'No resumes found. Upload your master resume in the Resume Manager to run AI match scores.',
-          priority: 'high'
+          priority: 'high',
         });
       }
 
       // 4. Job market & company health recommendations
-      const disabledComps = companies.filter(c => !c.enabled);
+      const disabledComps = companies.filter((c) => !c.enabled);
       if (disabledComps.length > 0) {
         recommendations.push({
           type: 'general',
           title: 'Optimize Scraper Channels',
           description: `You have ${disabledComps.length} target scraper targets disabled. Check Company Monitor.`,
-          priority: 'low'
+          priority: 'low',
         });
       }
 
@@ -78,7 +79,7 @@ export class CareerAgent {
           type: 'general',
           title: 'Looking Good!',
           description: 'Your profile settings and resume mappings are fully aligned. Daily scraper is active.',
-          priority: 'low'
+          priority: 'low',
         });
       }
 
