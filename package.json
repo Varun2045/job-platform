@@ -32,7 +32,6 @@
     "pdf-parse": "^2.4.5",
     "playwright": "^1.44.1",
     "resend": "^3.2.0",
-    "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
