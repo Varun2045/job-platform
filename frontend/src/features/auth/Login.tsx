@@ -67,7 +67,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="flex items-center justify-center min-h-screen bg-[#0b0f19] px-4">
       <div className="w-full max-w-md bg-[#131a26] border border-[#232d3f] rounded-2xl p-8 space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
+          <h2 className="text-fluid-title font-extrabold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </h2>
           <p className="text-sm text-[#94a3b8]">

@@ -30,7 +30,7 @@ export const Dashboard: React.FC = () => {
     return (
       <div className="p-4 md:p-8 space-y-6 animate-pulse">
         <div className="h-8 bg-[#131a26] rounded w-1/4"></div>
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+        <div className="grid-fluid-stats gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="h-32 bg-[#131a26] rounded-2xl"></div>
           ))}
@@ -68,11 +68,11 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
+        <h1 className="text-fluid-title font-extrabold text-white tracking-tight">Dashboard</h1>
         <p className="text-sm text-[#94a3b8]">Your job search overview and quick actions</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div className="grid-fluid-stats gap-4">
         {cardItems.map((c) => (
           <div key={c.label} className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 relative overflow-hidden flex flex-col items-center justify-center text-center">
             <div className={`p-3 rounded-xl ${c.bg} ${c.color} mb-3`}>
@@ -86,7 +86,7 @@ export const Dashboard: React.FC = () => {
 
       <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid-fluid-stats gap-4">
           {quickActions.map((action) => (
             <button
               key={action.name}
@@ -102,7 +102,7 @@ export const Dashboard: React.FC = () => {
 
       <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Scraper Fleet Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid-fluid-cards gap-6">
           <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-[#232d3f]">
             <CheckCircle2 className="w-6 h-6 text-emerald-400" />
             <div>
@@ -143,7 +143,7 @@ export const Dashboard: React.FC = () => {
             View All →
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid-fluid-stats gap-4">
           <div className="flex flex-col items-center gap-2 p-4 bg-[#1b2535] rounded-xl border border-[#232d3f]">
             <Users className="w-5 h-5 text-indigo-400" />
             <span className="text-xs text-[#94a3b8]">Referral Opportunities</span>

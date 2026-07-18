@@ -154,11 +154,8 @@
 }
 
 #spacer {
-  height: 88px;
+  height: clamp(48px, 6vh + 12px, 88px);
   border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
 }
 
 .ticks {

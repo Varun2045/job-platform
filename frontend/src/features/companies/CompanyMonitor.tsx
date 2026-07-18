@@ -131,7 +131,7 @@ export const CompanyMonitor: React.FC = () => {
       {showAddForm && (
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-4 max-w-2xl animate-in fade-in slide-in-from-top-4 duration-200">
           <h3 className="text-md font-bold text-white">Register Target Company Scraper</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid-fluid-cards gap-4">
             <div className="space-y-1">
               <label className="text-xs text-[#94a3b8] font-semibold">Company ID (slug, e.g. netflix)</label>
               <input type="text" value={newId} onChange={(e) => setNewId(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))} placeholder="netflix" className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500 transition-colors" />
@@ -216,7 +216,7 @@ export const CompanyMonitor: React.FC = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className={`${selectedComp ? 'lg:col-span-2' : 'lg:col-span-3'} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`}>
+        <div className={`${selectedComp ? 'lg:col-span-2' : 'lg:col-span-3'} grid-fluid-cards gap-6`}>
 
           {list.map((c: any) => {
             const status = !c.enabled

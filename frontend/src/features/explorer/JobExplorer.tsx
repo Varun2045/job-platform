@@ -105,12 +105,12 @@ export const JobExplorer: React.FC = () => {
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto flex flex-col min-h-screen relative">
       {/* Page Title */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Job Explorer</h1>
+        <h1 className="text-fluid-title font-extrabold text-white tracking-tight">Job Explorer</h1>
         <p className="text-sm text-[#94a3b8]">Search, rank by Opportunity Score, and tailoring your applications</p>
       </div>
 
       {/* Advanced Filter Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4 bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
+      <div className="grid-fluid-stats gap-4 bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Search Keyword</label>
           <div className="relative">

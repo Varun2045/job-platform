@@ -31,6 +31,30 @@ body {
   overflow-x: hidden;
 }
 
+/* Fluid Auto-fit Grid Layouts using minmax */
+.grid-fluid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.grid-fluid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* Fluid Typography and Spacings using clamp */
+.text-fluid-title {
+  font-size: clamp(1.5rem, 3vw + 1rem, 2.5rem);
+}
+
+.text-fluid-subtitle {
+  font-size: clamp(1.1rem, 1.8vw + 0.8rem, 1.75rem);
+}
+
+.padding-fluid-container {
+  padding: clamp(12px, 3vw, 32px);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
