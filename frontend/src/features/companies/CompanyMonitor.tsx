@@ -25,6 +25,12 @@ export const CompanyMonitor: React.FC = () => {
   const [editEnableResume, setEditEnableResume] = useState(true);
   const [editProfiles, setEditProfiles] = useState('');
 
+  // Filtering and Sorting state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [atsFilter, setAtsFilter] = useState('all');
+
   const { data: companies, isLoading } = useQuery({
     queryKey: ['companies'],
     queryFn: async () => {
@@ -111,7 +117,28 @@ export const CompanyMonitor: React.FC = () => {
     return <div className="p-8 animate-pulse text-[#94a3b8]">Loading Scraper Fleet Statuses...</div>;
   }
 
-  const list = companies || [];
+  // Default alphabetical sort, then filter by search term, status, priority, and ATS platform
+  const list = [...(companies || [])]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .filter((c: any) => {
+      const matchesSearch = 
+        c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        c.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.detected_ats && c.detected_ats.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const status = !c.enabled
+        ? 'disabled'
+        : (c.total_failures > 0 && c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)))
+          ? 'degraded'
+          : 'healthy';
+      const matchesStatus = statusFilter === 'all' || status === statusFilter;
+
+      const matchesPriority = priorityFilter === 'all' || String(c.priority) === priorityFilter;
+
+      const matchesAts = atsFilter === 'all' || (c.detected_ats || 'none') === atsFilter;
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesAts;
+    });
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
@@ -126,6 +153,67 @@ export const CompanyMonitor: React.FC = () => {
         >
           {showAddForm ? 'Cancel' : 'Register Scraper'}
         </button>
+      </div>
+
+      {/* Filters Section */}
+      <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="w-full md:w-1/3 space-y-1">
+          <label className="text-xs text-[#94a3b8] font-semibold">Search Company</label>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name, slug, or ATS..."
+            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-4 py-2 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+          />
+        </div>
+        <div className="w-full md:w-2/3 grid grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <label className="text-xs text-[#94a3b8] font-semibold">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+            >
+              <option value="all">All Statuses</option>
+              <option value="healthy">Healthy</option>
+              <option value="degraded">Degraded</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-[#94a3b8] font-semibold">Priority</label>
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+            >
+              <option value="all">All Priorities</option>
+              <option value="1">High (1)</option>
+              <option value="2">Medium (2)</option>
+              <option value="3">Low (3)</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-[#94a3b8] font-semibold">ATS Platform</label>
+            <select
+              value={atsFilter}
+              onChange={(e) => setAtsFilter(e.target.value)}
+              className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-indigo-500 transition-colors"
+            >
+              <option value="all">All Platforms</option>
+              <option value="none">Fallback/None</option>
+              <option value="greenhouse">Greenhouse</option>
+              <option value="lever">Lever</option>
+              <option value="workday">Workday</option>
+              <option value="google">Google</option>
+              <option value="microsoft">Microsoft</option>
+              <option value="amazon">Amazon</option>
+              <option value="apple">Apple</option>
+              <option value="meta">Meta</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {showAddForm && (
