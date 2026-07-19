@@ -118,9 +118,10 @@ const isProduction = isGitHubActions || process.env.NODE_ENV === 'production';
 if (isProduction) {
   validateEnv('SUPABASE_URL', true);
   validateEnv('SUPABASE_SERVICE_KEY', true);
-  validateEnv('RESEND_API_KEY', true);
-  validateEnv('NOTIFICATION_EMAIL_SENDER', true);
-  validateEnv('NOTIFICATION_EMAIL_RECIPIENT', true);
+  if (process.env.RESEND_API_KEY) {
+    validateEnv('NOTIFICATION_EMAIL_SENDER', true);
+    validateEnv('NOTIFICATION_EMAIL_RECIPIENT', true);
+  }
 }
 
 export const config: Config = {
