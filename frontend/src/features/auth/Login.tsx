@@ -49,7 +49,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
 
     try {
-      const res = await fetch(`/api/auth/oauth/${provider}`);
+      const origin = window.location.origin;
+      const res = await fetch(`/api/auth/oauth/${provider}?origin=${encodeURIComponent(origin)}`);
       if (!res.ok) {
         const body = await res.json();
         throw new Error(body.error || 'Failed to generate OAuth redirect link');
