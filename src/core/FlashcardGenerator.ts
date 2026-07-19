@@ -287,8 +287,9 @@ No pre-amble, no post-amble, no conversational text.`;
             response_format: { type: 'json_object' },
             temperature: 0.7,
           },
-          timeoutMs: 15000,
-          retries: 2,
+          timeoutMs: 30000,
+          retries: 4,
+          backoffMs: 3000,
         });
 
         const responseData = response.data;
