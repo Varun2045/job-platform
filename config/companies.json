@@ -6,7 +6,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "detected_ats": "google",
-    "resume_profiles": ["backend", "ai"]
+    "resume_profiles": []
   },
   {
     "id": "microsoft",
@@ -15,7 +15,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "detected_ats": "microsoft",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "amazon",
@@ -24,7 +24,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "detected_ats": "amazon",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "nvidia",
@@ -34,7 +34,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite",
-    "resume_profiles": ["backend", "ai"]
+    "resume_profiles": []
   },
   {
     "id": "adobe",
@@ -44,7 +44,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/ExternalCareers",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "apple",
@@ -53,7 +53,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "detected_ats": "apple",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "meta",
@@ -62,7 +62,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "detected_ats": "meta",
-    "resume_profiles": ["backend", "ai"]
+    "resume_profiles": []
   },
   {
     "id": "oracle",
@@ -71,7 +71,7 @@
     "priority": 2,
     "interval_minutes": 180,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "sap",
@@ -80,7 +80,7 @@
     "priority": 2,
     "interval_minutes": 180,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "cisco",
@@ -89,7 +89,7 @@
     "priority": 2,
     "interval_minutes": 180,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "amd",
@@ -99,7 +99,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://amd.wd1.myworkdayjobs.com/wday/cxs/amd/AMDExternalSite",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "intel",
@@ -109,7 +109,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "qualcomm",
@@ -119,7 +119,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://qualcomm.wd5.myworkdayjobs.com/wday/cxs/qualcomm/External",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "atlassian",
@@ -129,7 +129,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://atlassian.wd3.myworkdayjobs.com/wday/cxs/atlassian/Careers",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "servicenow",
@@ -139,7 +139,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://servicenow.wd5.myworkdayjobs.com/wday/cxs/servicenow/ServiceNowCareers",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "uber",
@@ -148,7 +148,7 @@
     "priority": 2,
     "interval_minutes": 180,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "salesforce",
@@ -158,7 +158,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://salesforce.wd1.myworkdayjobs.com/wday/cxs/salesforce/External_Career_Site",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "databricks",
@@ -168,7 +168,7 @@
     "interval_minutes": 180,
     "detected_ats": "greenhouse",
     "api_endpoint": "databricks",
-    "resume_profiles": ["backend", "ai"]
+    "resume_profiles": []
   },
   {
     "id": "snowflake",
@@ -178,7 +178,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://snowflake.wd5.myworkdayjobs.com/wday/cxs/snowflake/Snowflake_Careers",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "mongodb",
@@ -188,7 +188,7 @@
     "interval_minutes": 180,
     "detected_ats": "greenhouse",
     "api_endpoint": "mongodb",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "browserstack",
@@ -198,7 +198,7 @@
     "interval_minutes": 360,
     "detected_ats": "workday",
     "api_endpoint": "https://browserstack.wd3.myworkdayjobs.com/wday/cxs/browserstack/External",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "postman",
@@ -208,7 +208,7 @@
     "interval_minutes": 360,
     "detected_ats": "greenhouse",
     "api_endpoint": "postman",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "freshworks",
@@ -218,7 +218,7 @@
     "interval_minutes": 360,
     "detected_ats": "lever",
     "api_endpoint": "freshworks",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "razorpay",
@@ -228,7 +228,7 @@
     "interval_minutes": 360,
     "detected_ats": "greenhouse",
     "api_endpoint": "razorpaysoftwareprivatelimited",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "phonepe",
@@ -238,7 +238,7 @@
     "interval_minutes": 360,
     "detected_ats": "greenhouse",
     "api_endpoint": "phonepe",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "groww",
@@ -248,7 +248,7 @@
     "interval_minutes": 360,
     "detected_ats": "lever",
     "api_endpoint": "groww",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "cred",
@@ -258,7 +258,7 @@
     "interval_minutes": 360,
     "detected_ats": "lever",
     "api_endpoint": "cred",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "flipkart",
@@ -267,7 +267,7 @@
     "priority": 3,
     "interval_minutes": 360,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "meesho",
@@ -277,7 +277,7 @@
     "interval_minutes": 360,
     "detected_ats": "lever",
     "api_endpoint": "meesho",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "zoho",
@@ -286,7 +286,7 @@
     "priority": 3,
     "interval_minutes": 360,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "jpmorgan",
@@ -296,7 +296,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://jpmorgan.wd5.myworkdayjobs.com/wday/cxs/jpmorgan/JPM_Careers",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "goldmansachs",
@@ -305,7 +305,7 @@
     "priority": 2,
     "interval_minutes": 180,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "paypal",
@@ -315,7 +315,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://paypal.wd5.myworkdayjobs.com/wday/cxs/paypal/jobs",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "visa",
@@ -325,7 +325,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://visa.wd5.myworkdayjobs.com/wday/cxs/visa/VisaRecruiting",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "mastercard",
@@ -335,7 +335,7 @@
     "interval_minutes": 180,
     "detected_ats": "workday",
     "api_endpoint": "https://mastercard.wd1.myworkdayjobs.com/wday/cxs/mastercard/MastercardCareers",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   },
   {
     "id": "hsbc",
@@ -344,6 +344,6 @@
     "priority": 3,
     "interval_minutes": 360,
     "detected_ats": "fallback",
-    "resume_profiles": ["backend"]
+    "resume_profiles": []
   }
 ]
