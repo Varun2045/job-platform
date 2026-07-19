@@ -18,7 +18,7 @@ export class SupabaseStorage implements StorageProvider {
       auth: { persistSession: false },
       global: {
         headers: { 'x-client-info': 'job-monitor-production' },
-        fetch: (url, options) => {
+        fetch: (url: any, options: any) => {
           return fetch(url, {
             ...options,
             signal: AbortSignal.timeout(15000),
@@ -516,7 +516,7 @@ export class SupabaseStorage implements StorageProvider {
       Logger.error('Error getting resumes', error);
       return [];
     }
-    return (data || []).map((r) => ({
+    return (data || []).map((r: any) => ({
       profileName: r.profile_name,
       content: r.content,
       pdf_data: r.pdf_data,
@@ -947,7 +947,7 @@ export class SupabaseStorage implements StorageProvider {
       Logger.error(`Error fetching recruiters for ${userId}`, error);
       return [];
     }
-    return (data || []).map((row) => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       name: row.name,
       company: row.company,
