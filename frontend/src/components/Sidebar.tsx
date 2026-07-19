@@ -24,13 +24,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
 
     fetch('/api/profile')
       .then(res => res.json())
-      .then(data => setProfile(data))
+      .then(data => {
+        if (data && !data.error) {
+          setProfile(data);
+        }
+      })
       .catch(() => {});
 
     fetch('/api/notifications')
       .then(res => res.json())
-      .then(data => setNotifications(data))
-      .catch(() => {});
+      .then(data => {
+        if (Array.isArray(data)) {
+          setNotifications(data);
+        } else {
+          setNotifications([]);
+        }
+      })
+      .catch(() => setNotifications([]));
   }, []);
 
   const handleLogout = () => {

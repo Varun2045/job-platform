@@ -28,6 +28,21 @@ import { Menu } from 'lucide-react';
 
 const queryClient = new QueryClient();
 
+// Override window.fetch at the module level to ensure it is active immediately on mount
+const originalFetch = window.fetch;
+window.fetch = async (input, init) => {
+  const jwt = localStorage.getItem('token');
+  const authHeader = jwt ? { Authorization: `Bearer ${jwt}` } : {};
+  const updatedInit = {
+    ...init,
+    headers: {
+      ...(init?.headers || {}),
+      ...authHeader
+    }
+  } as RequestInit;
+  return originalFetch(input, updatedInit);
+};
+
 export const App: React.FC = () => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [, setEmail] = useState<string | null>(localStorage.getItem('email'));
@@ -58,25 +73,6 @@ export const App: React.FC = () => {
       }
     }
   }, []);
-
-  useEffect(() => {
-    const originalFetch = window.fetch;
-    window.fetch = async (input, init) => {
-      const jwt = localStorage.getItem('token');
-      const authHeader = jwt ? { Authorization: `Bearer ${jwt}` } : {};
-      const updatedInit = {
-        ...init,
-        headers: {
-          ...(init?.headers || {}),
-          ...authHeader
-        }
-      } as RequestInit;
-      return originalFetch(input, updatedInit);
-    };
-    return () => {
-      window.fetch = originalFetch;
-    };
-  }, [token]);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
