@@ -112,7 +112,8 @@ app.use(
         !origin ||
         corsWhitelist.includes(origin) ||
         origin.startsWith('http://localhost:') ||
-        origin.startsWith('http://127.0.0.1:')
+        origin.startsWith('http://127.0.0.1:') ||
+        origin.endsWith('.vercel.app')
       ) {
         callback(null, true);
       } else {
