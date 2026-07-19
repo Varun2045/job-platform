@@ -689,6 +689,18 @@ const CalendarAutomation: React.FC = () => {
     { id: '3', title: 'Follow-up with John - Amazon', start: new Date('2026-07-14T14:00:00'), end: new Date('2026-07-14T14:30:00'), type: 'followup', company: 'Amazon', description: 'Follow-up call regarding referral' },
   ]);
 
+  useEffect(() => {
+    // Check Google Calendar connection status from backend
+    fetch('/api/calendar/google/status')
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.linked === 'boolean') {
+          setIsConnected(data.linked);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const [newEvent, setNewEvent] = useState({
     title: '',
     start: '',
@@ -698,10 +710,22 @@ const CalendarAutomation: React.FC = () => {
     description: ''
   });
 
-  const connectGoogleCalendar = () => {
-    // In a real implementation, this would initiate OAuth flow
-    window.open('https://accounts.google.com/o/oauth2/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=https://www.googleapis.com/auth/calendar', '_blank');
-    setIsConnected(true);
+  const connectGoogleCalendar = async () => {
+    try {
+      const res = await fetch('/api/auth/google/url');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server returned status ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.url) {
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error('OAuth URL not returned from server');
+      }
+    } catch (err: any) {
+      alert(`Failed to start Google Calendar connection: ${err.message}`);
+    }
   };
 
   const disconnectGoogleCalendar = () => {
