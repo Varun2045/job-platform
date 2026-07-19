@@ -318,7 +318,8 @@ app.get('/api/auth/oauth/:provider', async (req, res) => {
   }
   try {
     const supabase = (storage as any).client;
-    const redirectUrl = `${req.protocol}://${req.get('host')}/`;
+    const referer = req.get('referer');
+    const redirectUrl = referer ? new URL(referer).origin + '/' : `${req.protocol}://${req.get('host')}/`;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: provider as any,
       options: {
