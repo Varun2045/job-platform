@@ -362,9 +362,16 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
     return res.json({
       stats: {
         jobsToday: allJobs.filter((j) => {
-          const today = new Date().toISOString().split('T')[0];
-          const jDate = new Date(j.datePosted || 0).toISOString().split('T')[0];
-          return today === jDate;
+          if (!j.datePosted) return false;
+          try {
+            const dateObj = new Date(j.datePosted);
+            if (isNaN(dateObj.getTime())) return false;
+            const today = new Date().toISOString().split('T')[0];
+            const jDate = dateObj.toISOString().split('T')[0];
+            return today === jDate;
+          } catch {
+            return false;
+          }
         }).length,
         newJobs: allJobs.length,
         matches: allJobs.filter((j) => {
