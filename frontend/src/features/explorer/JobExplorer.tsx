@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, MapPin, Briefcase, Globe, ExternalLink, ArrowRight, X, Sparkles, FileText, CheckSquare, Users, MessageSquare, Star, Mail } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
@@ -10,8 +10,10 @@ import { useNavigate } from 'react-router-dom';
 export const JobExplorer: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   const [search, setSearch] = useState('');
   const [company] = useState('all');
+  const [locationQuery, setLocationQuery] = useState('');
   const [location, setLocation] = useState('');
   const [remote, setRemote] = useState('all');
   const [minScore, setMinScore] = useState('0');
@@ -20,6 +22,22 @@ export const JobExplorer: React.FC = () => {
   const [selectedJobHash, setSelectedJobHash] = useState<string | null>(null);
   const [trackNotes, setTrackNotes] = useState('');
   const [sortBy, setSortBy] = useState<'opportunity' | 'match'>('opportunity');
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Debounce location input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setLocation(locationQuery);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [locationQuery]);
 
   // Modals visibility state
   const [openCoverLetter, setOpenCoverLetter] = useState(false);
@@ -118,8 +136,8 @@ export const JobExplorer: React.FC = () => {
             <input
               type="text"
               placeholder="e.g. React, Node, Go..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
             />
           </div>
@@ -130,8 +148,8 @@ export const JobExplorer: React.FC = () => {
           <input
             type="text"
             placeholder="e.g. USA, Pune..."
-            value={location}
-            onChange={(e) => { setLocation(e.target.value); setPage(1); }}
+            value={locationQuery}
+            onChange={(e) => setLocationQuery(e.target.value)}
             className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
           />
         </div>
