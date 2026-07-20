@@ -351,11 +351,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
       } catch {}
     }
 
-    let allJobs: any[] = [];
-    for (const comp of companies) {
-      const jobs = await storage.getCompanyJobs(comp.id);
-      allJobs.push(...jobs);
-    }
+    const allJobs = await storage.getAllJobs();
 
     const activeComps = companies.filter((c) => c.enabled);
     const healthyComps = activeComps.filter((c) => c.total_failures === 0);
@@ -409,22 +405,23 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
 
     const settings = await storage.getExtendedSettings();
     const companies = await storage.getEnabledCompanies();
+    const allJobs = await storage.getAllJobs();
+    const enabledCompsMap = new Map(companies.map((c) => [c.id, c]));
     const allScoredJobs: { job: any; score: number; opportunityScore: number; breakdown: any }[] = [];
 
-    for (const comp of companies) {
-      const jobs = await storage.getCompanyJobs(comp.id);
-      const scored = jobs.map((j) => {
-        const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : ['backend'];
-        const bestScore = Math.max(...profiles.map((p) => ResumeMatcher.match(j, p)));
-        const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
-        return {
-          job: j,
-          score: bestScore,
-          opportunityScore: recommendation.opportunityScore,
-          breakdown: recommendation.breakdown,
-        };
+    for (const j of allJobs) {
+      const comp = enabledCompsMap.get(j.company);
+      if (!comp) continue;
+
+      const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : ['backend'];
+      const bestScore = Math.max(...profiles.map((p) => ResumeMatcher.match(j, p)));
+      const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
+      allScoredJobs.push({
+        job: j,
+        score: bestScore,
+        opportunityScore: recommendation.opportunityScore,
+        breakdown: recommendation.breakdown,
       });
-      allScoredJobs.push(...scored);
     }
 
     // Build search filter object - only include non-empty filters
@@ -470,14 +467,11 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
     let foundJob: any = null;
     let matchedComp: any = null;
 
-    for (const comp of companies) {
-      const jobs = await storage.getCompanyJobs(comp.id);
-      const j = jobs.find((x) => x.jobHash === hash);
-      if (j) {
-        foundJob = j;
-        matchedComp = comp;
-        break;
-      }
+    const allJobs = await storage.getAllJobs();
+    const j = allJobs.find((x) => x.jobHash === hash);
+    if (j) {
+      foundJob = j;
+      matchedComp = companies.find((c) => c.id === j.company);
     }
 
     if (!foundJob) {

@@ -60,6 +60,11 @@ export interface StorageProvider {
   getCompanyJobs(companyId: string): Promise<Job[]>;
 
   /**
+   * Retrieves all previous job listings across all companies.
+   */
+  getAllJobs(): Promise<Job[]>;
+
+  /**
    * Overwrites the stored job listings for a company.
    */
   saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void>;
