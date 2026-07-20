@@ -157,6 +157,16 @@ export class FileStorage implements StorageProvider {
     return this.readJsonFile<Job[]>(companyJobsPath, []);
   }
 
+  public async getAllJobs(): Promise<Job[]> {
+    const configs = await this.getAllCompanies();
+    const allJobs: Job[] = [];
+    for (const c of configs) {
+      const jobs = await this.getCompanyJobs(c.id);
+      allJobs.push(...jobs);
+    }
+    return allJobs;
+  }
+
   public async saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void> {
     const companyJobsPath = path.join(this.storageDir, `${companyId}.json`);
     this.writeJsonFile(companyJobsPath, jobs);

@@ -228,6 +228,25 @@ export class SupabaseStorage implements StorageProvider {
     return (data?.jobs_data || []) as Job[];
   }
 
+  public async getAllJobs(): Promise<Job[]> {
+    const { data, error } = await this.client
+      .from('job_monitor_state')
+      .select('jobs_data');
+
+    if (error) {
+      Logger.error('Error fetching all jobs state', error);
+      return [];
+    }
+
+    const allJobs: Job[] = [];
+    for (const row of data || []) {
+      if (row.jobs_data) {
+        allJobs.push(...(row.jobs_data as Job[]));
+      }
+    }
+    return allJobs;
+  }
+
   public async saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void> {
     // Use upsert to overwrite or create state
     const { error } = await this.client.from('job_monitor_state').upsert({
