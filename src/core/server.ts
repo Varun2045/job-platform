@@ -57,6 +57,7 @@ import { HttpClient } from './HttpClient.js';
 import * as cheerio from 'cheerio';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Enable ETag checks
 app.set('etag', 'weak');
