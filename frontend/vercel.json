@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "http://13.53.192.45:3001/api/:path*"
+      "destination": "https://job-search-tracker-7pu6.onrender.com/api/:path*"
     },
     {
       "source": "/((?!api/).*)",
