@@ -38,6 +38,7 @@ RUN npm ci --only=production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/config ./config
 COPY --from=builder /app/frontend/dist ./frontend/dist
+COPY resumes ./resumes
 
 EXPOSE 3001
 CMD ["node", "dist/core/server.js"]
