@@ -46,7 +46,7 @@ jobs:
         run: npm run build
 
       - name: Run Scraper
-        run: npm run monitor priority 3
+        run: node dist/cli/admin.js monitor priority 3
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
