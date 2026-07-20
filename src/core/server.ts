@@ -385,6 +385,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
       },
     });
   } catch (err: any) {
+    Logger.error('Error in /api/dashboard', err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -456,6 +457,7 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       pages: Math.ceil(filtered.length / l),
     });
   } catch (err: any) {
+    Logger.error('Error in /api/jobs', err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -488,6 +490,7 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
       aiSummary: `This is an automated AI summary description placeholder for the ${foundJob.title} role at ${foundJob.company}.`,
     });
   } catch (err: any) {
+    Logger.error('Error in /api/jobs/:hash', err);
     return res.status(500).json({ error: err.message });
   }
 });
