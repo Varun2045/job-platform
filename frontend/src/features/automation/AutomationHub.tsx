@@ -499,7 +499,7 @@ const EmailAutomation: React.FC = () => {
       {/* Email Preferences */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-sm text-white">Instant Alerts</span>
             <button
               onClick={() => setInstantAlerts(!instantAlerts)}
@@ -507,11 +507,11 @@ const EmailAutomation: React.FC = () => {
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${instantAlerts ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
-          </label>
+          </div>
           <p className="text-xs text-[#94a3b8] mt-2">Get notified immediately when new jobs match your criteria</p>
         </div>
         <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-sm text-white">Daily Digest</span>
             <button
               onClick={() => setDailyDigest(!dailyDigest)}
@@ -519,11 +519,11 @@ const EmailAutomation: React.FC = () => {
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${dailyDigest ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
-          </label>
+          </div>
           <p className="text-xs text-[#94a3b8] mt-2">Receive a daily summary of new job opportunities</p>
         </div>
         <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-sm text-white">Weekly Report</span>
             <button
               onClick={() => setWeeklyReport(!weeklyReport)}
@@ -531,11 +531,11 @@ const EmailAutomation: React.FC = () => {
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${weeklyReport ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
-          </label>
+          </div>
           <p className="text-xs text-[#94a3b8] mt-2">Weekly analytics and application progress report</p>
         </div>
         <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <label className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <span className="text-sm text-white">Monthly Summary</span>
             <button
               onClick={() => setMonthlySummary(!monthlySummary)}
@@ -543,7 +543,7 @@ const EmailAutomation: React.FC = () => {
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${monthlySummary ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
-          </label>
+          </div>
           <p className="text-xs text-[#94a3b8] mt-2">Monthly overview of your job search performance</p>
         </div>
       </div>
