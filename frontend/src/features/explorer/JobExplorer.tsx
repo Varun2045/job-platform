@@ -12,7 +12,6 @@ export const JobExplorer: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [search, setSearch] = useState('');
-  const [company] = useState('all');
   const [locationQuery, setLocationQuery] = useState('');
   const [location, setLocation] = useState('');
   const [remote, setRemote] = useState('all');
