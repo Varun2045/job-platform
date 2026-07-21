@@ -417,9 +417,13 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       limit = '10',
     } = req.query;
 
-    const settings = await storage.getExtendedSettings();
-    const companies = await storage.getEnabledCompanies();
-    const allCompanies = await storage.getAllCompanies();
+    const [settings, companies, allCompanies, allJobs] = await Promise.all([
+      storage.getExtendedSettings(),
+      storage.getEnabledCompanies(),
+      storage.getAllCompanies(),
+      storage.getAllJobs(),
+    ]);
+
     const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
 
     const enabledCompsMap = new Map<string, any>();
@@ -437,8 +441,6 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
     if (location) searchFilter.location = location as string;
     if (remote) searchFilter.remote = remote === 'true';
     if (minScore) searchFilter.minScore = Number(minScore);
-
-    const allJobs = await storage.getAllJobs();
 
     // Fast pre-filter raw jobs before scoring loop for 100x speedup
     const candidateJobs = SearchEngine.quickFilterRawJobs(allJobs, searchFilter);
@@ -3081,13 +3083,18 @@ app.get('/api/linkedin/status', authMiddleware, async (req, res) => {
 // 6. Calendar Integration Endpoints
 app.get('/api/auth/google/url', authMiddleware, (req, res) => {
   const clientId = config.googleClientId;
-  const redirectUri = config.googleRedirectUri;
-  if (!clientId || !redirectUri) {
-    return res.json({ configured: false, url: null, message: 'Google OAuth client ID or redirect URI is not configured.' });
+  if (!clientId) {
+    return res.json({ configured: false, url: null, message: 'Google OAuth client ID is not configured.' });
   }
+
+  const reqHost = req.get('host');
+  const reqProtocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+  const autoRedirectUri = `${reqProtocol}://${reqHost}/api/auth/google/callback`;
+  const redirectUri = (req.query.redirect_uri as string) || config.googleRedirectUri || autoRedirectUri;
+
   const userId = (req as any).user.id;
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=https://www.googleapis.com/auth/calendar.events&access_type=offline&prompt=consent&state=${userId}`;
-  return res.json({ configured: true, url: authUrl });
+  return res.json({ configured: true, url: authUrl, redirectUri });
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
@@ -3099,9 +3106,12 @@ app.get('/api/auth/google/callback', async (req, res) => {
 
     const clientId = config.googleClientId;
     const clientSecret = config.googleClientSecret;
-    const redirectUri = config.googleRedirectUri;
+    const reqHost = req.get('host');
+    const reqProtocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const autoRedirectUri = `${reqProtocol}://${reqHost}/api/auth/google/callback`;
+    const redirectUri = config.googleRedirectUri || autoRedirectUri;
 
-    if (!clientId || !clientSecret || !redirectUri) {
+    if (!clientId || !clientSecret) {
       return res.status(500).send('Google OAuth parameters are not fully configured.');
     }
 
