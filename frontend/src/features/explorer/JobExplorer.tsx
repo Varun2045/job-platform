@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, MapPin, Briefcase, Globe, ExternalLink, ArrowRight, X, Sparkles, FileText, CheckSquare, Users, MessageSquare, Star, Mail } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
