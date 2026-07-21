@@ -20,8 +20,12 @@ export const CompanyMonitor: React.FC = () => {
 
   // Inline edit state
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editEnabled, setEditEnabled] = useState(true);
   const [editInterval, setEditInterval] = useState('');
   const [editPriority, setEditPriority] = useState('');
+  const [editAts, setEditAts] = useState('none');
+  const [editEndpoint, setEditEndpoint] = useState('');
   const [editEnableResume, setEditEnableResume] = useState(true);
   const [editProfiles, setEditProfiles] = useState('');
 
@@ -64,11 +68,11 @@ export const CompanyMonitor: React.FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, interval_minutes, priority, resume_profiles }: { id: string; interval_minutes: number; priority: number; resume_profiles?: string[] }) => {
-      const res = await fetch(`/api/companies/${id}`, {
+    mutationFn: async (payload: { id: string; name?: string; enabled?: boolean; interval_minutes?: number; priority?: number; api_endpoint?: string | null; detected_ats?: string; resume_profiles?: string[] }) => {
+      const res = await fetch(`/api/companies/${payload.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interval_minutes, priority, resume_profiles })
+        body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error('Failed to update company');
       return res.json();
@@ -338,8 +342,12 @@ export const CompanyMonitor: React.FC = () => {
                           setEditingId(null);
                         } else {
                           setEditingId(c.id);
+                          setEditName(c.name || '');
+                          setEditEnabled(c.enabled !== false);
                           setEditInterval(String(c.interval_minutes || 180));
                           setEditPriority(String(c.priority || 2));
+                          setEditAts(c.detected_ats || 'none');
+                          setEditEndpoint(c.api_endpoint || '');
                           const hasResume = !(c.resume_profiles?.includes('_skip_') || c.resume_profiles?.includes('none') || c.resume_profiles?.length === 0);
                           setEditEnableResume(hasResume);
                           setEditProfiles(c.resume_profiles?.filter((p: string) => p !== '_skip_' && p !== 'none').join(', ') || 'backend');
@@ -364,6 +372,55 @@ export const CompanyMonitor: React.FC = () => {
                   <div className="space-y-3 bg-[#1b2535] border border-[#232d3f] rounded-xl p-3">
                     <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Edit Settings</p>
                     <div className="space-y-2">
+                      <div>
+                        <label className="text-[10px] text-[#94a3b8] font-semibold block mb-1">Company Display Name</label>
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={e => setEditName(e.target.value)}
+                          className="w-full bg-[#131a26] border border-[#232d3f] rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 py-1">
+                        <input
+                          type="checkbox"
+                          id={`edit-enabled-${c.id}`}
+                          checked={editEnabled}
+                          onChange={e => setEditEnabled(e.target.checked)}
+                          className="rounded border-[#232d3f] text-indigo-600 focus:ring-indigo-500 bg-[#131a26]"
+                        />
+                        <label htmlFor={`edit-enabled-${c.id}`} className="text-[10px] text-[#94a3b8] font-semibold select-none cursor-pointer">
+                          Enable Scraper Monitoring
+                        </label>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#94a3b8] font-semibold block mb-1">ATS Platform</label>
+                        <select
+                          value={editAts}
+                          onChange={e => setEditAts(e.target.value)}
+                          className="w-full bg-[#131a26] border border-[#232d3f] rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500"
+                        >
+                          <option value="none">None (Fallback Crawl)</option>
+                          <option value="greenhouse">Greenhouse API</option>
+                          <option value="lever">Lever API</option>
+                          <option value="workday">Workday API</option>
+                          <option value="google">Google API</option>
+                          <option value="microsoft">Microsoft API</option>
+                          <option value="amazon">Amazon API</option>
+                          <option value="apple">Apple API</option>
+                          <option value="meta">Meta API</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#94a3b8] font-semibold block mb-1">API Endpoint / Careers Page URL</label>
+                        <input
+                          type="text"
+                          value={editEndpoint}
+                          onChange={e => setEditEndpoint(e.target.value)}
+                          placeholder="https://..."
+                          className="w-full bg-[#131a26] border border-[#232d3f] rounded-lg px-2 py-1.5 text-xs text-white outline-none focus:border-indigo-500"
+                        />
+                      </div>
                       <div>
                         <label className="text-[10px] text-[#94a3b8] font-semibold block mb-1">Check Interval (minutes)</label>
                         <input
@@ -413,8 +470,12 @@ export const CompanyMonitor: React.FC = () => {
                     <button
                       onClick={() => updateMutation.mutate({
                         id: c.id,
+                        name: editName,
+                        enabled: editEnabled,
                         interval_minutes: Number(editInterval),
                         priority: Number(editPriority),
+                        detected_ats: editAts,
+                        api_endpoint: editEndpoint || null,
                         resume_profiles: editEnableResume
                           ? editProfiles.split(',').map(s => s.trim()).filter(Boolean)
                           : ['_skip_']

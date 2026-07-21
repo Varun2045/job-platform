@@ -670,7 +670,7 @@ app.post('/api/companies', authMiddleware, async (req, res) => {
     const companyConfig: CompanyConfig = {
       id,
       name,
-      enabled: true,
+      enabled: req.body.enabled !== undefined ? Boolean(req.body.enabled) : true,
       priority: Number(priority),
       interval_minutes: Number(interval_minutes),
       api_endpoint: api_endpoint || null,
@@ -705,17 +705,22 @@ app.post('/api/companies', authMiddleware, async (req, res) => {
   }
 });
 
-app.patch('/api/companies/:id', authMiddleware, async (req, res) => {
+const handleUpdateCompany = async (req: express.Request, res: express.Response) => {
   try {
     const id = req.params.id as string;
     const company = await storage.getCompanyConfig(id);
     if (!company) {
       return res.status(404).json({ error: 'Company not found' });
     }
-    const { interval_minutes, priority, resume_profiles } = req.body;
+    const { name, enabled, interval_minutes, priority, resume_profiles, api_endpoint, detected_ats, cron_expression } = req.body;
     const updates: Record<string, any> = {};
+    if (name !== undefined) updates.name = String(name);
+    if (enabled !== undefined) updates.enabled = Boolean(enabled);
     if (interval_minutes !== undefined) updates.interval_minutes = Number(interval_minutes);
     if (priority !== undefined) updates.priority = Number(priority);
+    if (api_endpoint !== undefined) updates.api_endpoint = api_endpoint || null;
+    if (detected_ats !== undefined) updates.detected_ats = detected_ats || null;
+    if (cron_expression !== undefined) updates.cron_expression = cron_expression || null;
     if (resume_profiles !== undefined) {
       updates.resume_profiles = Array.isArray(resume_profiles)
         ? resume_profiles
@@ -731,7 +736,10 @@ app.patch('/api/companies/:id', authMiddleware, async (req, res) => {
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
-});
+};
+
+app.patch('/api/companies/:id', authMiddleware, handleUpdateCompany);
+app.put('/api/companies/:id', authMiddleware, handleUpdateCompany);
 
 app.delete('/api/companies/:id', authMiddleware, async (req, res) => {
   try {
@@ -1527,44 +1535,48 @@ let isScrapersPaused = false;
 
 app.get('/api/monitoring', authMiddleware, async (req, res) => {
   try {
-    const companiesPath = path.join(process.cwd(), 'storage', 'companies_state.json');
-    const summaryPath = path.join(process.cwd(), 'storage', 'summary.json');
+    const companiesList = await storage.getAllCompanies();
+    const totalCompanies = companiesList.length;
+    const failedScrapers = companiesList.filter((c: any) => c.consecutive_failures > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)))).length;
+    const healthyScrapers = totalCompanies - failedScrapers;
 
-    let totalCompanies = 0;
-    let healthyScrapers = 0;
-    let failedScrapers = 0;
+    const responseTimes = companiesList.map((c: any) => c.avg_response_time_ms || 0).filter((t: number) => t > 0);
     let avgDuration = '0.0s';
-
-    if (fs.existsSync(companiesPath)) {
-      const companiesList = JSON.parse(fs.readFileSync(companiesPath, 'utf-8'));
-      totalCompanies = companiesList.length;
-      failedScrapers = companiesList.filter((c: any) => c.consecutive_failures > 0).length;
-      healthyScrapers = totalCompanies - failedScrapers;
-
-      const responseTimes = companiesList.map((c: any) => c.avg_response_time_ms || 0).filter((t: number) => t > 0);
-      if (responseTimes.length > 0) {
-        const avg = responseTimes.reduce((acc: number, t: number) => acc + t, 0) / responseTimes.length;
-        avgDuration = (avg / 1000).toFixed(1) + 's';
-      }
+    if (responseTimes.length > 0) {
+      const avg = responseTimes.reduce((acc: number, t: number) => acc + t, 0) / responseTimes.length;
+      avgDuration = (avg / 1000).toFixed(1) + 's';
     }
 
-    let lastRun = 'Never';
-    let jobsToday = 0;
-    if (fs.existsSync(summaryPath)) {
-      const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf-8'));
-      if (summary.runTimestamp) {
-        const diffMs = Date.now() - new Date(summary.runTimestamp).getTime();
-        const diffMins = Math.floor(diffMs / (60 * 1000));
-        if (diffMins < 1) lastRun = 'Just now';
-        else if (diffMins === 1) lastRun = '1 minute ago';
-        else lastRun = `${diffMins} minutes ago`;
+    const allJobs = await storage.getAllJobs();
+    const todayStr = new Date().toISOString().split('T')[0];
+    const jobsToday = allJobs.filter((j: any) => {
+      if (!j.datePosted) return false;
+      try {
+        const d = new Date(j.datePosted);
+        if (isNaN(d.getTime())) return false;
+        return d.toISOString().split('T')[0] === todayStr;
+      } catch {
+        return false;
       }
-      jobsToday = summary.jobsDiscovered || 0;
+    }).length;
+
+    const lastScrapeTimes = companiesList
+      .map((c: any) => c.last_successful_scrape ? new Date(c.last_successful_scrape).getTime() : 0)
+      .filter((t: number) => t > 0);
+    let lastRun = 'Never';
+    if (lastScrapeTimes.length > 0) {
+      const latestMs = Math.max(...lastScrapeTimes);
+      const diffMs = Date.now() - latestMs;
+      const diffMins = Math.floor(diffMs / (60 * 1000));
+      if (diffMins < 1) lastRun = 'Just now';
+      else if (diffMins === 1) lastRun = '1 minute ago';
+      else if (diffMins < 60) lastRun = `${diffMins} minutes ago`;
+      else lastRun = `${Math.floor(diffMins / 60)} hours ago`;
     }
 
     return res.json({
       lastRun,
-      nextRun: isScrapersPaused ? 'Paused' : 'In 58 minutes',
+      nextRun: isScrapersPaused ? 'Paused' : 'In 30 minutes',
       totalCompanies,
       healthyScrapers,
       failedScrapers,
