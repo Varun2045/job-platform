@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Search, MapPin, Briefcase, Globe, ExternalLink, ArrowRight, X, Sparkles, 
-  FileText, CheckSquare, Users, MessageSquare, Star, Mail, Bookmark, 
-  Share2, EyeOff, Filter, ChevronDown, ChevronUp, Clock, Building, DollarSign, RefreshCw, Zap
+  Search, MapPin, Briefcase, Globe, ExternalLink, X, Sparkles, 
+  FileText, CheckSquare, Bookmark, EyeOff, Filter, Clock, RefreshCw, Zap
 } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
@@ -13,7 +12,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const JobExplorer: React.FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Search input & debouncing
