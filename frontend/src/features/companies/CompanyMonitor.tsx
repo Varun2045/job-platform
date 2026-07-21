@@ -130,9 +130,9 @@ export const CompanyMonitor: React.FC = () => {
         c.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (c.detected_ats && c.detected_ats.toLowerCase().includes(searchTerm.toLowerCase()));
       
-      const status = !c.enabled
+      const status = c.enabled === false
         ? 'disabled'
-        : (c.total_failures > 0 && c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)))
+        : ((c.consecutive_failures ?? 0) > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape))))
           ? 'degraded'
           : 'healthy';
       const matchesStatus = statusFilter === 'all' || status === statusFilter;
@@ -311,9 +311,9 @@ export const CompanyMonitor: React.FC = () => {
         <div className={`${selectedComp ? 'lg:col-span-2' : 'lg:col-span-3'} grid-fluid-cards gap-6`}>
 
           {list.map((c: any) => {
-            const status = !c.enabled
+            const status = c.enabled === false
               ? 'disabled'
-              : (c.total_failures > 0 && c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)))
+              : ((c.consecutive_failures ?? 0) > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape))))
                 ? 'degraded'
                 : 'healthy';
 

@@ -354,10 +354,14 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
 
     const allJobs = await storage.getAllJobs();
 
-    const activeComps = companies.filter((c) => c.enabled);
-    const healthyComps = activeComps.filter((c) => c.total_failures === 0);
-    const degradedComps = activeComps.filter((c) => c.total_failures > 0);
-    const disabledComps = companies.filter((c) => !c.enabled);
+    const disabledComps = companies.filter((c) => c.enabled === false);
+    const activeComps = companies.filter((c) => c.enabled !== false);
+    const degradedComps = activeComps.filter(
+      (c) =>
+        (c.consecutive_failures ?? 0) > 0 ||
+        (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape))),
+    );
+    const healthyComps = activeComps.filter((c) => !degradedComps.includes(c));
 
     return res.json({
       stats: {
