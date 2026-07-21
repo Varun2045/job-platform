@@ -37,19 +37,18 @@ export class SearchEngine {
         const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
 
         if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
-          if (!/early|entry|junior|associate|fresher|0-2|0-3|0-1|1-2|1-3|new grad|intern|graduate/i.test(expText)) {
-            return false;
-          }
+          // Early career = 0-2 years: exclude roles explicitly requiring 5+ years, senior, staff, lead, principal
+          const isExplicitSenior = /senior|sr\.|lead|principal|staff|director|head of|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(expText);
+          const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText);
+          if (isExplicitSenior && !isExplicitEarly) return false;
         } else if (expLower.includes('mid')) {
-          if (!/mid|2-5|3-5|3-6|intermediate|2\+|3\+/i.test(expText)) {
-            return false;
-          }
+          // Mid level = 2-5 years: exclude director/staff/10+ year roles
+          const isExplicitTopSenior = /staff|principal|director|head of|7\+|8\+|10\+|7-10|8-10|10\+/i.test(expText);
+          if (isExplicitTopSenior) return false;
         } else if (expLower.includes('senior') || expLower.includes('lead')) {
-          if (!/senior|lead|sr|staff|principal|5\+|6\+|7\+|8\+|9\+|10\+/i.test(expText)) {
-            return false;
-          }
-        } else {
-          if (!expText.includes(expLower)) return false;
+          // Senior = 5+ years: require senior/lead/staff/5+ years
+          const isSenior = /senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|9\+|10\+|5-7|5-8|5-10/i.test(expText);
+          if (!isSenior) return false;
         }
       }
 
@@ -125,19 +124,15 @@ export class SearchEngine {
         const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
 
         if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
-          if (!/early|entry|junior|associate|fresher|0-2|0-3|0-1|1-2|1-3|new grad|intern|graduate/i.test(expText)) {
-            return false;
-          }
+          const isExplicitSenior = /senior|sr\.|lead|principal|staff|director|head of|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(expText);
+          const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText);
+          if (isExplicitSenior && !isExplicitEarly) return false;
         } else if (expLower.includes('mid')) {
-          if (!/mid|2-5|3-5|3-6|intermediate|2\+|3\+/i.test(expText)) {
-            return false;
-          }
+          const isExplicitTopSenior = /staff|principal|director|head of|7\+|8\+|10\+|7-10|8-10|10\+/i.test(expText);
+          if (isExplicitTopSenior) return false;
         } else if (expLower.includes('senior') || expLower.includes('lead')) {
-          if (!/senior|lead|sr|staff|principal|5\+|6\+|7\+|8\+|9\+|10\+/i.test(expText)) {
-            return false;
-          }
-        } else {
-          if (!expText.includes(expLower)) return false;
+          const isSenior = /senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|9\+|10\+|5-7|5-8|5-10/i.test(expText);
+          if (!isSenior) return false;
         }
       }
 
