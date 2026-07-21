@@ -38,14 +38,14 @@ export class PlaywrightScraper {
     try {
       browser = await chromium.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
       });
 
       const page = await browser.newPage();
       await page.setViewportSize({ width: 1280, height: 800 });
 
       // Navigate with timeout
-      await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
 
       // Wait another 3s for hydration/rendering of lists
       await page.waitForTimeout(3000);
@@ -112,9 +112,12 @@ export class PlaywrightScraper {
 
     let browser: Browser | null = null;
     try {
-      browser = await chromium.launch({ headless: true });
+      browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+      });
       const page = await browser.newPage();
-      await page.goto(rawJob.url, { waitUntil: 'networkidle', timeout: 30000 });
+      await page.goto(rawJob.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
       await page.waitForTimeout(2000);
 
       // Extract inner text of body excluding headers/footers

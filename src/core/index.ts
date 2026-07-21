@@ -456,15 +456,12 @@ export async function runOrchestrator(
                   err.message.includes('ENOTFOUND') ||
                   err.message.includes('EAI_AGAIN');
 
-                if (isPermanentFailure) {
-                  Logger.critical(`[${company.name}] Permanent endpoint failure: ${err.message}. Disabling company.`);
-                  nextState.enabled = false;
-                } else if (nextConsecutiveFailures >= (company.retry_count ?? 3)) {
+                if (isPermanentFailure || nextConsecutiveFailures >= (company.retry_count ?? 3)) {
                   const cooldownMinutes = 120;
                   const suspendedUntil = new Date(Date.now() + cooldownMinutes * 60 * 1000).toISOString();
                   nextState.api_suspended_until = suspendedUntil;
                   Logger.warn(
-                    `[${company.name}] Circuit breaker tripped! Suspending scraper for ${cooldownMinutes} minutes.`,
+                    `[${company.name}] Scraper error/circuit breaker tripped: ${err.message}. Suspending scraper for ${cooldownMinutes} minutes.`,
                   );
                 }
 
