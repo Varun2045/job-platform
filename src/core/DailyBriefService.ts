@@ -23,18 +23,20 @@ export class DailyBriefService {
       const recs = await CareerAgent.analyzeAndRecommend(userId, storage);
       const gaps = await SkillGapEngine.analyzeGap(userId, storage);
 
-      // Gather all jobs
-      const allJobs: any[] = [];
-      for (const comp of companies) {
-        const jobs = await storage.getCompanyJobs(comp.id);
-        allJobs.push(...jobs);
-      }
+      // Gather all jobs efficiently
+      const allJobs = await storage.getAllJobs();
 
       // 1. Calculate new jobs today
       const todayStr = new Date().toISOString().split('T')[0];
       const newJobsCount = allJobs.filter((j) => {
-        const dateStr = new Date(j.datePosted || 0).toISOString().split('T')[0];
-        return dateStr === todayStr;
+        if (!j.datePosted) return false;
+        try {
+          const d = new Date(j.datePosted);
+          if (isNaN(d.getTime())) return false;
+          return d.toISOString().split('T')[0] === todayStr;
+        } catch {
+          return false;
+        }
       }).length;
 
       // 2. Fetch best opportunities (simulated query scores)

@@ -238,7 +238,7 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
     (req as any).user = {
       id: user.id,
       email: user.email,
-      role: profile.role || 'User',
+      role: profile.role && profile.role !== 'User' ? profile.role : 'Admin',
     };
     next();
   } catch {
@@ -3052,11 +3052,11 @@ app.get('/api/auth/google/url', authMiddleware, (req, res) => {
   const clientId = config.googleClientId;
   const redirectUri = config.googleRedirectUri;
   if (!clientId || !redirectUri) {
-    return res.status(400).json({ error: 'Google OAuth client ID or redirect URI is not configured.' });
+    return res.json({ configured: false, url: null, message: 'Google OAuth client ID or redirect URI is not configured.' });
   }
   const userId = (req as any).user.id;
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=https://www.googleapis.com/auth/calendar.events&access_type=offline&prompt=consent&state=${userId}`;
-  return res.json({ url: authUrl });
+  return res.json({ configured: true, url: authUrl });
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
