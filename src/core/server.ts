@@ -405,17 +405,33 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
 app.get('/api/jobs', authMiddleware, async (req, res) => {
   try {
     const {
-      company,
+      q,
       technology,
+      company,
       experience,
       department,
       location,
       remote,
       minScore,
       sort = 'opportunity',
-      page = '1',
-      limit = '10',
+      cursor,
+      pageSize = '25',
+      limit,
     } = req.query;
+
+    const rawQuery = (q as string) || (technology as string) || '';
+    const nlParsed = SearchEngine.parseNLQuery(rawQuery);
+
+    const targetKeyword = nlParsed.keyword;
+    const targetCompany = (company as string) || '';
+    const targetExperience = (experience as string) || nlParsed.experience || '';
+    const targetDepartment = (department as string) || nlParsed.department || '';
+    const targetLocation = (location as string) || nlParsed.location || '';
+    const targetRemote = remote !== undefined && remote !== '' ? remote === 'true' : nlParsed.remote;
+    const targetMinScore = minScore ? Number(minScore) : 0;
+
+    const ps = Math.min(100, Math.max(1, Number(pageSize || limit || 25)));
+    const offset = SearchEngine.decodeCursor(cursor as string);
 
     const [settings, companies, allCompanies, allJobs] = await Promise.all([
       storage.getExtendedSettings(),
@@ -432,19 +448,17 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       enabledCompsMap.set(c.name.toLowerCase(), c);
     }
 
-    // Build search filter object
     const searchFilter: any = {};
-    if (company && company !== 'all') searchFilter.company = company as string;
-    if (technology) searchFilter.technology = technology as string;
-    if (experience && experience !== 'all') searchFilter.experience = experience as string;
-    if (department && department !== 'all') searchFilter.department = department as string;
-    if (location) searchFilter.location = location as string;
-    if (remote) searchFilter.remote = remote === 'true';
-    if (minScore) searchFilter.minScore = Number(minScore);
+    if (targetCompany && targetCompany !== 'all') searchFilter.company = targetCompany;
+    if (targetKeyword) searchFilter.technology = targetKeyword;
+    if (targetExperience && targetExperience !== 'all') searchFilter.experience = targetExperience;
+    if (targetDepartment && targetDepartment !== 'all') searchFilter.department = targetDepartment;
+    if (targetLocation) searchFilter.location = targetLocation;
+    if (targetRemote !== undefined && targetRemote !== null) searchFilter.remote = targetRemote;
+    if (targetMinScore > 0) searchFilter.minScore = targetMinScore;
 
-    // Fast pre-filter raw jobs before scoring loop for 100x speedup
     const candidateJobs = SearchEngine.quickFilterRawJobs(allJobs, searchFilter);
-    const allScoredJobs: { job: any; score: number; opportunityScore: number; breakdown: any }[] = [];
+    const allScoredJobs: { job: any; score: number; opportunityScore: number; weightedScore: number; breakdown: any }[] = [];
 
     for (const j of candidateJobs) {
       const compKey = (j.company || '').toLowerCase();
@@ -455,34 +469,49 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
       const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
       const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
+      
+      const weightedScore = SearchEngine.calculateWeightedScore(
+        { job: j, score: bestScore, opportunityScore: recommendation.opportunityScore },
+        targetKeyword
+      );
+
       allScoredJobs.push({
         job: j,
         score: bestScore,
         opportunityScore: recommendation.opportunityScore,
+        weightedScore,
         breakdown: recommendation.breakdown,
       });
     }
 
     const filtered = SearchEngine.search(allScoredJobs as any, searchFilter) as any[];
 
-    // Sort by match score or opportunity score
+    // Calculate Database-level Facet Counts
+    const facetsData = SearchEngine.calculateDatabaseFacets(allScoredJobs);
+
+    // Multi-factor Weighted Ranking Sort
     if (sort === 'match') {
       filtered.sort((a, b) => b.score - a.score || b.opportunityScore - a.opportunityScore);
+    } else if (sort === 'newest') {
+      filtered.sort((a, b) => new Date(b.job.datePosted || 0).getTime() - new Date(a.job.datePosted || 0).getTime());
     } else {
-      filtered.sort((a, b) => b.opportunityScore - a.opportunityScore || b.score - a.score);
+      filtered.sort((a, b) => (b.weightedScore || b.opportunityScore) - (a.weightedScore || a.opportunityScore));
     }
 
-    const p = Number(page);
-    const l = Number(limit);
-    const start = (p - 1) * l;
-    const end = start + l;
-    const paginated = filtered.slice(start, end);
+    const end = offset + ps;
+    const paginatedJobs = filtered.slice(offset, end);
+    const hasMore = end < filtered.length;
+    const nextCursor = hasMore ? SearchEngine.encodeCursor(end) : null;
 
     return res.json({
-      jobs: paginated,
-      total: filtered.length,
-      page: p,
-      pages: Math.ceil(filtered.length / l),
+      jobs: paginatedJobs,
+      facets: facetsData,
+      pagination: {
+        pageSize: ps,
+        total: filtered.length,
+        hasMore,
+        nextCursor,
+      },
     });
   } catch (err: any) {
     Logger.error('Error in /api/jobs', err);

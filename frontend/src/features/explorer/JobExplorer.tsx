@@ -1,69 +1,164 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, MapPin, Briefcase, Globe, ExternalLink, ArrowRight, X, Sparkles, FileText, CheckSquare, Users, MessageSquare, Star, Mail } from 'lucide-react';
+import { 
+  Search, MapPin, Briefcase, Globe, ExternalLink, ArrowRight, X, Sparkles, 
+  FileText, CheckSquare, Users, MessageSquare, Star, Mail, Bookmark, 
+  Share2, EyeOff, Filter, ChevronDown, ChevronUp, Clock, Building, DollarSign, RefreshCw, Zap
+} from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
 import { ResumeTailoringModal } from './ResumeTailoringModal.js';
 import { InterviewPrepPanel } from './InterviewPrepPanel.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const JobExplorer: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [search, setSearch] = useState('');
-  const [locationQuery, setLocationQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [remote, setRemote] = useState('all');
-  const [minScore, setMinScore] = useState('0');
-  const [experience, setExperience] = useState('all');
-  const [department, setDepartment] = useState('all');
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Search input & debouncing
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [debouncedQuery, setDebouncedQuery] = useState(searchParams.get('q') || '');
+
+  // Filter state
+  const [locationQuery, setLocationQuery] = useState(searchParams.get('location') || '');
+  const [debouncedLocation, setDebouncedLocation] = useState(searchParams.get('location') || '');
+  const [remote, setRemote] = useState<string>(searchParams.get('remote') || 'all');
+  const [experience, setExperience] = useState<string[]>(
+    searchParams.get('experience') ? searchParams.get('experience')!.split(',') : []
+  );
+  const [department, setDepartment] = useState<string[]>(
+    searchParams.get('department') ? searchParams.get('department')!.split(',') : []
+  );
+  const [company, setCompany] = useState<string>(searchParams.get('company') || 'all');
+  const [minScore, setMinScore] = useState<string>(searchParams.get('minScore') || '0');
+  const [employmentType, setEmploymentType] = useState<string>(searchParams.get('employmentType') || 'all');
+  const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest'>('opportunity');
+
+  // Infinite Scroll & Cursor Pagination state
+  const [accumulatedJobs, setAccumulatedJobs] = useState<any[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
   const [selectedJobHash, setSelectedJobHash] = useState<string | null>(null);
-  const [trackNotes, setTrackNotes] = useState('');
-  const [sortBy, setSortBy] = useState<'opportunity' | 'match'>('opportunity');
+  const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('bookmarked_jobs');
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+  const [hiddenJobs, setHiddenJobs] = useState<Set<string>>(new Set());
 
-  // Debounce search input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setSearch(searchQuery);
-    }, 200);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
+  // Recent searches memory
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('recent_job_searches');
+      return saved ? JSON.parse(saved) : ['React Remote', 'Java Spring Boot', 'AI Engineer', 'Bangalore'];
+    } catch {
+      return ['React Remote', 'Java Spring Boot', 'AI Engineer', 'Bangalore'];
+    }
+  });
 
-  // Debounce location input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setLocation(locationQuery);
-    }, 200);
-    return () => clearTimeout(handler);
-  }, [locationQuery]);
-
-  // Modals visibility state
+  // UI Drawer & Sidebar visibility state
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [openCoverLetter, setOpenCoverLetter] = useState(false);
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
+  const [trackNotes, setTrackNotes] = useState('');
 
-  // Fetch Jobs List directly from backend search engine (queries 100% of jobs in 100ms)
-  const { data: jobsData, isLoading: isJobsLoading } = useQuery({
-    queryKey: ['jobs', search, location, remote, minScore, experience, department, sortBy, page],
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcut: Press "/" to focus search bar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement !== searchInputRef.current && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // 300ms Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+      if (searchQuery.trim() && !recentSearches.includes(searchQuery.trim())) {
+        const updated = [searchQuery.trim(), ...recentSearches.slice(0, 4)];
+        setRecentSearches(updated);
+        localStorage.setItem('recent_job_searches', JSON.stringify(updated));
+      }
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // 300ms Debounce location input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedLocation(locationQuery);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [locationQuery]);
+
+  // Sync state to URL parameters
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (debouncedQuery) params.q = debouncedQuery;
+    if (debouncedLocation) params.location = debouncedLocation;
+    if (remote !== 'all') params.remote = remote;
+    if (experience.length > 0) params.experience = experience.join(',');
+    if (department.length > 0) params.department = department.join(',');
+    if (company !== 'all') params.company = company;
+    if (minScore !== '0') params.minScore = minScore;
+    if (employmentType !== 'all') params.employmentType = employmentType;
+
+    setSearchParams(params, { replace: true });
+    // Reset accumulated pagination when filters change
+    setCursor(null);
+    setAccumulatedJobs([]);
+  }, [debouncedQuery, debouncedLocation, remote, experience, department, company, minScore, employmentType, sortBy]);
+
+  // Query Jobs API (Cursor-based infinite scroll + database-level facet aggregation)
+  const { data: apiResponse, isLoading: isJobsLoading, isFetching } = useQuery({
+    queryKey: ['jobs-feed', debouncedQuery, debouncedLocation, remote, experience, department, company, minScore, employmentType, sortBy, cursor],
     queryFn: async () => {
       const params = new URLSearchParams({
-        technology: search,
-        location,
-        remote: remote === 'all' ? '' : String(remote === 'true'),
+        q: debouncedQuery,
+        location: debouncedLocation,
+        remote: remote === 'all' ? '' : remote,
+        experience: experience.join(','),
+        department: department.join(','),
+        company: company === 'all' ? '' : company,
         minScore: minScore === '0' ? '' : minScore,
-        experience: experience === 'all' ? '' : experience,
-        department: department === 'all' ? '' : department,
+        employmentType: employmentType === 'all' ? '' : employmentType,
         sort: sortBy,
-        page: String(page),
-        limit: '6'
+        pageSize: '25',
+        ...(cursor ? { cursor } : {})
       });
       const res = await fetch(`/api/jobs?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch job postings');
+      if (!res.ok) throw new Error('Failed to fetch job feed');
       return res.json();
     }
   });
+
+  // Accumulate jobs for smooth infinite scroll
+  useEffect(() => {
+    if (apiResponse && apiResponse.jobs) {
+      if (!cursor) {
+        setAccumulatedJobs(apiResponse.jobs);
+        if (apiResponse.jobs.length > 0 && !selectedJobHash) {
+          setSelectedJobHash(apiResponse.jobs[0].job.jobHash);
+        }
+      } else {
+        setAccumulatedJobs(prev => {
+          const existingHashes = new Set(prev.map(j => j.job.jobHash));
+          const newUnique = apiResponse.jobs.filter((j: any) => !existingHashes.has(j.job.jobHash));
+          return [...prev, ...newUnique];
+        });
+      }
+    }
+  }, [apiResponse, cursor]);
 
   // Fetch Selected Job Detail
   const { data: detailData, isLoading: isDetailLoading } = useQuery({
@@ -72,18 +167,6 @@ export const JobExplorer: React.FC = () => {
       if (!selectedJobHash) return null;
       const res = await fetch(`/api/jobs/${selectedJobHash}`);
       if (!res.ok) throw new Error('Failed to load job details');
-      return res.json();
-    },
-    enabled: !!selectedJobHash
-  });
-
-  // Fetch AI Analysis Detail
-  const { data: analysisData, isLoading: isAnalysisLoading } = useQuery({
-    queryKey: ['job-analysis', selectedJobHash],
-    queryFn: async () => {
-      if (!selectedJobHash) return null;
-      const res = await fetch(`/api/jobs/${selectedJobHash}/analysis`);
-      if (!res.ok) throw new Error('Failed to load job analysis');
       return res.json();
     },
     enabled: !!selectedJobHash
@@ -104,315 +187,552 @@ export const JobExplorer: React.FC = () => {
           notes: trackNotes
         })
       });
-      if (!res.ok) throw new Error('Failed to save application tracker status');
+      if (!res.ok) throw new Error('Failed to save application status');
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
       setTrackNotes('');
-      alert('Application tracked successfully!');
+      alert('Application status tracked successfully!');
     }
   });
 
-  const handleTrackSubmit = (status: string) => {
-    trackMutation.mutate(status);
+  // Bookmark toggle
+  const toggleBookmark = (hash: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setBookmarkedJobs(prev => {
+      const next = new Set(prev);
+      if (next.has(hash)) next.delete(hash);
+      else next.add(hash);
+      localStorage.setItem('bookmarked_jobs', JSON.stringify(Array.from(next)));
+      return next;
+    });
   };
 
+  // Hide job toggle
+  const hideJob = (hash: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setHiddenJobs(prev => new Set(prev).add(hash));
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setDebouncedQuery('');
+    setLocationQuery('');
+    setDebouncedLocation('');
+    setRemote('all');
+    setExperience([]);
+    setDepartment([]);
+    setCompany('all');
+    setMinScore('0');
+    setEmploymentType('all');
+    setSearchParams({});
+  };
+
+  // Toggle array filter helper
+  const toggleArrayFilter = (arr: string[], val: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    if (arr.includes(val)) {
+      setter(arr.filter(v => v !== val));
+    } else {
+      setter([...arr, val]);
+    }
+  };
+
+  // Keyword highlighting helper
+  const renderHighlightedText = (text: string, highlight: string) => {
+    if (!highlight.trim()) return text;
+    const parts = text.split(new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    return parts.map((part, i) => 
+      part.toLowerCase() === highlight.toLowerCase() ? (
+        <mark key={i} className="bg-amber-400/30 text-amber-200 px-0.5 rounded font-bold">{part}</mark>
+      ) : (
+        part
+      )
+    );
+  };
+
+  const facets = apiResponse?.facets || {};
+  const visibleJobs = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash));
+  const hasMore = apiResponse?.pagination?.hasMore;
+  const nextCursorToken = apiResponse?.pagination?.nextCursor;
+  const totalCount = apiResponse?.pagination?.total ?? visibleJobs.length;
+
   return (
-    <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto flex flex-col min-h-screen relative">
-      {/* Page Title */}
-      <div>
-        <h1 className="text-fluid-title font-extrabold text-white tracking-tight">Job Explorer</h1>
-        <p className="text-sm text-[#94a3b8]">Search, rank by Opportunity Score, and tailoring your applications</p>
+    <div className="p-4 md:p-6 space-[#101725] max-w-[1600px] mx-auto min-h-screen text-white font-sans">
+      
+      {/* STICKY GLOBAL SEARCH HEADER */}
+      <div className="sticky top-0 z-30 bg-[#0b0f17]/95 backdrop-blur-md pb-4 pt-2 border-b border-[#1f293d] mb-6">
+        <div className="flex flex-col gap-3">
+          
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-3.5 w-5 h-5 text-[#818cf8]" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder='Search "Java Spring Boot Bangalore", "React Remote", "AI Engineer"... (Press "/" to focus)'
+                className="w-full bg-[#131b2e] border border-[#232f48] rounded-2xl py-3 pl-12 pr-12 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-lg transition-all"
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
+                  className="absolute right-4 top-3.5 text-[#64748b] hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="lg:hidden flex items-center gap-2 bg-[#131b2e] border border-[#232f48] px-4 py-3 rounded-2xl text-xs font-bold text-white hover:bg-[#1c273e]"
+            >
+              <Filter className="w-4 h-4 text-indigo-400" /> Filters
+            </button>
+          </div>
+
+          {/* TRENDING SEARCH CHIPS & RECENT SEARCHES */}
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-wider flex items-center gap-1">
+              <Zap className="w-3 h-3 text-amber-400" /> Trending:
+            </span>
+            {['Java', 'Python', 'React', 'AI Engineer', 'Backend', 'Remote'].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => { setSearchQuery(tag); setDebouncedQuery(tag); }}
+                className="bg-[#131b2e] hover:bg-indigo-600/20 hover:border-indigo-500/40 border border-[#232f48] text-[#94a3b8] hover:text-white px-3 py-1 rounded-full text-xs transition-all font-medium cursor-pointer"
+              >
+                {tag}
+              </button>
+            ))}
+
+            {recentSearches.length > 0 && (
+              <div className="hidden md:flex items-center gap-2 ml-auto">
+                <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-wider">Recent:</span>
+                {recentSearches.slice(0, 3).map((rs) => (
+                  <button
+                    key={rs}
+                    onClick={() => { setSearchQuery(rs); setDebouncedQuery(rs); }}
+                    className="text-xs text-[#818cf8] hover:underline cursor-pointer"
+                  >
+                    {rs}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
       </div>
 
-      {/* Advanced Filter Panel */}
-      <div className="grid-fluid-stats gap-4 bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Search Keyword</label>
-          <div className="relative">
-            <Search className="absolute left-3 top-3 w-4 h-4 text-[#94a3b8]" />
+      {/* ACTIVE FILTER CHIPS BAR */}
+      {(debouncedQuery || debouncedLocation || remote !== 'all' || experience.length > 0 || department.length > 0 || company !== 'all' || minScore !== '0' || employmentType !== 'all') && (
+        <div className="flex flex-wrap items-center gap-2 mb-6 bg-[#131b2e] border border-[#232f48] rounded-xl p-3">
+          <span className="text-xs font-bold text-[#818cf8] uppercase tracking-wider mr-1">Active Filters:</span>
+
+          {debouncedQuery && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              Query: "{debouncedQuery}" <button onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {debouncedLocation && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              Location: {debouncedLocation} <button onClick={() => { setLocationQuery(''); setDebouncedLocation(''); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {remote !== 'all' && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              {remote === 'true' ? 'Remote Only' : 'Onsite / Hybrid'} <button onClick={() => setRemote('all')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {experience.map(exp => (
+            <span key={exp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {department.map(dept => (
+            <span key={dept} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {minScore !== '0' && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              Min {minScore}% Score <button onClick={() => setMinScore('0')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          <button
+            onClick={clearAllFilters}
+            className="ml-auto text-xs font-bold text-rose-400 hover:text-rose-300 underline cursor-pointer"
+          >
+            Clear All
+          </button>
+        </div>
+      )}
+
+      {/* DASHBOARD MAIN GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* COLLAPSIBLE FACETED LEFT SIDEBAR */}
+        <div className="hidden lg:block lg:col-span-3 space-y-6 bg-[#131b2e] border border-[#232f48] rounded-2xl p-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar">
+          
+          <div className="flex items-center justify-between border-b border-[#232f48] pb-3">
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
+              <Filter className="w-4 h-4 text-indigo-400" /> Faceted Filters
+            </h3>
+            <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold px-2 py-0.5 rounded-full">
+              {totalCount} jobs
+            </span>
+          </div>
+
+          {/* Department Facets */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Department</span>
+            <div className="space-y-1.5">
+              {facets.departments?.map((f: any) => (
+                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#1b253b] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={department.includes(f.value)}
+                      onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
+                      className="rounded border-[#232f48] bg-[#0b0f17] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>{f.name}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#64748b] bg-[#0b0f17] px-2 py-0.5 rounded-full border border-[#232f48]">
+                    {f.count}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Experience Level Facets */}
+          <div className="space-y-2 border-t border-[#232f48] pt-4">
+            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Experience Level</span>
+            <div className="space-y-1.5">
+              {facets.experience?.map((f: any) => (
+                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#1b253b] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={experience.includes(f.value)}
+                      onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
+                      className="rounded border-[#232f48] bg-[#0b0f17] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>{f.name}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#64748b] bg-[#0b0f17] px-2 py-0.5 rounded-full border border-[#232f48]">
+                    {f.count}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Remote Status Facets */}
+          <div className="space-y-2 border-t border-[#232f48] pt-4">
+            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Remote Status</span>
+            <div className="space-y-1.5">
+              {facets.remote?.map((f: any) => (
+                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#1b253b] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="remoteOption"
+                      checked={remote === f.value}
+                      onChange={() => setRemote(remote === f.value ? 'all' : f.value)}
+                      className="border-[#232f48] bg-[#0b0f17] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>{f.name}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#64748b] bg-[#0b0f17] px-2 py-0.5 rounded-full border border-[#232f48]">
+                    {f.count}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Location Facets */}
+          <div className="space-y-2 border-t border-[#232f48] pt-4">
+            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Location</span>
             <input
               type="text"
-              placeholder="e.g. React, Node, Go..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
+              placeholder="Filter by city/country..."
+              value={locationQuery}
+              onChange={(e) => setLocationQuery(e.target.value)}
+              className="w-full bg-[#0b0f17] border border-[#232f48] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
             />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Location</label>
-          <input
-            type="text"
-            placeholder="e.g. USA, Pune..."
-            value={locationQuery}
-            onChange={(e) => setLocationQuery(e.target.value)}
-            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Remote Status</label>
-          <select
-            value={remote}
-            onChange={(e) => { setRemote(e.target.value); setPage(1); }}
-            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-600"
-          >
-            <option value="all">All</option>
-            <option value="true">Remote Only</option>
-            <option value="false">Onsite / Hybrid</option>
-          </select>
-        </div>
-
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Experience Level</label>
-          <select
-            value={experience}
-            onChange={(e) => { setExperience(e.target.value); setPage(1); }}
-            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-600"
-          >
-            <option value="all">All Levels</option>
-            <option value="Early Career">Early Career</option>
-            <option value="Mid Level">Mid Level</option>
-            <option value="Senior">Senior / Lead</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Min Score</label>
-          <select
-            value={minScore}
-            onChange={(e) => { setMinScore(e.target.value); setPage(1); }}
-            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-600"
-          >
-            <option value="0">All Scores</option>
-            <option value="70">70% or Higher</option>
-            <option value="80">80% or Higher</option>
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Sort Ranking</label>
-          <select
-            value={sortBy}
-            onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
-            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-600 font-bold text-indigo-400"
-          >
-            <option value="opportunity">Opportunity Score</option>
-            <option value="match">Resume Match Only</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Left 2 cols: Jobs list */}
-        <div className="lg:col-span-2 space-y-6">
-          {isJobsLoading ? (
-            <div className="grid grid-cols-1 gap-6">
-              {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
+            <div className="space-y-1.5 mt-2">
+              {facets.locations?.map((f: any) => (
+                <button
+                  key={f.value}
+                  onClick={() => { setLocationQuery(f.value); setDebouncedLocation(f.value); }}
+                  className={`w-full flex items-center justify-between text-xs py-1 px-2 rounded-lg transition-all cursor-pointer ${
+                    debouncedLocation === f.value ? 'bg-indigo-600/20 text-indigo-300 font-bold border border-indigo-500/30' : 'text-[#94a3b8] hover:bg-[#1b253b] hover:text-white'
+                  }`}
+                >
+                  <span>{f.name}</span>
+                  <span className="text-[10px] font-bold text-[#64748b] bg-[#0b0f17] px-2 py-0.5 rounded-full border border-[#232f48]">
+                    {f.count}
+                  </span>
+                </button>
+              ))}
             </div>
-          ) : !jobsData || jobsData.jobs.length === 0 ? (
-            <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-12 text-center text-[#94a3b8]">
-              No matching job listings found. Try relaxing your filter tags.
+          </div>
+
+          {/* Min Match Score */}
+          <div className="space-y-2 border-t border-[#232f48] pt-4">
+            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Minimum Resume Match</span>
+            <select
+              value={minScore}
+              onChange={(e) => setMinScore(e.target.value)}
+              className="w-full bg-[#0b0f17] border border-[#232f48] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+            >
+              <option value="0">All Match Scores</option>
+              <option value="70">70% or Higher</option>
+              <option value="80">80% or Higher</option>
+            </select>
+          </div>
+
+        </div>
+
+        {/* CENTRAL INFINITE SCROLL JOB FEED */}
+        <div className="lg:col-span-5 space-y-4">
+          
+          {/* Feed Toolbar */}
+          <div className="flex items-center justify-between bg-[#131b2e] border border-[#232f48] rounded-2xl p-4">
+            <span className="text-xs font-bold text-[#94a3b8]">
+              Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount}</span> postings
+            </span>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-wider">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-[#0b0f17] border border-[#232f48] text-xs text-indigo-400 font-bold py-1.5 px-3 rounded-xl focus:outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="opportunity">Opportunity Score</option>
+                <option value="match">Resume Match %</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Job Feed List */}
+          {isJobsLoading && visibleJobs.length === 0 ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+            </div>
+          ) : visibleJobs.length === 0 ? (
+            /* CONTEXTUAL SMART EMPTY STATE */
+            <div className="bg-[#131b2e] border border-[#232f48] rounded-2xl p-10 text-center space-y-4">
+              <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl flex items-center gap-1 justify-center mx-auto">
+                <Search className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">No matching job listings found</h3>
+                <p className="text-xs text-[#94a3b8] mt-1 max-w-sm mx-auto">
+                  {debouncedQuery 
+                    ? `No matches for "${debouncedQuery}". Try searching for: Spring Boot, Backend, Remote, or India.`
+                    : 'Try clearing your active filter tags to view available postings.'}
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 pt-2">
+                <button
+                  onClick={clearAllFilters}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition duration-200 cursor-pointer"
+                >
+                  Clear All Filters
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 gap-6">
-                {jobsData.jobs.map(({ job, score, opportunityScore }: any) => (
+            <div className="space-y-4">
+              {visibleJobs.map(({ job, score, opportunityScore }: any) => {
+                const isSelected = selectedJobHash === job.jobHash;
+                const isBookmarked = bookmarkedJobs.has(job.jobHash);
+
+                return (
                   <div
                     key={job.jobHash}
                     onClick={() => setSelectedJobHash(job.jobHash)}
-                    className={`bg-[#131a26] border rounded-2xl p-6 hover:border-indigo-600 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
-                      selectedJobHash === job.jobHash ? 'border-indigo-600 ring-2 ring-indigo-600/20' : 'border-[#232d3f]'
+                    className={`bg-[#131b2e] border rounded-2xl p-5 hover:border-indigo-500 transition-all duration-200 cursor-pointer flex flex-col justify-between group shadow-sm ${
+                      isSelected ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-[#162138]' : 'border-[#232f48]'
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{job.company}</span>
-                        <h3 className="text-lg font-bold text-white mt-1">{job.title}</h3>
+                    {/* Top Header: Company Avatar + Title + Badges */}
+                    <div className="flex justify-between items-start gap-3 mb-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-[#1b253b] border border-[#232f48] rounded-xl flex items-center justify-center font-black text-indigo-400 text-sm group-hover:border-indigo-500/40 transition-all">
+                          {(job.company || 'C').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">{job.company}</span>
+                          <h3 className="text-sm font-bold text-white leading-snug group-hover:text-indigo-300 transition-colors">
+                            {renderHighlightedText(job.title, debouncedQuery)}
+                          </h3>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <span className="bg-indigo-600/10 border border-indigo-600/20 text-[#818cf8] font-bold px-3 py-1.5 rounded-full text-xs">
-                          {opportunityScore}% Opportunity
+
+                      <div className="flex items-center gap-1.5">
+                        <span className="bg-indigo-600/10 border border-indigo-600/20 text-[#818cf8] font-extrabold px-2.5 py-1 rounded-full text-[11px]">
+                          {opportunityScore}% Opp
                         </span>
-                        <span className="bg-[#1b2535] border border-[#232d3f] text-[#94a3b8] font-bold px-3 py-1.5 rounded-full text-xs">
+                        <span className="bg-[#0b0f17] border border-[#232f48] text-[#94a3b8] font-extrabold px-2.5 py-1 rounded-full text-[11px]">
                           {score}% Match
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="text-xs bg-[#1b2535] border border-[#232d3f] px-2.5 py-1 rounded-lg text-[#94a3b8] flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> {job.location}
+                    {/* Metadata Pills */}
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="text-xs bg-[#0b0f17] border border-[#232f48] px-2.5 py-0.5 rounded-lg text-[#94a3b8] flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-indigo-400" /> {job.location}
                       </span>
-                      <span className="text-xs bg-[#1b2535] border border-[#232d3f] px-2.5 py-1 rounded-lg text-[#94a3b8] flex items-center gap-1">
-                        <Briefcase className="w-3 h-3" /> {job.experience}
+                      <span className="text-xs bg-[#0b0f17] border border-[#232f48] px-2.5 py-0.5 rounded-lg text-[#94a3b8] flex items-center gap-1">
+                        <Briefcase className="w-3 h-3 text-indigo-400" /> {job.experience || 'Full Time'}
                       </span>
                       {job.isRemote && (
-                        <span className="text-xs bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg text-indigo-400 flex items-center gap-1">
+                        <span className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                           <Globe className="w-3 h-3" /> Remote
                         </span>
                       )}
                     </div>
 
-                    <div className="flex justify-between items-center pt-4 border-t border-[#232d3f]">
-                      <span className="text-xs text-[#94a3b8]">Posted: {new Date(job.datePosted).toLocaleDateString()}</span>
-                      <div className="flex gap-2">
+                    {/* Footer Actions */}
+                    <div className="flex justify-between items-center pt-3 border-t border-[#232f48] text-xs">
+                      <span className="text-[11px] text-[#64748b] flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {new Date(job.datePosted).toLocaleDateString()}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => toggleBookmark(job.jobHash, e)}
+                          className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                            isBookmarked ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-[#0b0f17] border-[#232f48] text-[#64748b] hover:text-white'
+                          }`}
+                          title="Bookmark"
+                        >
+                          <Bookmark className="w-3.5 h-3.5" />
+                        </button>
+
+                        <button
+                          onClick={(e) => hideJob(job.jobHash, e)}
+                          className="p-1.5 rounded-lg bg-[#0b0f17] border border-[#232f48] text-[#64748b] hover:text-rose-400 transition-all cursor-pointer"
+                          title="Hide Job"
+                        >
+                          <EyeOff className="w-3.5 h-3.5" />
+                        </button>
+
                         <a
                           href={job.url}
                           target="_blank"
                           rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition duration-200 cursor-pointer"
+                          className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition duration-200 cursor-pointer"
                         >
                           Apply <ExternalLink className="w-3 h-3" />
                         </a>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/referrals`);
-                          }}
-                          className="flex items-center gap-1.5 bg-[#0077b5] hover:bg-[#006097] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition duration-200 cursor-pointer"
-                          title="Find Referrals"
-                        >
-                          <Users className="w-3 h-3" /> Referrals
-                        </button>
                       </div>
                     </div>
-
-                    {/* Referral Quick Actions */}
-                    <div className="flex flex-wrap gap-2 pt-3 border-t border-[#232d3f]">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/referrals`);
-                        }}
-                        className="flex items-center gap-1 text-xs text-[#94a3b8] hover:text-indigo-400 transition-colors"
-                      >
-                        <Users className="w-3 h-3" /> View Recruiters
-                      </button>
-                      <a
-                        href={`https://www.google.com/search?q=${encodeURIComponent(`${job.company} LinkedIn company`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center gap-1 text-xs text-[#94a3b8] hover:text-indigo-400 transition-colors"
-                      >
-                        <ExternalLink className="w-3 h-3" /> Company LinkedIn
-                      </a>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/referrals`);
-                        }}
-                        className="flex items-center gap-1 text-xs text-[#94a3b8] hover:text-indigo-400 transition-colors"
-                      >
-                        <MessageSquare className="w-3 h-3" /> Generate Message
-                      </button>
-                    </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
 
-              {jobsData.pages > 1 && (
-                <div className="flex items-center justify-center gap-2">
+              {/* CURSOR INFINITE SCROLL LOAD MORE */}
+              {hasMore && (
+                <div className="text-center pt-4">
                   <button
-                    disabled={page === 1}
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    className="px-3.5 py-2 bg-[#131a26] border border-[#232d3f] text-[#94a3b8] rounded-xl text-xs font-semibold disabled:opacity-50 hover:bg-[#1b2535] cursor-pointer"
+                    disabled={isFetching}
+                    onClick={() => setCursor(nextCursorToken)}
+                    className="bg-[#131b2e] hover:bg-[#1b253b] border border-[#232f48] text-indigo-400 font-bold text-xs px-6 py-3 rounded-2xl transition duration-200 w-full flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                   >
-                    Previous
-                  </button>
-                  <span className="text-xs text-[#94a3b8]">Page {page} of {jobsData.pages}</span>
-                  <button
-                    disabled={page === jobsData.pages}
-                    onClick={() => setPage(p => p + 1)}
-                    className="px-3.5 py-2 bg-[#131a26] border border-[#232d3f] text-[#94a3b8] rounded-xl text-xs font-semibold disabled:opacity-50 hover:bg-[#1b2535] cursor-pointer"
-                  >
-                    Next
+                    {isFetching ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Load More Jobs (Cursor Next Batch)'}
                   </button>
                 </div>
               )}
             </div>
           )}
+
         </div>
 
-        {/* Right 1 col: Job details & Department Explorer drawer panel */}
-        <div className="space-y-6 sticky top-8">
-          <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 h-fit">
-          {!selectedJobHash ? (
-            <div className="py-12 text-center text-[#94a3b8] space-y-2">
-              <ArrowRight className="w-8 h-8 mx-auto text-indigo-500 animate-pulse" />
-              <div className="text-sm font-semibold">Select a Job Posting</div>
-              <p className="text-xs">Click on any posting card in explorer list to review details and AI tools</p>
+        {/* SLIDE-OVER RIGHT DETAILS PANEL */}
+        <div className="hidden lg:block lg:col-span-4 bg-[#131b2e] border border-[#232f48] rounded-2xl p-6 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar space-y-6">
+          {isDetailLoading ? (
+            <div className="space-y-4 animate-pulse">
+              <div className="h-6 bg-[#1c273e] rounded w-3/4"></div>
+              <div className="h-4 bg-[#1c273e] rounded w-1/2"></div>
+              <div className="h-32 bg-[#1c273e] rounded"></div>
             </div>
-          ) : isDetailLoading || !detailData ? (
-            <div className="animate-pulse space-y-6 py-6">
-              <div className="h-6 bg-[#1b2535] rounded w-3/4"></div>
-              <div className="h-4 bg-[#1b2535] rounded w-1/3"></div>
-              <div className="h-32 bg-[#1b2535] rounded-xl"></div>
-            </div>
-          ) : (
+          ) : detailData ? (
             <div className="space-y-6">
-              <div className="flex justify-between items-start border-b border-[#232d3f] pb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">{detailData.job.title}</h2>
-                  <span className="text-xs text-[#94a3b8]">{detailData.job.company}</span>
+              {/* Header */}
+              <div className="border-b border-[#232f48] pb-4">
+                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{detailData.job.company}</span>
+                <h2 className="text-lg font-bold text-white mt-1">{detailData.job.title}</h2>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 font-bold px-3 py-1 rounded-full text-xs">
+                    {detailData.opportunityScore}% Opportunity Score
+                  </span>
+                  <span className="bg-[#0b0f17] border border-[#232f48] text-[#94a3b8] font-bold px-3 py-1 rounded-full text-xs">
+                    {detailData.bestScore}% Match
+                  </span>
                 </div>
-                <button onClick={() => setSelectedJobHash(null)} className="text-[#94a3b8] hover:text-white p-1">
-                  <X className="w-5 h-5" />
-                </button>
               </div>
 
-              {/* AI Tools Action Bar */}
+              {/* Action Buttons Grid */}
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setOpenTailor(true)}
-                  className="flex flex-col items-center gap-1.5 p-3 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] rounded-xl text-white font-bold text-[10px] transition duration-200 cursor-pointer"
+                  className="flex flex-col items-center gap-1.5 p-3 bg-[#0b0f17] hover:bg-[#1b253b] border border-[#232f48] rounded-xl text-white font-bold text-[10px] transition duration-200 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-purple-400" />
                   Tailor Resume
                 </button>
                 <button
                   onClick={() => setOpenCoverLetter(true)}
-                  className="flex flex-col items-center gap-1.5 p-3 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] rounded-xl text-white font-bold text-[10px] transition duration-200 cursor-pointer"
+                  className="flex flex-col items-center gap-1.5 p-3 bg-[#0b0f17] hover:bg-[#1b253b] border border-[#232f48] rounded-xl text-white font-bold text-[10px] transition duration-200 cursor-pointer"
                 >
                   <FileText className="w-4 h-4 text-emerald-400" />
                   Cover Letter
                 </button>
                 <button
                   onClick={() => setOpenPrep(true)}
-                  className="flex flex-col items-center gap-1.5 p-3 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] rounded-xl text-white font-bold text-[10px] transition duration-200 cursor-pointer"
+                  className="flex flex-col items-center gap-1.5 p-3 bg-[#0b0f17] hover:bg-[#1b253b] border border-[#232f48] rounded-xl text-white font-bold text-[10px] transition duration-200 cursor-pointer"
                 >
                   <CheckSquare className="w-4 h-4 text-amber-400" />
                   Interview Prep
                 </button>
               </div>
 
-              {/* Contact Recommendations */}
-              <ContactRecommendations jobData={detailData} />
-
-              {/* Status Update Trigger */}
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Update Application Status</span>
+              {/* Application Tracker Status */}
+              <div className="space-y-2 border-t border-[#232f48] pt-4">
+                <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider">Application Tracker</span>
                 <input
                   type="text"
-                  placeholder="Add application notes..."
+                  placeholder="Notes (e.g. Applied via LinkedIn)..."
                   value={trackNotes}
                   onChange={(e) => setTrackNotes(e.target.value)}
-                  className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600 mb-2"
+                  className="w-full bg-[#0b0f17] border border-[#232f48] rounded-xl py-2 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500 mb-2"
                 />
                 <div className="grid grid-cols-3 gap-2">
                   {['Saved', 'Applied', 'Interview'].map((st) => (
                     <button
                       key={st}
-                      onClick={() => handleTrackSubmit(st)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1.5 rounded transition duration-200 cursor-pointer"
+                      onClick={() => trackMutation.mutate(st)}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] py-1.5 rounded-xl transition duration-200 cursor-pointer"
                     >
                       {st}
                     </button>
@@ -420,92 +740,82 @@ export const JobExplorer: React.FC = () => {
                 </div>
               </div>
 
-              {/* AI analysis block */}
-              {isAnalysisLoading ? (
-                <div className="animate-pulse h-24 bg-[#1b2535] rounded-xl"></div>
-              ) : analysisData ? (
-                <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 space-y-4 text-xs text-[#94a3b8]">
-                  <div className="flex justify-between items-center border-b border-[#232d3f] pb-2">
-                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">AI Job Analysis</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                      analysisData.difficulty === 'Easy' ? 'bg-emerald-500/10 text-emerald-400' :
-                      analysisData.difficulty === 'Medium' ? 'bg-amber-500/10 text-amber-400' : 'bg-red-500/10 text-red-400'
-                    }`}>
-                      {analysisData.difficulty} Difficulty
-                    </span>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="font-bold text-white block">Plain English Summary</span>
-                    <p className="leading-relaxed">{analysisData.summary}</p>
-                  </div>
-
-                  <div className="space-y-1 pt-2 border-t border-[#232d3f]">
-                    <span className="font-bold text-white block">Why it Matches</span>
-                    <p className="leading-relaxed">{analysisData.whyMatches}</p>
-                  </div>
-
-                  {analysisData.resumeImprovements.length > 0 && (
-                    <div className="space-y-1 pt-2 border-t border-[#232d3f]">
-                      <span className="font-bold text-white block">Resume Improvements</span>
-                      <ul className="list-disc list-inside space-y-0.5">
-                        {analysisData.resumeImprovements.map((imp: string, idx: number) => (
-                          <li key={idx}>{imp}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {analysisData.prepTopics.length > 0 && (
-                    <div className="space-y-1 pt-2 border-t border-[#232d3f]">
-                      <span className="font-bold text-white block">Suggested Prep Topics</span>
-                      <ul className="list-disc list-inside space-y-0.5">
-                        {analysisData.prepTopics.slice(0, 3).map((topic: string, idx: number) => (
-                          <li key={idx}>{topic}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              {/* Complete Job Description */}
-              <div className="space-y-2 border-t border-[#232d3f] pt-4">
-                <span className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Complete Description</span>
-                <div className="text-xs text-[#94a3b8] leading-relaxed max-h-48 overflow-y-auto pr-2 whitespace-pre-line">
+              {/* Job Description */}
+              <div className="space-y-2 border-t border-[#232f48] pt-4">
+                <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider">Job Description</span>
+                <div className="text-xs text-[#94a3b8] leading-relaxed max-h-60 overflow-y-auto custom-scrollbar p-3 bg-[#0b0f17] rounded-xl border border-[#232f48]">
                   {detailData.job.description}
                 </div>
               </div>
+
+              {/* Contact Recommendations */}
+              <ContactRecommendations jobData={detailData} />
+            </div>
+          ) : (
+            <div className="text-center py-12 text-xs text-[#64748b]">
+              Select a job card from the feed to view full details and AI match breakdown.
             </div>
           )}
         </div>
 
-        {/* Department Wise Dropdown Search Panel */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 text-center flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Department Filter</span>
-          </div>
+      </div>
 
-          <div className="w-full">
-            <select
-              value={department}
-              onChange={(e) => { setDepartment(e.target.value); setPage(1); }}
-              className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2.5 px-4 text-xs font-semibold text-white text-center focus:outline-none focus:border-indigo-600 cursor-pointer shadow-sm transition-all"
+      {/* MOBILE SLIDE-OVER FILTER DRAWER */}
+      {mobileFilterOpen && (
+        <div className="fixed inset-0 z-50 flex bg-black/70 backdrop-blur-sm lg:hidden">
+          <div className="ml-auto w-4/5 max-w-xs bg-[#131b2e] border-l border-[#232f48] p-5 h-full overflow-y-auto space-y-6">
+            <div className="flex justify-between items-center border-b border-[#232f48] pb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-white">Filters</h3>
+              <button onClick={() => setMobileFilterOpen(false)}><X className="w-5 h-5 text-white" /></button>
+            </div>
+
+            {/* Department */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Department</span>
+              {facets.departments?.map((f: any) => (
+                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] py-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={department.includes(f.value)}
+                      onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
+                    />
+                    <span>{f.name}</span>
+                  </div>
+                  <span className="text-[10px] text-[#64748b]">{f.count}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* Experience */}
+            <div className="space-y-2 border-t border-[#232f48] pt-4">
+              <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Experience Level</span>
+              {facets.experience?.map((f: any) => (
+                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] py-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={experience.includes(f.value)}
+                      onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
+                    />
+                    <span>{f.name}</span>
+                  </div>
+                  <span className="text-[10px] text-[#64748b]">{f.count}</span>
+                </label>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setMobileFilterOpen(false)}
+              className="w-full bg-indigo-600 font-bold text-xs py-3 rounded-xl text-white cursor-pointer"
             >
-              <option value="all">All Departments</option>
-              <option value="engineering">Engineering & Software</option>
-              <option value="ai_data">AI, ML & Data Science</option>
-              <option value="product">Product & Project Mgmt</option>
-              <option value="design">UI/UX & Creative Design</option>
-              <option value="marketing_sales">Sales & Marketing</option>
-              <option value="operations">Operations, HR & Finance</option>
-            </select>
+              Apply Filters
+            </button>
           </div>
         </div>
-      </div>
-      </div>
+      )}
 
-      {/* Modals rendering */}
+      {/* MODALS */}
       {openCoverLetter && selectedJobHash && detailData && (
         <CoverLetterModal
           jobHash={selectedJobHash}
@@ -532,18 +842,18 @@ export const JobExplorer: React.FC = () => {
           onClose={() => setOpenPrep(false)}
         />
       )}
+
     </div>
   );
 };
 
-// Contact Recommendations Component
+// Contact Recommendations Subcomponent
 const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
   const navigate = useNavigate();
   const { data: recommendations, isLoading } = useQuery({
     queryKey: ['contact-recommendations', jobData?.job?.company, jobData?.job?.title],
     queryFn: async () => {
       if (!jobData?.job?.company || !jobData?.job?.title) return [];
-
       const token = localStorage.getItem('token');
       const res = await fetch('/api/linkedin/recommend', {
         method: 'POST',
@@ -557,7 +867,6 @@ const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
           jobDescription: jobData.job.description
         })
       });
-
       if (!res.ok) throw new Error('Failed to fetch recommendations');
       return res.json();
     },
@@ -567,64 +876,32 @@ const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
   if (!jobData?.job?.company) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 border-t border-[#232f48] pt-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Recommended Contacts</span>
-        <button
-          onClick={() => navigate('/referrals')}
-          className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-        >
+        <span className="text-xs font-bold text-[#64748b] uppercase tracking-wider">Recommended Network Contacts</span>
+        <button onClick={() => navigate('/referrals')} className="text-xs text-indigo-400 hover:underline cursor-pointer">
           View All →
         </button>
       </div>
 
       {isLoading ? (
-        <div className="text-xs text-[#94a3b8]">Loading recommendations...</div>
+        <div className="text-xs text-[#64748b]">Loading recommendations...</div>
       ) : !recommendations || recommendations.length === 0 ? (
-        <div className="text-xs text-[#94a3b8] p-3 bg-[#1b2535] rounded-lg">
-          No contacts found for {jobData.job.company}. Add contacts to get recommendations.
+        <div className="text-xs text-[#64748b] p-3 bg-[#0b0f17] rounded-xl border border-[#232f48]">
+          No contacts found for {jobData.job.company}.
         </div>
       ) : (
         <div className="space-y-2">
           {recommendations.slice(0, 3).map((rec: any) => (
-            <div key={rec.contact.id} className="p-3 bg-[#1b2535] rounded-lg border border-[#232d3f]">
-              <div className="flex items-start justify-between mb-2">
+            <div key={rec.contact.id} className="p-3 bg-[#0b0f17] rounded-xl border border-[#232f48]">
+              <div className="flex items-start justify-between mb-1">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-bold text-white">{rec.contact.name}</h4>
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold rounded-full">
-                      <Star className="w-3 h-3" />
-                      {rec.score}%
-                    </div>
-                  </div>
-                  <p className="text-xs text-[#94a3b8]">{rec.contact.currentRole}</p>
+                  <h4 className="text-xs font-bold text-white">{rec.contact.name}</h4>
+                  <p className="text-[11px] text-[#64748b]">{rec.contact.currentRole}</p>
                 </div>
-                <span className="text-xs text-indigo-400">{rec.contact.relationship}</span>
-              </div>
-              <div className="text-xs text-[#94a3b8] mb-2">
-                {rec.reasons.slice(0, 2).join(', ')}
-              </div>
-              <div className="flex gap-2">
-                {rec.contact.linkedInProfile && (
-                  <a
-                    href={rec.contact.linkedInProfile}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-2 py-1 bg-[#0077b5] hover:bg-[#006097] rounded text-xs font-semibold text-white transition-colors"
-                  >
-                    <span className="font-bold">in</span>
-                    Profile
-                  </a>
-                )}
-                {rec.contact.email && (
-                  <a
-                    href={`mailto:${rec.contact.email}`}
-                    className="flex items-center gap-1 px-2 py-1 bg-[#ea4335]/10 border border-[#ea4335]/20 text-[#ea4335] rounded text-xs font-semibold hover:bg-[#ea4335]/20 transition-colors"
-                  >
-                    <Mail className="w-3 h-3" />
-                    Email
-                  </a>
-                )}
+                <span className="text-[10px] text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                  {rec.score}% Match
+                </span>
               </div>
             </div>
           ))}
