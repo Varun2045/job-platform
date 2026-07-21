@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, MapPin, Briefcase, Globe, ExternalLink, ArrowRight, X, Sparkles, FileText, CheckSquare, Users, MessageSquare, Star, Mail } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
@@ -28,7 +28,7 @@ export const JobExplorer: React.FC = () => {
   useEffect(() => {
     const handler = setTimeout(() => {
       setSearch(searchQuery);
-    }, 400);
+    }, 200);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
@@ -36,7 +36,7 @@ export const JobExplorer: React.FC = () => {
   useEffect(() => {
     const handler = setTimeout(() => {
       setLocation(locationQuery);
-    }, 400);
+    }, 200);
     return () => clearTimeout(handler);
   }, [locationQuery]);
 
@@ -45,27 +45,112 @@ export const JobExplorer: React.FC = () => {
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
 
-  // Fetch Jobs List
+  // Fetch Full Jobs Dataset ONCE (Cached for instant client-side filtering)
   const { data: jobsData, isLoading: isJobsLoading } = useQuery({
-    queryKey: ['jobs', search, company, location, remote, minScore, experience, department, sortBy, page],
+    queryKey: ['all-jobs-dataset'],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        technology: search,
-        company: company === 'all' ? '' : company,
-        location,
-        remote: remote === 'all' ? '' : String(remote === 'true'),
-        minScore,
-        experience: experience === 'all' ? '' : experience,
-        department: department === 'all' ? '' : department,
-        sort: sortBy,
-        page: String(page),
-        limit: '6'
-      });
-      const res = await fetch(`/api/jobs?${params}`);
+      const res = await fetch('/api/jobs?limit=500');
       if (!res.ok) throw new Error('Failed to fetch job postings');
       return res.json();
-    }
+    },
+    staleTime: 5 * 60 * 1000,
   });
+
+  // Instant In-Memory Filter Engine (0ms latency, zero network wait)
+  const filteredJobs = useMemo(() => {
+    if (!jobsData || !jobsData.jobs) return [];
+    let result = jobsData.jobs;
+
+    // 1. Keyword search (Binary/substring match)
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      result = result.filter(({ job }: any) => {
+        const text = `${job.title} ${job.company} ${job.description || ''}`.toLowerCase();
+        return text.includes(q);
+      });
+    }
+
+    // 2. Location filter
+    if (location.trim()) {
+      const loc = location.toLowerCase().trim();
+      result = result.filter(({ job }: any) => (job.location || '').toLowerCase().includes(loc));
+    }
+
+    // 3. Remote Status
+    if (remote !== 'all') {
+      const isRemoteOnly = remote === 'true';
+      result = result.filter(({ job }: any) => {
+        const locLower = (job.location || '').toLowerCase();
+        const descLower = (job.description || '').toLowerCase();
+        const isRemoteJob = job.isRemote || locLower.includes('remote') || descLower.includes('remote');
+        return isRemoteOnly ? isRemoteJob : !isRemoteJob;
+      });
+    }
+
+    // 4. Experience Level Filter
+    if (experience !== 'all') {
+      const expLower = experience.toLowerCase().trim();
+      result = result.filter(({ job }: any) => {
+        const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+        if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
+          const isExplicitSenior = /senior|sr\.|lead|principal|staff|director|head of|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(expText);
+          const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText);
+          if (isExplicitSenior && !isExplicitEarly) return false;
+        } else if (expLower.includes('mid')) {
+          const isExplicitTopSenior = /staff|principal|director|head of|7\+|8\+|10\+|7-10|8-10|10\+/i.test(expText);
+          if (isExplicitTopSenior) return false;
+        } else if (expLower.includes('senior') || expLower.includes('lead')) {
+          const isSenior = /senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|9\+|10\+|5-7|5-8|5-10/i.test(expText);
+          if (!isSenior) return false;
+        }
+        return true;
+      });
+    }
+
+    // 5. Department Filter
+    if (department !== 'all') {
+      const dept = department.toLowerCase().trim();
+      result = result.filter(({ job }: any) => {
+        const text = `${job.team || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+        if (dept === 'engineering') {
+          return /engineer|developer|sde|backend|frontend|fullstack|software|architect|infrastructure|devops|platform|coder/i.test(text);
+        } else if (dept === 'ai_data') {
+          return /ai|ml|machine learning|data science|data engineer|analyst|analytics|nlp|deep learning|computer vision/i.test(text);
+        } else if (dept === 'product') {
+          return /product|program|project manager|scrum|agile|owner|technical program/i.test(text);
+        } else if (dept === 'design') {
+          return /design|ux|ui|graphic|art|creative/i.test(text);
+        } else if (dept === 'marketing_sales') {
+          return /marketing|sales|growth|account executive|business development|seo|content/i.test(text);
+        } else if (dept === 'operations') {
+          return /operations|hr|human resources|recruiter|people|talent|legal|finance|accounting/i.test(text);
+        }
+        return text.includes(dept);
+      });
+    }
+
+    // 6. Min Score Filter
+    if (minScore !== '0') {
+      const targetScore = Number(minScore);
+      result = result.filter(({ score }: any) => score >= targetScore);
+    }
+
+    // 7. Sort Ranking
+    return [...result].sort((a: any, b: any) => {
+      if (sortBy === 'match') {
+        return b.score - a.score || b.opportunityScore - a.opportunityScore;
+      }
+      return b.opportunityScore - a.opportunityScore || b.score - a.score;
+    });
+  }, [jobsData, search, location, remote, experience, department, minScore, sortBy]);
+
+  // Paginated View
+  const ITEMS_PER_PAGE = 6;
+  const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE) || 1;
+  const paginatedJobs = useMemo(() => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    return filteredJobs.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredJobs, page]);
 
   // Fetch Selected Job Detail
   const { data: detailData, isLoading: isDetailLoading } = useQuery({
@@ -218,14 +303,14 @@ export const JobExplorer: React.FC = () => {
             <div className="grid grid-cols-1 gap-6">
               {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
             </div>
-          ) : !jobsData || jobsData.jobs.length === 0 ? (
+          ) : filteredJobs.length === 0 ? (
             <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-12 text-center text-[#94a3b8]">
               No matching job listings found. Try relaxing your filter tags.
             </div>
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-6">
-                {jobsData.jobs.map(({ job, score, opportunityScore }: any) => (
+                {paginatedJobs.map(({ job, score, opportunityScore }: any) => (
                   <div
                     key={job.jobHash}
                     onClick={() => setSelectedJobHash(job.jobHash)}
@@ -321,7 +406,7 @@ export const JobExplorer: React.FC = () => {
                 ))}
               </div>
 
-              {jobsData.pages > 1 && (
+              {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2">
                   <button
                     disabled={page === 1}
@@ -330,9 +415,9 @@ export const JobExplorer: React.FC = () => {
                   >
                     Previous
                   </button>
-                  <span className="text-xs text-[#94a3b8]">Page {page} of {jobsData.pages}</span>
+                  <span className="text-xs text-[#94a3b8]">Page {page} of {totalPages}</span>
                   <button
-                    disabled={page === jobsData.pages}
+                    disabled={page === totalPages}
                     onClick={() => setPage(p => p + 1)}
                     className="px-3.5 py-2 bg-[#131a26] border border-[#232d3f] text-[#94a3b8] rounded-xl text-xs font-semibold disabled:opacity-50 hover:bg-[#1b2535] cursor-pointer"
                   >
