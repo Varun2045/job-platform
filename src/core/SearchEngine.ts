@@ -35,22 +35,29 @@ export class SearchEngine {
       // 3. Experience Match (supports single or comma-separated experience levels)
       if (criteria.experience && criteria.experience.trim() !== '' && criteria.experience !== 'all') {
         const exps = criteria.experience.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean);
-        const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+        const titleText = (job.title || '').toLowerCase();
+        const expText = `${job.experience || ''} ${job.description || ''}`.toLowerCase();
+
+        const isSenior = /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(titleText) ||
+                         /\b(5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10)\s*(years|yrs)/i.test(expText);
+
+        const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(`${titleText} ${job.experience || ''}`);
 
         const matchesAnyExp = exps.some((expLower) => {
           if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
-            const isExplicitSenior = /senior|sr\.|lead|principal|staff|director|head of|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(expText);
-            const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText);
-            if (isExplicitSenior && !isExplicitEarly) return false;
-            return true;
+            // Strict Early Career: MUST NOT be Senior/Lead/Manager/Architect or 5+ years
+            if (isSenior) return false;
+            return isExplicitEarly || !/\b(3-5|3-6|4-6|5\+|6\+|7\+)\b/i.test(expText);
           } else if (expLower.includes('mid')) {
-            const isExplicitTopSenior = /staff|principal|director|head of|7\+|8\+|10\+|7-10|8-10|10\+/i.test(expText);
-            if (isExplicitTopSenior) return false;
-            return true;
+            // Mid Level: 2-5 years, not director/staff/10+
+            const isTopSenior = /staff|principal|director|head of|vp|7\+|8\+|10\+/i.test(titleText);
+            if (isTopSenior) return false;
+            return !isSenior || /2-5|3-5|2-4|3-4/i.test(expText);
           } else if (expLower.includes('senior') || expLower.includes('lead')) {
-            return /senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|9\+|10\+|5-7|5-8|5-10/i.test(expText);
+            // Senior Level: Must be senior/lead/5+ years
+            return isSenior;
           }
-          return expText.includes(expLower);
+          return `${titleText} ${expText}`.includes(expLower);
         });
 
         if (!matchesAnyExp) return false;
@@ -350,10 +357,18 @@ export class SearchEngine {
       if (/marketing|sales|growth|account executive|business development|seo|content/i.test(text)) deptMap['marketing_sales']++;
       if (/operations|hr|human resources|recruiter|people|talent|legal|finance|accounting/i.test(text)) deptMap['operations']++;
 
-      // Experience facets
-      if (/early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText)) expMap['Early Career']++;
-      if (/mid|2-5|3-5|2-4|intermediate/i.test(expText)) expMap['Mid Level']++;
-      if (/senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|10\+/i.test(expText)) expMap['Senior']++;
+      // Experience facets (strict & mutually exclusive)
+      const titleLower = (j.title || '').toLowerCase();
+      const isSeniorJob = /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|5\+|6\+|7\+|8\+|10\+/i.test(titleLower) ||
+                          /\b(5\+|6\+|7\+|8\+|10\+)\s*(years|yrs)/i.test(expText);
+
+      if (isSeniorJob) {
+        expMap['Senior']++;
+      } else if (/early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(`${titleLower} ${j.experience || ''}`)) {
+        expMap['Early Career']++;
+      } else {
+        expMap['Mid Level']++;
+      }
 
       // Company facets
       compCounts[company] = (compCounts[company] || 0) + 1;

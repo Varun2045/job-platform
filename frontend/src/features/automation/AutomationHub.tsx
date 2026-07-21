@@ -1031,28 +1031,6 @@ const CalendarAutomation: React.FC = () => {
             </button>
           )}
         </div>
-
-        {/* Google Verification Status Guidance Banner */}
-        {!isConnected && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs space-y-2">
-            <div className="flex items-center gap-2 font-bold text-amber-300">
-              <AlertCircle className="w-4 h-4 text-amber-400" />
-              <span>Fixing "Access Blocked: Error 403 access_denied" on Google OAuth</span>
-            </div>
-            <p className="text-[#cbd5e1] leading-relaxed">
-              If Google blocks access with <code className="bg-[#090d16] px-1.5 py-0.5 rounded text-amber-300 font-mono">Error 403: access_denied</code>, it is because your Google Cloud project is in <strong>Testing Mode</strong>.
-            </p>
-            <div className="bg-[#090d16] border border-[#243147] rounded-lg p-3 text-[11px] text-[#94a3b8] space-y-1">
-              <div className="font-bold text-white mb-1">To enable Google OAuth for varun.damani.12@gmail.com:</div>
-              <div>1. Open <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noreferrer" className="text-indigo-400 underline font-semibold">Google Cloud OAuth Consent Screen</a>.</div>
-              <div>2. Under <strong>Test users</strong>, click <strong>+ ADD USERS</strong> and add <code className="text-amber-300">varun.damani.12@gmail.com</code>.</div>
-              <div>3. Click <strong>SAVE</strong>. (Or switch Publishing Status to <strong>In Production</strong>).</div>
-            </div>
-            <div className="text-[11px] text-emerald-400 font-semibold pt-1">
-              ✨ Local Calendar Active: You can create, edit, and manage all events locally in the calendar below even without Google OAuth!
-            </div>
-          </div>
-        )}
         
         {isConnected && (
           <div className="space-y-3">
