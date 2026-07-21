@@ -414,16 +414,26 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
 
     const settings = await storage.getExtendedSettings();
     const companies = await storage.getEnabledCompanies();
+    const allCompanies = await storage.getAllCompanies();
+    const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
+
+    const enabledCompsMap = new Map<string, any>();
+    for (const c of companies) {
+      enabledCompsMap.set(c.id.toLowerCase(), c);
+      enabledCompsMap.set(c.name.toLowerCase(), c);
+    }
+
     const allJobs = await storage.getAllJobs();
-    const enabledCompsMap = new Map(companies.map((c) => [c.id, c]));
     const allScoredJobs: { job: any; score: number; opportunityScore: number; breakdown: any }[] = [];
 
     for (const j of allJobs) {
-      const comp = enabledCompsMap.get(j.company);
-      if (!comp) continue;
+      const compKey = (j.company || '').toLowerCase();
+      if (disabledIds.has(compKey)) continue;
 
-      const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : ['backend'];
-      const bestScore = Math.max(...profiles.map((p) => ResumeMatcher.match(j, p)));
+      const comp = enabledCompsMap.get(compKey) || { resume_profiles: ['backend'], priority: 2 };
+      const rawProfiles = comp.resume_profiles || [];
+      const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
+      const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
       const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
       allScoredJobs.push({
         job: j,
