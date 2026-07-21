@@ -75,7 +75,7 @@ export class SearchEngine {
       // 6. Department Match (supports single or comma-separated departments)
       if (criteria.department && criteria.department.trim() !== '' && criteria.department !== 'all') {
         const depts = criteria.department.toLowerCase().split(',').map((d) => d.trim()).filter(Boolean);
-        const text = `${job.team || ''} ${job.department || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+        const text = `${job.team || ''} ${(job as any).department || ''} ${job.title} ${job.description || ''}`.toLowerCase();
 
         const matchesAnyDept = depts.some((dept) => {
           if (dept === 'engineering') {
