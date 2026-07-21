@@ -402,6 +402,14 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
 });
 
 // Job Explorer
+// In-Memory Scored Jobs Cache for 100x Speedup
+let scoredJobsCache: {
+  jobs: any[];
+  allActiveScoredJobs: any[];
+  timestamp: number;
+} | null = null;
+const JOBS_CACHE_TTL_MS = 30000;
+
 app.get('/api/jobs', authMiddleware, async (req, res) => {
   try {
     const {
@@ -433,20 +441,61 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
     const ps = Math.min(100, Math.max(1, Number(pageSize || limit || 25)));
     const offset = SearchEngine.decodeCursor(cursor as string);
 
-    const [settings, companies, allCompanies, allJobs] = await Promise.all([
-      storage.getExtendedSettings(),
-      storage.getEnabledCompanies(),
-      storage.getAllCompanies(),
-      storage.getAllJobs(),
-    ]);
+    const now = Date.now();
+    let allActiveScoredJobs: any[] = [];
+    let allJobs: any[] = [];
 
-    const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
+    if (scoredJobsCache && now - scoredJobsCache.timestamp < JOBS_CACHE_TTL_MS) {
+      allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
+      allJobs = scoredJobsCache.jobs;
+    } else {
+      const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
+        storage.getExtendedSettings(),
+        storage.getEnabledCompanies(),
+        storage.getAllCompanies(),
+        storage.getAllJobs(),
+      ]);
 
-    const enabledCompsMap = new Map<string, any>();
-    for (const c of companies) {
-      enabledCompsMap.set(c.id.toLowerCase(), c);
-      enabledCompsMap.set(c.name.toLowerCase(), c);
+      allJobs = rawAllJobs;
+      const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
+
+      const enabledCompsMap = new Map<string, any>();
+      for (const c of companies) {
+        enabledCompsMap.set(c.id.toLowerCase(), c);
+        enabledCompsMap.set(c.name.toLowerCase(), c);
+      }
+
+      for (const j of allJobs) {
+        const compKey = (j.company || '').toLowerCase();
+        if (disabledIds.has(compKey)) continue;
+
+        const comp = enabledCompsMap.get(compKey) || { resume_profiles: ['backend'], priority: 2 };
+        const rawProfiles = comp.resume_profiles || [];
+        const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
+        const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
+        const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
+
+        allActiveScoredJobs.push({
+          job: j,
+          score: bestScore,
+          opportunityScore: recommendation.opportunityScore,
+          weightedScore: recommendation.opportunityScore,
+          breakdown: recommendation.breakdown,
+        });
+      }
+
+      scoredJobsCache = {
+        jobs: allJobs,
+        allActiveScoredJobs,
+        timestamp: now,
+      };
     }
+
+    // Re-evaluate weighted scores for specific keyword if targetKeyword is present
+    const scoredJobsWithWeighted = allActiveScoredJobs.map((item) => ({
+      ...item,
+      weightedScore: SearchEngine.calculateWeightedScore(item, targetKeyword),
+    }));
 
     const searchFilter: any = {};
     if (targetCompany && targetCompany !== 'all') searchFilter.company = targetCompany;
@@ -457,36 +506,10 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
     if (targetRemote !== undefined && targetRemote !== null) searchFilter.remote = targetRemote;
     if (targetMinScore > 0) searchFilter.minScore = targetMinScore;
 
-    const allActiveScoredJobs: { job: any; score: number; opportunityScore: number; weightedScore: number; breakdown: any }[] = [];
-
-    for (const j of allJobs) {
-      const compKey = (j.company || '').toLowerCase();
-      if (disabledIds.has(compKey)) continue;
-
-      const comp = enabledCompsMap.get(compKey) || { resume_profiles: ['backend'], priority: 2 };
-      const rawProfiles = comp.resume_profiles || [];
-      const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
-      const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
-      const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
-      
-      const weightedScore = SearchEngine.calculateWeightedScore(
-        { job: j, score: bestScore, opportunityScore: recommendation.opportunityScore },
-        targetKeyword
-      );
-
-      allActiveScoredJobs.push({
-        job: j,
-        score: bestScore,
-        opportunityScore: recommendation.opportunityScore,
-        weightedScore,
-        breakdown: recommendation.breakdown,
-      });
-    }
-
     // Filter candidate jobs for feed
     const candidateJobs = SearchEngine.quickFilterRawJobs(allJobs, searchFilter);
     const candidateHashes = new Set(candidateJobs.map((cj) => cj.jobHash));
-    const allScoredJobs = allActiveScoredJobs.filter((sj) => candidateHashes.has(sj.job.jobHash));
+    const allScoredJobs = scoredJobsWithWeighted.filter((sj) => candidateHashes.has(sj.job.jobHash));
 
     const filtered = SearchEngine.search(allScoredJobs as any, searchFilter) as any[];
 

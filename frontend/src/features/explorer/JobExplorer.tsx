@@ -244,7 +244,7 @@ export const JobExplorer: React.FC = () => {
     <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen text-white font-sans bg-[#090d16]">
       
       {/* PAGE TITLE HEADER AT THE TOP */}
-      <div className="border-b border-[#1c273c] pb-4">
+      <div className="pb-2">
         <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
           Job Explorer
         </h1>
@@ -254,7 +254,7 @@ export const JobExplorer: React.FC = () => {
       </div>
 
       {/* STICKY GLOBAL SEARCH BAR */}
-      <div className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md pb-2 pt-2 border-b border-[#1c273c]">
+      <div className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md pb-2 pt-1">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-3.5 w-5 h-5 text-indigo-400" />
