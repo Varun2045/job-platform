@@ -457,10 +457,9 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
     if (targetRemote !== undefined && targetRemote !== null) searchFilter.remote = targetRemote;
     if (targetMinScore > 0) searchFilter.minScore = targetMinScore;
 
-    const candidateJobs = SearchEngine.quickFilterRawJobs(allJobs, searchFilter);
-    const allScoredJobs: { job: any; score: number; opportunityScore: number; weightedScore: number; breakdown: any }[] = [];
+    const allActiveScoredJobs: { job: any; score: number; opportunityScore: number; weightedScore: number; breakdown: any }[] = [];
 
-    for (const j of candidateJobs) {
+    for (const j of allJobs) {
       const compKey = (j.company || '').toLowerCase();
       if (disabledIds.has(compKey)) continue;
 
@@ -475,7 +474,7 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
         targetKeyword
       );
 
-      allScoredJobs.push({
+      allActiveScoredJobs.push({
         job: j,
         score: bestScore,
         opportunityScore: recommendation.opportunityScore,
@@ -484,10 +483,15 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       });
     }
 
+    // Filter candidate jobs for feed
+    const candidateJobs = SearchEngine.quickFilterRawJobs(allJobs, searchFilter);
+    const candidateHashes = new Set(candidateJobs.map((cj) => cj.jobHash));
+    const allScoredJobs = allActiveScoredJobs.filter((sj) => candidateHashes.has(sj.job.jobHash));
+
     const filtered = SearchEngine.search(allScoredJobs as any, searchFilter) as any[];
 
-    // Calculate Database-level Facet Counts
-    const facetsData = SearchEngine.calculateDatabaseFacets(allScoredJobs);
+    // Calculate Database-level Facet Counts from all active jobs
+    const facetsData = SearchEngine.calculateDatabaseFacets(allActiveScoredJobs);
 
     // Multi-factor Weighted Ranking Sort
     if (sort === 'match') {

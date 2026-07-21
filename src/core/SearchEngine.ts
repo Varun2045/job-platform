@@ -32,34 +32,39 @@ export class SearchEngine {
       }
 
       // 3. Experience Match
+      // 3. Experience Match (supports single or comma-separated experience levels)
       if (criteria.experience && criteria.experience.trim() !== '' && criteria.experience !== 'all') {
-        const expLower = criteria.experience.toLowerCase().trim();
+        const exps = criteria.experience.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean);
         const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
 
-        if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
-          // Early career = 0-2 years: exclude roles explicitly requiring 5+ years, senior, staff, lead, principal
-          const isExplicitSenior = /senior|sr\.|lead|principal|staff|director|head of|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(expText);
-          const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText);
-          if (isExplicitSenior && !isExplicitEarly) return false;
-        } else if (expLower.includes('mid')) {
-          // Mid level = 2-5 years: exclude director/staff/10+ year roles
-          const isExplicitTopSenior = /staff|principal|director|head of|7\+|8\+|10\+|7-10|8-10|10\+/i.test(expText);
-          if (isExplicitTopSenior) return false;
-        } else if (expLower.includes('senior') || expLower.includes('lead')) {
-          // Senior = 5+ years: require senior/lead/staff/5+ years
-          const isSenior = /senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|9\+|10\+|5-7|5-8|5-10/i.test(expText);
-          if (!isSenior) return false;
-        }
+        const matchesAnyExp = exps.some((expLower) => {
+          if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
+            const isExplicitSenior = /senior|sr\.|lead|principal|staff|director|head of|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(expText);
+            const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(expText);
+            if (isExplicitSenior && !isExplicitEarly) return false;
+            return true;
+          } else if (expLower.includes('mid')) {
+            const isExplicitTopSenior = /staff|principal|director|head of|7\+|8\+|10\+|7-10|8-10|10\+/i.test(expText);
+            if (isExplicitTopSenior) return false;
+            return true;
+          } else if (expLower.includes('senior') || expLower.includes('lead')) {
+            return /senior|lead|sr\.|staff|principal|director|5\+|6\+|7\+|8\+|9\+|10\+|5-7|5-8|5-10/i.test(expText);
+          }
+          return expText.includes(expLower);
+        });
+
+        if (!matchesAnyExp) return false;
       }
 
-      // 3. Location Match
+      // 4. Location Match
       if (criteria.location && criteria.location.trim() !== '') {
-        const locLower = (job.location || '').toLowerCase();
-        const searchLoc = criteria.location.toLowerCase().trim();
-        if (!locLower.includes(searchLoc)) return false;
+        const locLower = `${job.location || ''} ${job.description || ''}`.toLowerCase();
+        const searchLocs = criteria.location.toLowerCase().split(',').map((l) => l.trim()).filter(Boolean);
+        const matchesAnyLoc = searchLocs.some((sl) => locLower.includes(sl));
+        if (!matchesAnyLoc) return false;
       }
 
-      // 4. Remote Match
+      // 5. Remote Match
       if (criteria.remote !== undefined && criteria.remote !== null) {
         const locLower = (job.location || '').toLowerCase();
         const descLower = (job.description || '').toLowerCase();
@@ -67,26 +72,29 @@ export class SearchEngine {
         if (criteria.remote !== isRemoteJob) return false;
       }
 
-      // 5. Department Match
+      // 6. Department Match (supports single or comma-separated departments)
       if (criteria.department && criteria.department.trim() !== '' && criteria.department !== 'all') {
-        const dept = criteria.department.toLowerCase().trim();
-        const text = `${job.team || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+        const depts = criteria.department.toLowerCase().split(',').map((d) => d.trim()).filter(Boolean);
+        const text = `${job.team || ''} ${job.department || ''} ${job.title} ${job.description || ''}`.toLowerCase();
 
-        if (dept === 'engineering') {
-          if (!/engineer|developer|sde|backend|frontend|fullstack|software|architect|infrastructure|devops|platform|coder/i.test(text)) return false;
-        } else if (dept === 'ai_data') {
-          if (!/ai|ml|machine learning|data science|data engineer|analyst|analytics|nlp|deep learning|computer vision/i.test(text)) return false;
-        } else if (dept === 'product') {
-          if (!/product|program|project manager|scrum|agile|owner|technical program/i.test(text)) return false;
-        } else if (dept === 'design') {
-          if (!/design|ux|ui|graphic|art|creative/i.test(text)) return false;
-        } else if (dept === 'marketing_sales') {
-          if (!/marketing|sales|growth|account executive|business development|seo|content/i.test(text)) return false;
-        } else if (dept === 'operations') {
-          if (!/operations|hr|human resources|recruiter|people|talent|legal|finance|accounting/i.test(text)) return false;
-        } else {
-          if (!text.includes(dept)) return false;
-        }
+        const matchesAnyDept = depts.some((dept) => {
+          if (dept === 'engineering') {
+            return /engineer|developer|sde|backend|frontend|fullstack|software|architect|infrastructure|devops|platform|coder|tech/i.test(text);
+          } else if (dept === 'ai_data' || dept.includes('ai') || dept.includes('data')) {
+            return /ai|ml|machine learning|data science|data engineer|analyst|analytics|nlp|deep learning|computer vision|data|python|sql|model/i.test(text);
+          } else if (dept === 'product') {
+            return /product|program|project manager|scrum|agile|owner|technical program/i.test(text);
+          } else if (dept === 'design') {
+            return /design|ux|ui|graphic|art|creative/i.test(text);
+          } else if (dept === 'marketing_sales') {
+            return /marketing|sales|growth|account executive|business development|seo|content/i.test(text);
+          } else if (dept === 'operations') {
+            return /operations|hr|human resources|recruiter|people|talent|legal|finance|accounting/i.test(text);
+          }
+          return text.includes(dept);
+        });
+
+        if (!matchesAnyDept) return false;
       }
 
       return true;
