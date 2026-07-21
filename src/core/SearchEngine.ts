@@ -31,6 +31,28 @@ export class SearchEngine {
         if (!text.includes(tech)) return false;
       }
 
+      // 3. Experience Match
+      if (criteria.experience && criteria.experience.trim() !== '' && criteria.experience !== 'all') {
+        const expLower = criteria.experience.toLowerCase().trim();
+        const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+
+        if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
+          if (!/early|entry|junior|associate|fresher|0-2|0-3|0-1|1-2|1-3|new grad|intern|graduate/i.test(expText)) {
+            return false;
+          }
+        } else if (expLower.includes('mid')) {
+          if (!/mid|2-5|3-5|3-6|intermediate|2\+|3\+/i.test(expText)) {
+            return false;
+          }
+        } else if (expLower.includes('senior') || expLower.includes('lead')) {
+          if (!/senior|lead|sr|staff|principal|5\+|6\+|7\+|8\+|9\+|10\+/i.test(expText)) {
+            return false;
+          }
+        } else {
+          if (!expText.includes(expLower)) return false;
+        }
+      }
+
       // 3. Location Match
       if (criteria.location && criteria.location.trim() !== '') {
         const locLower = (job.location || '').toLowerCase();
@@ -99,10 +121,23 @@ export class SearchEngine {
 
       // 3. Experience Match
       if (criteria.experience && criteria.experience.trim() !== '' && criteria.experience !== 'all') {
-        const searchExp = criteria.experience.toLowerCase().trim();
-        const expText = `${job.experience || ''} ${job.title} ${job.description}`.toLowerCase();
-        if (!expText.includes(searchExp)) {
-          return false;
+        const expLower = criteria.experience.toLowerCase().trim();
+        const expText = `${job.experience || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+
+        if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
+          if (!/early|entry|junior|associate|fresher|0-2|0-3|0-1|1-2|1-3|new grad|intern|graduate/i.test(expText)) {
+            return false;
+          }
+        } else if (expLower.includes('mid')) {
+          if (!/mid|2-5|3-5|3-6|intermediate|2\+|3\+/i.test(expText)) {
+            return false;
+          }
+        } else if (expLower.includes('senior') || expLower.includes('lead')) {
+          if (!/senior|lead|sr|staff|principal|5\+|6\+|7\+|8\+|9\+|10\+/i.test(expText)) {
+            return false;
+          }
+        } else {
+          if (!expText.includes(expLower)) return false;
         }
       }
 

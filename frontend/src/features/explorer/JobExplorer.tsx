@@ -484,11 +484,8 @@ export const JobExplorer: React.FC = () => {
 
         {/* Department Wise Dropdown Search Panel */}
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 text-center flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center justify-center gap-1">
+          <div className="flex flex-col items-center justify-center">
             <span className="text-xs font-bold text-white uppercase tracking-wider">Department Filter</span>
-            <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full">
-              Quick Select
-            </span>
           </div>
 
           <div className="w-full">
