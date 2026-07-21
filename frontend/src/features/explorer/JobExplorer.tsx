@@ -169,22 +169,6 @@ export const JobExplorer: React.FC = () => {
           </select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Department / Job Type</label>
-          <select
-            value={department}
-            onChange={(e) => { setDepartment(e.target.value); setPage(1); }}
-            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-600 font-medium"
-          >
-            <option value="all">All Departments</option>
-            <option value="engineering">💻 Engineering & Software</option>
-            <option value="ai_data">🤖 AI, ML & Data Science</option>
-            <option value="product">🎯 Product & Project Mgmt</option>
-            <option value="design">🎨 UI/UX & Design</option>
-            <option value="marketing_sales">📈 Sales & Marketing</option>
-            <option value="operations">⚡ Operations, HR & Finance</option>
-          </select>
-        </div>
 
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Experience Level</label>
@@ -498,42 +482,29 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* Department Wise Quick Search Panel */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">Department Wise Search</span>
-            <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">Fast Filter</span>
+        {/* Department Wise Dropdown Search Panel */}
+        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 text-center flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-1">
+            <span className="text-xs font-bold text-white uppercase tracking-wider">Department Filter</span>
+            <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full">
+              Quick Select
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2">
-            {[
-              { id: 'all', label: 'All Departments', icon: '🌐' },
-              { id: 'engineering', label: 'Engineering & Software', icon: '💻' },
-              { id: 'ai_data', label: 'AI, ML & Data Science', icon: '🤖' },
-              { id: 'product', label: 'Product & Project Mgmt', icon: '🎯' },
-              { id: 'design', label: 'UI/UX & Creative Design', icon: '🎨' },
-              { id: 'marketing_sales', label: 'Sales & Marketing', icon: '📈' },
-              { id: 'operations', label: 'Operations, HR & Finance', icon: '⚡' },
-            ].map((item) => {
-              const isActive = department === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => { setDepartment(item.id); setPage(1); }}
-                  className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? 'bg-indigo-600/15 border-indigo-500 text-indigo-300 ring-1 ring-indigo-500/30'
-                      : 'bg-[#1b2535] border-[#232d3f] text-[#94a3b8] hover:border-indigo-600/50 hover:text-white'
-                  }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="text-sm">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </span>
-                  {isActive && <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />}
-                </button>
-              );
-            })}
+          <div className="w-full">
+            <select
+              value={department}
+              onChange={(e) => { setDepartment(e.target.value); setPage(1); }}
+              className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2.5 px-4 text-xs font-semibold text-white text-center focus:outline-none focus:border-indigo-600 cursor-pointer shadow-sm transition-all"
+            >
+              <option value="all">All Departments</option>
+              <option value="engineering">Engineering & Software</option>
+              <option value="ai_data">AI, ML & Data Science</option>
+              <option value="product">Product & Project Mgmt</option>
+              <option value="design">UI/UX & Creative Design</option>
+              <option value="marketing_sales">Sales & Marketing</option>
+              <option value="operations">Operations, HR & Finance</option>
+            </select>
           </div>
         </div>
       </div>
