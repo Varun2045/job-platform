@@ -18,6 +18,7 @@ export const JobExplorer: React.FC = () => {
   const [remote, setRemote] = useState('all');
   const [minScore, setMinScore] = useState('0');
   const [experience, setExperience] = useState('all');
+  const [department, setDepartment] = useState('all');
   const [page, setPage] = useState(1);
   const [selectedJobHash, setSelectedJobHash] = useState<string | null>(null);
   const [trackNotes, setTrackNotes] = useState('');
@@ -46,7 +47,7 @@ export const JobExplorer: React.FC = () => {
 
   // Fetch Jobs List
   const { data: jobsData, isLoading: isJobsLoading } = useQuery({
-    queryKey: ['jobs', search, company, location, remote, minScore, experience, sortBy, page],
+    queryKey: ['jobs', search, company, location, remote, minScore, experience, department, sortBy, page],
     queryFn: async () => {
       const params = new URLSearchParams({
         technology: search,
@@ -55,6 +56,7 @@ export const JobExplorer: React.FC = () => {
         remote: remote === 'all' ? '' : String(remote === 'true'),
         minScore,
         experience: experience === 'all' ? '' : experience,
+        department: department === 'all' ? '' : department,
         sort: sortBy,
         page: String(page),
         limit: '6'
@@ -164,6 +166,23 @@ export const JobExplorer: React.FC = () => {
             <option value="all">All</option>
             <option value="true">Remote Only</option>
             <option value="false">Onsite / Hybrid</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Department / Job Type</label>
+          <select
+            value={department}
+            onChange={(e) => { setDepartment(e.target.value); setPage(1); }}
+            className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-600 font-medium"
+          >
+            <option value="all">All Departments</option>
+            <option value="engineering">💻 Engineering & Software</option>
+            <option value="ai_data">🤖 AI, ML & Data Science</option>
+            <option value="product">🎯 Product & Project Mgmt</option>
+            <option value="design">🎨 UI/UX & Design</option>
+            <option value="marketing_sales">📈 Sales & Marketing</option>
+            <option value="operations">⚡ Operations, HR & Finance</option>
           </select>
         </div>
 
@@ -341,8 +360,9 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* Right 1 col: Job details drawer panel */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 h-fit sticky top-8 space-y-6">
+        {/* Right 1 col: Job details & Department Explorer drawer panel */}
+        <div className="space-y-6 sticky top-8">
+          <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 h-fit">
           {!selectedJobHash ? (
             <div className="py-12 text-center text-[#94a3b8] space-y-2">
               <ArrowRight className="w-8 h-8 mx-auto text-indigo-500 animate-pulse" />
@@ -477,6 +497,46 @@ export const JobExplorer: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Department Wise Quick Search Panel */}
+        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">Department Wise Search</span>
+            <span className="text-[10px] text-indigo-400 font-semibold bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">Fast Filter</span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            {[
+              { id: 'all', label: 'All Departments', icon: '🌐' },
+              { id: 'engineering', label: 'Engineering & Software', icon: '💻' },
+              { id: 'ai_data', label: 'AI, ML & Data Science', icon: '🤖' },
+              { id: 'product', label: 'Product & Project Mgmt', icon: '🎯' },
+              { id: 'design', label: 'UI/UX & Creative Design', icon: '🎨' },
+              { id: 'marketing_sales', label: 'Sales & Marketing', icon: '📈' },
+              { id: 'operations', label: 'Operations, HR & Finance', icon: '⚡' },
+            ].map((item) => {
+              const isActive = department === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => { setDepartment(item.id); setPage(1); }}
+                  className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-600/15 border-indigo-500 text-indigo-300 ring-1 ring-indigo-500/30'
+                      : 'bg-[#1b2535] border-[#232d3f] text-[#94a3b8] hover:border-indigo-600/50 hover:text-white'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-sm">{item.icon}</span>
+                    <span>{item.label}</span>
+                  </span>
+                  {isActive && <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
       </div>
 
       {/* Modals rendering */}
@@ -517,7 +577,7 @@ const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
     queryKey: ['contact-recommendations', jobData?.job?.company, jobData?.job?.title],
     queryFn: async () => {
       if (!jobData?.job?.company || !jobData?.job?.title) return [];
-      
+
       const token = localStorage.getItem('token');
       const res = await fetch('/api/linkedin/recommend', {
         method: 'POST',
@@ -531,7 +591,7 @@ const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
           jobDescription: jobData.job.description
         })
       });
-      
+
       if (!res.ok) throw new Error('Failed to fetch recommendations');
       return res.json();
     },
@@ -551,7 +611,7 @@ const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
           View All →
         </button>
       </div>
-      
+
       {isLoading ? (
         <div className="text-xs text-[#94a3b8]">Loading recommendations...</div>
       ) : !recommendations || recommendations.length === 0 ? (
@@ -607,4 +667,5 @@ const ContactRecommendations: React.FC<{ jobData: any }> = ({ jobData }) => {
     </div>
   );
 };
+
 export default JobExplorer;

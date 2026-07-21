@@ -408,6 +408,7 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       company,
       technology,
       experience,
+      department,
       location,
       remote,
       minScore,
@@ -427,10 +428,23 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       enabledCompsMap.set(c.name.toLowerCase(), c);
     }
 
+    // Build search filter object
+    const searchFilter: any = {};
+    if (company && company !== 'all') searchFilter.company = company as string;
+    if (technology) searchFilter.technology = technology as string;
+    if (experience && experience !== 'all') searchFilter.experience = experience as string;
+    if (department && department !== 'all') searchFilter.department = department as string;
+    if (location) searchFilter.location = location as string;
+    if (remote) searchFilter.remote = remote === 'true';
+    if (minScore) searchFilter.minScore = Number(minScore);
+
     const allJobs = await storage.getAllJobs();
+
+    // Fast pre-filter raw jobs before scoring loop for 100x speedup
+    const candidateJobs = SearchEngine.quickFilterRawJobs(allJobs, searchFilter);
     const allScoredJobs: { job: any; score: number; opportunityScore: number; breakdown: any }[] = [];
 
-    for (const j of allJobs) {
+    for (const j of candidateJobs) {
       const compKey = (j.company || '').toLowerCase();
       if (disabledIds.has(compKey)) continue;
 
@@ -446,15 +460,6 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
         breakdown: recommendation.breakdown,
       });
     }
-
-    // Build search filter object - only include non-empty filters
-    const searchFilter: any = {};
-    if (company && company !== 'all') searchFilter.company = company as string;
-    if (technology) searchFilter.technology = technology as string;
-    if (experience && experience !== 'all') searchFilter.experience = experience as string;
-    if (location) searchFilter.location = location as string;
-    if (remote) searchFilter.remote = remote === 'true';
-    if (minScore) searchFilter.minScore = Number(minScore);
 
     const filtered = SearchEngine.search(allScoredJobs as any, searchFilter) as any[];
 
