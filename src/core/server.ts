@@ -1683,6 +1683,34 @@ app.post('/api/monitoring/run', authMiddleware, async (req, res) => {
   }
 });
 
+app.post('/api/monitoring/cron-trigger', async (req, res) => {
+  try {
+    const token = req.query.token || req.headers['x-cron-token'];
+    const expectedToken = process.env.CRON_SECRET;
+
+    if (!expectedToken || token !== expectedToken) {
+      Logger.warn('Unauthorized cron trigger attempt.');
+      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+
+    if (isScrapersPaused) {
+      Logger.info('Cron trigger received but scrapers are paused.');
+      return res.status(400).json({ error: 'Scrapers are currently paused.' });
+    }
+
+    // Run the orchestrator in the background immediately
+    runOrchestrator().catch((err) => {
+      Logger.error('Background runOrchestrator failed via cron trigger', err);
+    });
+
+    Logger.info('Scrapers run triggered via secure cron webhook.');
+    return res.json({ success: true, message: 'Scrapers run triggered via webhook successfully' });
+  } catch (err: any) {
+    Logger.error('Error in cron-trigger endpoint', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/monitoring/pause', authMiddleware, async (req, res) => {
   isScrapersPaused = true;
   return res.json({ success: true, message: 'Scrapers paused successfully' });

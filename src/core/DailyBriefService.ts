@@ -17,7 +17,6 @@ export class DailyBriefService {
   public static async compileDailyBrief(userId: string, storage: StorageProvider): Promise<DailyBrief> {
     try {
       const applications = await storage.getApplications(userId);
-      const companies = await storage.getAllCompanies();
 
       // Gather recommendations & gaps
       const recs = await CareerAgent.analyzeAndRecommend(userId, storage);

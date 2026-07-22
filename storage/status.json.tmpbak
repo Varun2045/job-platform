@@ -1,0 +1,11 @@
+{
+  "status": "degraded",
+  "lastRun": "2026-07-19T18:12:44.717Z",
+  "totalDurationMs": 6010,
+  "companiesChecked": 2,
+  "failuresCount": 1,
+  "failedCompanies": [
+    "BadCo"
+  ],
+  "newJobsFound": 0
+}

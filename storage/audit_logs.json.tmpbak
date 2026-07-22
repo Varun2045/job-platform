@@ -1,0 +1,14 @@
+[
+  {
+    "id": "h1n1h9",
+    "user_id": "user-a-uuid",
+    "userId": "user-a-uuid",
+    "action": "Login",
+    "details": {
+      "browser": "Chrome"
+    },
+    "ip_address": "192.168.1.1",
+    "ipAddress": "192.168.1.1",
+    "created_at": "2026-07-19T18:13:12.604Z"
+  }
+]

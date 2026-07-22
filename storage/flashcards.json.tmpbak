@@ -1,0 +1,172 @@
+[
+  {
+    "id": "deck-egv0gcabt",
+    "user_id": "00000000-0000-0000-0000-000000000000",
+    "title": "Docker",
+    "description": "AI-generated study deck focusing on Docker (medium level)",
+    "category": "Docker",
+    "cards": [
+      {
+        "id": "card-heuristic-0-8afxsamxs",
+        "question": "When designing a production architecture utilizing Docker, what is the primary architectural trade-off?",
+        "options": [
+          "Trading execution isolation for reduced runtime container overhead.",
+          "Increasing network packet fragmentation rate in service layers.",
+          "Guaranteeing write-once consistency across replication threads.",
+          "Restricting developer access to system config parameters."
+        ],
+        "correctOptionIndex": 0,
+        "answer": "In Docker systems, isolating execution context protects applications from cascading thread locks, but incurs startup overhead. Finding the sweet spot between full isolation and execution density is key for scaling.",
+        "masteryStatus": "mastered",
+        "difficulty": "medium",
+        "userAnswer": 0
+      },
+      {
+        "id": "card-heuristic-1-soyvliqmu",
+        "question": "Which of the following is considered a core best practice when optimizing performance for Docker operations?",
+        "options": [
+          "Forcing periodic garbage collection sweeps in loop cycles.",
+          "Implementing connection pool reuse and distributed cache layers.",
+          "Storing all session metadata inside base-64 encoded URL parameters.",
+          "Disabling logging outputs during intensive read-write threads."
+        ],
+        "correctOptionIndex": 1,
+        "answer": "Optimizing Docker requires connection pool configurations to avoid query creation overhead and caching to deflect repeated requests from reaching storage layers.",
+        "masteryStatus": "mastered",
+        "difficulty": "medium",
+        "userAnswer": 1
+      },
+      {
+        "id": "card-heuristic-2-kalm7wool",
+        "question": "How does Docker typically manage synchronization and race conditions under concurrent requests?",
+        "options": [
+          "By blocking all network ports until the active lock thread completes.",
+          "Through read-write locks, semaphores, or event-driven concurrency loop scheduling.",
+          "By writing execution logs to disk logs and replaying them sequentially.",
+          "By duplicating the application process for every active TCP transaction."
+        ],
+        "correctOptionIndex": 1,
+        "answer": "Docker handles concurrency using standard synchronization primitives (e.g., locks, queues, or mutexes) or event-driven single-threaded loop dispatch models to keep operations safe and high-throughput.",
+        "masteryStatus": "mastered",
+        "difficulty": "medium",
+        "userAnswer": 1
+      },
+      {
+        "id": "card-heuristic-3-2jythq36j",
+        "question": "What is a common symptom of resource leakage in a system running Docker?",
+        "options": [
+          "A gradual, steady increase in RAM usage leading to an Out-Of-Memory (OOM) crash.",
+          "Immediate termination of the physical router switch port.",
+          "Automatic decryption of archived database tables.",
+          "Sub-millisecond API response latency values."
+        ],
+        "correctOptionIndex": 0,
+        "answer": "Memory or resource leaks in Docker manifest as monotonic increases in resource usage (like heap size or open file descriptors) over time, eventually causing the runtime to crash.",
+        "masteryStatus": "mastered",
+        "difficulty": "medium",
+        "userAnswer": 0
+      },
+      {
+        "id": "card-heuristic-4-1yz092sq6",
+        "question": "What is the primary difference between development and production configurations in a Docker setup?",
+        "options": [
+          "Development runs in isolation; production disables security and logging controls.",
+          "Development prioritizes hot-reloading and source maps; production prioritizes minification, caching, and hardening.",
+          "Development uses SQL storage; production strictly uses local files.",
+          "There are no differences; configuration files must be identical."
+        ],
+        "correctOptionIndex": 1,
+        "answer": "In development, debugging tools (like hot-module replacement and verbose logs) are active. In production, performance optimizations (like code compression, strict environment variables, and CDN assets) are utilized to guarantee scale and speed.",
+        "masteryStatus": "mastered",
+        "difficulty": "medium",
+        "userAnswer": 1
+      }
+    ],
+    "updatedAt": "2026-07-16T20:10:02.307Z"
+  },
+  {
+    "id": "deck-yxtr4pfop",
+    "user_id": "00000000-0000-0000-0000-000000000000",
+    "title": "Docker",
+    "description": "AI-generated study deck focusing on Docker (easy level)",
+    "category": "Docker",
+    "cards": [
+      {
+        "id": "card-heuristic-0-5jhptfuka",
+        "question": "When designing a production architecture utilizing Docker, what is the primary architectural trade-off?",
+        "options": [
+          "Trading execution isolation for reduced runtime container overhead.",
+          "Increasing network packet fragmentation rate in service layers.",
+          "Guaranteeing write-once consistency across replication threads.",
+          "Restricting developer access to system config parameters."
+        ],
+        "correctOptionIndex": 0,
+        "answer": "In Docker systems, isolating execution context protects applications from cascading thread locks, but incurs startup overhead. Finding the sweet spot between full isolation and execution density is key for scaling.",
+        "masteryStatus": "mastered",
+        "difficulty": "easy",
+        "userAnswer": 0
+      },
+      {
+        "id": "card-heuristic-1-lq690qluw",
+        "question": "Which of the following is considered a core best practice when optimizing performance for Docker operations?",
+        "options": [
+          "Forcing periodic garbage collection sweeps in loop cycles.",
+          "Implementing connection pool reuse and distributed cache layers.",
+          "Storing all session metadata inside base-64 encoded URL parameters.",
+          "Disabling logging outputs during intensive read-write threads."
+        ],
+        "correctOptionIndex": 1,
+        "answer": "Optimizing Docker requires connection pool configurations to avoid query creation overhead and caching to deflect repeated requests from reaching storage layers.",
+        "masteryStatus": "mastered",
+        "difficulty": "easy",
+        "userAnswer": 1
+      },
+      {
+        "id": "card-heuristic-2-dxyhwf9fx",
+        "question": "How does Docker typically manage synchronization and race conditions under concurrent requests?",
+        "options": [
+          "By blocking all network ports until the active lock thread completes.",
+          "Through read-write locks, semaphores, or event-driven concurrency loop scheduling.",
+          "By writing execution logs to disk logs and replaying them sequentially.",
+          "By duplicating the application process for every active TCP transaction."
+        ],
+        "correctOptionIndex": 1,
+        "answer": "Docker handles concurrency using standard synchronization primitives (e.g., locks, queues, or mutexes) or event-driven single-threaded loop dispatch models to keep operations safe and high-throughput.",
+        "masteryStatus": "mastered",
+        "difficulty": "easy",
+        "userAnswer": 1
+      },
+      {
+        "id": "card-heuristic-3-0wzx16sef",
+        "question": "What is a common symptom of resource leakage in a system running Docker?",
+        "options": [
+          "A gradual, steady increase in RAM usage leading to an Out-Of-Memory (OOM) crash.",
+          "Immediate termination of the physical router switch port.",
+          "Automatic decryption of archived database tables.",
+          "Sub-millisecond API response latency values."
+        ],
+        "correctOptionIndex": 0,
+        "answer": "Memory or resource leaks in Docker manifest as monotonic increases in resource usage (like heap size or open file descriptors) over time, eventually causing the runtime to crash.",
+        "masteryStatus": "mastered",
+        "difficulty": "easy",
+        "userAnswer": 0
+      },
+      {
+        "id": "card-heuristic-4-cg38mt6f8",
+        "question": "What is the primary difference between development and production configurations in a Docker setup?",
+        "options": [
+          "Development runs in isolation; production disables security and logging controls.",
+          "Development prioritizes hot-reloading and source maps; production prioritizes minification, caching, and hardening.",
+          "Development uses SQL storage; production strictly uses local files.",
+          "There are no differences; configuration files must be identical."
+        ],
+        "correctOptionIndex": 1,
+        "answer": "In development, debugging tools (like hot-module replacement and verbose logs) are active. In production, performance optimizations (like code compression, strict environment variables, and CDN assets) are utilized to guarantee scale and speed.",
+        "masteryStatus": "mastered",
+        "difficulty": "easy",
+        "userAnswer": 1
+      }
+    ],
+    "updatedAt": "2026-07-16T20:30:29.437Z"
+  }
+]

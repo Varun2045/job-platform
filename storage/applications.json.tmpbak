@@ -1,0 +1,11 @@
+[
+  {
+    "jobHash": "mock-hash-1",
+    "company": "MockCorp",
+    "jobId": "1",
+    "status": "Applied",
+    "notes": "Applied last week",
+    "lastUpdated": "2026-07-11T18:13:17.962Z",
+    "userId": "copilot-test-user-id"
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "runTimestamp": "2026-07-19T18:12:44.717Z",
+  "totalDurationMs": 6010,
+  "companiesChecked": 2,
+  "totalJobs": 1,
+  "totalNewMatches": 0,
+  "totalUpdatedMatches": 0,
+  "totalFailures": 1,
+  "healthRate": 50,
+  "companies": [
+    {
+      "id": "failure-good",
+      "name": "GoodCo",
+      "status": "healthy",
+      "jobsCount": 1,
+      "newJobsCount": 1,
+      "durationMs": 58
+    },
+    {
+      "id": "failure-bad",
+      "name": "BadCo",
+      "status": "failed",
+      "jobsCount": 0,
+      "newJobsCount": 0,
+      "durationMs": 5988
+    }
+  ],
+  "recentMatches": [],
+  "updatedMatches": [],
+  "applications": [
+    {
+      "jobHash": "hash-123",
+      "company": "Google",
+      "jobId": "1",
+      "status": "Applied",
+      "notes": "Notes A",
+      "lastUpdated": "2026-07-19T17:40:38.620Z",
+      "userId": "user-a-uuid"
+    },
+    {
+      "jobHash": "hash-123",
+      "company": "Google",
+      "jobId": "1",
+      "status": "Interview",
+      "notes": "Notes B",
+      "lastUpdated": "2026-07-19T17:40:38.620Z",
+      "userId": "user-b-uuid"
+    },
+    {
+      "jobHash": "hash123",
+      "company": "Google",
+      "jobId": "12345",
+      "status": "Applied",
+      "appliedDate": "2026-07-19T17:40:43.552Z",
+      "resumeUsed": "resume_v1.pdf",
+      "notes": "First round scheduled.",
+      "lastUpdated": "2026-07-19T17:40:43.552Z"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 # Stage 1: Build the backend and frontend
-FROM node:22-alpine AS builder
+FROM node:22 AS builder
 WORKDIR /app
 
 # Copy configuration files and dependencies descriptors
@@ -26,12 +26,13 @@ RUN npm run build
 WORKDIR /app/frontend
 RUN npm run build
 
-# Stage 2: Runtime image
-FROM node:22-alpine AS runner
+# Stage 2: Runtime image with Playwright and Chromium pre-installed
+FROM mcr.microsoft.com/playwright:v1.44.1-jammy AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=7860
 
-# Copy built outputs and dependencies
+# Copy built outputs and dependencies from builder
 COPY package*.json tsconfig.json ./
 RUN npm ci --only=production
 
@@ -40,5 +41,8 @@ COPY --from=builder /app/config ./config
 COPY --from=builder /app/frontend/dist ./frontend/dist
 COPY resumes ./resumes
 
-EXPOSE 3001
+# Create storage and logs folders and ensure write permissions for non-root user 1000 (Hugging Face default)
+RUN mkdir -p storage logs && chmod -R 777 storage logs
+
+EXPOSE 7860
 CMD ["node", "dist/core/server.js"]
