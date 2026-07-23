@@ -573,7 +573,13 @@ export const JobExplorer: React.FC = () => {
                     {/* Footer Actions */}
                     <div className="flex justify-between items-center pt-3 border-t border-[#243147] text-xs">
                       <span className="text-[11px] text-[#64748b] flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {new Date(job.datePosted).toLocaleDateString()}
+                        <Clock className="w-3 h-3" /> {(() => {
+                          const val = job.datePosted || job.firstSeen || job.created_at;
+                          if (!val) return 'Recently';
+                          if (typeof val === 'string' && (val.includes('ago') || val.includes('Today') || val.includes('Just now'))) return val;
+                          const d = new Date(val);
+                          return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString();
+                        })()}
                       </span>
 
                       <div className="flex items-center gap-2">

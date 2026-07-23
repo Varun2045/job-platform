@@ -248,7 +248,11 @@ export const KanbanTracker: React.FC = () => {
                         </div>
                       )}
                       <div className="flex justify-between items-center mt-3 pt-2 border-t border-[#232d3f] text-[10px] text-[#94a3b8]">
-                        <span>Updated: {new Date(a.lastUpdated).toLocaleDateString()}</span>
+                        <span>Updated: {(() => {
+                          if (!a.lastUpdated) return 'Recently';
+                          const d = new Date(a.lastUpdated);
+                          return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString();
+                        })()}</span>
                       </div>
                     </div>
                   ))
