@@ -115,7 +115,7 @@ const isProduction = isGitHubActions || process.env.NODE_ENV === 'production';
 
 // In production/GitHub Actions we fail fast if secrets are missing.
 // Locally, if they are missing, we fall back to FileStorage and disable email (Offline mode).
-if (isProduction) {
+if (isProduction && process.env.IS_LOCAL !== 'true') {
   validateEnv('SUPABASE_URL', true);
   validateEnv('SUPABASE_SERVICE_KEY', true);
   if (process.env.RESEND_API_KEY) {
