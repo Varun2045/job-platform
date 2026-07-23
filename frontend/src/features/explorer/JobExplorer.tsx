@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, MapPin, Briefcase, Globe, ExternalLink, X, Sparkles, 
-  FileText, CheckSquare, Bookmark, EyeOff, Filter, Clock, RefreshCw
+  FileText, CheckSquare, Bookmark, EyeOff, Filter, Clock, RefreshCw,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
@@ -53,6 +54,19 @@ export const JobExplorer: React.FC = () => {
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
+
+  // Accordion Sections for Faceted Filters
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    department: true,
+    experience: true,
+    remote: false,
+    location: false,
+    minScore: false,
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -351,115 +365,174 @@ export const JobExplorer: React.FC = () => {
           </div>
 
           {/* Department Facets */}
-          <div className="space-y-2">
-            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Department</span>
-            <div className="space-y-1.5">
-              {facets.departments?.map((f: any) => (
-                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={department.includes(f.value)}
-                      onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
-                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span>{f.name}</span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                    {f.count}
-                  </span>
-                </label>
-              ))}
-            </div>
+          <div className="border-t border-[#243147] pt-3">
+            <button
+              onClick={() => toggleSection('department')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+            >
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Department {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
+              </span>
+              {openSections.department ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+            
+            {openSections.department && (
+              <div className="space-y-1.5 mt-2 transition-all">
+                {facets.departments?.map((f: any) => (
+                  <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={department.includes(f.value)}
+                        onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Experience Level Facets */}
-          <div className="space-y-2 border-t border-[#243147] pt-4">
-            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Experience Level</span>
-            <div className="space-y-1.5">
-              {facets.experience?.map((f: any) => (
-                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={experience.includes(f.value)}
-                      onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
-                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span>{f.name}</span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                    {f.count}
-                  </span>
-                </label>
-              ))}
-            </div>
+          <div className="border-t border-[#243147] pt-3">
+            <button
+              onClick={() => toggleSection('experience')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+            >
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Experience Level {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
+              </span>
+              {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+
+            {openSections.experience && (
+              <div className="space-y-1.5 mt-2 transition-all">
+                {facets.experience?.map((f: any) => (
+                  <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={experience.includes(f.value)}
+                        onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Remote Status Facets */}
-          <div className="space-y-2 border-t border-[#243147] pt-4">
-            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Remote Status</span>
-            <div className="space-y-1.5">
-              {facets.remote?.map((f: any) => (
-                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="remoteOption"
-                      checked={remote === f.value}
-                      onChange={() => setRemote(remote === f.value ? 'all' : f.value)}
-                      className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span>{f.name}</span>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                    {f.count}
-                  </span>
-                </label>
-              ))}
-            </div>
+          <div className="border-t border-[#243147] pt-3">
+            <button
+              onClick={() => toggleSection('remote')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+            >
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Remote Status {remote !== 'all' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
+              </span>
+              {openSections.remote ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+
+            {openSections.remote && (
+              <div className="space-y-1.5 mt-2 transition-all">
+                {facets.remote?.map((f: any) => (
+                  <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="remoteOption"
+                        checked={remote === f.value}
+                        onChange={() => setRemote(remote === f.value ? 'all' : f.value)}
+                        className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Location Facets */}
-          <div className="space-y-2 border-t border-[#243147] pt-4">
-            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Location</span>
-            <input
-              type="text"
-              placeholder="Filter by city/country..."
-              value={locationQuery}
-              onChange={(e) => setLocationQuery(e.target.value)}
-              className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
-            />
-            <div className="space-y-1.5 mt-2">
-              {facets.locations?.map((f: any) => (
-                <button
-                  key={f.value}
-                  onClick={() => { setLocationQuery(f.value); setDebouncedLocation(f.value); }}
-                  className={`w-full flex items-center justify-between text-xs py-1 px-2 rounded-lg transition-all cursor-pointer ${
-                    debouncedLocation === f.value ? 'bg-indigo-600/20 text-indigo-300 font-bold border border-indigo-500/30' : 'text-[#94a3b8] hover:bg-[#192438] hover:text-white'
-                  }`}
-                >
-                  <span>{f.name}</span>
-                  <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                    {f.count}
-                  </span>
-                </button>
-              ))}
-            </div>
+          <div className="border-t border-[#243147] pt-3">
+            <button
+              onClick={() => toggleSection('location')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+            >
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Location {debouncedLocation && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
+              </span>
+              {openSections.location ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+
+            {openSections.location && (
+              <div className="space-y-2 mt-2 transition-all">
+                <input
+                  type="text"
+                  placeholder="Filter by city/country..."
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
+                />
+                <div className="space-y-1.5 mt-2">
+                  {facets.locations?.map((f: any) => (
+                    <button
+                      key={f.value}
+                      onClick={() => { setLocationQuery(f.value); setDebouncedLocation(f.value); }}
+                      className={`w-full flex items-center justify-between text-xs py-1 px-2 rounded-lg transition-all cursor-pointer ${
+                        debouncedLocation === f.value ? 'bg-indigo-600/20 text-indigo-300 font-bold border border-indigo-500/30' : 'text-[#94a3b8] hover:bg-[#192438] hover:text-white'
+                      }`}
+                    >
+                      <span>{f.name}</span>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                        {f.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Min Match Score */}
-          <div className="space-y-2 border-t border-[#243147] pt-4">
-            <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Minimum Resume Match</span>
-            <select
-              value={minScore}
-              onChange={(e) => setMinScore(e.target.value)}
-              className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+          <div className="border-t border-[#243147] pt-3">
+            <button
+              onClick={() => toggleSection('minScore')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
             >
-              <option value="0">All Match Scores</option>
-              <option value="70">70% or Higher</option>
-              <option value="80">80% or Higher</option>
-            </select>
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Minimum Match Score {minScore !== '0' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{minScore}%</span>}
+              </span>
+              {openSections.minScore ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+
+            {openSections.minScore && (
+              <div className="mt-2 transition-all">
+                <select
+                  value={minScore}
+                  onChange={(e) => setMinScore(e.target.value)}
+                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                >
+                  <option value="0">All Match Scores</option>
+                  <option value="70">70% or Higher</option>
+                  <option value="80">80% or Higher</option>
+                </select>
+              </div>
+            )}
           </div>
 
         </div>
