@@ -1,6 +1,5 @@
 import express from 'express';
 import { CompanyConfig } from '../companies/Scraper.js';
-import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 import cors from 'cors';
 import path from 'path';
@@ -675,6 +674,10 @@ app.post('/api/resumes/parse', authMiddleware, express.raw({ type: '*/*', limit:
     let text = '';
     if (contentType.includes('pdf')) {
       try {
+        if (typeof (globalThis as any).DOMMatrix === 'undefined') {
+          (globalThis as any).DOMMatrix = class DOMMatrix {};
+        }
+        const { PDFParse } = await import('pdf-parse');
         const parser = new PDFParse({ data: buffer });
         const result = await parser.getText();
         text = result.text || '';
