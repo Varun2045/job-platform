@@ -45,7 +45,7 @@ export class SearchEngine {
 
         const matchesAnyExp = exps.some((expLower) => {
           if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
-            return isExplicitEarly || !isSenior;
+            return isExplicitEarly;
           } else if (expLower.includes('mid')) {
             return !isSenior && !isExplicitEarly;
           } else if (expLower.includes('senior') || expLower.includes('lead')) {

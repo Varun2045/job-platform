@@ -365,7 +365,7 @@ export const JobExplorer: React.FC = () => {
           </div>
 
           {/* Department Facets */}
-          <div className="border-t border-[#243147] pt-3">
+          <div>
             <button
               onClick={() => toggleSection('department')}
               className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
@@ -648,10 +648,10 @@ export const JobExplorer: React.FC = () => {
                       <span className="text-[11px] text-[#64748b] flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {(() => {
                           const val = job.datePosted || job.firstSeen || job.created_at;
-                          if (!val) return 'Recently';
+                          if (!val) return '20-07-2026';
                           if (typeof val === 'string' && (val.includes('ago') || val.includes('Today') || val.includes('Just now'))) return val;
                           const d = new Date(val);
-                          return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString();
+                          return isNaN(d.getTime()) ? '20-07-2026' : d.toLocaleDateString();
                         })()}
                       </span>
 

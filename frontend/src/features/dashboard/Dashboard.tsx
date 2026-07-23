@@ -106,7 +106,7 @@ export const Dashboard: React.FC = () => {
 
       <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-        <div className="grid-fluid-cards gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {quickActions.map((action) => (
             <button
               key={action.name}
