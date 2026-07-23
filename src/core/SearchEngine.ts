@@ -38,10 +38,12 @@ export class SearchEngine {
         const titleText = (job.title || '').toLowerCase();
         const expField = (job.experience || '').toLowerCase();
 
-        const isSenior = /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect/i.test(titleText) ||
+        const isSenior = expField === 'senior' ||
+                         /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|distinguished|5\+|6\+|7\+|8\+|10\+/i.test(titleText) ||
                          /\b(5\+|6\+|7\+|8\+|10\+)\s*(years|yrs)/i.test(`${titleText} ${expField}`);
 
-        const isExplicitEarly = /early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(`${titleText} ${expField}`);
+        const isExplicitEarly = expField.includes('early') || expField.includes('entry') ||
+                                /early|entry|junior|\bjr\b|\bjr\.|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|internship|graduate/i.test(`${titleText} ${expField}`);
 
         const matchesAnyExp = exps.some((expLower) => {
           if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {

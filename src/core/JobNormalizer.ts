@@ -53,23 +53,23 @@ export class JobNormalizer {
       }
     }
 
-    // Heuristics for experience level
-    let experience = raw.experience || 'Entry Level';
-    if (!raw.experience) {
-      const descLower = cleanedDescription.toLowerCase();
-      const titleLower = cleanedTitle.toLowerCase();
-      if (
-        /graduate|intern|new grad|university graduate|early career|entry level/i.test(titleLower) ||
-        /graduate|intern|new grad/i.test(descLower)
-      ) {
-        experience = 'Early Career';
-      } else if (/senior|sr\.|lead|principal/i.test(titleLower)) {
-        experience = 'Senior';
-      } else if (/manager|director|vp/i.test(titleLower)) {
-        experience = 'Management';
-      } else {
-        experience = 'Mid Level';
-      }
+    // Comprehensive heuristics for experience level classification
+    let experience = raw.experience || '';
+    const descLower = cleanedDescription.toLowerCase();
+    const titleLower = cleanedTitle.toLowerCase();
+    const expText = `${titleLower} ${experience.toLowerCase()} ${descLower.slice(0, 1000)}`;
+
+    const isSenior = /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|distinguished|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(titleLower) ||
+                     /\b(5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10)\s*(years|yrs)/i.test(expText);
+
+    const isEarly = /early|entry|junior|\bjr\b|\bjr\.|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|internship|graduate/i.test(`${titleLower} ${experience.toLowerCase()}`);
+
+    if (isSenior) {
+      experience = 'Senior';
+    } else if (isEarly) {
+      experience = 'Early Career';
+    } else {
+      experience = 'Mid Level';
     }
 
     // Standardize source name
