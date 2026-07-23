@@ -15,7 +15,18 @@ export class SupabaseStorage implements StorageProvider {
     }
 
     this.client = createClient(config.supabaseUrl, config.supabaseServiceKey, {
-      auth: { persistSession: false },
+      auth: { persistSession: false, autoRefreshToken: false },
+      realtime: {
+        transport: (typeof globalThis.WebSocket !== 'undefined'
+          ? globalThis.WebSocket
+          : class WebSocket {
+              constructor() {}
+              addEventListener() {}
+              removeEventListener() {}
+              send() {}
+              close() {}
+            }) as any,
+      },
       global: {
         headers: { 'x-client-info': 'job-monitor-production' },
         fetch: (url: any, options: any) => {
