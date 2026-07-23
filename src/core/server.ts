@@ -3834,8 +3834,15 @@ app.use('/portfolios', express.static(portfoliosDir));
 // Serve frontend build output
 const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
 if (fs.existsSync(frontendDist)) {
-  app.use(express.static(frontendDist));
+  app.use(express.static(frontendDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
   app.get('/{*splat}', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(frontendDist, 'index.html'));
   });
 }
