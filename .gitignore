@@ -43,8 +43,10 @@ Thumbs.db
 
 # Temporary files
 *.tmp
+*.tmpbak
 *.temp
 .cache/
+scratch/
 
 # Build artifacts
 *.tsbuildinfo
