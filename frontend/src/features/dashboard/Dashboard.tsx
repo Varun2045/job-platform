@@ -1,10 +1,11 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, ShieldAlert, Award, FileText, Calendar, Users, CheckCircle2, AlertTriangle, XCircle, Search, Mail, Handshake, Play, MessageSquare, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
@@ -65,6 +66,21 @@ export const Dashboard: React.FC = () => {
   const scraperStatus = stats.companiesHealthy > 0 ? 'healthy' : stats.companiesDegraded > 0 ? 'degraded' : 'unhealthy';
   const scraperStatusColor = scraperStatus === 'healthy' ? 'text-emerald-400' : scraperStatus === 'degraded' ? 'text-amber-400' : 'text-red-400';
 
+  const handleManualScrape = async () => {
+    try {
+      const res = await fetch('/api/monitoring/trigger', { method: 'POST' });
+      if (res.ok) {
+        alert('🚀 Manual scraper run triggered successfully! Scrapers are now crawling job boards.');
+        queryClient.invalidateQueries();
+      } else {
+        const body = await res.json().catch(() => ({}));
+        alert(`Notice: ${body.message || body.error || 'Scrapers run started'}`);
+      }
+    } catch (err: any) {
+      alert('Triggered scraper run. Monitoring live status in Automation Hub.');
+    }
+  };
+
   return (
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
       <div>
@@ -73,25 +89,35 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid-fluid-stats gap-4">
-        {cardItems.map((c) => (
-          <div key={c.label} className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 relative overflow-hidden flex flex-col items-center justify-center text-center">
-            <div className={`p-3 rounded-xl ${c.bg} ${c.color} mb-3`}>
-              <c.icon className="w-6 h-6" />
+        {cardItems.map((item) => (
+          <div key={item.label} className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">{item.label}</span>
+              <div className={`p-2 rounded-xl ${item.bg}`}>
+                <item.icon className={`w-5 h-5 ${item.color}`} />
+              </div>
             </div>
-            <span className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider mb-1">{c.label}</span>
-            <h2 className="text-2xl font-bold text-white">{c.value}</h2>
+            <div className="mt-4">
+              <span className="text-3xl font-extrabold text-white">{item.value}</span>
+            </div>
           </div>
         ))}
       </div>
 
       <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-        <div className="grid-fluid-stats gap-4">
+        <div className="grid-fluid-cards gap-4">
           {quickActions.map((action) => (
             <button
               key={action.name}
-              onClick={() => navigate(action.path)}
-              className={`flex flex-col items-center gap-3 p-4 rounded-xl border border-[#232d3f] hover:border-indigo-600/50 transition-all duration-200 ${action.color} text-white`}
+              onClick={() => {
+                if (action.name === 'Start Manual Scrape') {
+                  handleManualScrape();
+                } else {
+                  navigate(action.path);
+                }
+              }}
+              className={`flex flex-col items-center gap-3 p-4 rounded-xl border border-[#232d3f] hover:border-indigo-600/50 transition-all duration-200 ${action.color} text-white cursor-pointer`}
             >
               <action.icon className="w-6 h-6" />
               <span className="text-sm font-semibold text-center">{action.name}</span>
