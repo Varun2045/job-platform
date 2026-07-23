@@ -1,3 +1,4 @@
+import './polyfill.js';
 import express from 'express';
 import { CompanyConfig } from '../companies/Scraper.js';
 import mammoth from 'mammoth';
@@ -9,16 +10,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import crypto from 'crypto';
 import swaggerUi from 'swagger-ui-express';
-
-if (typeof (globalThis as any).WebSocket === 'undefined') {
-  (globalThis as any).WebSocket = class WebSocket {
-    constructor() {}
-    addEventListener() {}
-    removeEventListener() {}
-    send() {}
-    close() {}
-  };
-}
 import { config } from '../config/config.js';
 import { FileStorage } from '../storage/FileStorage.js';
 import { SupabaseStorage } from '../storage/SupabaseStorage.js';
