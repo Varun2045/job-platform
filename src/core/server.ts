@@ -113,7 +113,9 @@ app.use(
         corsWhitelist.includes(origin) ||
         origin.startsWith('http://localhost:') ||
         origin.startsWith('http://127.0.0.1:') ||
-        origin.endsWith('.vercel.app')
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.herokuapp.com') ||
+        origin.endsWith('.hf.space')
       ) {
         callback(null, true);
       } else {
