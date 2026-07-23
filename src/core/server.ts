@@ -446,7 +446,16 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
     const targetExperience = (experience as string) || nlParsed.experience || '';
     const targetDepartment = (department as string) || nlParsed.department || '';
     const targetLocation = (location as string) || nlParsed.location || '';
-    const targetRemote = remote !== undefined && remote !== '' ? remote === 'true' : nlParsed.remote;
+    let targetRemote: boolean | undefined = undefined;
+    if (remote !== undefined && remote !== '' && remote !== 'all') {
+      if (remote === 'true' || remote === 'remote') {
+        targetRemote = true;
+      } else if (remote === 'false' || remote === 'onsite') {
+        targetRemote = false;
+      }
+    } else if (nlParsed.remote !== undefined) {
+      targetRemote = nlParsed.remote;
+    }
     const targetMinScore = minScore ? Number(minScore) : 0;
 
     const ps = Math.min(100, Math.max(1, Number(pageSize || limit || 25)));
