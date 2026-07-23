@@ -17,7 +17,9 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "deploy:check": "npm run lint && npm run build && npm test -- --runInBand",
+    "deploy:heroku": "deploy_heroku.bat"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",

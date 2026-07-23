@@ -77,7 +77,7 @@
 - **Linter**: **ESLint** (backend) and **Oxlint** (frontend, ultra-fast rust-based linter).
 - **Formatter**: **Prettier**.
 - **Test Runner**: **Jest** (`ts-jest`) sequentially executing integration and performance load runs.
-- **Docker**: Packages runtime server and dependencies into a container.
+- **Docker & Deployment**: Containerized build (`heroku.yml` + `Dockerfile`) deployed directly to Heroku Basic Dyno ($7/mo) via local pre-push verification scripts (`deploy_heroku.bat` / `deploy_heroku.ps1`).
 
 ---
 

@@ -2,7 +2,6 @@
 
 An enterprise-grade, autonomous career copilot and job monitoring system featuring intelligent resume matching, skill gap analytics, automated apply workflows, recruiter CRM tracking, and multi-channel notification pipelines.
 
-[![Build Status](https://github.com/job-monitor/platform/actions/workflows/ci.yml/badge.svg)](https://github.com/job-monitor/platform/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 ---
@@ -143,6 +142,37 @@ A `Dockerfile` and `docker-compose.yml` are provided in the repository root.
    ```
 
 *Note: Headless environments must verify that Playwright Chromium dependencies are installed: `npx playwright install --with-deps chromium`.*
+
+---
+
+## Heroku Deployment
+
+Deploy your platform to a Heroku Basic Dyno ($7/mo) using the pre-configured container stack (`heroku.yml` + `Dockerfile`):
+
+### Automated One-Click Command
+Run the interactive deployment script which executes pre-push verification (`npm run lint`, `npm run build`, `npm test`) locally before deploying:
+
+```bash
+# Command Prompt
+npm run deploy:heroku
+
+# PowerShell
+.\deploy_heroku.ps1
+```
+
+### Manual Deployment Steps
+1. Set stack to container:
+   ```bash
+   heroku stack:set container -a <your-app-name>
+   ```
+2. Configure basic environment flags:
+   ```bash
+   heroku config:set NODE_ENV=production IS_LOCAL=false FEATURE_PLAYWRIGHT=true -a <your-app-name>
+   ```
+3. Push to Heroku git remote:
+   ```bash
+   git push heroku main
+   ```
 
 ---
 
