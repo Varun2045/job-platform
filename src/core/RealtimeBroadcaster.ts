@@ -7,7 +7,9 @@ export class RealtimeBroadcaster {
 
   public static initialize(): void {
     if (!config.isLocal && config.supabaseUrl && config.supabaseServiceKey) {
-      this.client = createClient(config.supabaseUrl, config.supabaseServiceKey);
+      this.client = createClient(config.supabaseUrl, config.supabaseServiceKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
     }
   }
 
