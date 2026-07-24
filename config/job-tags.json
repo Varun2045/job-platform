@@ -1,0 +1,24 @@
+{
+  "configVersion": "v2.0.0",
+  "tags": [
+    { "name": "Remote", "conditionField": "isRemote", "conditionValue": true },
+    { "name": "Hybrid", "conditionField": "location", "regex": "hybrid" },
+    { "name": "On-site", "conditionField": "isRemote", "conditionValue": false },
+    { "name": "Internship", "conditionField": "title", "regex": "intern|internship|co-op" },
+    { "name": "Graduate", "conditionField": "title", "regex": "graduate|new grad|campus hire|fresher" },
+    { "name": "Entry Level", "conditionField": "experience", "regex": "entry|early" },
+    { "name": "Senior", "conditionField": "experience", "regex": "senior|staff|lead|principal" },
+    { "name": "Contract", "conditionField": "employmentType", "regex": "contract|freelance|temp" },
+    { "name": "Part Time", "conditionField": "employmentType", "regex": "part-time|part time" },
+    { "name": "Full Time", "conditionField": "employmentType", "regex": "full-time|full time" },
+    { "name": "Temporary", "conditionField": "employmentType", "regex": "temporary|temp" },
+    { "name": "Freelance", "conditionField": "employmentType", "regex": "freelance" },
+    { "name": "Visa Sponsorship", "conditionField": "description", "regex": "visa sponsorship|h1b|work authorization provided" },
+    { "name": "Urgent Hiring", "conditionField": "description", "regex": "urgent|immediate start|hiring immediately" },
+    { "name": "High Salary", "conditionField": "salary", "regex": "\\$1[5-9]\\d|\\$2\\d\\d|₹[2-9]\\d|₹1\\d\\d|lpa" },
+    { "name": "Easy Apply", "conditionField": "source", "regex": "greenhouse|lever|workday" },
+    { "name": "Referral Available", "conditionField": "company", "regex": "google|meta|amazon|microsoft|apple|uber|netflix" },
+    { "name": "AI Recommended", "conditionField": "recommendationScore", "greaterThan": 80 },
+    { "name": "Featured", "conditionField": "priority", "greaterThan": 8 }
+  ]
+}

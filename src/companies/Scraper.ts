@@ -62,6 +62,44 @@ export interface Job {
   salary: string;
   description: string;
   jobHash: string; // sha256(company + "_" + id)
+  // Production-grade classification metadata (Immutable Job Data)
+  classificationVersion?: string;
+  configVersionsMap?: Record<string, string>;
+  experienceLevel?: string;
+  experienceReason?: string;
+  experienceSource?: string;
+  primaryDepartment?: string;
+  secondaryDepartments?: string[];
+  tags?: string[];
+  qualityFlags?: string[];
+  confidenceBreakdown?: {
+    overall: number;
+    experience: number;
+    department: number;
+    location: number;
+    tags: number;
+  };
+  freshnessScore?: number;
+  classificationHistory?: Array<{
+    classificationVersion: string;
+    timestamp: string;
+    level: string;
+    primaryDepartment: string;
+    confidence: number;
+  }>;
+  // User-derived dynamic match metadata
+  scoreExplanation?: {
+    skills: number;
+    experience: number;
+    department: number;
+    location: number;
+    company: number;
+    resume: number;
+    title: number;
+    total: number;
+  };
+  recommendationBadges?: string[];
+  whyRecommended?: string[];
   explanation?: {
     overallScore: number;
     matchedSkills: string[];

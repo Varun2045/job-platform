@@ -1,10 +1,6 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Load env variables
 dotenv.config();
@@ -23,6 +19,11 @@ export interface FeatureFlags {
   screenshots: boolean;
   playwright: boolean;
   email: boolean;
+  explainableAi: boolean;
+  advancedTags: boolean;
+  multiDepartment: boolean;
+  ruleEngine: boolean;
+  weightedKeywords: boolean;
 }
 
 export interface Config {
@@ -66,10 +67,8 @@ const defaultWeights: Weights = {
 
 let loadedWeights = defaultWeights;
 try {
-  const weightsPath = path.join(__dirname, 'weights.json');
-  // Fallback to searching relative to project root
   const rootWeightsPath = path.join(process.cwd(), 'config', 'weights.json');
-  const targetPath = fs.existsSync(weightsPath) ? weightsPath : fs.existsSync(rootWeightsPath) ? rootWeightsPath : '';
+  const targetPath = fs.existsSync(rootWeightsPath) ? rootWeightsPath : '';
 
   if (targetPath) {
     const raw = fs.readFileSync(targetPath, 'utf-8');
@@ -138,6 +137,11 @@ export const config: Config = {
     screenshots: process.env.FEATURE_SCREENSHOTS !== 'false',
     playwright: process.env.FEATURE_PLAYWRIGHT !== 'false',
     email: process.env.FEATURE_EMAIL !== 'false' && hasResend,
+    explainableAi: process.env.FEATURE_EXPLAINABLE_AI !== 'false',
+    advancedTags: process.env.FEATURE_ADVANCED_TAGS !== 'false',
+    multiDepartment: process.env.FEATURE_MULTI_DEPARTMENT !== 'false',
+    ruleEngine: process.env.FEATURE_RULE_ENGINE !== 'false',
+    weightedKeywords: process.env.FEATURE_WEIGHTED_KEYWORDS !== 'false',
   },
   isLocal: process.env.IS_LOCAL === 'true' || !hasSupabase,
   googleClientId: process.env.GOOGLE_CLIENT_ID,

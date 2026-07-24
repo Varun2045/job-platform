@@ -618,7 +618,8 @@ export class SkillNormalizer {
       const synonymsPath = path.join(process.cwd(), 'config', 'synonyms.json');
       if (fs.existsSync(synonymsPath)) {
         const raw = fs.readFileSync(synonymsPath, 'utf-8');
-        this.synonyms = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        this.synonyms = parsed.synonyms || parsed;
       }
     } catch (e) {
       Logger.error('Failed to load synonyms.json', e as any);

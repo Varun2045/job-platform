@@ -1,6 +1,12 @@
 import crypto from 'crypto';
 import { RawJob, Job, CompanyConfig } from '../companies/Scraper.js';
 import { SkillNormalizer } from './ResumeMatcher.js';
+import { HybridExperienceClassifier } from './HybridExperienceClassifier.js';
+import { DepartmentClassifier } from './DepartmentClassifier.js';
+import { JobTagger } from './JobTagger.js';
+import { FreshnessCalculator } from './FreshnessCalculator.js';
+import { ClassificationConfig } from './ClassificationConfig.js';
+import { ClassificationMetrics } from './ClassificationMetrics.js';
 
 export class JobNormalizer {
   /**
@@ -53,24 +59,30 @@ export class JobNormalizer {
       }
     }
 
-    // Comprehensive heuristics for experience level classification
-    let experience = raw.experience || '';
-    const descLower = cleanedDescription.toLowerCase();
-    const titleLower = cleanedTitle.toLowerCase();
-    const expText = `${titleLower} ${experience.toLowerCase()} ${descLower.slice(0, 1000)}`;
+    const startMs = Date.now();
 
-    const isSenior = /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|distinguished|5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10/i.test(titleLower) ||
-                     /\b(5\+|6\+|7\+|8\+|10\+|5-7|5-8|5-10|6-10)\s*(years|yrs)/i.test(expText);
+    // 1. Production-Grade Hybrid Experience Classification
+    const expResult = HybridExperienceClassifier.classify(cleanedTitle, cleanedDescription, raw.experience, raw.company);
 
-    const isEarly = /early|entry|junior|\bjr\b|\bjr\.|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|internship|graduate/i.test(`${titleLower} ${experience.toLowerCase()}`);
+    // 2. Production-Grade 28-Category Department Classification
+    const deptResult = DepartmentClassifier.classify(cleanedTitle, cleanedDescription, raw.team);
 
-    if (isSenior) {
-      experience = 'Senior';
-    } else if (isEarly) {
-      experience = 'Early Career';
-    } else {
-      experience = 'Mid Level';
-    }
+    // 3. Automated Job Tagging & Quality Flags
+    const tagResult = JobTagger.tag({
+      title: cleanedTitle,
+      description: cleanedDescription,
+      location: cleanedLocation,
+      isRemote,
+      experience: expResult.level,
+      employmentType: raw.employmentType || 'Full-time',
+      salary: raw.salary || 'Not Specified',
+      source: raw.source || company.detected_ats || 'unknown',
+      company: raw.company,
+    });
+
+    // 4. Continuous Freshness Score
+    const datePostedStr = raw.datePosted || new Date().toISOString();
+    const freshnessScore = FreshnessCalculator.calculateScore(datePostedStr);
 
     // Standardize source name
     const source = raw.source || company.detected_ats || 'unknown';
@@ -80,22 +92,59 @@ export class JobNormalizer {
     const normalizedId = raw.id.trim();
     const jobHash = crypto.createHash('sha256').update(`${normalizedCompany}_${normalizedId}`).digest('hex');
 
+    const versionsMap = ClassificationConfig.getInstance().getConfigVersionsMap();
+
+    // Non-blocking telemetry metrics recording
+    ClassificationMetrics.getInstance().recordClassification(
+      Date.now() - startMs,
+      expResult.confidence,
+      raw.company,
+      deptResult.primaryDepartment
+    );
+
     return {
       company: raw.company,
       id: raw.id,
       title: cleanedTitle,
       location: cleanedLocation,
       country: country,
-      experience: experience,
+      experience: expResult.legacyBucket, // Legacy compatibility bucket (Early Career, Mid Level, Senior)
       employmentType: raw.employmentType || 'Full-time',
       url: raw.url,
-      datePosted: raw.datePosted || new Date().toISOString(),
-      team: raw.team || 'Engineering',
+      datePosted: datePostedStr,
+      team: deptResult.primaryDepartment,
       source: source,
       isRemote: isRemote,
       salary: raw.salary || 'Not Specified',
       description: cleanedDescription,
       jobHash: jobHash,
+      // Precomputed Metadata
+      classificationVersion: 'v1',
+      configVersionsMap: versionsMap,
+      experienceLevel: expResult.level,
+      experienceReason: expResult.reason,
+      experienceSource: expResult.source,
+      primaryDepartment: deptResult.primaryDepartment,
+      secondaryDepartments: deptResult.secondaryDepartments,
+      tags: tagResult.tags,
+      qualityFlags: tagResult.qualityFlags,
+      confidenceBreakdown: {
+        overall: Math.round((expResult.confidence + deptResult.confidence + tagResult.confidence) / 3),
+        experience: expResult.confidence,
+        department: deptResult.confidence,
+        location: 100,
+        tags: tagResult.confidence,
+      },
+      freshnessScore: freshnessScore,
+      classificationHistory: [
+        {
+          classificationVersion: 'v1',
+          timestamp: new Date().toISOString(),
+          level: expResult.level,
+          primaryDepartment: deptResult.primaryDepartment,
+          confidence: Math.round((expResult.confidence + deptResult.confidence) / 2),
+        },
+      ],
     };
   }
 }

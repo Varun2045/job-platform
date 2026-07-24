@@ -32,20 +32,20 @@ export class SearchEngine {
       }
 
       // 3. Experience Match
-      // 3. Experience Match (supports single or comma-separated experience levels)
       if (criteria.experience && criteria.experience.trim() !== '' && criteria.experience !== 'all') {
         const exps = criteria.experience.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean);
         const titleText = (job.title || '').toLowerCase();
-        const expField = (job.experience || '').toLowerCase();
+        const expField = (job.experience || job.experienceLevel || '').toLowerCase();
 
         const isSenior = expField === 'senior' ||
                          /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|distinguished|5\+|6\+|7\+|8\+|10\+/i.test(titleText) ||
                          /\b(5\+|6\+|7\+|8\+|10\+)\s*(years|yrs)/i.test(`${titleText} ${expField}`);
 
-        const isExplicitEarly = expField.includes('early') || expField.includes('entry') ||
+        const isExplicitEarly = expField.includes('early') || expField.includes('entry') || expField.includes('intern') ||
                                 /early|entry|junior|\bjr\b|\bjr\.|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|internship|graduate/i.test(`${titleText} ${expField}`);
 
         const matchesAnyExp = exps.some((expLower) => {
+          if (job.experienceLevel && job.experienceLevel.toLowerCase().includes(expLower)) return true;
           if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
             return isExplicitEarly;
           } else if (expLower.includes('mid')) {
@@ -75,12 +75,15 @@ export class SearchEngine {
         if (criteria.remote !== isRemoteJob) return false;
       }
 
-      // 6. Department Match (supports single or comma-separated departments)
+      // 6. Department Match
       if (criteria.department && criteria.department.trim() !== '' && criteria.department !== 'all') {
         const depts = criteria.department.toLowerCase().split(',').map((d) => d.trim()).filter(Boolean);
-        const text = `${job.team || ''} ${(job as any).department || ''} ${job.title} ${job.description || ''}`.toLowerCase();
+        const text = `${job.team || ''} ${job.primaryDepartment || ''} ${(job.secondaryDepartments || []).join(' ')} ${job.title} ${job.description || ''}`.toLowerCase();
 
         const matchesAnyDept = depts.some((dept) => {
+          if (job.primaryDepartment && job.primaryDepartment.toLowerCase().includes(dept)) return true;
+          if (job.secondaryDepartments && job.secondaryDepartments.some((sd) => sd.toLowerCase().includes(dept))) return true;
+
           if (dept === 'engineering') {
             return /engineer|developer|sde|backend|frontend|fullstack|software|architect|infrastructure|devops|platform|coder|tech/i.test(text);
           } else if (dept === 'ai_data' || dept.includes('ai') || dept.includes('data')) {

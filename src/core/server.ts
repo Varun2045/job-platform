@@ -23,6 +23,8 @@ import { ResumeTailor } from './ResumeTailor.js';
 import { CoverLetterGenerator } from './CoverLetterGenerator.js';
 import { InterviewGenerator } from './InterviewGenerator.js';
 import { RecommendationEngine } from './RecommendationEngine.js';
+import { ConfigValidator } from './ConfigValidator.js';
+import { ClassificationMetrics } from './ClassificationMetrics.js';
 import { Telemetry } from './Telemetry.js';
 import { HealthService } from './HealthService.js';
 import { BackupService } from './BackupService.js';
@@ -186,6 +188,14 @@ FeatureFlagsService.initialize(storage);
 AuditLogger.initialize(storage);
 RealtimeBroadcaster.initialize();
 
+// Validate Classification Configuration files on startup
+const configReport = ConfigValidator.validateAll();
+if (!configReport.valid) {
+  Logger.warn(`Classification Configuration Warnings: ${configReport.errors.join(', ')}`);
+} else {
+  Logger.info(`Classification Configuration validated successfully.`);
+}
+
 // Middleware for checking Supabase Auth in production
 const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (config.isLocal) {
@@ -247,6 +257,15 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
     return res.status(401).json({ error: 'Unauthorized: Error validating token' });
   }
 };
+
+// Observability & Classification Metrics Endpoint
+app.get('/api/metrics/classification', (req, res) => {
+  try {
+    return res.json(ClassificationMetrics.getInstance().getReport());
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 // Role Access Control checking middleware
 const requireRole = (roles: string[]) => {

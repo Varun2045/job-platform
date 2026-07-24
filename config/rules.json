@@ -1,0 +1,65 @@
+{
+  "configVersion": "v1.0.0",
+  "rules": [
+    {
+      "name": "Visa Sponsorship Tagging",
+      "priority": 90,
+      "condition": {
+        "field": "description",
+        "operator": "contains",
+        "value": ["visa sponsorship", "h1-b sponsorship", "work authorization provided", "h1b sponsorship"]
+      },
+      "action": {
+        "addTag": "Visa Sponsorship"
+      }
+    },
+    {
+      "name": "Urgent Hiring Tagging",
+      "priority": 85,
+      "condition": {
+        "field": "description",
+        "operator": "contains",
+        "value": ["hiring urgently", "immediate joiner", "urgent requirement", "immediate start"]
+      },
+      "action": {
+        "addTag": "Urgent Hiring"
+      }
+    },
+    {
+      "name": "High Salary Tagging",
+      "priority": 80,
+      "condition": {
+        "field": "salary",
+        "operator": "regex",
+        "value": "(\\$[1-9]\\d{5}|[2-9]\\d\\s*lpa|1\\d\\d\\s*lpa)"
+      },
+      "action": {
+        "addTag": "High Salary"
+      }
+    },
+    {
+      "name": "Incomplete Description Flag",
+      "priority": 100,
+      "condition": {
+        "field": "descriptionLength",
+        "operator": "lessThan",
+        "value": 50
+      },
+      "action": {
+        "addQualityFlag": "incomplete_description"
+      }
+    },
+    {
+      "name": "Missing Salary Flag",
+      "priority": 70,
+      "condition": {
+        "field": "salary",
+        "operator": "equals",
+        "value": "Not Specified"
+      },
+      "action": {
+        "addQualityFlag": "missing_salary"
+      }
+    }
+  ]
+}

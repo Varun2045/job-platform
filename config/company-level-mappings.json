@@ -1,0 +1,74 @@
+{
+  "configVersion": "v5.0.0",
+  "companies": {
+    "google": {
+      "L3": "Entry Level (0–2 Years)",
+      "L4": "Mid Level (2–5 Years)",
+      "L5": "Senior (5–8 Years)",
+      "L6": "Staff Engineer",
+      "L7": "Principal Engineer",
+      "L8": "Director"
+    },
+    "meta": {
+      "E3": "Entry Level (0–2 Years)",
+      "E4": "Mid Level (2–5 Years)",
+      "E5": "Senior (5–8 Years)",
+      "E6": "Staff Engineer",
+      "E7": "Principal Engineer",
+      "E8": "Director"
+    },
+    "facebook": {
+      "E3": "Entry Level (0–2 Years)",
+      "E4": "Mid Level (2–5 Years)",
+      "E5": "Senior (5–8 Years)",
+      "E6": "Staff Engineer"
+    },
+    "amazon": {
+      "L4": "Entry Level (0–2 Years)",
+      "L5": "Mid Level (2–5 Years)",
+      "L6": "Senior (5–8 Years)",
+      "L7": "Principal Engineer",
+      "L8": "Director"
+    },
+    "microsoft": {
+      "59": "Entry Level (0–2 Years)",
+      "60": "Entry Level (0–2 Years)",
+      "61": "Mid Level (2–5 Years)",
+      "62": "Mid Level (2–5 Years)",
+      "63": "Senior (5–8 Years)",
+      "64": "Senior (5–8 Years)",
+      "65": "Staff Engineer",
+      "66": "Principal Engineer",
+      "67": "Principal Engineer"
+    },
+    "apple": {
+      "ICT2": "Entry Level (0–2 Years)",
+      "ICT3": "Mid Level (2–5 Years)",
+      "ICT4": "Senior (5–8 Years)",
+      "ICT5": "Staff Engineer",
+      "ICT6": "Principal Engineer"
+    },
+    "uber": {
+      "SWE I": "Entry Level (0–2 Years)",
+      "SWE II": "Mid Level (2–5 Years)",
+      "Senior SWE": "Senior (5–8 Years)",
+      "Staff SWE": "Staff Engineer"
+    },
+    "netflix": {
+      "Senior Software Engineer": "Senior (5–8 Years)",
+      "Staff Software Engineer": "Staff Engineer"
+    },
+    "stripe": {
+      "L1": "Entry Level (0–2 Years)",
+      "L2": "Mid Level (2–5 Years)",
+      "L3": "Senior (5–8 Years)",
+      "L4": "Staff Engineer"
+    },
+    "airbnb": {
+      "L3": "Entry Level (0–2 Years)",
+      "L4": "Mid Level (2–5 Years)",
+      "L5": "Senior (5–8 Years)",
+      "L6": "Staff Engineer"
+    }
+  }
+}

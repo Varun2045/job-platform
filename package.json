@@ -19,7 +19,9 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "deploy:check": "npm run lint && npm run build && npm test -- --runInBand",
-    "deploy:heroku": "deploy_heroku.bat"
+    "deploy:heroku": "deploy_heroku.bat",
+    "validate-classification": "node dist/cli/validateClassification.js",
+    "reclassify-jobs": "node dist/cli/reclassifyJobs.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",

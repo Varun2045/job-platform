@@ -1,0 +1,341 @@
+{
+  "configVersion": "v3.0.0",
+  "departments": [
+    {
+      "id": "software_engineering",
+      "displayName": "Software Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "software engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "software developer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "sde", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "swe", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "programmer", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "backend_engineering",
+      "displayName": "Backend Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "backend", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "back end", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "server side", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "java", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "node.js", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "golang", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "spring boot", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "microservices", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "distributed systems", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "frontend_engineering",
+      "displayName": "Frontend Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "frontend", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "front end", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "react", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "vue", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "angular", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "typescript", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "javascript", "defaultWeight": 6, "currentWeight": 6, "source": "manual" },
+        { "keyword": "css", "defaultWeight": 5, "currentWeight": 5, "source": "manual" },
+        { "keyword": "web developer", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "full_stack_engineering",
+      "displayName": "Full Stack Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "fullstack", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "full stack", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "full-stack", "defaultWeight": 10, "currentWeight": 10, "source": "manual" }
+      ]
+    },
+    {
+      "id": "mobile_development",
+      "displayName": "Mobile Development",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "mobile", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "ios", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "android", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "flutter", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "react native", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "swift", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "kotlin", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "ai_machine_learning",
+      "displayName": "AI / Machine Learning",
+      "legacyBucket": "ai_data",
+      "keywords": [
+        { "keyword": "artificial intelligence", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "machine learning", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "deep learning", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "nlp", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "computer vision", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "llm", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "generative ai", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "pytorch", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "tensorflow", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "data_science",
+      "displayName": "Data Science",
+      "legacyBucket": "ai_data",
+      "keywords": [
+        { "keyword": "data scientist", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "data science", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "statistical modeling", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "data_engineering",
+      "displayName": "Data Engineering",
+      "legacyBucket": "ai_data",
+      "keywords": [
+        { "keyword": "data engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "data engineering", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "spark", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "hadoop", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "airflow", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "snowflake", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "databricks", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "etl", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "analytics_bi",
+      "displayName": "Analytics / Business Intelligence",
+      "legacyBucket": "ai_data",
+      "keywords": [
+        { "keyword": "data analyst", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "business intelligence", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "bi analyst", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "tableau", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "power bi", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "looker", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "cloud_engineering",
+      "displayName": "Cloud Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "cloud engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "aws", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "azure", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "gcp", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "cloud architect", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "devops_sre",
+      "displayName": "DevOps / SRE",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "devops", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "sre", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "site reliability", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "kubernetes", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "docker", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "terraform", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "ci/cd", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "cybersecurity",
+      "displayName": "Cybersecurity",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "security engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "cybersecurity", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "information security", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "penetration testing", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "soc analyst", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "qa_test_automation",
+      "displayName": "QA / Test Automation",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "qa engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "sdet", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "test automation", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "quality assurance", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "selenium", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "cypress", "defaultWeight": 7, "currentWeight": 7, "source": "manual" },
+        { "keyword": "playwright", "defaultWeight": 7, "currentWeight": 7, "source": "manual" }
+      ]
+    },
+    {
+      "id": "embedded_systems",
+      "displayName": "Embedded Systems",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "embedded engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "firmware", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "rtos", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "c/c++", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "microcontroller", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "hardware_engineering",
+      "displayName": "Hardware Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "hardware engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "asic", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "fpga", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "pcb", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "vlsi", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "ui_ux_design",
+      "displayName": "UI / UX Design",
+      "legacyBucket": "design",
+      "keywords": [
+        { "keyword": "ui designer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "ux designer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "product designer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "figma", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "graphic designer", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "product_management",
+      "displayName": "Product Management",
+      "legacyBucket": "product",
+      "keywords": [
+        { "keyword": "product manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "group product manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "head of product", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "product owner", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "program_management",
+      "displayName": "Program Management",
+      "legacyBucket": "product",
+      "keywords": [
+        { "keyword": "program manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "technical program manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "tpm", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "project_management",
+      "displayName": "Project Management",
+      "legacyBucket": "product",
+      "keywords": [
+        { "keyword": "project manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "scrum master", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "agile coach", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "sales",
+      "displayName": "Sales",
+      "legacyBucket": "marketing_sales",
+      "keywords": [
+        { "keyword": "sales", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "account executive", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "business development", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "bdr", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "sdr", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "marketing",
+      "displayName": "Marketing",
+      "legacyBucket": "marketing_sales",
+      "keywords": [
+        { "keyword": "marketing", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "growth marketer", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "seo specialist", "defaultWeight": 8, "currentWeight": 8, "source": "manual" },
+        { "keyword": "content marketer", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "finance",
+      "displayName": "Finance",
+      "legacyBucket": "operations",
+      "keywords": [
+        { "keyword": "finance", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "financial analyst", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "accountant", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "hr",
+      "displayName": "HR",
+      "legacyBucket": "operations",
+      "keywords": [
+        { "keyword": "human resources", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "hr manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "recruiter", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "talent acquisition", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "people ops", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "legal",
+      "displayName": "Legal",
+      "legacyBucket": "operations",
+      "keywords": [
+        { "keyword": "legal counsel", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "compliance officer", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "attorney", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "operations",
+      "displayName": "Operations",
+      "legacyBucket": "operations",
+      "keywords": [
+        { "keyword": "operations manager", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "operations specialist", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "supply chain", "defaultWeight": 8, "currentWeight": 8, "source": "manual" }
+      ]
+    },
+    {
+      "id": "customer_success",
+      "displayName": "Customer Success",
+      "legacyBucket": "operations",
+      "keywords": [
+        { "keyword": "customer success", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "csm", "defaultWeight": 9, "currentWeight": 9, "source": "manual" },
+        { "keyword": "support engineer", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    },
+    {
+      "id": "developer_relations",
+      "displayName": "Developer Relations",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "developer advocate", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "devrel", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "developer evangelist", "defaultWeight": 10, "currentWeight": 10, "source": "manual" }
+      ]
+    },
+    {
+      "id": "solutions_engineering",
+      "displayName": "Solutions Engineering",
+      "legacyBucket": "engineering",
+      "keywords": [
+        { "keyword": "solutions engineer", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "solutions architect", "defaultWeight": 10, "currentWeight": 10, "source": "manual" },
+        { "keyword": "sales engineer", "defaultWeight": 9, "currentWeight": 9, "source": "manual" }
+      ]
+    }
+  ]
+}

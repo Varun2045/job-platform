@@ -1,5 +1,6 @@
 import { Job, CompanyConfig } from '../companies/Scraper.js';
 import { ExtendedSettings } from '../storage/StorageProvider.js';
+import { ExplainableScoringEngine } from './ExplainableScoringEngine.js';
 
 export interface ScoredJobRecommendation {
   job: Job;
@@ -115,6 +116,19 @@ export class RecommendationEngine {
       0.05 * scoreExperience;
 
     const opportunityScore = Math.min(100, Math.max(0, Math.round(finalScore)));
+
+    // Calculate user-derived match explainability
+    const explainableMatch = ExplainableScoringEngine.calculateMatch(
+      job,
+      matchScore,
+      settings?.preferredCities?.[0] || 'India',
+      'Early Career'
+    );
+
+    // Attach user-derived dynamic properties to job
+    job.scoreExplanation = explainableMatch.scoreExplanation;
+    job.recommendationBadges = explainableMatch.recommendationBadges;
+    job.whyRecommended = explainableMatch.whyRecommended;
 
     return {
       job,
