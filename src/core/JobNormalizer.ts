@@ -28,6 +28,41 @@ export class JobNormalizer {
     return text.replace(/\s+/g, ' ').trim();
   }
 
+  public static normalizeExperienceLevel(level: string): string {
+    const normalized = (level || '').trim();
+    const lower = normalized.toLowerCase();
+    
+    if (lower === 'intern' || lower.includes('internship') || lower.includes('co-op')) return 'Internship';
+    if (lower === 'new grad' || lower.includes('new graduate') || lower.includes('fresher') || lower.includes('campus hire')) return 'New Graduate';
+    if (lower.includes('entry level') || lower.includes('early career') || lower.includes('junior') || lower.includes('jr.')) return 'Entry Level (0–2 Years)';
+    if (lower.includes('associate') || lower.includes('sde i') || lower.includes('swe i') || lower.includes('level 1')) return 'Associate (1–3 Years)';
+    if (lower.includes('mid level') || lower.includes('mid') || lower.includes('sde ii') || lower.includes('swe ii') || lower.includes('level 2')) return 'Mid Level (2–5 Years)';
+    if (lower.includes('senior') || lower.includes('sr.') || lower.includes('sde iii') || lower.includes('swe iii') || lower.includes('level 3')) return 'Senior (5–8 Years)';
+    if (lower.includes('staff')) return 'Staff Engineer';
+    if (lower.includes('principal') || lower.includes('distinguished') || lower.includes('fellow')) return 'Principal Engineer';
+    if (lower.includes('engineering manager') || lower.includes('em') || lower.includes('development manager') || lower.includes('lead manager')) return 'Engineering Manager';
+    if (lower.includes('director')) return 'Director';
+    if (lower.includes('vp') || lower.includes('vice president') || lower.includes('executive') || lower.includes('cto') || lower.includes('chief architect')) return 'Executive';
+    
+    return 'Mid Level (2–5 Years)';
+  }
+
+  public static normalizeEmploymentType(emp: string): string {
+    const normalized = (emp || '').trim().toLowerCase().replace(/[-_]/g, ' ');
+    if (normalized.includes('full time') || normalized.includes('fulltime') || normalized.includes('permanent')) return 'Full-time';
+    if (normalized.includes('part time') || normalized.includes('parttime')) return 'Part-time';
+    if (normalized.includes('intern') || normalized.includes('co op')) return 'Internship';
+    if (normalized.includes('contract') || normalized.includes('temp') || normalized.includes('temporary')) return 'Temporary';
+    if (normalized.includes('freelance')) return 'Freelance';
+    if (normalized.includes('apprentice') || normalized.includes('trainee')) return 'Apprenticeship';
+    if (normalized.includes('graduate')) return 'Graduate Program';
+    if (normalized.includes('co-op')) return 'Co-op';
+    if (normalized.includes('seasonal')) return 'Seasonal';
+    if (normalized.includes('volunteer')) return 'Volunteer';
+    if (normalized.includes('consult')) return 'Consultant';
+    return 'Full-time'; // Default fallback
+  }
+
   /**
    * Normalizes a RawJob into a canonical Job model.
    */
@@ -174,7 +209,7 @@ export class JobNormalizer {
       location: cleanedLocation,
       country: country,
       experience: expResult.legacyBucket, // Legacy compatibility bucket (Early Career, Mid Level, Senior)
-      employmentType: raw.employmentType || 'Full-time',
+      employmentType: JobNormalizer.normalizeEmploymentType(raw.employmentType || 'Full-time'),
       url: raw.url,
       datePosted: datePostedStr,
       team: deptResult.primaryDepartment,
@@ -186,7 +221,7 @@ export class JobNormalizer {
       // Precomputed Metadata
       classificationVersion: 'v1',
       configVersionsMap: versionsMap,
-      experienceLevel: expResult.level,
+      experienceLevel: JobNormalizer.normalizeExperienceLevel(expResult.level),
       experienceReason: expResult.reason,
       experienceSource: expResult.source,
       primaryDepartment: deptResult.primaryDepartment,
@@ -211,7 +246,7 @@ export class JobNormalizer {
         {
           classificationVersion: 'v1',
           timestamp: new Date().toISOString(),
-          level: expResult.level,
+          level: JobNormalizer.normalizeExperienceLevel(expResult.level),
           primaryDepartment: deptResult.primaryDepartment,
           confidence: Math.round((expResult.confidence + deptResult.confidence) / 2),
         },

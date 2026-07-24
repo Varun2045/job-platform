@@ -146,6 +146,15 @@ export class SearchEngine {
         if (targetFlags.includes('recently_updated') && (job.freshnessScore || 0) < 80) {
           return false;
         }
+        if (targetFlags.includes('verified_company') && (jobFlags.includes('unverified_company') || jobFlags.includes('fraudulent'))) {
+          return false;
+        }
+        if (targetFlags.includes('direct_apply') && (jobFlags.includes('external_apply') || jobFlags.includes('third_party'))) {
+          return false;
+        }
+        if (targetFlags.includes('external_apply') && !jobFlags.includes('external_apply')) {
+          return false;
+        }
       }
 
       // 10. Recommendations Match (Multi-select)
@@ -171,18 +180,24 @@ export class SearchEngine {
         let jobMaxYears = 15;
         const expStr = (job.experienceLevel || job.experience || '').toLowerCase();
         
-        if (expStr.includes('0–2') || expStr.includes('0-2')) { jobMinYears = 0; jobMaxYears = 2; }
-        else if (expStr.includes('1–3') || expStr.includes('1-3')) { jobMinYears = 1; jobMaxYears = 3; }
-        else if (expStr.includes('2–5') || expStr.includes('2-5')) { jobMinYears = 2; jobMaxYears = 5; }
-        else if (expStr.includes('5–8') || expStr.includes('5-8')) { jobMinYears = 5; jobMaxYears = 8; }
-        else if (expStr.includes('8–12') || expStr.includes('8-12')) { jobMinYears = 8; jobMaxYears = 12; }
-        else if (expStr.includes('12+') || expStr.includes('staff') || expStr.includes('director')) { jobMinYears = 12; jobMaxYears = 30; }
-        else if (expStr.includes('senior')) { jobMinYears = 5; jobMaxYears = 12; }
-        else if (expStr.includes('entry') || expStr.includes('intern')) { jobMinYears = 0; jobMaxYears = 2; }
-        else if (expStr.includes('mid')) { jobMinYears = 2; jobMaxYears = 5; }
+        if (expStr.includes('internship') || expStr.includes('intern')) { jobMinYears = 0; jobMaxYears = 0; }
+        else if (expStr.includes('new graduate') || expStr.includes('new grad') || expStr.includes('fresher')) { jobMinYears = 0; jobMaxYears = 1; }
+        else if (expStr.includes('entry level') || expStr.includes('junior') || expStr.includes('jr.')) { jobMinYears = 0; jobMaxYears = 2; }
+        else if (expStr.includes('associate') || expStr.includes('level 1')) { jobMinYears = 1; jobMaxYears = 3; }
+        else if (expStr.includes('mid level') || expStr.includes('mid') || expStr.includes('level 2')) { jobMinYears = 2; jobMaxYears = 5; }
+        else if (expStr.includes('senior') || expStr.includes('level 3')) { jobMinYears = 5; jobMaxYears = 8; }
+        else if (expStr.includes('staff')) { jobMinYears = 8; jobMaxYears = 12; }
+        else if (expStr.includes('principal') || expStr.includes('distinguished')) { jobMinYears = 10; jobMaxYears = 20; }
+        else if (expStr.includes('manager')) { jobMinYears = 6; jobMaxYears = 15; }
+        else if (expStr.includes('director')) { jobMinYears = 10; jobMaxYears = 20; }
+        else if (expStr.includes('executive') || expStr.includes('vp') || expStr.includes('cto')) { jobMinYears = 12; jobMaxYears = 30; }
 
-        if (jobMaxYears < minSearchYears || jobMinYears > maxSearchYears) {
-          return false;
+        if (maxSearchYears >= 15) {
+          if (jobMaxYears < minSearchYears) return false;
+        } else {
+          if (jobMaxYears < minSearchYears || jobMinYears > maxSearchYears) {
+            return false;
+          }
         }
       }
 
@@ -191,7 +206,7 @@ export class SearchEngine {
         const jobMin = job.salaryMin || 0;
         if (jobMin > 0 && jobMin < criteria.minSalary) return false;
       }
-      if (criteria.maxSalary !== undefined && criteria.maxSalary !== null) {
+      if (criteria.maxSalary !== undefined && criteria.maxSalary !== null && criteria.maxSalary < 250000) {
         const jobMax = job.salaryMax || 0;
         if (jobMax > 0 && jobMax > criteria.maxSalary) return false;
       }
@@ -212,10 +227,15 @@ export class SearchEngine {
 
       // 15. Freshness/Date Range Match
       if (criteria.dateRange && criteria.dateRange.trim() !== '') {
-        const daysLimit = criteria.dateRange === '1d' ? 1 : criteria.dateRange === '3d' ? 3 : criteria.dateRange === '7d' ? 7 : criteria.dateRange === '30d' ? 30 : 365;
+        const dateLimit = new Date();
+        if (criteria.dateRange === '1d') {
+          dateLimit.setHours(0, 0, 0, 0);
+        } else {
+          const daysLimit = criteria.dateRange === '3d' ? 3 : criteria.dateRange === '7d' ? 7 : criteria.dateRange === '30d' ? 30 : 365;
+          dateLimit.setDate(dateLimit.getDate() - daysLimit);
+        }
         const postedTime = new Date(job.datePosted || 0).getTime();
-        const diffDays = (Date.now() - postedTime) / (1000 * 60 * 60 * 24);
-        if (diffDays > daysLimit) return false;
+        if (postedTime < dateLimit.getTime()) return false;
       }
 
       return true;
