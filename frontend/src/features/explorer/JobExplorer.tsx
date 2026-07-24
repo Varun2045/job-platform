@@ -56,11 +56,17 @@ export const JobExplorer: React.FC = () => {
   const [minYearsExp, setMinYearsExp] = useState<number>(
     searchParams.get('minYearsExp') ? Number(searchParams.get('minYearsExp')) : 0
   );
+  const [maxYearsExp, setMaxYearsExp] = useState<number>(
+    searchParams.get('maxYearsExp') ? Number(searchParams.get('maxYearsExp')) : 15
+  );
   const [minSalary, setMinSalary] = useState<number>(
     searchParams.get('minSalary') ? Number(searchParams.get('minSalary')) : 0
   );
   const [maxSalary, setMaxSalary] = useState<number>(
     searchParams.get('maxSalary') ? Number(searchParams.get('maxSalary')) : 250000
+  );
+  const [salaryCurrency, setSalaryCurrency] = useState<string>(
+    searchParams.get('salaryCurrency') || 'all'
   );
   const [minConfidence, setMinConfidence] = useState<number>(
     searchParams.get('minConfidence') ? Number(searchParams.get('minConfidence')) : 0
@@ -69,6 +75,24 @@ export const JobExplorer: React.FC = () => {
     searchParams.get('dateRange') || ''
   );
   const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>('opportunity');
+
+  // Company Favorites & Recently Viewed tracking
+  const [favoriteCompanies, setFavoriteCompanies] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('favorite_companies');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [recentlyViewedCompanies, setRecentlyViewedCompanies] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('recently_viewed_companies');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Infinite Scroll & Cursor Pagination state
   const [accumulatedJobs, setAccumulatedJobs] = useState<any[]>([]);
@@ -95,6 +119,9 @@ export const JobExplorer: React.FC = () => {
   const [deptSearch, setDeptSearch] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
   const [locSearch, setLocSearch] = useState('');
+  const [compSearch, setCompSearch] = useState('');
+  const [showAllCompanies, setShowAllCompanies] = useState(false);
+  const [showAllSkills, setShowAllSkills] = useState(false);
 
   // Accordion Sections for Faceted Filters
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -154,8 +181,10 @@ export const JobExplorer: React.FC = () => {
     if (recommendations.length > 0) params.recommendations = recommendations.join(',');
     if (requiredSkills.length > 0) params.requiredSkills = requiredSkills.join(',');
     if (minYearsExp > 0) params.minYearsExp = minYearsExp.toString();
+    if (maxYearsExp < 15) params.maxYearsExp = maxYearsExp.toString();
     if (minSalary > 0) params.minSalary = minSalary.toString();
     if (maxSalary < 250000) params.maxSalary = maxSalary.toString();
+    if (salaryCurrency !== 'all') params.salaryCurrency = salaryCurrency;
     if (minConfidence > 0) params.minConfidence = minConfidence.toString();
     if (dateRange) params.dateRange = dateRange;
     if (sortBy !== 'opportunity') params.sort = sortBy;
@@ -177,8 +206,10 @@ export const JobExplorer: React.FC = () => {
     recommendations,
     requiredSkills,
     minYearsExp,
+    maxYearsExp,
     minSalary,
     maxSalary,
+    salaryCurrency,
     minConfidence,
     dateRange,
     sortBy,
@@ -201,8 +232,10 @@ export const JobExplorer: React.FC = () => {
       recommendations,
       requiredSkills,
       minYearsExp,
+      maxYearsExp,
       minSalary,
       maxSalary,
+      salaryCurrency,
       minConfidence,
       dateRange,
     ],
@@ -221,8 +254,10 @@ export const JobExplorer: React.FC = () => {
         recommendations: recommendations.join(','),
         requiredSkills: requiredSkills.join(','),
         minYearsExp: minYearsExp.toString(),
+        maxYearsExp: maxYearsExp.toString(),
         minSalary: minSalary.toString(),
         maxSalary: maxSalary.toString(),
+        salaryCurrency,
         minConfidence: minConfidence.toString(),
         dateRange,
       });
@@ -249,8 +284,10 @@ export const JobExplorer: React.FC = () => {
       recommendations,
       requiredSkills,
       minYearsExp,
+      maxYearsExp,
       minSalary,
       maxSalary,
+      salaryCurrency,
       minConfidence,
       dateRange,
       sortBy,
@@ -271,8 +308,10 @@ export const JobExplorer: React.FC = () => {
         recommendations: recommendations.join(','),
         requiredSkills: requiredSkills.join(','),
         minYearsExp: minYearsExp.toString(),
+        maxYearsExp: maxYearsExp.toString(),
         minSalary: minSalary.toString(),
         maxSalary: maxSalary.toString(),
+        salaryCurrency,
         minConfidence: minConfidence.toString(),
         dateRange,
         sort: sortBy,
@@ -312,8 +351,28 @@ export const JobExplorer: React.FC = () => {
       if (!res.ok) throw new Error('Failed to load job details');
       return res.json();
     },
-    enabled: !!selectedJobHash
   });
+
+  // Track recently viewed companies
+  useEffect(() => {
+    if (detailData?.job?.company) {
+      const comp = detailData.job.company;
+      setRecentlyViewedCompanies(prev => {
+        const next = [comp, ...prev.filter(c => c !== comp)].slice(0, 5);
+        localStorage.setItem('recently_viewed_companies', JSON.stringify(next));
+        return next;
+      });
+    }
+  }, [detailData]);
+
+  const toggleFavoriteCompany = (comp: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFavoriteCompanies(prev => {
+      const next = prev.includes(comp) ? prev.filter(c => c !== comp) : [...prev, comp];
+      localStorage.setItem('favorite_companies', JSON.stringify(next));
+      return next;
+    });
+  };
 
   // Track Application mutation
   const trackMutation = useMutation({
@@ -370,12 +429,14 @@ export const JobExplorer: React.FC = () => {
     setMinScore(0);
     setEmploymentType([]);
     setTags([]);
-    setQualityFlags([]);
+    setQualityFlags(['hide_expired', 'hide_broken', 'hide_duplicate']);
     setRecommendations([]);
     setRequiredSkills([]);
     setMinYearsExp(0);
+    setMaxYearsExp(15);
     setMinSalary(0);
     setMaxSalary(250000);
+    setSalaryCurrency('all');
     setMinConfidence(0);
     setDateRange('');
     setSearchParams({});
@@ -415,9 +476,20 @@ export const JobExplorer: React.FC = () => {
     const filteredLocs = (facets.locations || []).filter((l: any) =>
       l.label.toLowerCase().includes(locSearch.toLowerCase())
     );
-    const filteredComps = (facets.companies || []).filter((c: any) =>
-      c.label.toLowerCase().includes(skillSearch.toLowerCase())
+    
+    // Sort companies: Pinned favorites first, then sort by count descending
+    const rawComps = facets.companies || [];
+    const sortedComps = [...rawComps].sort((a: any, b: any) => {
+      const aFav = favoriteCompanies.includes(a.label);
+      const bFav = favoriteCompanies.includes(b.label);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return b.count - a.count;
+    });
+    const filteredComps = sortedComps.filter((c: any) =>
+      c.label.toLowerCase().includes(compSearch.toLowerCase())
     );
+
     const filteredSkills = (facets.skills || []).filter((s: any) =>
       s.label.toLowerCase().includes(skillSearch.toLowerCase())
     );
@@ -471,7 +543,7 @@ export const JobExplorer: React.FC = () => {
         </div>
 
         {/* 1. EXPERIENCE LEVEL */}
-        <div className="border-t border-[#243147] pt-4">
+        <div className="border-t border-[#243147] pt-4 animate-fadeIn">
           <button
             onClick={() => toggleSection('experience')}
             className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
@@ -483,10 +555,10 @@ export const JobExplorer: React.FC = () => {
           </button>
           
           {openSections.experience && (
-            <div className="space-y-1.5 mt-2 transition-all">
+            <div className="space-y-1.5 mt-2 transition-all duration-300">
               <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
                 {filteredExps.map((f: any) => (
-                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all" title={f.label.includes('Entry') ? '0-2 years' : f.label.includes('Mid') ? '2-5 years' : 'Senior/Manager'}>
+                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -501,6 +573,68 @@ export const JobExplorer: React.FC = () => {
                     </span>
                   </label>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 1.5 EXPERIENCE YEARS SLIDER */}
+        <div className="border-t border-[#243147] pt-4 animate-fadeIn">
+          <button
+            onClick={() => toggleSection('expSlider')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Experience Range {(minYearsExp > 0 || maxYearsExp < 15) && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
+            </span>
+            {openSections.expSlider ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.expSlider && (
+            <div className="space-y-4 mt-3 transition-all duration-300">
+              <div className="flex justify-between items-center text-xs text-[#94a3b8] gap-2">
+                <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2.5">
+                  <span className="text-[9px] text-[#64748b] uppercase">Min:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="15"
+                    value={minYearsExp}
+                    onChange={(e) => setMinYearsExp(Math.max(0, Math.min(15, Number(e.target.value))))}
+                    className="w-7 bg-transparent text-white text-center text-xs font-bold outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2.5">
+                  <span className="text-[9px] text-[#64748b] uppercase">Max:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="15"
+                    value={maxYearsExp}
+                    onChange={(e) => setMaxYearsExp(Math.max(0, Math.min(15, Number(e.target.value))))}
+                    className="w-7 bg-transparent text-white text-center text-xs font-bold outline-none"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="15"
+                  step="1"
+                  value={minYearsExp}
+                  onChange={(e) => setMinYearsExp(Number(e.target.value))}
+                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="15"
+                  step="1"
+                  value={maxYearsExp}
+                  onChange={(e) => setMaxYearsExp(Number(e.target.value))}
+                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
               </div>
             </div>
           )}
@@ -548,6 +682,100 @@ export const JobExplorer: React.FC = () => {
                   </label>
                 ))}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2.5 COMPANIES SELECTOR */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('companies')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Companies {company.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{company.length}</span>}
+            </span>
+            {openSections.companies ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.companies && (
+            <div className="space-y-3 mt-2 transition-all">
+              <input
+                type="text"
+                placeholder="Search companies..."
+                value={compSearch}
+                onChange={(e) => setCompSearch(e.target.value)}
+                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
+              />
+
+              {/* Recently Viewed Companies */}
+              {recentlyViewedCompanies.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Recently Viewed</span>
+                  <div className="flex flex-wrap gap-1">
+                    {recentlyViewedCompanies.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => toggleArrayFilter(company, c, setCompany)}
+                        className={`text-[10px] px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                          company.includes(c) ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300 font-bold' : 'bg-[#192438] border-[#243147] text-[#94a3b8] hover:text-white'
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Main List */}
+              <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                {(showAllCompanies ? filteredComps : filteredComps.slice(0, 10)).map((f: any) => {
+                  const isFavorite = favoriteCompanies.includes(f.label);
+                  const firstChar = f.label.charAt(0).toUpperCase();
+                  const badgeColors = ['bg-rose-500/20 text-rose-300', 'bg-blue-500/20 text-blue-300', 'bg-emerald-500/20 text-emerald-300', 'bg-amber-500/20 text-amber-300', 'bg-purple-500/20 text-purple-300'];
+                  const colorIndex = f.label.charCodeAt(0) % badgeColors.length;
+
+                  return (
+                    <div key={f.label} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-[#192438] transition-all group">
+                      <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={company.includes(f.label)}
+                          onChange={() => toggleArrayFilter(company, f.label, setCompany)}
+                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        />
+                        {/* Initial Logo badge */}
+                        <div className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${badgeColors[colorIndex]}`}>
+                          {firstChar}
+                        </div>
+                        <span className="truncate text-[#94a3b8] group-hover:text-white">{f.label}</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {/* Heart Favorite toggler */}
+                        <button
+                          onClick={(e) => toggleFavoriteCompany(f.label, e)}
+                          className={`focus:outline-none transition-all ${isFavorite ? 'text-rose-500' : 'text-[#64748b] opacity-0 group-hover:opacity-100 hover:text-rose-400'}`}
+                        >
+                          ♥
+                        </button>
+                        <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                          {f.count}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {filteredComps.length > 10 && (
+                <button
+                  onClick={() => setShowAllCompanies(!showAllCompanies)}
+                  className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1.5 border-t border-[#243147] cursor-pointer"
+                >
+                  {showAllCompanies ? 'Show Less' : `Show All (${filteredComps.length})`}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -637,7 +865,7 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 5. LOCATION */}
+        {/* 5. LOCATION HIERARCHY */}
         <div className="border-t border-[#243147] pt-4">
           <button
             onClick={() => toggleSection('location')}
@@ -650,54 +878,116 @@ export const JobExplorer: React.FC = () => {
           </button>
           
           {openSections.location && (
-            <div className="space-y-2 mt-2 transition-all">
-              <input
-                type="text"
-                placeholder="Search locations..."
-                value={locSearch}
-                onChange={(e) => setLocSearch(e.target.value)}
-                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
-              />
-              <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
-                {filteredLocs.map((f: any) => (
-                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={location.includes(f.label)}
-                        onChange={() => toggleArrayFilter(location, f.label, setLocation)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{f.label}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                      {f.count}
-                    </span>
-                  </label>
-                ))}
+            <div className="space-y-3 mt-2 transition-all">
+              {/* Quick Remote location tags */}
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Quick Remote Zones</span>
+                <div className="flex flex-wrap gap-1">
+                  {['Remote Worldwide', 'Remote India', 'Remote US'].map((remZone) => (
+                    <button
+                      key={remZone}
+                      onClick={() => toggleArrayFilter(location, remZone.toLowerCase(), setLocation)}
+                      className={`text-[9px] px-2.5 py-1 rounded-md border font-semibold transition-all cursor-pointer ${
+                        location.includes(remZone.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
+                      }`}
+                    >
+                      {remZone}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t border-[#243147]/60 pt-2">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Search locations</span>
+                <input
+                  type="text"
+                  placeholder="Filter country, state or city..."
+                  value={locSearch}
+                  onChange={(e) => setLocSearch(e.target.value)}
+                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
+                />
+                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
+                  {filteredLocs.map((f: any) => (
+                    <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={location.includes(f.label)}
+                          onChange={() => toggleArrayFilter(location, f.label, setLocation)}
+                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span>{f.label}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                        {f.count}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* 6. SALARY RANGE SLIDER */}
+        {/* 6. SALARY FILTER */}
         <div className="border-t border-[#243147] pt-4">
           <button
             onClick={() => toggleSection('salary')}
             className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
           >
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-              Salary Range {(minSalary > 0 || maxSalary < 250000) && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
+              Salary range {(minSalary > 0 || maxSalary < 250000 || salaryCurrency !== 'all') && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
             </span>
             {openSections.salary ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.salary && (
             <div className="space-y-4 mt-2 transition-all">
-              <div className="flex justify-between items-center text-xs text-[#94a3b8]">
-                <span>Min: ${minSalary.toLocaleString()}</span>
-                <span>Max: ${maxSalary.toLocaleString()}</span>
+              {/* Currency Selector */}
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Currency</span>
+                <select
+                  value={salaryCurrency}
+                  onChange={(e) => setSalaryCurrency(e.target.value)}
+                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                >
+                  <option value="all">Any Currency</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="INR">INR (₹)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                </select>
               </div>
+
+              {/* Min/Max Inputs */}
+              <div className="flex justify-between items-center text-xs text-[#94a3b8] gap-2">
+                <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1.5 px-2.5">
+                  <span className="text-[9px] text-[#64748b] uppercase">Min:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="250000"
+                    step="5000"
+                    value={minSalary}
+                    onChange={(e) => setMinSalary(Math.max(0, Number(e.target.value)))}
+                    className="w-14 bg-transparent text-white text-xs font-bold outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1.5 px-2.5">
+                  <span className="text-[9px] text-[#64748b] uppercase">Max:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="250000"
+                    step="5000"
+                    value={maxSalary}
+                    onChange={(e) => setMaxSalary(Math.max(0, Number(e.target.value)))}
+                    className="w-14 bg-transparent text-white text-xs font-bold outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Range sliders */}
               <div className="space-y-2">
                 <input
                   type="range"
@@ -722,8 +1012,8 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 7. REQUIRED SKILLS */}
-        <div className="border-t border-[#243147] pt-4">
+        {/* 7. REQUIRED SKILLS TAG PICKER */}
+        <div className="border-t border-[#243147] pt-4 animate-fadeIn">
           <button
             onClick={() => toggleSection('skills')}
             className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
@@ -735,16 +1025,47 @@ export const JobExplorer: React.FC = () => {
           </button>
           
           {openSections.skills && (
-            <div className="space-y-2 mt-2 transition-all">
+            <div className="space-y-3 mt-2 transition-all">
               <input
                 type="text"
-                placeholder="Search skills..."
+                placeholder="Search skills (e.g. React, Docker...)"
                 value={skillSearch}
                 onChange={(e) => setSkillSearch(e.target.value)}
                 className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
               />
-              <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5">
-                {filteredSkills.map((f: any) => (
+
+              {/* Active Skills tags */}
+              {requiredSkills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 border-b border-[#243147]/60 pb-2 mb-2">
+                  {requiredSkills.map(s => (
+                    <span key={s} className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1.5">
+                      {s} <button onClick={() => toggleArrayFilter(requiredSkills, s, setRequiredSkills)}><X className="w-2.5 h-2.5 hover:text-white" /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Popular skills suggestions */}
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Popular Skills</span>
+                <div className="flex flex-wrap gap-1">
+                  {['React', 'Node.js', 'Python', 'TypeScript', 'PyTorch', 'AWS'].map(popSkill => (
+                    <button
+                      key={popSkill}
+                      onClick={() => toggleArrayFilter(requiredSkills, popSkill, setRequiredSkills)}
+                      className={`text-[9px] px-2.5 py-1 rounded-md border font-semibold transition-all cursor-pointer ${
+                        requiredSkills.includes(popSkill) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
+                      }`}
+                    >
+                      {popSkill}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* List limit */}
+              <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
+                {(showAllSkills ? filteredSkills : filteredSkills.slice(0, 10)).map((f: any) => (
                   <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
                       <input
@@ -761,13 +1082,58 @@ export const JobExplorer: React.FC = () => {
                   </label>
                 ))}
               </div>
+
+              {filteredSkills.length > 10 && (
+                <button
+                  onClick={() => setShowAllSkills(!showAllSkills)}
+                  className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1.5 border-t border-[#243147] cursor-pointer"
+                >
+                  {showAllSkills ? 'Show Less' : `Show All (${filteredSkills.length})`}
+                </button>
+              )}
             </div>
           )}
         </div>
 
-        {/* 8. JOB TAGS */}
+        {/* 8. POSTING DATE */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('datePosted')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Posting Date {dateRange && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
+            </span>
+            {openSections.datePosted ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.datePosted && (
+            <div className="space-y-1.5 mt-2 transition-all">
+              {[
+                { label: 'Any Time', value: '' },
+                { label: 'Today', value: '1d' },
+                { label: 'Last 3 Days', value: '3d' },
+                { label: 'Last Week', value: '7d' },
+                { label: 'Last Month', value: '30d' }
+              ].map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <input
+                    type="radio"
+                    name="datePostedOption"
+                    checked={dateRange === opt.value}
+                    onChange={() => setDateRange(opt.value)}
+                    className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 9. JOB TAGS */}
         {facets.tags && facets.tags.length > 0 && (
-          <div className="border-t border-[#243147] pt-4">
+          <div className="border-t border-[#243147] pt-4 animate-fadeIn">
             <button
               onClick={() => toggleSection('tags')}
               className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
@@ -801,7 +1167,111 @@ export const JobExplorer: React.FC = () => {
           </div>
         )}
 
-        {/* 9. CLASSIFICATION CONFIDENCE */}
+        {/* 10. QUALITY FILTERS */}
+        <div className="border-t border-[#243147] pt-4 animate-fadeIn">
+          <button
+            onClick={() => toggleSection('quality')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Quality & Exclusions {qualityFlags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{qualityFlags.length}</span>}
+            </span>
+            {openSections.quality ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.quality && (
+            <div className="space-y-4 mt-2 transition-all">
+              {/* Positives */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">Quality Requirements</span>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('verified_job')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'verified_job', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Verified Job</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('salary_available')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'salary_available', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Salary Available</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('active_posting')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'active_posting', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Active Posting</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('recently_updated')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'recently_updated', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>Recently Updated</span>
+                  </div>
+                </label>
+              </div>
+
+              {/* Exclusions */}
+              <div className="space-y-1.5 border-t border-[#243147] pt-3">
+                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block">Hide Filters</span>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('hide_expired')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'hide_expired', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-rose-500 focus:ring-rose-500"
+                    />
+                    <span>Hide Expired Jobs</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('hide_broken')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'hide_broken', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-rose-500 focus:ring-rose-500"
+                    />
+                    <span>Hide Broken Apply Links</span>
+                  </div>
+                </label>
+                <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={qualityFlags.includes('hide_duplicate')}
+                      onChange={() => toggleArrayFilter(qualityFlags, 'hide_duplicate', setQualityFlags)}
+                      className="rounded border-[#243147] bg-[#090d16] text-rose-500 focus:ring-rose-500"
+                    />
+                    <span>Hide Duplicate Jobs</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 11. CLASSIFICATION CONFIDENCE */}
         <div className="border-t border-[#243147] pt-4">
           <button
             onClick={() => toggleSection('confidence')}
@@ -830,8 +1300,8 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 10. AI MATCH RECOMMENDATIONS */}
-        <div className="border-t border-[#243147] pt-4">
+        {/* 12. AI MATCH RECOMMENDATIONS */}
+        <div className="border-t border-[#243147] pt-4 animate-fadeIn">
           <button
             onClick={() => toggleSection('recommendations')}
             className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"

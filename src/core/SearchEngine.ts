@@ -20,6 +20,7 @@ export interface SearchCriteria {
   requiredSkills?: string;
   preferredSkills?: string;
   dateRange?: string;
+  salaryCurrency?: string;
 }
 
 export class SearchEngine {
@@ -116,12 +117,35 @@ export class SearchEngine {
         if (!matchesAnyTag) return false;
       }
 
-      // 9. Quality Flags Match (Multi-select)
+      // 9. Quality Flags Match (Multi-select and exclusions)
       if (criteria.qualityFlags && criteria.qualityFlags.trim() !== '' && criteria.qualityFlags !== 'all') {
         const targetFlags = criteria.qualityFlags.toLowerCase().split(',').map((f) => f.trim()).filter(Boolean);
         const jobFlags = (job.qualityFlags || []).map((f) => f.toLowerCase());
-        const matchesAnyFlag = targetFlags.some((tf) => jobFlags.includes(tf));
-        if (!matchesAnyFlag) return false;
+        
+        // Exclusions:
+        if (targetFlags.includes('hide_expired') && jobFlags.includes('expired')) {
+          return false;
+        }
+        if (targetFlags.includes('hide_broken') && jobFlags.includes('broken_link')) {
+          return false;
+        }
+        if (targetFlags.includes('hide_duplicate') && jobFlags.includes('duplicate')) {
+          return false;
+        }
+
+        // Positives:
+        if (targetFlags.includes('verified_job') && (jobFlags.includes('incomplete_description') || jobFlags.includes('unverified'))) {
+          return false;
+        }
+        if (targetFlags.includes('salary_available') && (!job.salaryMin || job.salaryMin === 0)) {
+          return false;
+        }
+        if (targetFlags.includes('active_posting') && jobFlags.includes('expired')) {
+          return false;
+        }
+        if (targetFlags.includes('recently_updated') && (job.freshnessScore || 0) < 80) {
+          return false;
+        }
       }
 
       // 10. Recommendations Match (Multi-select)
@@ -138,18 +162,44 @@ export class SearchEngine {
         if (overallConf < criteria.minConfidence) return false;
       }
 
-      // 12. Experience Years Slider Match
-      if (criteria.minYearsExp !== undefined && criteria.minYearsExp !== null) {
-        const minLvlYears = job.experienceLevel?.includes('0–2') ? 0 : job.experienceLevel?.includes('1–3') ? 1 : job.experienceLevel?.includes('2–5') ? 2 : job.experienceLevel?.includes('5–8') ? 5 : 0;
-        if (minLvlYears < criteria.minYearsExp) return false;
+      // 12. Experience Years Slider Match (Range overlap check)
+      const minSearchYears = criteria.minYearsExp !== undefined && criteria.minYearsExp !== null ? criteria.minYearsExp : 0;
+      const maxSearchYears = criteria.maxYearsExp !== undefined && criteria.maxYearsExp !== null ? criteria.maxYearsExp : 15;
+      
+      if (minSearchYears > 0 || maxSearchYears < 15) {
+        let jobMinYears = 0;
+        let jobMaxYears = 15;
+        const expStr = (job.experienceLevel || job.experience || '').toLowerCase();
+        
+        if (expStr.includes('0–2') || expStr.includes('0-2')) { jobMinYears = 0; jobMaxYears = 2; }
+        else if (expStr.includes('1–3') || expStr.includes('1-3')) { jobMinYears = 1; jobMaxYears = 3; }
+        else if (expStr.includes('2–5') || expStr.includes('2-5')) { jobMinYears = 2; jobMaxYears = 5; }
+        else if (expStr.includes('5–8') || expStr.includes('5-8')) { jobMinYears = 5; jobMaxYears = 8; }
+        else if (expStr.includes('8–12') || expStr.includes('8-12')) { jobMinYears = 8; jobMaxYears = 12; }
+        else if (expStr.includes('12+') || expStr.includes('staff') || expStr.includes('director')) { jobMinYears = 12; jobMaxYears = 30; }
+        else if (expStr.includes('senior')) { jobMinYears = 5; jobMaxYears = 12; }
+        else if (expStr.includes('entry') || expStr.includes('intern')) { jobMinYears = 0; jobMaxYears = 2; }
+        else if (expStr.includes('mid')) { jobMinYears = 2; jobMaxYears = 5; }
+
+        if (jobMaxYears < minSearchYears || jobMinYears > maxSearchYears) {
+          return false;
+        }
       }
 
       // 13. Salary Range Match
-      if (criteria.minSalary !== undefined && criteria.minSalary !== null && job.salaryMin !== undefined) {
-        if (job.salaryMin > 0 && job.salaryMin < criteria.minSalary) return false;
+      if (criteria.minSalary !== undefined && criteria.minSalary !== null) {
+        const jobMin = job.salaryMin || 0;
+        if (jobMin > 0 && jobMin < criteria.minSalary) return false;
       }
-      if (criteria.maxSalary !== undefined && criteria.maxSalary !== null && job.salaryMax !== undefined) {
-        if (job.salaryMax > 0 && job.salaryMax > criteria.maxSalary) return false;
+      if (criteria.maxSalary !== undefined && criteria.maxSalary !== null) {
+        const jobMax = job.salaryMax || 0;
+        if (jobMax > 0 && jobMax > criteria.maxSalary) return false;
+      }
+      if (criteria.salaryCurrency && criteria.salaryCurrency !== 'all') {
+        const jobCurr = (job.salaryCurrency || '').toUpperCase();
+        if (jobCurr && jobCurr !== criteria.salaryCurrency.toUpperCase()) {
+          return false;
+        }
       }
 
       // 14. Required Skills Match (Multi-select)

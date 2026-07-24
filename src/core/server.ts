@@ -456,6 +456,7 @@ function parseSearchCriteria(query: any): SearchCriteria {
     requiredSkills,
     preferredSkills,
     dateRange,
+    salaryCurrency,
   } = query;
 
   const rawQuery = (q as string) || (technology as string) || '';
@@ -487,6 +488,7 @@ function parseSearchCriteria(query: any): SearchCriteria {
     requiredSkills: (requiredSkills as string) || '',
     preferredSkills: (preferredSkills as string) || '',
     dateRange: (dateRange as string) || '',
+    salaryCurrency: (salaryCurrency as string) || 'all',
   };
 }
 
