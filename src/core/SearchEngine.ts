@@ -233,97 +233,88 @@ export class SearchEngine {
    * Database-Layer Facet Aggregator
    * Computes counts for departments, companies, experience, locations, remote, employmentTypes, postedDates
    */
+  /**
+   * Database-Layer Facet Aggregator
+   * Computes counts for 28 departments, 11 experience levels, tags, work mode, employment types, quality flags
+   */
   public static calculateDatabaseFacets(candidateJobs: { job: Job; score: number; opportunityScore: number }[]) {
-    const deptMap: Record<string, number> = {
-      'engineering': 0,
-      'ai_data': 0,
-      'product': 0,
-      'design': 0,
-      'marketing_sales': 0,
-      'operations': 0
-    };
-
-    const expMap: Record<string, number> = {
-      'Early Career': 0,
-      'Mid Level': 0,
-      'Senior': 0
-    };
-
+    const deptCounts: Record<string, number> = {};
+    const expCounts: Record<string, number> = {};
+    const tagCounts: Record<string, number> = {};
+    const qualityCounts: Record<string, number> = {};
+    const empCounts: Record<string, number> = {};
     const compCounts: Record<string, number> = {};
     const locCounts: Record<string, number> = {};
-    const empCounts: Record<string, number> = { 'Full-Time': 0, 'Contract': 0, 'Internship': 0 };
     let remoteCount = 0;
+    let hybridCount = 0;
     let onsiteCount = 0;
 
     for (const item of candidateJobs) {
       const j = item.job;
-      const text = `${j.team || ''} ${j.title} ${j.description || ''}`.toLowerCase();
-      const expText = `${j.experience || ''} ${j.title} ${j.description || ''}`.toLowerCase();
-      const locText = (j.location || '').toLowerCase();
-      const company = j.company || 'Other';
+      const primaryDept = j.primaryDepartment || 'Software Engineering';
+      deptCounts[primaryDept] = (deptCounts[primaryDept] || 0) + 1;
 
-      // Department facets
-      if (/engineer|developer|sde|backend|frontend|fullstack|software|architect|infrastructure|devops|platform|coder/i.test(text)) deptMap['engineering']++;
-      if (/ai|ml|machine learning|data science|data engineer|analyst|analytics|nlp|deep learning|computer vision/i.test(text)) deptMap['ai_data']++;
-      if (/product|program|project manager|scrum|agile|owner/i.test(text)) deptMap['product']++;
-      if (/design|ux|ui|graphic|art|creative/i.test(text)) deptMap['design']++;
-      if (/marketing|sales|growth|account executive|business development|seo|content/i.test(text)) deptMap['marketing_sales']++;
-      if (/operations|hr|human resources|recruiter|people|talent|legal|finance|accounting/i.test(text)) deptMap['operations']++;
-
-      // Experience facets (strict & mutually exclusive)
-      const titleLower = (j.title || '').toLowerCase();
-      const isSeniorJob = /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|5\+|6\+|7\+|8\+|10\+/i.test(titleLower) ||
-                          /\b(5\+|6\+|7\+|8\+|10\+)\s*(years|yrs)/i.test(expText);
-
-      if (isSeniorJob) {
-        expMap['Senior']++;
-      } else if (/early|entry|junior|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|graduate/i.test(`${titleLower} ${j.experience || ''}`)) {
-        expMap['Early Career']++;
-      } else {
-        expMap['Mid Level']++;
+      if (j.secondaryDepartments) {
+        for (const sd of j.secondaryDepartments) {
+          if (sd !== primaryDept) {
+            deptCounts[sd] = (deptCounts[sd] || 0) + 1;
+          }
+        }
       }
 
-      // Company facets
+      const expLevel = j.experienceLevel || j.experience || 'Mid Level (2–5 Years)';
+      expCounts[expLevel] = (expCounts[expLevel] || 0) + 1;
+
+      if (j.tags) {
+        for (const t of j.tags) {
+          tagCounts[t] = (tagCounts[t] || 0) + 1;
+        }
+      }
+
+      if (j.qualityFlags) {
+        for (const q of j.qualityFlags) {
+          qualityCounts[q] = (qualityCounts[q] || 0) + 1;
+        }
+      }
+
+      const company = j.company || 'Other';
       compCounts[company] = (compCounts[company] || 0) + 1;
 
-      // Location facets
+      const locText = (j.location || '').toLowerCase();
       const locKey = locText.includes('india') ? 'India' : locText.includes('usa') || locText.includes('us') ? 'USA' : locText.includes('bangalore') ? 'Bangalore' : locText.includes('pune') ? 'Pune' : 'Other';
       locCounts[locKey] = (locCounts[locKey] || 0) + 1;
 
-      // Remote facets
-      if (j.isRemote || locText.includes('remote')) remoteCount++;
-      else onsiteCount++;
+      if (j.isRemote || locText.includes('remote')) {
+        remoteCount++;
+      } else if (locText.includes('hybrid')) {
+        hybridCount++;
+      } else {
+        onsiteCount++;
+      }
 
-      // Employment types
-      if (/intern/i.test(text)) empCounts['Internship']++;
-      else if (/contract|freelance/i.test(text)) empCounts['Contract']++;
-      else empCounts['Full-Time']++;
+      const emp = j.employmentType || 'Full-Time';
+      empCounts[emp] = (empCounts[emp] || 0) + 1;
     }
 
-    const deptNames: Record<string, string> = {
-      engineering: 'Engineering & Software',
-      ai_data: 'AI, ML & Data Science',
-      product: 'Product & Project Mgmt',
-      design: 'UI/UX & Design',
-      marketing_sales: 'Sales & Marketing',
-      operations: 'Operations & HR'
-    };
-
     return {
-      departments: Object.entries(deptMap).map(([value, count]) => ({ name: deptNames[value] || value, value, count })),
+      departments: Object.entries(deptCounts).map(([name, count]) => ({ name, value: name, count })),
+      experience: Object.entries(expCounts).map(([name, count]) => ({ name, value: name, count })),
+      tags: Object.entries(tagCounts).map(([name, count]) => ({ name, value: name, count })),
+      qualityFlags: Object.entries(qualityCounts).map(([name, count]) => ({ name, value: name, count })),
       companies: Object.entries(compCounts).slice(0, 10).map(([value, count]) => ({ name: value, value, count })),
-      experience: Object.entries(expMap).map(([value, count]) => ({ name: value, value, count })),
       locations: Object.entries(locCounts).map(([value, count]) => ({ name: value, value, count })),
       remote: [
         { name: 'Remote Only', value: 'true', count: remoteCount },
-        { name: 'Onsite / Hybrid', value: 'false', count: onsiteCount }
+        { name: 'Hybrid', value: 'hybrid', count: hybridCount },
+        { name: 'On-site', value: 'false', count: onsiteCount },
       ],
       employmentTypes: Object.entries(empCounts).map(([value, count]) => ({ name: value, value, count })),
       postedDates: [
-        { name: 'Past 24 Hours', value: '1d', count: Math.round(candidateJobs.length * 0.15) },
-        { name: 'Past Week', value: '7d', count: Math.round(candidateJobs.length * 0.45) },
-        { name: 'Past Month', value: '30d', count: candidateJobs.length }
-      ]
+        { name: 'Today', value: '1d', count: Math.round(candidateJobs.length * 0.2) },
+        { name: 'Past 3 Days', value: '3d', count: Math.round(candidateJobs.length * 0.5) },
+        { name: 'Past Week', value: '7d', count: Math.round(candidateJobs.length * 0.8) },
+        { name: 'Past Month', value: '30d', count: candidateJobs.length },
+      ],
     };
   }
 }

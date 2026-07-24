@@ -32,6 +32,8 @@ export const JobExplorer: React.FC = () => {
   const [company, setCompany] = useState<string>(searchParams.get('company') || 'all');
   const [minScore, setMinScore] = useState<string>(searchParams.get('minScore') || '0');
   const [employmentType, setEmploymentType] = useState<string>(searchParams.get('employmentType') || 'all');
+  const [tags, setTags] = useState<string[]>([]);
+  const [qualityFlags, setQualityFlags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest'>('opportunity');
 
   // Infinite Scroll & Cursor Pagination state
@@ -59,7 +61,10 @@ export const JobExplorer: React.FC = () => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     department: true,
     experience: true,
+    employment: false,
     remote: false,
+    tags: false,
+    quality: false,
     location: false,
     minScore: false,
   });
@@ -378,27 +383,32 @@ export const JobExplorer: React.FC = () => {
             
             {openSections.department && (
               <div className="space-y-1.5 mt-2 transition-all">
-                {facets.departments?.map((f: any) => (
-                  <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={department.includes(f.value)}
-                        onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{f.name}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                      {f.count}
-                    </span>
-                  </label>
-                ))}
+                <p className="text-[10px] text-indigo-400/80 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 mb-2">
+                  ℹ️ Jobs may have multi-department classifications.
+                </p>
+                <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                  {facets.departments?.map((f: any) => (
+                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={department.includes(f.value)}
+                          onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
+                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="truncate max-w-[170px]">{f.name}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                        {f.count}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Experience Level Facets */}
+          {/* Granular Experience Level Facets */}
           <div className="border-t border-[#243147] pt-3">
             <button
               onClick={() => toggleSection('experience')}
@@ -412,14 +422,51 @@ export const JobExplorer: React.FC = () => {
 
             {openSections.experience && (
               <div className="space-y-1.5 mt-2 transition-all">
-                {facets.experience?.map((f: any) => (
+                <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                  {facets.experience?.map((f: any) => (
+                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={experience.includes(f.value)}
+                          onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
+                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="truncate max-w-[170px]">{f.name}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                        {f.count}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Employment Type Facets */}
+          <div className="border-t border-[#243147] pt-3">
+            <button
+              onClick={() => toggleSection('employment')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+            >
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Employment Type {employmentType !== 'all' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
+              </span>
+              {openSections.employment ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+
+            {openSections.employment && (
+              <div className="space-y-1.5 mt-2 transition-all">
+                {facets.employmentTypes?.map((f: any) => (
                   <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
                       <input
-                        type="checkbox"
-                        checked={experience.includes(f.value)}
-                        onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        type="radio"
+                        name="empTypeOption"
+                        checked={employmentType === f.value}
+                        onChange={() => setEmploymentType(employmentType === f.value ? 'all' : f.value)}
+                        className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
                       />
                       <span>{f.name}</span>
                     </div>
@@ -432,14 +479,14 @@ export const JobExplorer: React.FC = () => {
             )}
           </div>
 
-          {/* Remote Status Facets */}
+          {/* Work Mode / Remote Status */}
           <div className="border-t border-[#243147] pt-3">
             <button
               onClick={() => toggleSection('remote')}
               className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
             >
               <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Remote Status {remote !== 'all' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
+                Work Mode {remote !== 'all' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
               </span>
               {openSections.remote ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
             </button>
@@ -466,6 +513,78 @@ export const JobExplorer: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Job Tags Facets */}
+          {facets.tags && facets.tags.length > 0 && (
+            <div className="border-t border-[#243147] pt-3">
+              <button
+                onClick={() => toggleSection('tags')}
+                className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+              >
+                <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                  Job Tags {tags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{tags.length}</span>}
+                </span>
+                {openSections.tags ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+              </button>
+
+              {openSections.tags && (
+                <div className="space-y-1.5 mt-2 transition-all max-h-48 overflow-y-auto custom-scrollbar">
+                  {facets.tags?.map((f: any) => (
+                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={tags.includes(f.value)}
+                          onChange={() => toggleArrayFilter(tags, f.value, setTags)}
+                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span>#{f.name}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                        {f.count}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quality Flags Facets */}
+          {facets.qualityFlags && facets.qualityFlags.length > 0 && (
+            <div className="border-t border-[#243147] pt-3">
+              <button
+                onClick={() => toggleSection('quality')}
+                className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+              >
+                <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                  Quality Flags {qualityFlags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{qualityFlags.length}</span>}
+                </span>
+                {openSections.quality ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+              </button>
+
+              {openSections.quality && (
+                <div className="space-y-1.5 mt-2 transition-all">
+                  {facets.qualityFlags?.map((f: any) => (
+                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={qualityFlags.includes(f.value)}
+                          onChange={() => toggleArrayFilter(qualityFlags, f.value, setQualityFlags)}
+                          className="rounded border-[#243147] bg-[#090d16] text-amber-500 focus:ring-amber-500"
+                        />
+                        <span>⚠️ {f.name.replace('_', ' ')}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                        {f.count}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Location Facets */}
           <div className="border-t border-[#243147] pt-3">
@@ -528,8 +647,9 @@ export const JobExplorer: React.FC = () => {
                   className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
                 >
                   <option value="0">All Match Scores</option>
-                  <option value="70">70% or Higher</option>
-                  <option value="80">80% or Higher</option>
+                  <option value="90">90%+ Top Match</option>
+                  <option value="80">80%+ Strong Match</option>
+                  <option value="70">70%+ Good Match</option>
                 </select>
               </div>
             )}
