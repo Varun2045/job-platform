@@ -450,7 +450,6 @@ export const JobExplorer: React.FC = () => {
     setSearchParams({});
     setShowAllCompanies(false);
     setShowAllSkills(false);
-    setShowAllLocations(false);
   };
 
   // Toggle array filter helper
@@ -495,9 +494,7 @@ export const JobExplorer: React.FC = () => {
     const maxPossibleYears = facetsData?.ranges?.experienceYears?.max || 15;
 
     // Filter lists by local search query inside section
-    const filteredLocs = (facets.locations || []).filter((l: any) =>
-      l.label.toLowerCase().includes(locSearch.toLowerCase())
-    );
+    const filteredLocs = facets.locations || [];
     
     // Sort companies dynamically
     const rawComps = facets.companies || [];
