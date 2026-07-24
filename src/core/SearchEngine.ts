@@ -457,6 +457,36 @@ export class SearchEngine {
     // Calculate locations (exclude 'location' criteria)
     const locJobs = getFilteredJobs(['location']);
     const locCounts: Record<string, number> = {};
+    const ALLOWED_TECH_LOCATIONS = new Set([
+      'india',
+      'remote',
+      'bangalore',
+      'bengaluru',
+      'hyderabad',
+      'pune',
+      'mumbai',
+      'chennai',
+      'delhi',
+      'new delhi',
+      'gurgaon',
+      'gurugram',
+      'noida',
+      'karnataka',
+      'telangana',
+      'maharashtra',
+      'tamil nadu',
+      'haryana',
+      'uttar pradesh',
+      'delhi ncr',
+      'kolkata',
+      'west bengal',
+      'ahmedabad',
+      'gujarat',
+      'kochi',
+      'cochin',
+      'kerala'
+    ]);
+
     for (const item of locJobs) {
       const rawLoc = (item.job.location || '').toLowerCase();
       const isRemote = item.job.isRemote || rawLoc.includes('remote') || (item.job.locationHierarchy?.city || '').toLowerCase().includes('remote');
@@ -467,7 +497,7 @@ export class SearchEngine {
       const city = item.job.locationHierarchy?.city;
       if (city && city.toLowerCase() !== 'other' && city.toLowerCase() !== 'remote') {
         const formattedCity = city.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-        if (formattedCity) {
+        if (ALLOWED_TECH_LOCATIONS.has(city.toLowerCase().trim())) {
           locCounts[formattedCity] = (locCounts[formattedCity] || 0) + 1;
         }
       }
@@ -481,8 +511,16 @@ export class SearchEngine {
         else {
           name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
         }
-        if (name) {
+        if (ALLOWED_TECH_LOCATIONS.has(name.toLowerCase())) {
           locCounts[name] = (locCounts[name] || 0) + 1;
+        }
+      }
+
+      const stateVal = item.job.locationHierarchy?.state;
+      if (stateVal && stateVal.toLowerCase() !== 'other') {
+        const formattedState = stateVal.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        if (ALLOWED_TECH_LOCATIONS.has(stateVal.toLowerCase().trim())) {
+          locCounts[formattedState] = (locCounts[formattedState] || 0) + 1;
         }
       }
 
@@ -491,7 +529,9 @@ export class SearchEngine {
         const raw = item.job.location.trim().split(',')[0].trim();
         const formatted = raw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
         if (formatted && formatted.toLowerCase() !== 'other') {
-          locCounts[formatted] = (locCounts[formatted] || 0) + 1;
+          if (ALLOWED_TECH_LOCATIONS.has(raw.toLowerCase())) {
+            locCounts[formatted] = (locCounts[formatted] || 0) + 1;
+          }
         }
       }
     }
