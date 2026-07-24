@@ -74,7 +74,7 @@ export const JobExplorer: React.FC = () => {
   const [dateRange, setDateRange] = useState<string>(
     searchParams.get('dateRange') || ''
   );
-  const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>(
+  const [sortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>(
     (searchParams.get('sort') as any) || 'newest'
   );
 
@@ -1743,19 +1743,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-xs font-bold text-[#94a3b8]">
               Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount}</span> postings
             </span>
-
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold text-[#64748b] uppercase tracking-wider">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-[#090d16] border border-[#243147] text-xs text-indigo-400 font-bold py-1.5 px-3 rounded-xl focus:outline-none focus:border-indigo-500 cursor-pointer"
-              >
-                <option value="opportunity">Opportunity Score</option>
-                <option value="match">Resume Match %</option>
-                <option value="newest">Newest First</option>
-              </select>
-            </div>
           </div>
 
           {/* Job Feed List */}

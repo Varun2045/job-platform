@@ -40,21 +40,27 @@ export class HybridExperienceClassifier {
     const compLower = (companyName || '').trim().toLowerCase();
 
     // Priority 1: Explicit Experience Requirements in Title/Description (e.g. 0-2 years, 5+ years)
-    const explicitYearsMatch =
-      /(\b[0-9]+)\s*[-–to]+\s*([0-9]+)\s*(?:years?|yrs?)/i.exec(`${titleLower} ${rawExpStr} ${descLower.slice(0, 1500)}`) ||
-      /(\b[0-9]+)\+\s*(?:years?|yrs?)/i.exec(`${titleLower} ${rawExpStr} ${descLower.slice(0, 1500)}`);
+    const combinedText = `${titleLower} ${rawExpStr} ${descLower.slice(0, 1500)}`;
+    const rangeMatch = /(\b[0-9]+)\s*[-–to]+\s*([0-9]+)\s*(?:years?|yrs?)/i.exec(combinedText);
+    const plusMatch = /(\b[0-9]+)\+\s*(?:years?|yrs?)/i.exec(combinedText);
 
-    if (explicitYearsMatch) {
-      const minY = parseInt(explicitYearsMatch[1], 10);
-      const maxY = explicitYearsMatch[2] ? parseInt(explicitYearsMatch[2], 10) : minY + 5;
+    if (rangeMatch || plusMatch) {
+      const isPlus = !rangeMatch && !!plusMatch;
+      const match = rangeMatch || plusMatch!;
+      const minY = parseInt(match[1], 10);
+      const maxY = match[2] ? parseInt(match[2], 10) : minY + 5;
 
-      const matchedLevel = this.matchByYears(minY, maxY, levels);
+      // For "N+ years" patterns, use strict matching that treats N as the floor.
+      // E.g. "2+ years" should be Mid Level, not Entry Level.
+      const matchedLevel = isPlus
+        ? this.matchByYearsStrict(minY, levels)
+        : this.matchByYears(minY, maxY, levels);
       if (matchedLevel) {
         return {
           level: matchedLevel.displayName,
           confidence: 100,
           source: 'ExplicitExperience',
-          reason: `Matched explicit experience requirement "${explicitYearsMatch[0]}".`,
+          reason: `Matched explicit experience requirement "${match[0]}".`,
           legacyBucket: matchedLevel.legacyBucket,
           minYears: matchedLevel.minYears,
           maxYears: matchedLevel.maxYears,
@@ -142,6 +148,37 @@ export class HybridExperienceClassifier {
   }
 
   private static matchByYears(minY: number, maxY: number, levels: ExperienceLevelConfig[]): ExperienceLevelConfig | null {
+    // For range patterns (e.g. "2-5 years"), find the level whose range best overlaps.
+    // Use the midpoint of the stated range to find the best-fit level.
+    const mid = (minY + maxY) / 2;
+    for (const lvl of levels) {
+      if (mid >= lvl.minYears && mid <= lvl.maxYears) {
+        return lvl;
+      }
+    }
+    // Fallback: just check if minY falls in range
+    for (const lvl of levels) {
+      if (minY >= lvl.minYears && minY <= lvl.maxYears) {
+        return lvl;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Strict matching for "N+ years" patterns.
+   * Finds the level where N falls strictly within (minYears, maxYears),
+   * not at the bottom boundary. E.g. "2+" skips Entry Level (0-2) and matches Mid Level (2-5).
+   */
+  private static matchByYearsStrict(minY: number, levels: ExperienceLevelConfig[]): ExperienceLevelConfig | null {
+    // First try: find a level where minY is strictly above the level's minYears
+    // This ensures "2+" maps to Mid Level (2-5) not Entry Level (0-2)
+    for (const lvl of levels) {
+      if (minY >= lvl.minYears && minY < lvl.maxYears && minY > lvl.minYears) {
+        return lvl;
+      }
+    }
+    // Second try: find any level where minY falls within [minYears, maxYears]
     for (const lvl of levels) {
       if (minY >= lvl.minYears && minY <= lvl.maxYears) {
         return lvl;

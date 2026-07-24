@@ -1,0 +1,71 @@
+{
+  "version": "2.2.0",
+  "timestamp": "2026-07-24T17:07:47.812Z",
+  "companies": [
+    {
+      "id": "failure-bad",
+      "name": "BadCo",
+      "enabled": true,
+      "api_endpoint": "https://badco.com/careers",
+      "priority": 3,
+      "interval_minutes": 60,
+      "resume_profiles": [
+        "backend"
+      ],
+      "consecutive_failures": 1,
+      "total_scrapes": 0,
+      "total_failures": 1,
+      "preferred_scraper": "cheerio_fallback",
+      "retry_count": 0,
+      "detected_ats": "fallback",
+      "detected_ats_at": "2026-07-24T17:07:44.565Z",
+      "last_failed_scrape": "2026-07-24T17:07:47.765Z",
+      "api_suspended_until": "2026-07-24T19:07:47.765Z"
+    },
+    {
+      "id": "failure-good",
+      "name": "GoodCo",
+      "enabled": true,
+      "api_endpoint": "https://goodco.com/careers",
+      "priority": 3,
+      "interval_minutes": 60,
+      "resume_profiles": [
+        "backend"
+      ],
+      "consecutive_failures": 0,
+      "total_scrapes": 1,
+      "total_failures": 0,
+      "preferred_scraper": "cheerio_fallback",
+      "detected_ats": "fallback",
+      "detected_ats_at": "2026-07-24T17:07:42.073Z",
+      "last_successful_scrape": "2026-07-24T17:07:42.104Z",
+      "last_scraper_used": "cheerio_fallback",
+      "avg_response_time_ms": null,
+      "last_seen_timestamp": "2026-07-24T17:07:42.104Z",
+      "api_suspended_until": null
+    }
+  ],
+  "applications": [
+    {
+      "jobHash": "mock-hash-1",
+      "company": "MockCorp",
+      "jobId": "1",
+      "status": "Applied",
+      "notes": "Applied last week",
+      "lastUpdated": "2026-07-16T17:06:05.587Z",
+      "userId": "copilot-test-user-id"
+    },
+    {
+      "jobHash": "hash123",
+      "company": "Google",
+      "jobId": "12345",
+      "status": "Applied",
+      "appliedDate": "2026-07-24T17:06:11.459Z",
+      "resumeUsed": "resume_v1.pdf",
+      "notes": "First round scheduled.",
+      "lastUpdated": "2026-07-24T17:06:11.459Z"
+    }
+  ],
+  "extendedSettings": null,
+  "analyses": []
+}
