@@ -843,7 +843,7 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Job not found' });
     }
 
-    const profile = matchedComp.resume_profiles[0] || 'backend';
+    const profile = (matchedComp && matchedComp.resume_profiles && matchedComp.resume_profiles[0]) || 'backend';
     const explanation = ResumeMatcher.explain(foundJob, profile);
 
     return res.json({
