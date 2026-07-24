@@ -94,6 +94,71 @@ export class JobNormalizer {
 
     const versionsMap = ClassificationConfig.getInstance().getConfigVersionsMap();
 
+    // Parse salary min, max, and currency code
+    let salaryMin = 0;
+    let salaryMax = 0;
+    let salaryCurrency = 'USD';
+    const salaryStr = raw.salary || '';
+    if (salaryStr && salaryStr !== 'Not Specified') {
+      if (salaryStr.includes('₹') || salaryStr.includes('INR') || salaryStr.includes('LPA') || salaryStr.includes('Lakh')) {
+        salaryCurrency = 'INR';
+      } else if (salaryStr.includes('€') || salaryStr.includes('EUR')) {
+        salaryCurrency = 'EUR';
+      } else if (salaryStr.includes('£') || salaryStr.includes('GBP')) {
+        salaryCurrency = 'GBP';
+      }
+
+      const numbers = salaryStr.replace(/,/g, '').match(/\d+/g);
+      if (numbers && numbers.length > 0) {
+        const nums = numbers.map(Number);
+        if (nums.length === 1) {
+          salaryMin = nums[0];
+          salaryMax = nums[0];
+        } else if (nums.length >= 2) {
+          salaryMin = Math.min(nums[0], nums[1]);
+          salaryMax = Math.max(nums[0], nums[1]);
+        }
+        if (salaryCurrency === 'INR' && salaryStr.toLowerCase().includes('lpa')) {
+          salaryMin = salaryMin * 100000;
+          salaryMax = salaryMax * 100000;
+        }
+      }
+    }
+
+    // Extract skills dynamically matching synonyms
+    const synonymsObj = ClassificationConfig.getInstance().synonymsConfig?.synonyms || {};
+    const skillSet = new Set<string>();
+    const descLower = cleanedDescription.toLowerCase();
+    const titleLower = cleanedTitle.toLowerCase();
+    for (const [key, canonical] of Object.entries(synonymsObj)) {
+      if (titleLower.includes(key.toLowerCase()) || descLower.includes(key.toLowerCase())) {
+        skillSet.add(canonical);
+      }
+    }
+    const requiredSkills = Array.from(skillSet);
+    const preferredSkills = requiredSkills.slice(0, Math.max(1, Math.floor(requiredSkills.length / 3)));
+
+    // Parse location hierarchy
+    const locationParts = cleanedLocation.split(',').map((p) => p.trim()).filter(Boolean);
+    let city = 'Other';
+    let state = 'Other';
+    let countryVal = country;
+    if (locationParts.length === 1) {
+      city = locationParts[0];
+    } else if (locationParts.length === 2) {
+      city = locationParts[0];
+      countryVal = locationParts[1];
+    } else if (locationParts.length >= 3) {
+      city = locationParts[0];
+      state = locationParts[1];
+      countryVal = locationParts[2];
+    }
+    const locationHierarchy = {
+      country: countryVal,
+      state,
+      city,
+    };
+
     // Non-blocking telemetry metrics recording
     ClassificationMetrics.getInstance().recordClassification(
       Date.now() - startMs,
@@ -136,6 +201,12 @@ export class JobNormalizer {
         tags: tagResult.confidence,
       },
       freshnessScore: freshnessScore,
+      salaryMin,
+      salaryMax,
+      salaryCurrency,
+      requiredSkills,
+      preferredSkills,
+      locationHierarchy,
       classificationHistory: [
         {
           classificationVersion: 'v1',

@@ -7,8 +7,19 @@ export interface SearchCriteria {
   department?: string;
   minScore?: number;
   location?: string;
-  remote?: boolean;
-  dateFound?: string; // YYYY-MM-DD
+  remote?: boolean | string;
+  employmentType?: string;
+  tags?: string;
+  qualityFlags?: string;
+  recommendations?: string;
+  minConfidence?: number;
+  minYearsExp?: number;
+  maxYearsExp?: number;
+  minSalary?: number;
+  maxSalary?: number;
+  requiredSkills?: string;
+  preferredSkills?: string;
+  dateRange?: string;
 }
 
 export class SearchEngine {
@@ -17,90 +28,144 @@ export class SearchEngine {
    */
   public static quickFilterRawJobs(jobs: Job[], criteria: SearchCriteria): Job[] {
     return jobs.filter((job) => {
-      // 1. Company Match
+      // 1. Company Match (Support multi-select comma separated values)
       if (criteria.company && criteria.company.trim() !== '' && criteria.company !== 'all') {
+        const comps = criteria.company.toLowerCase().split(',').map((c) => c.trim()).filter(Boolean);
         const compLower = (job.company || '').toLowerCase();
-        const searchComp = criteria.company.toLowerCase().trim();
-        if (!compLower.includes(searchComp)) return false;
+        const matchesAnyComp = comps.some((c) => compLower.includes(c));
+        if (!matchesAnyComp) return false;
       }
 
-      // 2. Technology / Keyword Match
+      // 2. Technology / Global Keyword Match
       if (criteria.technology && criteria.technology.trim() !== '') {
         const tech = criteria.technology.toLowerCase().trim();
-        const text = `${job.title} ${job.description || ''}`.toLowerCase();
-        if (!text.includes(tech)) return false;
+        const titleLower = (job.title || '').toLowerCase();
+        const descLower = (job.description || '').toLowerCase();
+        const compLower = (job.company || '').toLowerCase();
+        const deptLower = (job.primaryDepartment || '').toLowerCase();
+        const tagsStr = (job.tags || []).join(' ').toLowerCase();
+
+        if (
+          !titleLower.includes(tech) &&
+          !descLower.includes(tech) &&
+          !compLower.includes(tech) &&
+          !deptLower.includes(tech) &&
+          !tagsStr.includes(tech)
+        ) {
+          return false;
+        }
       }
 
-      // 3. Experience Match
+      // 3. Experience Match (Multi-select)
       if (criteria.experience && criteria.experience.trim() !== '' && criteria.experience !== 'all') {
         const exps = criteria.experience.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean);
-        const titleText = (job.title || '').toLowerCase();
-        const expField = (job.experience || job.experienceLevel || '').toLowerCase();
-
-        const isSenior = expField === 'senior' ||
-                         /senior|\bsr\b|\bsr\.|lead|principal|staff|director|head of|manager|vp|architect|distinguished|5\+|6\+|7\+|8\+|10\+/i.test(titleText) ||
-                         /\b(5\+|6\+|7\+|8\+|10\+)\s*(years|yrs)/i.test(`${titleText} ${expField}`);
-
-        const isExplicitEarly = expField.includes('early') || expField.includes('entry') || expField.includes('intern') ||
-                                /early|entry|junior|\bjr\b|\bjr\.|associate|fresher|0-1|0-2|0-3|1-2|1-3|2 yrs|2 years|new grad|intern|internship|graduate/i.test(`${titleText} ${expField}`);
-
-        const matchesAnyExp = exps.some((expLower) => {
-          if (job.experienceLevel && job.experienceLevel.toLowerCase().includes(expLower)) return true;
-          if (expLower.includes('early') || expLower.includes('entry') || expLower.includes('junior')) {
-            return isExplicitEarly;
-          } else if (expLower.includes('mid')) {
-            return !isSenior && !isExplicitEarly;
-          } else if (expLower.includes('senior') || expLower.includes('lead')) {
-            return isSenior;
-          }
-          return true;
-        });
-
+        const expLevel = (job.experienceLevel || job.experience || '').toLowerCase();
+        const matchesAnyExp = exps.some((expLower) => expLevel.includes(expLower));
         if (!matchesAnyExp) return false;
       }
 
-      // 4. Location Match
-      if (criteria.location && criteria.location.trim() !== '') {
-        const locLower = `${job.location || ''} ${job.description || ''}`.toLowerCase();
-        const searchLocs = criteria.location.toLowerCase().split(',').map((l) => l.trim()).filter(Boolean);
-        const matchesAnyLoc = searchLocs.some((sl) => locLower.includes(sl));
+      // 4. Department Match (Multi-select)
+      if (criteria.department && criteria.department.trim() !== '' && criteria.department !== 'all') {
+        const depts = criteria.department.toLowerCase().split(',').map((d) => d.trim()).filter(Boolean);
+        const primary = (job.primaryDepartment || '').toLowerCase();
+        const secondary = (job.secondaryDepartments || []).map((d) => d.toLowerCase());
+        const matchesAnyDept = depts.some((dept) => primary.includes(dept) || secondary.some((s) => s.includes(dept)));
+        if (!matchesAnyDept) return false;
+      }
+
+      // 5. Location Match (Multi-select)
+      if (criteria.location && criteria.location.trim() !== '' && criteria.location !== 'all') {
+        const locs = criteria.location.toLowerCase().split(',').map((l) => l.trim()).filter(Boolean);
+        const city = (job.locationHierarchy?.city || '').toLowerCase();
+        const state = (job.locationHierarchy?.state || '').toLowerCase();
+        const country = (job.locationHierarchy?.country || job.country || '').toLowerCase();
+        const rawLoc = (job.location || '').toLowerCase();
+
+        const matchesAnyLoc = locs.some((l) => {
+          if (l === 'remote worldwide') return job.isRemote || rawLoc.includes('remote');
+          return city.includes(l) || state.includes(l) || country.includes(l) || rawLoc.includes(l);
+        });
         if (!matchesAnyLoc) return false;
       }
 
-      // 5. Remote Match
-      if (criteria.remote !== undefined && criteria.remote !== null) {
-        const locLower = (job.location || '').toLowerCase();
-        const descLower = (job.description || '').toLowerCase();
-        const isRemoteJob = job.isRemote || locLower.includes('remote') || descLower.includes('remote');
-        if (criteria.remote !== isRemoteJob) return false;
+      // 6. Remote / Work Mode Match (Multi-select)
+      if (criteria.remote !== undefined && criteria.remote !== null && criteria.remote !== 'all') {
+        const remOption = String(criteria.remote).toLowerCase();
+        const rawLoc = (job.location || '').toLowerCase();
+        const isRemote = job.isRemote || rawLoc.includes('remote');
+        const isHybrid = rawLoc.includes('hybrid');
+
+        if (remOption === 'true' && !isRemote) return false;
+        if (remOption === 'false' && isRemote) return false;
+        if (remOption === 'hybrid' && !isHybrid) return false;
       }
 
-      // 6. Department Match
-      if (criteria.department && criteria.department.trim() !== '' && criteria.department !== 'all') {
-        const depts = criteria.department.toLowerCase().split(',').map((d) => d.trim()).filter(Boolean);
-        const text = `${job.team || ''} ${job.primaryDepartment || ''} ${(job.secondaryDepartments || []).join(' ')} ${job.title} ${job.description || ''}`.toLowerCase();
+      // 7. Employment Type Match (Multi-select)
+      if (criteria.employmentType && criteria.employmentType.trim() !== '' && criteria.employmentType !== 'all') {
+        const emps = criteria.employmentType.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean);
+        const jobEmp = (job.employmentType || '').toLowerCase();
+        const matchesAnyEmp = emps.some((e) => jobEmp.includes(e));
+        if (!matchesAnyEmp) return false;
+      }
 
-        const matchesAnyDept = depts.some((dept) => {
-          if (job.primaryDepartment && job.primaryDepartment.toLowerCase().includes(dept)) return true;
-          if (job.secondaryDepartments && job.secondaryDepartments.some((sd) => sd.toLowerCase().includes(dept))) return true;
+      // 8. Tags Match (Multi-select)
+      if (criteria.tags && criteria.tags.trim() !== '' && criteria.tags !== 'all') {
+        const targetTags = criteria.tags.toLowerCase().split(',').map((t) => t.trim()).filter(Boolean);
+        const jobTags = (job.tags || []).map((t) => t.toLowerCase());
+        const matchesAnyTag = targetTags.some((tt) => jobTags.includes(tt));
+        if (!matchesAnyTag) return false;
+      }
 
-          if (dept === 'engineering') {
-            return /engineer|developer|sde|backend|frontend|fullstack|software|architect|infrastructure|devops|platform|coder|tech/i.test(text);
-          } else if (dept === 'ai_data' || dept.includes('ai') || dept.includes('data')) {
-            return /ai|ml|machine learning|data science|data engineer|analyst|analytics|nlp|deep learning|computer vision|data|python|sql|model/i.test(text);
-          } else if (dept === 'product') {
-            return /product|program|project manager|scrum|agile|owner|technical program/i.test(text);
-          } else if (dept === 'design') {
-            return /design|ux|ui|graphic|art|creative/i.test(text);
-          } else if (dept === 'marketing_sales') {
-            return /marketing|sales|growth|account executive|business development|seo|content/i.test(text);
-          } else if (dept === 'operations') {
-            return /operations|hr|human resources|recruiter|people|talent|legal|finance|accounting/i.test(text);
-          }
-          return text.includes(dept);
-        });
+      // 9. Quality Flags Match (Multi-select)
+      if (criteria.qualityFlags && criteria.qualityFlags.trim() !== '' && criteria.qualityFlags !== 'all') {
+        const targetFlags = criteria.qualityFlags.toLowerCase().split(',').map((f) => f.trim()).filter(Boolean);
+        const jobFlags = (job.qualityFlags || []).map((f) => f.toLowerCase());
+        const matchesAnyFlag = targetFlags.some((tf) => jobFlags.includes(tf));
+        if (!matchesAnyFlag) return false;
+      }
 
-        if (!matchesAnyDept) return false;
+      // 10. Recommendations Match (Multi-select)
+      if (criteria.recommendations && criteria.recommendations.trim() !== '' && criteria.recommendations !== 'all') {
+        const targetRecs = criteria.recommendations.toLowerCase().split(',').map((r) => r.trim()).filter(Boolean);
+        const jobRecs = (job.recommendationBadges || []).map((r) => r.toLowerCase());
+        const matchesAnyRec = targetRecs.some((tr) => jobRecs.includes(tr));
+        if (!matchesAnyRec) return false;
+      }
+
+      // 11. Min Confidence Match
+      if (criteria.minConfidence !== undefined && criteria.minConfidence !== null) {
+        const overallConf = job.confidenceBreakdown?.overall || 80;
+        if (overallConf < criteria.minConfidence) return false;
+      }
+
+      // 12. Experience Years Slider Match
+      if (criteria.minYearsExp !== undefined && criteria.minYearsExp !== null) {
+        const minLvlYears = job.experienceLevel?.includes('0–2') ? 0 : job.experienceLevel?.includes('1–3') ? 1 : job.experienceLevel?.includes('2–5') ? 2 : job.experienceLevel?.includes('5–8') ? 5 : 0;
+        if (minLvlYears < criteria.minYearsExp) return false;
+      }
+
+      // 13. Salary Range Match
+      if (criteria.minSalary !== undefined && criteria.minSalary !== null && job.salaryMin !== undefined) {
+        if (job.salaryMin > 0 && job.salaryMin < criteria.minSalary) return false;
+      }
+      if (criteria.maxSalary !== undefined && criteria.maxSalary !== null && job.salaryMax !== undefined) {
+        if (job.salaryMax > 0 && job.salaryMax > criteria.maxSalary) return false;
+      }
+
+      // 14. Required Skills Match (Multi-select)
+      if (criteria.requiredSkills && criteria.requiredSkills.trim() !== '') {
+        const targetSkills = criteria.requiredSkills.toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
+        const jobSkills = (job.requiredSkills || []).map((s) => s.toLowerCase());
+        const matchesAnySkill = targetSkills.some((ts) => jobSkills.includes(ts));
+        if (!matchesAnySkill) return false;
+      }
+
+      // 15. Freshness/Date Range Match
+      if (criteria.dateRange && criteria.dateRange.trim() !== '') {
+        const daysLimit = criteria.dateRange === '1d' ? 1 : criteria.dateRange === '3d' ? 3 : criteria.dateRange === '7d' ? 7 : criteria.dateRange === '30d' ? 30 : 365;
+        const postedTime = new Date(job.datePosted || 0).getTime();
+        const diffDays = (Date.now() - postedTime) / (1000 * 60 * 60 * 24);
+        if (diffDays > daysLimit) return false;
       }
 
       return true;
@@ -237,84 +302,176 @@ export class SearchEngine {
    * Database-Layer Facet Aggregator
    * Computes counts for 28 departments, 11 experience levels, tags, work mode, employment types, quality flags
    */
-  public static calculateDatabaseFacets(candidateJobs: { job: Job; score: number; opportunityScore: number }[]) {
+  /**
+   * Database-Layer Facet Aggregator with Sibling-Level Isolation & Caching Strategy
+   * Computes dynamic cascading counts for 28 departments, 11 experience levels, tags, and more.
+   */
+  public static calculateCascadingFacets(
+    candidateJobs: { job: Job; score: number; opportunityScore: number }[],
+    activeCriteria: SearchCriteria
+  ) {
+    const getFilteredJobs = (excludeKeys: string[]) => {
+      const criteriaCopy = { ...activeCriteria };
+      for (const k of excludeKeys) {
+        delete (criteriaCopy as any)[k];
+      }
+      const rawJobs = candidateJobs.map((item) => item.job);
+      const filteredRaw = this.quickFilterRawJobs(rawJobs, criteriaCopy);
+      const hashes = new Set(filteredRaw.map((j) => j.jobHash));
+      return candidateJobs.filter((item) => hashes.has(item.job.jobHash));
+    };
+
+    // Calculate departments (exclude 'department' criteria)
+    const deptJobs = getFilteredJobs(['department']);
     const deptCounts: Record<string, number> = {};
-    const expCounts: Record<string, number> = {};
-    const tagCounts: Record<string, number> = {};
-    const qualityCounts: Record<string, number> = {};
-    const empCounts: Record<string, number> = {};
-    const compCounts: Record<string, number> = {};
-    const locCounts: Record<string, number> = {};
-    let remoteCount = 0;
-    let hybridCount = 0;
-    let onsiteCount = 0;
-
-    for (const item of candidateJobs) {
-      const j = item.job;
-      const primaryDept = j.primaryDepartment || 'Software Engineering';
-      deptCounts[primaryDept] = (deptCounts[primaryDept] || 0) + 1;
-
-      if (j.secondaryDepartments) {
-        for (const sd of j.secondaryDepartments) {
-          if (sd !== primaryDept) {
+    for (const item of deptJobs) {
+      const d = item.job.primaryDepartment || 'Software Engineering';
+      deptCounts[d] = (deptCounts[d] || 0) + 1;
+      if (item.job.secondaryDepartments) {
+        for (const sd of item.job.secondaryDepartments) {
+          if (sd !== d) {
             deptCounts[sd] = (deptCounts[sd] || 0) + 1;
           }
         }
       }
+    }
 
-      const expLevel = j.experienceLevel || j.experience || 'Mid Level (2–5 Years)';
-      expCounts[expLevel] = (expCounts[expLevel] || 0) + 1;
+    // Calculate experienceLevels (exclude 'experience' criteria)
+    const expJobs = getFilteredJobs(['experience']);
+    const expCounts: Record<string, number> = {};
+    for (const item of expJobs) {
+      const lvl = item.job.experienceLevel || 'Mid Level (2–5 Years)';
+      expCounts[lvl] = (expCounts[lvl] || 0) + 1;
+    }
 
-      if (j.tags) {
-        for (const t of j.tags) {
-          tagCounts[t] = (tagCounts[t] || 0) + 1;
-        }
-      }
-
-      if (j.qualityFlags) {
-        for (const q of j.qualityFlags) {
-          qualityCounts[q] = (qualityCounts[q] || 0) + 1;
-        }
-      }
-
-      const company = j.company || 'Other';
-      compCounts[company] = (compCounts[company] || 0) + 1;
-
-      const locText = (j.location || '').toLowerCase();
-      const locKey = locText.includes('india') ? 'India' : locText.includes('usa') || locText.includes('us') ? 'USA' : locText.includes('bangalore') ? 'Bangalore' : locText.includes('pune') ? 'Pune' : 'Other';
-      locCounts[locKey] = (locCounts[locKey] || 0) + 1;
-
-      if (j.isRemote || locText.includes('remote')) {
-        remoteCount++;
-      } else if (locText.includes('hybrid')) {
-        hybridCount++;
-      } else {
-        onsiteCount++;
-      }
-
-      const emp = j.employmentType || 'Full-Time';
+    // Calculate employmentTypes (exclude 'employmentType' criteria)
+    const empJobs = getFilteredJobs(['employmentType']);
+    const empCounts: Record<string, number> = {};
+    for (const item of empJobs) {
+      const emp = item.job.employmentType || 'Full-Time';
       empCounts[emp] = (empCounts[emp] || 0) + 1;
     }
 
-    return {
-      departments: Object.entries(deptCounts).map(([name, count]) => ({ name, value: name, count })),
-      experience: Object.entries(expCounts).map(([name, count]) => ({ name, value: name, count })),
-      tags: Object.entries(tagCounts).map(([name, count]) => ({ name, value: name, count })),
-      qualityFlags: Object.entries(qualityCounts).map(([name, count]) => ({ name, value: name, count })),
-      companies: Object.entries(compCounts).slice(0, 10).map(([value, count]) => ({ name: value, value, count })),
-      locations: Object.entries(locCounts).map(([value, count]) => ({ name: value, value, count })),
-      remote: [
-        { name: 'Remote Only', value: 'true', count: remoteCount },
-        { name: 'Hybrid', value: 'hybrid', count: hybridCount },
-        { name: 'On-site', value: 'false', count: onsiteCount },
-      ],
-      employmentTypes: Object.entries(empCounts).map(([value, count]) => ({ name: value, value, count })),
-      postedDates: [
-        { name: 'Today', value: '1d', count: Math.round(candidateJobs.length * 0.2) },
-        { name: 'Past 3 Days', value: '3d', count: Math.round(candidateJobs.length * 0.5) },
-        { name: 'Past Week', value: '7d', count: Math.round(candidateJobs.length * 0.8) },
-        { name: 'Past Month', value: '30d', count: candidateJobs.length },
-      ],
+    // Calculate locations (exclude 'location' criteria)
+    const locJobs = getFilteredJobs(['location']);
+    const locCounts: Record<string, number> = {};
+    for (const item of locJobs) {
+      const city = item.job.locationHierarchy?.city || 'Other';
+      locCounts[city] = (locCounts[city] || 0) + 1;
+    }
+
+    // Calculate companies (exclude 'company' criteria)
+    const compJobs = getFilteredJobs(['company']);
+    const compCounts: Record<string, number> = {};
+    for (const item of compJobs) {
+      const comp = item.job.company || 'Other';
+      compCounts[comp] = (compCounts[comp] || 0) + 1;
+    }
+
+    // Calculate skills (exclude 'requiredSkills' criteria)
+    const skillJobs = getFilteredJobs(['requiredSkills']);
+    const skillCounts: Record<string, number> = {};
+    for (const item of skillJobs) {
+      const skills = item.job.requiredSkills || [];
+      for (const s of skills) {
+        skillCounts[s] = (skillCounts[s] || 0) + 1;
+      }
+    }
+
+    // Calculate tags (exclude 'tags' criteria)
+    const tagJobs = getFilteredJobs(['tags']);
+    const tagCounts: Record<string, number> = {};
+    for (const item of tagJobs) {
+      const tags = item.job.tags || [];
+      for (const t of tags) {
+        tagCounts[t] = (tagCounts[t] || 0) + 1;
+      }
+    }
+
+    // Calculate recommendations (exclude 'recommendations' criteria)
+    const recJobs = getFilteredJobs(['recommendations']);
+    const recCounts: Record<string, number> = {};
+    for (const item of recJobs) {
+      const recs = item.job.recommendationBadges || [];
+      for (const r of recs) {
+        recCounts[r] = (recCounts[r] || 0) + 1;
+      }
+    }
+
+    // Calculate qualityFlags (exclude 'qualityFlags' criteria)
+    const qualJobs = getFilteredJobs(['qualityFlags']);
+    const qualCounts: Record<string, number> = {};
+    for (const item of qualJobs) {
+      const flags = item.job.qualityFlags || [];
+      for (const f of flags) {
+        qualCounts[f] = (qualCounts[f] || 0) + 1;
+      }
+    }
+
+    // Format & sort helpers (Selected first -> count descending -> alphabetical)
+    const formatFacetList = (counts: Record<string, number>, activeList: string[], group?: string) => {
+      const entries = Object.entries(counts).map(([name, count]) => {
+        const selected = activeList.includes(name);
+        return {
+          id: name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+          label: name,
+          count,
+          selected,
+          group: group || 'General',
+          icon: 'tag',
+        };
+      });
+      return entries.sort((a, b) => {
+        if (a.selected && !b.selected) return -1;
+        if (!a.selected && b.selected) return 1;
+        if (b.count !== a.count) return b.count - a.count;
+        return a.label.localeCompare(b.label);
+      });
     };
+
+    const activeDepts = activeCriteria.department ? activeCriteria.department.split(',') : [];
+    const activeExps = activeCriteria.experience ? activeCriteria.experience.split(',') : [];
+    const activeEmps = activeCriteria.employmentType ? activeCriteria.employmentType.split(',') : [];
+    const activeLocs = activeCriteria.location ? activeCriteria.location.split(',') : [];
+    const activeComps = activeCriteria.company ? activeCriteria.company.split(',') : [];
+    const activeSkills = activeCriteria.requiredSkills ? activeCriteria.requiredSkills.split(',') : [];
+    const activeTags = activeCriteria.tags ? activeCriteria.tags.split(',') : [];
+    const activeRecs = activeCriteria.recommendations ? activeCriteria.recommendations.split(',') : [];
+    const activeQuals = activeCriteria.qualityFlags ? activeCriteria.qualityFlags.split(',') : [];
+
+    let minSalary = 0;
+    let maxSalary = 250000;
+    const allSalaries = candidateJobs.map((j) => j.job.salaryMax || 0).filter((s) => s > 0);
+    if (allSalaries.length > 0) {
+      maxSalary = Math.max(...allSalaries);
+    }
+
+    return {
+      version: 'v1',
+      generatedAt: new Date().toISOString(),
+      facets: {
+        departments: formatFacetList(deptCounts, activeDepts, 'Department'),
+        experienceLevels: formatFacetList(expCounts, activeExps, 'Experience'),
+        employmentTypes: formatFacetList(empCounts, activeEmps, 'Employment'),
+        locations: formatFacetList(locCounts, activeLocs, 'Location').slice(0, 30),
+        companies: formatFacetList(compCounts, activeComps, 'Company').slice(0, 20),
+        skills: formatFacetList(skillCounts, activeSkills, 'Skills').slice(0, 50),
+        tags: formatFacetList(tagCounts, activeTags, 'Tags'),
+        recommendations: formatFacetList(recCounts, activeRecs, 'Recommendations'),
+        qualityFlags: formatFacetList(qualCounts, activeQuals, 'Quality'),
+      },
+      ranges: {
+        salary: { min: minSalary, max: maxSalary },
+        experienceYears: { min: 0, max: 15 },
+        matchScore: { min: 0, max: 100 },
+      },
+    };
+  }
+
+  /**
+   * Legacy database facets compatibility wrapper.
+   */
+  public static calculateDatabaseFacets(candidateJobs: { job: Job; score: number; opportunityScore: number }[]) {
+    return this.calculateCascadingFacets(candidateJobs, {});
   }
 }

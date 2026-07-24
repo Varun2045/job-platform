@@ -16,7 +16,7 @@ import { SupabaseStorage } from '../storage/SupabaseStorage.js';
 import { StorageProvider } from '../storage/StorageProvider.js';
 import { EmailNotificationProvider } from '../notifications/EmailNotificationProvider.js';
 import { ResumeMatcher } from './ResumeMatcher.js';
-import { SearchEngine } from './SearchEngine.js';
+import { SearchEngine, SearchCriteria } from './SearchEngine.js';
 import { Logger } from './Logger.js';
 import { AiAnalyzer } from './ResumeMatcher.js';
 import { ResumeTailor } from './ResumeTailor.js';
@@ -433,6 +433,247 @@ let scoredJobsCache: {
   timestamp: number;
 } | null = null;
 const JOBS_CACHE_TTL_MS = 30000;
+
+// Helper to parse search criteria for versioned endpoints
+function parseSearchCriteria(query: any): SearchCriteria {
+  const {
+    q,
+    technology,
+    company,
+    experience,
+    department,
+    location,
+    remote,
+    employmentType,
+    tags,
+    qualityFlags,
+    recommendations,
+    minConfidence,
+    minYearsExp,
+    maxYearsExp,
+    minSalary,
+    maxSalary,
+    requiredSkills,
+    preferredSkills,
+    dateRange,
+  } = query;
+
+  const rawQuery = (q as string) || (technology as string) || '';
+  const nlParsed = SearchEngine.parseNLQuery(rawQuery);
+
+  let targetRemote: boolean | string | undefined = undefined;
+  if (remote !== undefined && remote !== '' && remote !== 'all') {
+    targetRemote = remote as string;
+  } else if (nlParsed.remote !== undefined) {
+    targetRemote = nlParsed.remote;
+  }
+
+  return {
+    company: (company as string) || '',
+    technology: nlParsed.keyword || rawQuery,
+    experience: (experience as string) || nlParsed.experience || '',
+    department: (department as string) || nlParsed.department || '',
+    location: (location as string) || nlParsed.location || '',
+    remote: targetRemote,
+    employmentType: (employmentType as string) || '',
+    tags: (tags as string) || '',
+    qualityFlags: (qualityFlags as string) || '',
+    recommendations: (recommendations as string) || '',
+    minConfidence: minConfidence ? Number(minConfidence) : undefined,
+    minYearsExp: minYearsExp ? Number(minYearsExp) : undefined,
+    maxYearsExp: maxYearsExp ? Number(maxYearsExp) : undefined,
+    minSalary: minSalary ? Number(minSalary) : undefined,
+    maxSalary: maxSalary ? Number(maxSalary) : undefined,
+    requiredSkills: (requiredSkills as string) || '',
+    preferredSkills: (preferredSkills as string) || '',
+    dateRange: (dateRange as string) || '',
+  };
+}
+
+// Memory caching maps for facets and search results
+const facetsCacheMap = new Map<string, { data: any; timestamp: number }>();
+const searchCacheMap = new Map<string, { data: any; timestamp: number }>();
+const VERSIONED_CACHE_TTL_MS = 30 * 1000; // 30 seconds
+
+// GET /api/v1/jobs/facets (Dedicated, Dynamic, Versioned Facets API)
+app.get('/api/v1/jobs/facets', authMiddleware, async (req, res) => {
+  try {
+    const criteria = parseSearchCriteria(req.query);
+    const cacheKey = JSON.stringify(criteria);
+
+    const cached = facetsCacheMap.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < VERSIONED_CACHE_TTL_MS) {
+      return res.json(cached.data);
+    }
+
+    const now = Date.now();
+    let allActiveScoredJobs: any[] = [];
+    if (scoredJobsCache && now - scoredJobsCache.timestamp < JOBS_CACHE_TTL_MS) {
+      allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
+    } else {
+      const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
+        storage.getExtendedSettings(),
+        storage.getEnabledCompanies(),
+        storage.getAllCompanies(),
+        storage.getAllJobs(),
+      ]);
+
+      const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
+      const enabledCompsMap = new Map<string, any>();
+      for (const c of companies) {
+        enabledCompsMap.set(c.id.toLowerCase(), c);
+        enabledCompsMap.set(c.name.toLowerCase(), c);
+      }
+
+      for (const j of rawAllJobs) {
+        const compKey = (j.company || '').toLowerCase();
+        if (disabledIds.has(compKey)) continue;
+
+        const comp = enabledCompsMap.get(compKey) || { resume_profiles: ['backend'], priority: 2 };
+        const rawProfiles = comp.resume_profiles || [];
+        const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
+        const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
+        const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
+
+        allActiveScoredJobs.push({
+          job: j,
+          score: bestScore,
+          opportunityScore: recommendation.opportunityScore,
+          weightedScore: recommendation.opportunityScore,
+          breakdown: recommendation.breakdown,
+        });
+      }
+
+      scoredJobsCache = {
+        jobs: rawAllJobs,
+        allActiveScoredJobs,
+        timestamp: now,
+      };
+    }
+
+    const facetsData = SearchEngine.calculateCascadingFacets(allActiveScoredJobs, criteria);
+    facetsCacheMap.set(cacheKey, { data: facetsData, timestamp: Date.now() });
+
+    return res.json(facetsData);
+  } catch (err: any) {
+    Logger.error('Error in /api/v1/jobs/facets', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/v1/jobs/search (Dedicated, Dynamic, Versioned Search API)
+app.get('/api/v1/jobs/search', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  try {
+    const criteria = parseSearchCriteria(req.query);
+    const { sort = 'opportunity', cursor, pageSize = '25' } = req.query;
+    const cacheKey = JSON.stringify({ criteria, sort, cursor, pageSize });
+
+    const cached = searchCacheMap.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < VERSIONED_CACHE_TTL_MS) {
+      return res.json(cached.data);
+    }
+
+    const now = Date.now();
+    let allActiveScoredJobs: any[] = [];
+    let allJobs: any[] = [];
+
+    if (scoredJobsCache && now - scoredJobsCache.timestamp < JOBS_CACHE_TTL_MS) {
+      allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
+      allJobs = scoredJobsCache.jobs;
+    } else {
+      const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
+        storage.getExtendedSettings(),
+        storage.getEnabledCompanies(),
+        storage.getAllCompanies(),
+        storage.getAllJobs(),
+      ]);
+
+      allJobs = rawAllJobs;
+      const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
+      const enabledCompsMap = new Map<string, any>();
+      for (const c of companies) {
+        enabledCompsMap.set(c.id.toLowerCase(), c);
+        enabledCompsMap.set(c.name.toLowerCase(), c);
+      }
+
+      for (const j of allJobs) {
+        const compKey = (j.company || '').toLowerCase();
+        if (disabledIds.has(compKey)) continue;
+
+        const comp = enabledCompsMap.get(compKey) || { resume_profiles: ['backend'], priority: 2 };
+        const rawProfiles = comp.resume_profiles || [];
+        const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
+        const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
+        const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
+
+        allActiveScoredJobs.push({
+          job: j,
+          score: bestScore,
+          opportunityScore: recommendation.opportunityScore,
+          weightedScore: recommendation.opportunityScore,
+          breakdown: recommendation.breakdown,
+        });
+      }
+
+      scoredJobsCache = {
+        jobs: allJobs,
+        allActiveScoredJobs,
+        timestamp: now,
+      };
+    }
+
+    // Filter candidate jobs
+    const filteredJobs = SearchEngine.quickFilterRawJobs(allJobs, criteria);
+    const filteredHashes = new Set(filteredJobs.map((j) => j.jobHash));
+    const allScoredJobs = allActiveScoredJobs.filter((sj) => filteredHashes.has(sj.job.jobHash));
+
+    // Sort Pipeline
+    if (sort === 'match') {
+      allScoredJobs.sort((a, b) => b.score - a.score || b.opportunityScore - a.opportunityScore);
+    } else if (sort === 'newest') {
+      allScoredJobs.sort((a, b) => new Date(b.job.datePosted || 0).getTime() - new Date(a.job.datePosted || 0).getTime());
+    } else if (sort === 'highest_salary') {
+      allScoredJobs.sort((a, b) => (b.job.salaryMax || 0) - (a.job.salaryMax || 0));
+    } else if (sort === 'company_name') {
+      allScoredJobs.sort((a, b) => (a.job.company || '').localeCompare(b.job.company || ''));
+    } else {
+      // opportunity (relevance + opportunity match)
+      allScoredJobs.sort((a, b) => b.opportunityScore - a.opportunityScore);
+    }
+
+    // Cursor Pagination
+    const ps = Math.min(100, Math.max(1, Number(pageSize || 25)));
+    const offset = SearchEngine.decodeCursor(cursor as string);
+    const end = offset + ps;
+    const paginatedJobs = allScoredJobs.slice(offset, end);
+    const hasMore = end < allScoredJobs.length;
+    const nextCursor = hasMore ? SearchEngine.encodeCursor(end) : null;
+
+    const response = {
+      jobs: paginatedJobs,
+      pagination: {
+        nextCursor,
+        hasMore,
+      },
+      appliedFilters: criteria,
+      sort: {
+        field: sort,
+        direction: 'desc',
+      },
+      execution: {
+        searchTimeMs: Date.now() - startTime,
+        totalResults: allScoredJobs.length,
+      },
+    };
+
+    searchCacheMap.set(cacheKey, { data: response, timestamp: Date.now() });
+    return res.json(response);
+  } catch (err: any) {
+    Logger.error('Error in /api/v1/jobs/search', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 app.get('/api/jobs', authMiddleware, async (req, res) => {
   try {

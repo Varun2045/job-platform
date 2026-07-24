@@ -20,21 +20,55 @@ export const JobExplorer: React.FC = () => {
   const [debouncedQuery, setDebouncedQuery] = useState(searchParams.get('q') || '');
 
   // Filter state
-  const [locationQuery, setLocationQuery] = useState(searchParams.get('location') || '');
-  const [debouncedLocation, setDebouncedLocation] = useState(searchParams.get('location') || '');
-  const [remote, setRemote] = useState<string>(searchParams.get('remote') || 'all');
+  const [location, setLocation] = useState<string[]>(
+    searchParams.get('location') ? searchParams.get('location')!.split(',') : []
+  );
+  const [remote, setRemote] = useState<string[]>(
+    searchParams.get('remote') ? searchParams.get('remote')!.split(',') : []
+  );
   const [experience, setExperience] = useState<string[]>(
     searchParams.get('experience') ? searchParams.get('experience')!.split(',') : []
   );
   const [department, setDepartment] = useState<string[]>(
     searchParams.get('department') ? searchParams.get('department')!.split(',') : []
   );
-  const [company, setCompany] = useState<string>(searchParams.get('company') || 'all');
-  const [minScore, setMinScore] = useState<string>(searchParams.get('minScore') || '0');
-  const [employmentType, setEmploymentType] = useState<string>(searchParams.get('employmentType') || 'all');
-  const [tags, setTags] = useState<string[]>([]);
-  const [qualityFlags, setQualityFlags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest'>('opportunity');
+  const [company, setCompany] = useState<string[]>(
+    searchParams.get('company') ? searchParams.get('company')!.split(',') : []
+  );
+  const [minScore, setMinScore] = useState<number>(
+    searchParams.get('minScore') ? Number(searchParams.get('minScore')) : 0
+  );
+  const [employmentType, setEmploymentType] = useState<string[]>(
+    searchParams.get('employmentType') ? searchParams.get('employmentType')!.split(',') : []
+  );
+  const [tags, setTags] = useState<string[]>(
+    searchParams.get('tags') ? searchParams.get('tags')!.split(',') : []
+  );
+  const [qualityFlags, setQualityFlags] = useState<string[]>(
+    searchParams.get('qualityFlags') ? searchParams.get('qualityFlags')!.split(',') : []
+  );
+  const [recommendations, setRecommendations] = useState<string[]>(
+    searchParams.get('recommendations') ? searchParams.get('recommendations')!.split(',') : []
+  );
+  const [requiredSkills, setRequiredSkills] = useState<string[]>(
+    searchParams.get('requiredSkills') ? searchParams.get('requiredSkills')!.split(',') : []
+  );
+  const [minYearsExp, setMinYearsExp] = useState<number>(
+    searchParams.get('minYearsExp') ? Number(searchParams.get('minYearsExp')) : 0
+  );
+  const [minSalary, setMinSalary] = useState<number>(
+    searchParams.get('minSalary') ? Number(searchParams.get('minSalary')) : 0
+  );
+  const [maxSalary, setMaxSalary] = useState<number>(
+    searchParams.get('maxSalary') ? Number(searchParams.get('maxSalary')) : 250000
+  );
+  const [minConfidence, setMinConfidence] = useState<number>(
+    searchParams.get('minConfidence') ? Number(searchParams.get('minConfidence')) : 0
+  );
+  const [dateRange, setDateRange] = useState<string>(
+    searchParams.get('dateRange') || ''
+  );
+  const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>('opportunity');
 
   // Infinite Scroll & Cursor Pagination state
   const [accumulatedJobs, setAccumulatedJobs] = useState<any[]>([]);
@@ -57,6 +91,11 @@ export const JobExplorer: React.FC = () => {
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
 
+  // Search inside filters state
+  const [deptSearch, setDeptSearch] = useState('');
+  const [skillSearch, setSkillSearch] = useState('');
+  const [locSearch, setLocSearch] = useState('');
+
   // Accordion Sections for Faceted Filters
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     department: true,
@@ -66,7 +105,11 @@ export const JobExplorer: React.FC = () => {
     tags: false,
     quality: false,
     location: false,
+    skills: false,
+    salary: false,
     minScore: false,
+    confidence: false,
+    recommendations: false,
   });
 
   const toggleSection = (section: string) => {
@@ -95,50 +138,149 @@ export const JobExplorer: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // 200ms Debounce location input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedLocation(locationQuery);
-    }, 200);
-    return () => clearTimeout(handler);
-  }, [locationQuery]);
-
   // Sync state to URL parameters
   useEffect(() => {
     const params: Record<string, string> = {};
     if (debouncedQuery) params.q = debouncedQuery;
-    if (debouncedLocation) params.location = debouncedLocation;
-    if (remote !== 'all') params.remote = remote;
+    if (location.length > 0) params.location = location.join(',');
+    if (remote.length > 0) params.remote = remote.join(',');
     if (experience.length > 0) params.experience = experience.join(',');
     if (department.length > 0) params.department = department.join(',');
-    if (company !== 'all') params.company = company;
-    if (minScore !== '0') params.minScore = minScore;
-    if (employmentType !== 'all') params.employmentType = employmentType;
+    if (company.length > 0) params.company = company.join(',');
+    if (minScore > 0) params.minScore = minScore.toString();
+    if (employmentType.length > 0) params.employmentType = employmentType.join(',');
+    if (tags.length > 0) params.tags = tags.join(',');
+    if (qualityFlags.length > 0) params.qualityFlags = qualityFlags.join(',');
+    if (recommendations.length > 0) params.recommendations = recommendations.join(',');
+    if (requiredSkills.length > 0) params.requiredSkills = requiredSkills.join(',');
+    if (minYearsExp > 0) params.minYearsExp = minYearsExp.toString();
+    if (minSalary > 0) params.minSalary = minSalary.toString();
+    if (maxSalary < 250000) params.maxSalary = maxSalary.toString();
+    if (minConfidence > 0) params.minConfidence = minConfidence.toString();
+    if (dateRange) params.dateRange = dateRange;
+    if (sortBy !== 'opportunity') params.sort = sortBy;
 
     setSearchParams(params, { replace: true });
     setCursor(null);
     setAccumulatedJobs([]);
-  }, [debouncedQuery, debouncedLocation, remote, experience, department, company, minScore, employmentType, sortBy]);
+  }, [
+    debouncedQuery,
+    location,
+    remote,
+    experience,
+    department,
+    company,
+    minScore,
+    employmentType,
+    tags,
+    qualityFlags,
+    recommendations,
+    requiredSkills,
+    minYearsExp,
+    minSalary,
+    maxSalary,
+    minConfidence,
+    dateRange,
+    sortBy,
+  ]);
 
-  // Query Jobs API (Cursor-based infinite scroll + database-level facet aggregation)
-  const { data: apiResponse, isLoading: isJobsLoading, isFetching } = useQuery({
-    queryKey: ['jobs-feed', debouncedQuery, debouncedLocation, remote, experience, department, company, minScore, employmentType, sortBy, cursor],
+  // Query Facets Schema dynamically
+  const { data: facetsData, isLoading: isFacetsLoading } = useQuery({
+    queryKey: [
+      'facets',
+      debouncedQuery,
+      location,
+      remote,
+      experience,
+      department,
+      company,
+      minScore,
+      employmentType,
+      tags,
+      qualityFlags,
+      recommendations,
+      requiredSkills,
+      minYearsExp,
+      minSalary,
+      maxSalary,
+      minConfidence,
+      dateRange,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams({
         q: debouncedQuery,
-        location: debouncedLocation,
-        remote: remote === 'all' ? '' : remote,
+        location: location.join(','),
+        remote: remote.join(','),
         experience: experience.join(','),
         department: department.join(','),
-        company: company === 'all' ? '' : company,
-        minScore: minScore === '0' ? '' : minScore,
-        employmentType: employmentType === 'all' ? '' : employmentType,
+        company: company.join(','),
+        minScore: minScore.toString(),
+        employmentType: employmentType.join(','),
+        tags: tags.join(','),
+        qualityFlags: qualityFlags.join(','),
+        recommendations: recommendations.join(','),
+        requiredSkills: requiredSkills.join(','),
+        minYearsExp: minYearsExp.toString(),
+        minSalary: minSalary.toString(),
+        maxSalary: maxSalary.toString(),
+        minConfidence: minConfidence.toString(),
+        dateRange,
+      });
+      const res = await fetch(`/api/v1/jobs/facets?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch facets');
+      return res.json();
+    },
+  });
+
+  // Query Jobs API using dedicated Search Endpoint
+  const { data: apiResponse, isLoading: isJobsLoading, isFetching } = useQuery({
+    queryKey: [
+      'jobs-search',
+      debouncedQuery,
+      location,
+      remote,
+      experience,
+      department,
+      company,
+      minScore,
+      employmentType,
+      tags,
+      qualityFlags,
+      recommendations,
+      requiredSkills,
+      minYearsExp,
+      minSalary,
+      maxSalary,
+      minConfidence,
+      dateRange,
+      sortBy,
+      cursor,
+    ],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        q: debouncedQuery,
+        location: location.join(','),
+        remote: remote.join(','),
+        experience: experience.join(','),
+        department: department.join(','),
+        company: company.join(','),
+        minScore: minScore.toString(),
+        employmentType: employmentType.join(','),
+        tags: tags.join(','),
+        qualityFlags: qualityFlags.join(','),
+        recommendations: recommendations.join(','),
+        requiredSkills: requiredSkills.join(','),
+        minYearsExp: minYearsExp.toString(),
+        minSalary: minSalary.toString(),
+        maxSalary: maxSalary.toString(),
+        minConfidence: minConfidence.toString(),
+        dateRange,
         sort: sortBy,
         pageSize: '25',
         ...(cursor ? { cursor } : {})
       });
-      const res = await fetch(`/api/jobs?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch job feed');
+      const res = await fetch(`/api/v1/jobs/search?${params}`);
+      if (!res.ok) throw new Error('Failed to search jobs feed');
       return res.json();
     }
   });
@@ -220,14 +362,22 @@ export const JobExplorer: React.FC = () => {
   const clearAllFilters = () => {
     setSearchQuery('');
     setDebouncedQuery('');
-    setLocationQuery('');
-    setDebouncedLocation('');
-    setRemote('all');
+    setLocation([]);
+    setRemote([]);
     setExperience([]);
     setDepartment([]);
-    setCompany('all');
-    setMinScore('0');
-    setEmploymentType('all');
+    setCompany([]);
+    setMinScore(0);
+    setEmploymentType([]);
+    setTags([]);
+    setQualityFlags([]);
+    setRecommendations([]);
+    setRequiredSkills([]);
+    setMinYearsExp(0);
+    setMinSalary(0);
+    setMaxSalary(250000);
+    setMinConfidence(0);
+    setDateRange('');
     setSearchParams({});
   };
 
@@ -253,7 +403,470 @@ export const JobExplorer: React.FC = () => {
     );
   };
 
-  const facets = apiResponse?.facets || {};
+  const renderSidebarContents = () => {
+    const facets = facetsData?.facets || {};
+
+    // Filter lists by local search query inside section
+    const filteredDepts = (facets.departments || []).filter((d: any) =>
+      d.label.toLowerCase().includes(deptSearch.toLowerCase())
+    );
+    const filteredExps = (facets.experienceLevels || []);
+    const filteredEmps = (facets.employmentTypes || []);
+    const filteredLocs = (facets.locations || []).filter((l: any) =>
+      l.label.toLowerCase().includes(locSearch.toLowerCase())
+    );
+    const filteredComps = (facets.companies || []).filter((c: any) =>
+      c.label.toLowerCase().includes(skillSearch.toLowerCase())
+    );
+    const filteredSkills = (facets.skills || []).filter((s: any) =>
+      s.label.toLowerCase().includes(skillSearch.toLowerCase())
+    );
+
+    return (
+      <div className="space-y-6">
+        {/* Global Auto-suggest inside Sidebar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search inside filters (Java, Remote, Google...)"
+            value={skillSearch}
+            onChange={(e) => setSkillSearch(e.target.value)}
+            className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
+          />
+          {skillSearch && (
+            <div className="absolute top-full left-0 right-0 z-50 bg-[#111827] border border-[#243147] rounded-xl p-2 mt-1 shadow-2xl max-h-48 overflow-y-auto space-y-1">
+              <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block px-2 pb-1 border-b border-[#243147]">Suggestions</span>
+              {filteredSkills.slice(0, 5).map((s: any) => (
+                <button
+                  key={s.label}
+                  onClick={() => { toggleArrayFilter(requiredSkills, s.label, setRequiredSkills); setSkillSearch(''); }}
+                  className="w-full text-left text-xs text-indigo-300 hover:bg-[#192438] px-2 py-1.5 rounded-lg flex justify-between items-center"
+                >
+                  <span>Skill: {s.label}</span>
+                  <span className="text-[10px] bg-[#090d16] text-[#64748b] px-1.5 py-0.5 rounded">{s.count}</span>
+                </button>
+              ))}
+              {filteredComps.slice(0, 5).map((c: any) => (
+                <button
+                  key={c.label}
+                  onClick={() => { toggleArrayFilter(company, c.label, setCompany); setSkillSearch(''); }}
+                  className="w-full text-left text-xs text-emerald-300 hover:bg-[#192438] px-2 py-1.5 rounded-lg flex justify-between items-center"
+                >
+                  <span>Company: {c.label}</span>
+                  <span className="text-[10px] bg-[#090d16] text-[#64748b] px-1.5 py-0.5 rounded">{c.count}</span>
+                </button>
+              ))}
+              {filteredDepts.slice(0, 5).map((d: any) => (
+                <button
+                  key={d.label}
+                  onClick={() => { toggleArrayFilter(department, d.label, setDepartment); setSkillSearch(''); }}
+                  className="w-full text-left text-xs text-amber-300 hover:bg-[#192438] px-2 py-1.5 rounded-lg flex justify-between items-center"
+                >
+                  <span>Dept: {d.label}</span>
+                  <span className="text-[10px] bg-[#090d16] text-[#64748b] px-1.5 py-0.5 rounded">{d.count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 1. EXPERIENCE LEVEL */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('experience')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Experience Level {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
+            </span>
+            {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.experience && (
+            <div className="space-y-1.5 mt-2 transition-all">
+              <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                {filteredExps.map((f: any) => (
+                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all" title={f.label.includes('Entry') ? '0-2 years' : f.label.includes('Mid') ? '2-5 years' : 'Senior/Manager'}>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={experience.includes(f.label)}
+                        onChange={() => toggleArrayFilter(experience, f.label, setExperience)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.label}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2. DEPARTMENTS */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('department')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Departments {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
+            </span>
+            {openSections.department ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.department && (
+            <div className="space-y-2 mt-2 transition-all">
+              <input
+                type="text"
+                placeholder="Search departments..."
+                value={deptSearch}
+                onChange={(e) => setDeptSearch(e.target.value)}
+                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
+              />
+              <p className="text-[10px] text-indigo-400/80 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 mb-2">
+                ℹ️ Jobs may have multi-department classifications.
+              </p>
+              <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                {filteredDepts.map((f: any) => (
+                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={department.includes(f.label)}
+                        onChange={() => toggleArrayFilter(department, f.label, setDepartment)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.label}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 3. EMPLOYMENT TYPE */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('employment')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Employment Type {employmentType.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{employmentType.length}</span>}
+            </span>
+            {openSections.employment ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.employment && (
+            <div className="space-y-1.5 mt-2 transition-all">
+              {filteredEmps.map((f: any) => (
+                <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={employmentType.includes(f.label)}
+                      onChange={() => toggleArrayFilter(employmentType, f.label, setEmploymentType)}
+                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>{f.label}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                    {f.count}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 4. WORK MODE */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('remote')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Work Mode {remote.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{remote.length}</span>}
+            </span>
+            {openSections.remote ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.remote && (
+            <div className="space-y-1.5 mt-2 transition-all">
+              <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={remote.includes('true')}
+                    onChange={() => toggleArrayFilter(remote, 'true', setRemote)}
+                    className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Remote Only</span>
+                </div>
+              </label>
+              <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={remote.includes('hybrid')}
+                    onChange={() => toggleArrayFilter(remote, 'hybrid', setRemote)}
+                    className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Hybrid</span>
+                </div>
+              </label>
+              <label className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={remote.includes('false')}
+                    onChange={() => toggleArrayFilter(remote, 'false', setRemote)}
+                    className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>On-site</span>
+                </div>
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* 5. LOCATION */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('location')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Location {location.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{location.length}</span>}
+            </span>
+            {openSections.location ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.location && (
+            <div className="space-y-2 mt-2 transition-all">
+              <input
+                type="text"
+                placeholder="Search locations..."
+                value={locSearch}
+                onChange={(e) => setLocSearch(e.target.value)}
+                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
+              />
+              <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
+                {filteredLocs.map((f: any) => (
+                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={location.includes(f.label)}
+                        onChange={() => toggleArrayFilter(location, f.label, setLocation)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.label}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 6. SALARY RANGE SLIDER */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('salary')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Salary Range {(minSalary > 0 || maxSalary < 250000) && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
+            </span>
+            {openSections.salary ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.salary && (
+            <div className="space-y-4 mt-2 transition-all">
+              <div className="flex justify-between items-center text-xs text-[#94a3b8]">
+                <span>Min: ${minSalary.toLocaleString()}</span>
+                <span>Max: ${maxSalary.toLocaleString()}</span>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="250000"
+                  step="5000"
+                  value={maxSalary}
+                  onChange={(e) => setMaxSalary(Number(e.target.value))}
+                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="250000"
+                  step="5000"
+                  value={minSalary}
+                  onChange={(e) => setMinSalary(Number(e.target.value))}
+                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 7. REQUIRED SKILLS */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('skills')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Required Skills {requiredSkills.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{requiredSkills.length}</span>}
+            </span>
+            {openSections.skills ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.skills && (
+            <div className="space-y-2 mt-2 transition-all">
+              <input
+                type="text"
+                placeholder="Search skills..."
+                value={skillSearch}
+                onChange={(e) => setSkillSearch(e.target.value)}
+                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+              <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1.5">
+                {filteredSkills.map((f: any) => (
+                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={requiredSkills.includes(f.label)}
+                        onChange={() => toggleArrayFilter(requiredSkills, f.label, setRequiredSkills)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{f.label}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 8. JOB TAGS */}
+        {facets.tags && facets.tags.length > 0 && (
+          <div className="border-t border-[#243147] pt-4">
+            <button
+              onClick={() => toggleSection('tags')}
+              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+            >
+              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+                Job Tags {tags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{tags.length}</span>}
+              </span>
+              {openSections.tags ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            </button>
+
+            {openSections.tags && (
+              <div className="space-y-1.5 mt-2 transition-all max-h-48 overflow-y-auto custom-scrollbar">
+                {facets.tags?.map((f: any) => (
+                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={tags.includes(f.label)}
+                        onChange={() => toggleArrayFilter(tags, f.label, setTags)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>#{f.label}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                      {f.count}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 9. CLASSIFICATION CONFIDENCE */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('confidence')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              AI Classification Confidence {minConfidence > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{minConfidence}%+</span>}
+            </span>
+            {openSections.confidence ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.confidence && (
+            <div className="mt-2 transition-all">
+              <select
+                value={minConfidence}
+                onChange={(e) => setMinConfidence(Number(e.target.value))}
+                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="0">All Confidence Levels</option>
+                <option value="95">95%+ Extremely Confident</option>
+                <option value="90">90%+ High Confidence</option>
+                <option value="80">80%+ Good Confidence</option>
+                <option value="70">70%+ Standard Confidence</option>
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* 10. AI MATCH RECOMMENDATIONS */}
+        <div className="border-t border-[#243147] pt-4">
+          <button
+            onClick={() => toggleSection('recommendations')}
+            className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
+              Match Badges {recommendations.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{recommendations.length}</span>}
+            </span>
+            {openSections.recommendations ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.recommendations && (
+            <div className="space-y-1.5 mt-2 transition-all">
+              {facets.recommendations?.map((f: any) => (
+                <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={recommendations.includes(f.label)}
+                      onChange={() => toggleArrayFilter(recommendations, f.label, setRecommendations)}
+                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span>{f.label}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
+                    {f.count}
+                  </span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const visibleJobs = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash));
   const hasMore = apiResponse?.pagination?.hasMore;
   const nextCursorToken = apiResponse?.pagination?.nextCursor;
@@ -305,49 +918,109 @@ export const JobExplorer: React.FC = () => {
       </div>
 
       {/* ACTIVE FILTER CHIPS BAR */}
-      {(debouncedQuery || debouncedLocation || remote !== 'all' || experience.length > 0 || department.length > 0 || company !== 'all' || minScore !== '0' || employmentType !== 'all') && (
+      {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || minScore > 0 || employmentType.length > 0 || tags.length > 0 || qualityFlags.length > 0 || recommendations.length > 0 || requiredSkills.length > 0 || minYearsExp > 0 || minSalary > 0 || maxSalary < 250000 || minConfidence > 0 || dateRange) && (
         <div className="flex flex-wrap items-center gap-2 bg-[#111827] border border-[#243147] rounded-xl p-3 shadow-sm">
           <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mr-1">Active Filters:</span>
 
           {debouncedQuery && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
               Query: "{debouncedQuery}" <button onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           )}
 
-          {debouncedLocation && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-              Location: {debouncedLocation} <button onClick={() => { setLocationQuery(''); setDebouncedLocation(''); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+          {location.map(loc => (
+            <span key={loc} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Loc: {loc} <button onClick={() => toggleArrayFilter(location, loc, setLocation)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
-          )}
+          ))}
 
-          {remote !== 'all' && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-              {remote === 'true' ? 'Remote Only' : 'Onsite / Hybrid'} <button onClick={() => setRemote('all')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+          {remote.map(rem => (
+            <span key={rem} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Mode: {rem === 'true' ? 'Remote Only' : rem === 'hybrid' ? 'Hybrid' : 'On-site'} <button onClick={() => toggleArrayFilter(remote, rem, setRemote)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
-          )}
+          ))}
 
           {experience.map(exp => (
-            <span key={exp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-              {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            <span key={exp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Exp: {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
 
           {department.map(dept => (
-            <span key={dept} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-              {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            <span key={dept} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Dept: {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
 
-          {minScore !== '0' && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-              Min {minScore}% Score <button onClick={() => setMinScore('0')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+          {company.map(comp => (
+            <span key={comp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Company: {comp} <button onClick={() => toggleArrayFilter(company, comp, setCompany)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {minScore > 0 && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Min {minScore}% Score <button onClick={() => setMinScore(0)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {employmentType.map(emp => (
+            <span key={emp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Emp: {emp} <button onClick={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {tags.map(t => (
+            <span key={t} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Tag: #{t} <button onClick={() => toggleArrayFilter(tags, t, setTags)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {qualityFlags.map(f => (
+            <span key={f} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Flag: {f} <button onClick={() => toggleArrayFilter(qualityFlags, f, setQualityFlags)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {recommendations.map(r => (
+            <span key={r} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Badge: {r} <button onClick={() => toggleArrayFilter(recommendations, r, setRecommendations)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {requiredSkills.map(s => (
+            <span key={s} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Skill: {s} <button onClick={() => toggleArrayFilter(requiredSkills, s, setRequiredSkills)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {minYearsExp > 0 && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Min {minYearsExp} Yrs Exp <button onClick={() => setMinYearsExp(0)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {(minSalary > 0 || maxSalary < 250000) && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Salary: {minSalary / 1000}k - {maxSalary / 1000}k <button onClick={() => { setMinSalary(0); setMaxSalary(250000); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {minConfidence > 0 && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Conf: {minConfidence}%+ <button onClick={() => setMinConfidence(0)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          )}
+
+          {dateRange && (
+            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              Range: {dateRange} <button onClick={() => setDateRange('')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           )}
 
           <button
             onClick={clearAllFilters}
-            className="ml-auto text-xs font-bold text-rose-400 hover:text-rose-300 underline cursor-pointer"
+            className="ml-auto text-xs font-bold text-rose-400 hover:text-rose-300 underline cursor-pointer hover:no-underline transition-all"
           >
             Clear All
           </button>
@@ -358,9 +1031,9 @@ export const JobExplorer: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* COLLAPSIBLE FACETED LEFT SIDEBAR */}
+        {/* COLLAPSIBLE FACETED LEFT SIDEBAR */}
         <div className="hidden lg:block lg:col-span-3 space-y-6 bg-[#111827] border border-[#243147] rounded-2xl p-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar shadow-lg">
-          
-          <div className="flex items-center justify-between border-b border-[#243147] pb-3">
+          <div className="flex items-center justify-between border-b border-[#243147] pb-3 mb-4">
             <h3 className="text-xs font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
               <Filter className="w-4 h-4 text-indigo-400" /> Faceted Filters
             </h3>
@@ -369,292 +1042,16 @@ export const JobExplorer: React.FC = () => {
             </span>
           </div>
 
-          {/* Department Facets */}
-          <div>
-            <button
-              onClick={() => toggleSection('department')}
-              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-            >
-              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Department {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
-              </span>
-              {openSections.department ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-            </button>
-            
-            {openSections.department && (
-              <div className="space-y-1.5 mt-2 transition-all">
-                <p className="text-[10px] text-indigo-400/80 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20 mb-2">
-                  ℹ️ Jobs may have multi-department classifications.
-                </p>
-                <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-1 pr-1">
-                  {facets.departments?.map((f: any) => (
-                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={department.includes(f.value)}
-                          onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="truncate max-w-[170px]">{f.name}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                        {f.count}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Granular Experience Level Facets */}
-          <div className="border-t border-[#243147] pt-3">
-            <button
-              onClick={() => toggleSection('experience')}
-              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-            >
-              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Experience Level {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
-              </span>
-              {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-            </button>
-
-            {openSections.experience && (
-              <div className="space-y-1.5 mt-2 transition-all">
-                <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-1 pr-1">
-                  {facets.experience?.map((f: any) => (
-                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={experience.includes(f.value)}
-                          onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span className="truncate max-w-[170px]">{f.name}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                        {f.count}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Employment Type Facets */}
-          <div className="border-t border-[#243147] pt-3">
-            <button
-              onClick={() => toggleSection('employment')}
-              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-            >
-              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Employment Type {employmentType !== 'all' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
-              </span>
-              {openSections.employment ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-            </button>
-
-            {openSections.employment && (
-              <div className="space-y-1.5 mt-2 transition-all">
-                {facets.employmentTypes?.map((f: any) => (
-                  <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="empTypeOption"
-                        checked={employmentType === f.value}
-                        onChange={() => setEmploymentType(employmentType === f.value ? 'all' : f.value)}
-                        className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{f.name}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                      {f.count}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Work Mode / Remote Status */}
-          <div className="border-t border-[#243147] pt-3">
-            <button
-              onClick={() => toggleSection('remote')}
-              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-            >
-              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Work Mode {remote !== 'all' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
-              </span>
-              {openSections.remote ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-            </button>
-
-            {openSections.remote && (
-              <div className="space-y-1.5 mt-2 transition-all">
-                {facets.remote?.map((f: any) => (
-                  <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="remoteOption"
-                        checked={remote === f.value}
-                        onChange={() => setRemote(remote === f.value ? 'all' : f.value)}
-                        className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{f.name}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                      {f.count}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Job Tags Facets */}
-          {facets.tags && facets.tags.length > 0 && (
-            <div className="border-t border-[#243147] pt-3">
-              <button
-                onClick={() => toggleSection('tags')}
-                className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-              >
-                <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                  Job Tags {tags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{tags.length}</span>}
-                </span>
-                {openSections.tags ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-              </button>
-
-              {openSections.tags && (
-                <div className="space-y-1.5 mt-2 transition-all max-h-48 overflow-y-auto custom-scrollbar">
-                  {facets.tags?.map((f: any) => (
-                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={tags.includes(f.value)}
-                          onChange={() => toggleArrayFilter(tags, f.value, setTags)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span>#{f.name}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                        {f.count}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
+          {isFacetsLoading ? (
+            <div className="space-y-4 py-4">
+              <div className="h-6 bg-[#1f2937] rounded animate-pulse" />
+              <div className="h-10 bg-[#1f2937] rounded animate-pulse" />
+              <div className="h-6 bg-[#1f2937] rounded animate-pulse" />
+              <div className="h-20 bg-[#1f2937] rounded animate-pulse" />
             </div>
+          ) : (
+            renderSidebarContents()
           )}
-
-          {/* Quality Flags Facets */}
-          {facets.qualityFlags && facets.qualityFlags.length > 0 && (
-            <div className="border-t border-[#243147] pt-3">
-              <button
-                onClick={() => toggleSection('quality')}
-                className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-              >
-                <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                  Quality Flags {qualityFlags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{qualityFlags.length}</span>}
-                </span>
-                {openSections.quality ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-              </button>
-
-              {openSections.quality && (
-                <div className="space-y-1.5 mt-2 transition-all">
-                  {facets.qualityFlags?.map((f: any) => (
-                    <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={qualityFlags.includes(f.value)}
-                          onChange={() => toggleArrayFilter(qualityFlags, f.value, setQualityFlags)}
-                          className="rounded border-[#243147] bg-[#090d16] text-amber-500 focus:ring-amber-500"
-                        />
-                        <span>⚠️ {f.name.replace('_', ' ')}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                        {f.count}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Location Facets */}
-          <div className="border-t border-[#243147] pt-3">
-            <button
-              onClick={() => toggleSection('location')}
-              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-            >
-              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Location {debouncedLocation && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">1</span>}
-              </span>
-              {openSections.location ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-            </button>
-
-            {openSections.location && (
-              <div className="space-y-2 mt-2 transition-all">
-                <input
-                  type="text"
-                  placeholder="Filter by city/country..."
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
-                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
-                />
-                <div className="space-y-1.5 mt-2">
-                  {facets.locations?.map((f: any) => (
-                    <button
-                      key={f.value}
-                      onClick={() => { setLocationQuery(f.value); setDebouncedLocation(f.value); }}
-                      className={`w-full flex items-center justify-between text-xs py-1 px-2 rounded-lg transition-all cursor-pointer ${
-                        debouncedLocation === f.value ? 'bg-indigo-600/20 text-indigo-300 font-bold border border-indigo-500/30' : 'text-[#94a3b8] hover:bg-[#192438] hover:text-white'
-                      }`}
-                    >
-                      <span>{f.name}</span>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]">
-                        {f.count}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Min Match Score */}
-          <div className="border-t border-[#243147] pt-3">
-            <button
-              onClick={() => toggleSection('minScore')}
-              className="w-full flex items-center justify-between py-1 text-left cursor-pointer group"
-            >
-              <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-2">
-                Minimum Match Score {minScore !== '0' && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{minScore}%</span>}
-              </span>
-              {openSections.minScore ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-            </button>
-
-            {openSections.minScore && (
-              <div className="mt-2 transition-all">
-                <select
-                  value={minScore}
-                  onChange={(e) => setMinScore(e.target.value)}
-                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
-                >
-                  <option value="0">All Match Scores</option>
-                  <option value="90">90%+ Top Match</option>
-                  <option value="80">80%+ Strong Match</option>
-                  <option value="70">70%+ Good Match</option>
-                </select>
-              </div>
-            )}
-          </div>
-
         </div>
 
         {/* CENTRAL INFINITE SCROLL JOB FEED */}
@@ -693,11 +1090,15 @@ export const JobExplorer: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-base font-bold text-white">No matching job listings found</h3>
-                <p className="text-xs text-[#94a3b8] mt-1 max-w-sm mx-auto">
-                  {debouncedQuery 
-                    ? `No matches for "${debouncedQuery}". Try searching for: Spring Boot, Backend, Remote, or India.`
-                    : 'Try clearing your active filter tags to view available postings.'}
+                <p className="text-xs text-[#94a3b8] mt-2 max-w-sm mx-auto">
+                  We couldn't find any jobs matching your current criteria. Try these actions to expand your search:
                 </p>
+                <ul className="text-xs text-[#94a3b8] text-left list-disc list-inside max-w-xs mx-auto mt-3 space-y-1.5">
+                  <li>Remove restrictive keyword filters</li>
+                  <li>Broaden experience level checkboxes</li>
+                  <li>Expand location or choose "Remote Worldwide"</li>
+                  <li>Increase your salary limit range</li>
+                </ul>
               </div>
               <div className="flex flex-wrap justify-center gap-2 pt-2">
                 <button
@@ -992,50 +1393,23 @@ export const JobExplorer: React.FC = () => {
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 flex bg-black/70 backdrop-blur-sm lg:hidden">
           <div className="ml-auto w-4/5 max-w-xs bg-[#111827] border-l border-[#243147] p-5 h-full overflow-y-auto space-y-6">
-            <div className="flex justify-between items-center border-b border-[#243147] pb-3">
+            <div className="flex justify-between items-center border-b border-[#243147] pb-3 mb-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-white">Filters</h3>
               <button onClick={() => setMobileFilterOpen(false)}><X className="w-5 h-5 text-white" /></button>
             </div>
 
-            {/* Department */}
-            <div className="space-y-2">
-              <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Department</span>
-              {facets.departments?.map((f: any) => (
-                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] py-1">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={department.includes(f.value)}
-                      onChange={() => toggleArrayFilter(department, f.value, setDepartment)}
-                    />
-                    <span>{f.name}</span>
-                  </div>
-                  <span className="text-[10px] text-[#64748b]">{f.count}</span>
-                </label>
-              ))}
-            </div>
-
-            {/* Experience */}
-            <div className="space-y-2 border-t border-[#243147] pt-4">
-              <span className="text-[11px] font-bold text-[#64748b] uppercase tracking-wider">Experience Level</span>
-              {facets.experience?.map((f: any) => (
-                <label key={f.value} className="flex items-center justify-between text-xs text-[#94a3b8] py-1">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={experience.includes(f.value)}
-                      onChange={() => toggleArrayFilter(experience, f.value, setExperience)}
-                    />
-                    <span>{f.name}</span>
-                  </div>
-                  <span className="text-[10px] text-[#64748b]">{f.count}</span>
-                </label>
-              ))}
-            </div>
+            {isFacetsLoading ? (
+              <div className="space-y-4 py-4 animate-pulse">
+                <div className="h-6 bg-[#1f2937] rounded" />
+                <div className="h-10 bg-[#1f2937] rounded" />
+              </div>
+            ) : (
+              renderSidebarContents()
+            )}
 
             <button
               onClick={() => setMobileFilterOpen(false)}
-              className="w-full bg-indigo-600 font-bold text-xs py-3 rounded-xl text-white cursor-pointer"
+              className="w-full bg-indigo-600 font-bold text-xs py-3 rounded-xl text-white cursor-pointer mt-4"
             >
               Apply Filters
             </button>

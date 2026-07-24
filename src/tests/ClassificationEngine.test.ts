@@ -107,4 +107,77 @@ describe('Production Classification Engine Tests', () => {
     expect(report.jobsClassified).toBeGreaterThan(0);
     expect(report.confidenceDistribution.highPct).toBeGreaterThanOrEqual(0);
   });
+
+  it('should normalize salary, location hierarchy, and skills during ingestion', () => {
+    const { JobNormalizer } = require('../core/JobNormalizer.js');
+    const mockRawJob = {
+      company: 'Google',
+      id: 'job-999',
+      title: 'Backend Node.js Developer',
+      location: 'Bangalore, Karnataka, India',
+      description: 'Requires Node.js and TypeScript. Salary: $120,000 to $160,000.',
+      salary: '$120,000 - $160,000',
+    };
+    const mockCompany = { id: 'google', name: 'Google', enabled: true, priority: 2, interval_minutes: 60, resume_profiles: ['backend'], avg_response_time_ms: 200, total_scrapes: 0, total_failures: 0 };
+    const normalized = JobNormalizer.normalize(mockRawJob, mockCompany);
+
+    expect(normalized.salaryMin).toBe(120000);
+    expect(normalized.salaryMax).toBe(160000);
+    expect(normalized.salaryCurrency).toBe('USD');
+    expect(normalized.requiredSkills).toContain('Node.js');
+    expect(normalized.locationHierarchy).toEqual({
+      country: 'India',
+      state: 'Karnataka',
+      city: 'Bangalore',
+    });
+  });
+
+  it('should calculate cascading facets with sibling-level isolation', () => {
+    const { SearchEngine } = require('../core/SearchEngine.js');
+    const mockJobs = [
+      {
+        job: {
+          company: 'Google',
+          jobHash: 'h1',
+          primaryDepartment: 'Backend Engineering',
+          experienceLevel: 'Entry Level (0–2 Years)',
+          isRemote: true,
+          locationHierarchy: { country: 'India', state: 'Karnataka', city: 'Bangalore' },
+        },
+        score: 95,
+        opportunityScore: 92,
+      },
+      {
+        job: {
+          company: 'Amazon',
+          jobHash: 'h2',
+          primaryDepartment: 'Frontend Engineering',
+          experienceLevel: 'Senior (5–8 Years)',
+          isRemote: false,
+          locationHierarchy: { country: 'India', state: 'Karnataka', city: 'Bangalore' },
+        },
+        score: 75,
+        opportunityScore: 70,
+      },
+    ];
+
+    const criteria = {
+      department: 'Backend Engineering',
+    };
+
+    const facetsResult = SearchEngine.calculateCascadingFacets(mockJobs, criteria);
+    expect(facetsResult.version).toBe('v1');
+    
+    // For experienceLevels facet, the 'department' criteria is NOT excluded (since it is experienceLevels)
+    // So it filters mockJobs down to only h1. Count for Entry Level should be 1.
+    const entryFacet = facetsResult.facets.experienceLevels.find((f: any) => f.label === 'Entry Level (0–2 Years)');
+    expect(entryFacet?.count).toBe(1);
+
+    // For departments facet, 'department' criteria is excluded.
+    // So both h1 and h2 are counted. Counts should be 1 for Backend and 1 for Frontend.
+    const backendFacet = facetsResult.facets.departments.find((f: any) => f.label === 'Backend Engineering');
+    const frontendFacet = facetsResult.facets.departments.find((f: any) => f.label === 'Frontend Engineering');
+    expect(backendFacet?.count).toBe(1);
+    expect(frontendFacet?.count).toBe(1);
+  });
 });

@@ -107,6 +107,17 @@ export interface Job {
     strengths: string[];
     weaknesses: string[];
   };
+  // Metadata-driven precomputed search fields
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  requiredSkills?: string[];
+  preferredSkills?: string[];
+  locationHierarchy?: {
+    country: string;
+    state: string;
+    city: string;
+  };
 }
 
 export interface Application {
