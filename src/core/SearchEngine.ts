@@ -21,6 +21,7 @@ export interface SearchCriteria {
   preferredSkills?: string;
   dateRange?: string;
   salaryCurrency?: string;
+  dateLimit?: string;
 }
 
 export class SearchEngine {
@@ -98,7 +99,13 @@ export class SearchEngine {
           if (l === 'remote worldwide') {
             return isRemote;
           }
-          return city.includes(l) || state.includes(l) || country.includes(l) || rawLoc.includes(l);
+
+          let targetCountry = country;
+          if (targetCountry === 'us' || targetCountry === 'usa') targetCountry = 'united states';
+          if (targetCountry === 'in') targetCountry = 'india';
+          if (targetCountry === 'uk' || targetCountry === 'gb') targetCountry = 'united kingdom';
+
+          return city.includes(l) || state.includes(l) || targetCountry.includes(l) || rawLoc.includes(l);
         });
         if (!matchesAnyLoc) return false;
       }
@@ -247,7 +254,11 @@ export class SearchEngine {
       }
 
       // 15. Freshness/Date Range Match
-      if (criteria.dateRange && criteria.dateRange.trim() !== '') {
+      if (criteria.dateLimit && criteria.dateLimit.trim() !== '') {
+        const limitTime = new Date(criteria.dateLimit).getTime();
+        const postedTime = new Date(job.datePosted || 0).getTime();
+        if (postedTime < limitTime) return false;
+      } else if (criteria.dateRange && criteria.dateRange.trim() !== '') {
         const dateLimit = new Date();
         if (criteria.dateRange === '1d') {
           dateLimit.setHours(0, 0, 0, 0);
@@ -447,14 +458,42 @@ export class SearchEngine {
     const locJobs = getFilteredJobs(['location']);
     const locCounts: Record<string, number> = {};
     for (const item of locJobs) {
-      const isRemote = item.job.isRemote || (item.job.location || '').toLowerCase().includes('remote') || (item.job.locationHierarchy?.city || '').toLowerCase().includes('remote');
-      const isIndia = (item.job.country || '').toUpperCase() === 'IN' || 
-                      (item.job.country || '').toLowerCase().includes('india') ||
-                      (item.job.location || '').toLowerCase().includes('india') ||
-                      (item.job.locationHierarchy?.country || '').toLowerCase() === 'india';
-      
-      const category = isRemote ? 'Remote' : (isIndia ? 'India' : 'Other');
-      locCounts[category] = (locCounts[category] || 0) + 1;
+      const rawLoc = (item.job.location || '').toLowerCase();
+      const isRemote = item.job.isRemote || rawLoc.includes('remote') || (item.job.locationHierarchy?.city || '').toLowerCase().includes('remote');
+      if (isRemote) {
+        locCounts['Remote'] = (locCounts['Remote'] || 0) + 1;
+      }
+
+      const city = item.job.locationHierarchy?.city;
+      if (city && city.toLowerCase() !== 'other' && city.toLowerCase() !== 'remote') {
+        const formattedCity = city.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        if (formattedCity) {
+          locCounts[formattedCity] = (locCounts[formattedCity] || 0) + 1;
+        }
+      }
+
+      const countryVal = item.job.locationHierarchy?.country || item.job.country;
+      if (countryVal && countryVal.toLowerCase() !== 'other') {
+        let name = countryVal.trim();
+        if (name.toUpperCase() === 'IN') name = 'India';
+        else if (name.toUpperCase() === 'US' || name.toUpperCase() === 'USA') name = 'United States';
+        else if (name.toUpperCase() === 'UK' || name.toUpperCase() === 'GB') name = 'United Kingdom';
+        else {
+          name = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        }
+        if (name) {
+          locCounts[name] = (locCounts[name] || 0) + 1;
+        }
+      }
+
+      // Fallback if no structured city/country and not remote
+      if (!city && !countryVal && !isRemote && item.job.location) {
+        const raw = item.job.location.trim().split(',')[0].trim();
+        const formatted = raw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        if (formatted && formatted.toLowerCase() !== 'other') {
+          locCounts[formatted] = (locCounts[formatted] || 0) + 1;
+        }
+      }
     }
 
     // Calculate companies (exclude 'company' criteria)

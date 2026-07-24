@@ -74,7 +74,9 @@ export const JobExplorer: React.FC = () => {
   const [dateRange, setDateRange] = useState<string>(
     searchParams.get('dateRange') || ''
   );
-  const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>('opportunity');
+  const [sortBy, setSortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>(
+    (searchParams.get('sort') as any) || 'newest'
+  );
 
   // Company Favorites & Recently Viewed tracking
   const [favoriteCompanies, setFavoriteCompanies] = useState<string[]>(() => {
@@ -118,6 +120,7 @@ export const JobExplorer: React.FC = () => {
   // Search inside filters state
   const [deptSearch, setDeptSearch] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
+  const [locSearch, setLocSearch] = useState('');
   const [compSearch, setCompSearch] = useState('');
   const [showAllCompanies, setShowAllCompanies] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
@@ -173,6 +176,19 @@ export const JobExplorer: React.FC = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  const calculateDateLimit = (range: string): string => {
+    if (!range) return '';
+    const dateLimit = new Date();
+    if (range === '1d') {
+      dateLimit.setHours(0, 0, 0, 0); // Local Midnight today
+    } else {
+      const days = range === '3d' ? 3 : range === '7d' ? 7 : range === '30d' ? 30 : 365;
+      dateLimit.setDate(dateLimit.getDate() - days);
+      dateLimit.setHours(0, 0, 0, 0); // Local Midnight N days ago
+    }
+    return dateLimit.toISOString();
+  };
+
   // Sync state to URL parameters
   useEffect(() => {
     const params: Record<string, string> = {};
@@ -194,8 +210,11 @@ export const JobExplorer: React.FC = () => {
     if (maxSalary < 250000) params.maxSalary = maxSalary.toString();
     if (salaryCurrency !== 'all') params.salaryCurrency = salaryCurrency;
     if (minConfidence > 0) params.minConfidence = minConfidence.toString();
-    if (dateRange) params.dateRange = dateRange;
-    if (sortBy !== 'opportunity') params.sort = sortBy;
+    if (dateRange) {
+      params.dateRange = dateRange;
+      params.dateLimit = calculateDateLimit(dateRange);
+    }
+    if (sortBy !== 'newest') params.sort = sortBy;
 
     setSearchParams(params, { replace: true });
     setCursor(null);
@@ -268,6 +287,7 @@ export const JobExplorer: React.FC = () => {
         salaryCurrency,
         minConfidence: minConfidence.toString(),
         dateRange,
+        dateLimit: calculateDateLimit(dateRange),
       });
       const res = await fetch(`/api/v1/jobs/facets?${params}`);
       if (!res.ok) throw new Error('Failed to fetch facets');
@@ -322,6 +342,7 @@ export const JobExplorer: React.FC = () => {
         salaryCurrency,
         minConfidence: minConfidence.toString(),
         dateRange,
+        dateLimit: calculateDateLimit(dateRange),
         sort: sortBy,
         pageSize: '25',
         ...(cursor ? { cursor } : {})
@@ -494,7 +515,9 @@ export const JobExplorer: React.FC = () => {
     const maxPossibleYears = facetsData?.ranges?.experienceYears?.max || 15;
 
     // Filter lists by local search query inside section
-    const filteredLocs = facets.locations || [];
+    const filteredLocs = (facets.locations || []).filter((l: any) =>
+      l.label.toLowerCase().includes(locSearch.toLowerCase())
+    );
     
     // Sort companies dynamically
     const rawComps = facets.companies || [];
@@ -1055,7 +1078,15 @@ export const JobExplorer: React.FC = () => {
           {openSections.location && (
             <div className="space-y-3 mt-1.5 transition-all">
               <div className="space-y-1.5">
-                <div className="space-y-0.5">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Search Locations</span>
+                <input
+                  type="text"
+                  placeholder="Filter country, state or city..."
+                  value={locSearch}
+                  onChange={(e) => setLocSearch(e.target.value)}
+                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
+                />
+                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
                   {filteredLocs.map((f: any) => (
                     <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
                       <div className="flex items-center gap-2">

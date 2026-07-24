@@ -457,6 +457,7 @@ function parseSearchCriteria(query: any): SearchCriteria {
     preferredSkills,
     dateRange,
     salaryCurrency,
+    dateLimit,
   } = query;
 
   const rawQuery = (q as string) || (technology as string) || '';
@@ -489,6 +490,7 @@ function parseSearchCriteria(query: any): SearchCriteria {
     preferredSkills: (preferredSkills as string) || '',
     dateRange: (dateRange as string) || '',
     salaryCurrency: (salaryCurrency as string) || 'all',
+    dateLimit: (dateLimit as string) || '',
   };
 }
 
@@ -568,7 +570,7 @@ app.get('/api/v1/jobs/search', authMiddleware, async (req, res) => {
   const startTime = Date.now();
   try {
     const criteria = parseSearchCriteria(req.query);
-    const { sort = 'opportunity', cursor, pageSize = '25' } = req.query;
+    const { sort = 'newest', cursor, pageSize = '25' } = req.query;
     const cacheKey = JSON.stringify({ criteria, sort, cursor, pageSize });
 
     const cached = searchCacheMap.get(cacheKey);
@@ -688,7 +690,7 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       location,
       remote,
       minScore,
-      sort = 'opportunity',
+      sort = 'newest',
       cursor,
       pageSize = '25',
       limit,
