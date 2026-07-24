@@ -221,7 +221,14 @@ export class SearchEngine {
       if (criteria.requiredSkills && criteria.requiredSkills.trim() !== '') {
         const targetSkills = criteria.requiredSkills.toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
         const jobSkills = (job.requiredSkills || []).map((s) => s.toLowerCase());
-        const matchesAnySkill = targetSkills.some((ts) => jobSkills.includes(ts));
+        const descLower = (job.description || '').toLowerCase();
+        const titleLower = (job.title || '').toLowerCase();
+        
+        const matchesAnySkill = targetSkills.some((ts) => 
+          jobSkills.includes(ts) || 
+          titleLower.includes(ts) || 
+          descLower.includes(ts)
+        );
         if (!matchesAnySkill) return false;
       }
 
@@ -426,8 +433,8 @@ export class SearchEngine {
     const locJobs = getFilteredJobs(['location']);
     const locCounts: Record<string, number> = {};
     for (const item of locJobs) {
-      const city = item.job.locationHierarchy?.city || 'Other';
-      locCounts[city] = (locCounts[city] || 0) + 1;
+      const countryVal = item.job.locationHierarchy?.country || item.job.country || 'Other';
+      locCounts[countryVal] = (locCounts[countryVal] || 0) + 1;
     }
 
     // Calculate companies (exclude 'company' criteria)

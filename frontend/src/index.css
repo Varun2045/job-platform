@@ -70,3 +70,20 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
+
+/* Single line double range slider styles */
+input[type="range"].range-slider-single-line {
+  -webkit-appearance: none;
+  background: transparent;
+}
+input[type="range"].range-slider-single-line::-webkit-slider-runnable-track {
+  background: transparent;
+  border: none;
+}
+input[type="range"].range-slider-single-line::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+input[type="range"].range-slider-single-line:focus {
+  outline: none;
+}

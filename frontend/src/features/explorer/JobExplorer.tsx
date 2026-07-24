@@ -751,15 +751,23 @@ export const JobExplorer: React.FC = () => {
                   />
                 </div>
               </div>
-              <div className="space-y-1.5 px-1">
+              <div className="relative h-6 mt-1 px-1">
+                <div className="absolute w-[calc(100%-8px)] h-1 bg-[#243147] rounded-lg top-2.5 left-1 z-0"></div>
+                <div 
+                  className="absolute h-1 bg-indigo-500 rounded-lg top-2.5 z-0"
+                  style={{
+                    left: `calc(4px + ${(minYearsExp / maxPossibleYears) * 100}% * 0.95)`,
+                    width: `${((maxYearsExp - minYearsExp) / maxPossibleYears) * 100}%`
+                  }}
+                ></div>
                 <input
                   type="range"
                   min="0"
                   max={maxPossibleYears}
                   step="1"
                   value={minYearsExp}
-                  onChange={(e) => setMinYearsExp(Number(e.target.value))}
-                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  onChange={(e) => setMinYearsExp(Math.min(maxYearsExp, Number(e.target.value)))}
+                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-25 range-slider-single-line"
                 />
                 <input
                   type="range"
@@ -767,8 +775,8 @@ export const JobExplorer: React.FC = () => {
                   max={maxPossibleYears}
                   step="1"
                   value={maxYearsExp}
-                  onChange={(e) => setMaxYearsExp(Number(e.target.value))}
-                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  onChange={(e) => setMaxYearsExp(Math.max(minYearsExp, Number(e.target.value)))}
+                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-20 range-slider-single-line"
                 />
               </div>
             </div>
@@ -1064,63 +1072,7 @@ export const JobExplorer: React.FC = () => {
           
           {openSections.location && (
             <div className="space-y-3 mt-1.5 transition-all">
-              {/* Quick Remote location tags */}
-              <div className="space-y-1">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Quick Remote Zones</span>
-                <div className="flex flex-wrap gap-1 px-1">
-                  {['Remote Worldwide', 'Remote India', 'Remote US'].map((remZone) => (
-                    <button
-                      key={remZone}
-                      onClick={() => selectLocation(remZone.toLowerCase())}
-                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                        location.includes(remZone.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
-                      }`}
-                    >
-                      {remZone}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Popular Cities */}
-              <div className="space-y-1">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Popular Cities</span>
-                <div className="flex flex-wrap gap-1 px-1">
-                  {['Bangalore', 'San Francisco', 'London', 'New York', 'Seattle'].map((city) => (
-                    <button
-                      key={city}
-                      onClick={() => selectLocation(city.toLowerCase())}
-                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                        location.includes(city.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
-                      }`}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Locations */}
-              {recentLocations.length > 0 && (
-                <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Recent Locations</span>
-                  <div className="flex flex-wrap gap-1 px-1">
-                    {recentLocations.map((locVal) => (
-                      <button
-                        key={locVal}
-                        onClick={() => selectLocation(locVal)}
-                        className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                          location.includes(locVal) ? 'bg-[#1e1b4b] border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147]/50 text-[#94a3b8] hover:text-white'
-                        }`}
-                      >
-                        {locVal}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-1.5 border-t border-[#243147]/30 pt-2">
+              <div className="space-y-1.5">
                 <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Search Locations</span>
                 <input
                   type="text"
@@ -1183,6 +1135,62 @@ export const JobExplorer: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Quick Remote location tags */}
+              <div className="space-y-1 border-t border-[#243147]/30 pt-2">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Quick Remote Zones</span>
+                <div className="flex flex-wrap gap-1 px-1">
+                  {['Remote Worldwide', 'Remote India', 'Remote US'].map((remZone) => (
+                    <button
+                      key={remZone}
+                      onClick={() => selectLocation(remZone.toLowerCase())}
+                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
+                        location.includes(remZone.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
+                      }`}
+                    >
+                      {remZone}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Popular Cities */}
+              <div className="space-y-1">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Popular Cities</span>
+                <div className="flex flex-wrap gap-1 px-1">
+                  {['Bangalore', 'San Francisco', 'London', 'New York', 'Seattle'].map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => selectLocation(city.toLowerCase())}
+                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
+                        location.includes(city.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
+                      }`}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recent Locations */}
+              {recentLocations.length > 0 && (
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Recent Locations</span>
+                  <div className="flex flex-wrap gap-1 px-1">
+                    {recentLocations.map((locVal) => (
+                      <button
+                        key={locVal}
+                        onClick={() => selectLocation(locVal)}
+                        className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
+                          location.includes(locVal) ? 'bg-[#1e1b4b] border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147]/50 text-[#94a3b8] hover:text-white'
+                        }`}
+                      >
+                        {locVal}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1250,24 +1258,32 @@ export const JobExplorer: React.FC = () => {
               </div>
 
               {/* Range sliders */}
-              <div className="space-y-1.5 px-1">
-                <input
-                  type="range"
-                  min="0"
-                  max="250000"
-                  step="5000"
-                  value={maxSalary}
-                  onChange={(e) => setMaxSalary(Number(e.target.value))}
-                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                />
+              <div className="relative h-6 mt-1 px-1">
+                <div className="absolute w-[calc(100%-8px)] h-1 bg-[#243147] rounded-lg top-2.5 left-1 z-0"></div>
+                <div 
+                  className="absolute h-1 bg-indigo-500 rounded-lg top-2.5 z-0"
+                  style={{
+                    left: `calc(4px + ${(minSalary / 250000) * 100}% * 0.95)`,
+                    width: `${((maxSalary - minSalary) / 250000) * 100}%`
+                  }}
+                ></div>
                 <input
                   type="range"
                   min="0"
                   max="250000"
                   step="5000"
                   value={minSalary}
-                  onChange={(e) => setMinSalary(Number(e.target.value))}
-                  className="w-full h-1 bg-[#243147] rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  onChange={(e) => setMinSalary(Math.min(maxSalary, Number(e.target.value)))}
+                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-25 range-slider-single-line"
+                />
+                <input
+                  type="range"
+                  min="0"
+                  max="250000"
+                  step="5000"
+                  value={maxSalary}
+                  onChange={(e) => setMaxSalary(Math.max(minSalary, Number(e.target.value)))}
+                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-20 range-slider-single-line"
                 />
               </div>
             </div>
@@ -1297,8 +1313,16 @@ export const JobExplorer: React.FC = () => {
                   onChange={(e) => setSkillSearch(e.target.value)}
                   className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
                 />
-                {skillSearch && filteredSkills.length > 0 && (
+                {skillSearch && (
                   <div className="absolute top-full left-0 right-0 z-50 bg-[#111827] border border-[#243147] rounded-xl p-1.5 mt-1 shadow-2xl max-h-40 overflow-y-auto space-y-0.5 custom-scrollbar">
+                    {/* Direct Search option */}
+                    <button
+                      onClick={() => { selectSkill(skillSearch.trim()); setSkillSearch(''); }}
+                      className="w-full text-left text-xs text-indigo-400 hover:bg-[#192438] px-2 py-1.5 rounded-lg flex justify-between items-center transition-colors font-bold border-b border-[#243147]/50 mb-1"
+                    >
+                      <span>Search for "{skillSearch.trim()}" in all jobs</span>
+                      <span className="text-[9px] text-[#64748b] bg-[#090d16] px-1.5 py-0.5 rounded-full border border-[#243147]/30">Net Search</span>
+                    </button>
                     {filteredSkills.slice(0, 8).map((s: any) => (
                       <button
                         key={s.label}
@@ -1328,7 +1352,7 @@ export const JobExplorer: React.FC = () => {
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Suggested Skills</span>
                 <div className="flex flex-wrap gap-1 px-1">
-                  {['Java', 'Python', 'React', 'Node.js', 'Docker', 'Kubernetes', 'AWS', 'SQL'].map(popSkill => (
+                  {['AI', 'Generative AI', 'Python', 'React', 'Node.js', 'Docker', 'AWS', 'SQL'].map(popSkill => (
                     <button
                       key={popSkill}
                       onClick={() => selectSkill(popSkill)}

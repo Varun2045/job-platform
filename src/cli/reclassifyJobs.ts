@@ -1,11 +1,14 @@
 import { FileStorage } from '../storage/FileStorage.js';
+import { SupabaseStorage } from '../storage/SupabaseStorage.js';
+import { StorageProvider } from '../storage/StorageProvider.js';
+import { config } from '../config/config.js';
 import { JobNormalizer } from '../core/JobNormalizer.js';
 import { Job } from '../companies/Scraper.js';
 
 console.log('=== Batch Historical Job Reclassification Tool ===\n');
 
 async function run() {
-  const storage = new FileStorage();
+  const storage: StorageProvider = config.isLocal ? new FileStorage() : new SupabaseStorage();
   await storage.initialize();
 
   const jobs = await storage.getAllJobs();
