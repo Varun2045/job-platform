@@ -83,7 +83,21 @@ export class SearchEngine {
         const rawLoc = (job.location || '').toLowerCase();
 
         const matchesAnyLoc = locs.some((l) => {
-          if (l === 'remote worldwide') return job.isRemote || rawLoc.includes('remote');
+          const isRemote = job.isRemote || rawLoc.includes('remote') || city.includes('remote');
+          const isIndia = country === 'in' || country.includes('india') || rawLoc.includes('india') || city.includes('india');
+          
+          if (l === 'remote') {
+            return isRemote;
+          }
+          if (l === 'india') {
+            return isIndia;
+          }
+          if (l === 'other') {
+            return !isRemote && !isIndia;
+          }
+          if (l === 'remote worldwide') {
+            return isRemote;
+          }
           return city.includes(l) || state.includes(l) || country.includes(l) || rawLoc.includes(l);
         });
         if (!matchesAnyLoc) return false;
@@ -433,8 +447,14 @@ export class SearchEngine {
     const locJobs = getFilteredJobs(['location']);
     const locCounts: Record<string, number> = {};
     for (const item of locJobs) {
-      const countryVal = item.job.locationHierarchy?.country || item.job.country || 'Other';
-      locCounts[countryVal] = (locCounts[countryVal] || 0) + 1;
+      const isRemote = item.job.isRemote || (item.job.location || '').toLowerCase().includes('remote') || (item.job.locationHierarchy?.city || '').toLowerCase().includes('remote');
+      const isIndia = (item.job.country || '').toUpperCase() === 'IN' || 
+                      (item.job.country || '').toLowerCase().includes('india') ||
+                      (item.job.location || '').toLowerCase().includes('india') ||
+                      (item.job.locationHierarchy?.country || '').toLowerCase() === 'india';
+      
+      const category = isRemote ? 'Remote' : (isIndia ? 'India' : 'Other');
+      locCounts[category] = (locCounts[category] || 0) + 1;
     }
 
     // Calculate companies (exclude 'company' criteria)

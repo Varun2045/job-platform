@@ -1073,18 +1073,8 @@ export const JobExplorer: React.FC = () => {
           {openSections.location && (
             <div className="space-y-3 mt-1.5 transition-all">
               <div className="space-y-1.5">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Search Locations</span>
-                <input
-                  type="text"
-                  placeholder="Filter country, state or city..."
-                  value={locSearch}
-                  onChange={(e) => setLocSearch(e.target.value)}
-                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
-                />
-                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
-                  {/* Top 5 Locations */}
-                  <span className="text-[9px] font-extrabold text-[#64748b] uppercase tracking-wider block px-1 mb-1">Top Locations</span>
-                  {filteredLocs.slice(0, 5).map((f: any) => (
+                <div className="space-y-0.5">
+                  {filteredLocs.map((f: any) => (
                     <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
                       <div className="flex items-center gap-2">
                         <input
@@ -1100,97 +1090,8 @@ export const JobExplorer: React.FC = () => {
                       </span>
                     </label>
                   ))}
-
-                  {/* Expandable Other Locations Accordion */}
-                  {filteredLocs.length > 5 && (
-                    <div className="mt-2 border-t border-[#243147]/20 pt-1.5">
-                      <button
-                        onClick={() => setShowAllLocations(!showAllLocations)}
-                        className="w-full flex items-center justify-between py-1 text-[10px] font-bold text-[#64748b] hover:text-white focus:outline-none cursor-pointer"
-                      >
-                        <span>{showAllLocations ? 'Hide Other Locations' : `Show Other Locations (${filteredLocs.length - 5})`}</span>
-                        {showAllLocations ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                      </button>
-                      {showAllLocations && (
-                        <div className="space-y-0.5 mt-1 animate-fadeIn">
-                          {filteredLocs.slice(5).map((f: any) => (
-                            <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={location.includes(f.label)}
-                                  onChange={() => selectLocation(f.label)}
-                                  className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span>{f.label}</span>
-                              </div>
-                              <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                                {f.count}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
-
-              {/* Quick Remote location tags */}
-              <div className="space-y-1 border-t border-[#243147]/30 pt-2">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Quick Remote Zones</span>
-                <div className="flex flex-wrap gap-1 px-1">
-                  {['Remote Worldwide', 'Remote India', 'Remote US'].map((remZone) => (
-                    <button
-                      key={remZone}
-                      onClick={() => selectLocation(remZone.toLowerCase())}
-                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                        location.includes(remZone.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
-                      }`}
-                    >
-                      {remZone}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Popular Cities */}
-              <div className="space-y-1">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Popular Cities</span>
-                <div className="flex flex-wrap gap-1 px-1">
-                  {['Bangalore', 'San Francisco', 'London', 'New York', 'Seattle'].map((city) => (
-                    <button
-                      key={city}
-                      onClick={() => selectLocation(city.toLowerCase())}
-                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                        location.includes(city.toLowerCase()) ? 'bg-indigo-600/30 border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
-                      }`}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Locations */}
-              {recentLocations.length > 0 && (
-                <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider">Recent Locations</span>
-                  <div className="flex flex-wrap gap-1 px-1">
-                    {recentLocations.map((locVal) => (
-                      <button
-                        key={locVal}
-                        onClick={() => selectLocation(locVal)}
-                        className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                          location.includes(locVal) ? 'bg-[#1e1b4b] border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147]/50 text-[#94a3b8] hover:text-white'
-                        }`}
-                      >
-                        {locVal}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
