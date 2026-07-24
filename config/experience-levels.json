@@ -46,7 +46,7 @@
       "id": "senior",
       "displayName": "Senior (5–8 Years)",
       "legacyBucket": "Senior",
-      "explicitPatterns": ["senior", "sr", "sr.", "sde iii", "swe iii", "engineer iii", "5-8 years", "5+ years", "6+ years", "7+ years"],
+      "explicitPatterns": ["senior", "sr", "sr.", "lead", "tech lead", "technical lead", "lead engineer", "lead developer", "sde iii", "swe iii", "engineer iii", "5-8 years", "5+ years", "6+ years", "7+ years"],
       "minYears": 5,
       "maxYears": 8
     },
