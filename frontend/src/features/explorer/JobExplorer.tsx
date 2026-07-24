@@ -628,19 +628,45 @@ export const JobExplorer: React.FC = () => {
                       </div>
                     </div>
 
+                    {/* Recommendation Badges & Tags */}
+                    {((job.recommendationBadges && job.recommendationBadges.length > 0) || (job.tags && job.tags.length > 0) || job.primaryDepartment) && (
+                      <div className="flex flex-wrap gap-1.5 mb-2.5">
+                        {job.recommendationBadges?.map((b: string) => (
+                          <span key={b} className="text-[10px] bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 text-purple-300 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Sparkles className="w-2.5 h-2.5 text-purple-400" /> {b}
+                          </span>
+                        ))}
+                        {job.primaryDepartment && (
+                          <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-semibold px-2 py-0.5 rounded-full">
+                            {job.primaryDepartment}
+                          </span>
+                        )}
+                        {job.tags?.slice(0, 3).map((t: string) => (
+                          <span key={t} className="text-[10px] bg-[#1a2436] border border-[#293a54] text-[#94a3b8] font-medium px-2 py-0.5 rounded-full">
+                            #{t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Metadata Pills */}
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className="text-xs bg-[#192336] border border-[#273752] px-2.5 py-0.5 rounded-lg text-[#94a3b8] flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-indigo-400" /> {job.location}
                       </span>
                       <span className="text-xs bg-[#192336] border border-[#273752] px-2.5 py-0.5 rounded-lg text-[#94a3b8] flex items-center gap-1">
-                        <Briefcase className="w-3 h-3 text-indigo-400" /> {job.experience || 'Full Time'}
+                        <Briefcase className="w-3 h-3 text-indigo-400" /> {job.experienceLevel || job.experience || 'Full Time'}
                       </span>
                       {job.isRemote && (
                         <span className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                           <Globe className="w-3 h-3" /> Remote
                         </span>
                       )}
+                      {job.qualityFlags?.map((q: string) => (
+                        <span key={q} className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 font-medium px-2.5 py-0.5 rounded-lg">
+                          ⚠️ {q.replace('_', ' ')}
+                        </span>
+                      ))}
                     </div>
 
                     {/* Footer Actions */}
@@ -727,8 +753,52 @@ export const JobExplorer: React.FC = () => {
                   <span className="bg-[#090d16] border border-[#243147] text-[#94a3b8] font-bold px-3 py-1 rounded-full text-xs">
                     {detailData.bestScore}% Match
                   </span>
+                  {detailData.job.confidenceBreakdown && (
+                    <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold px-3 py-1 rounded-full text-xs">
+                      ⚡ {detailData.job.confidenceBreakdown.overall}% Confidence
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Explainable AI Match Breakdown */}
+              {(detailData.job.whyRecommended || detailData.job.scoreExplanation) && (
+                <div className="bg-[#090d16] border border-[#243147] rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" /> Explainable AI Match Score Breakdown
+                    </span>
+                    <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                      v1 Engine
+                    </span>
+                  </div>
+
+                  {/* Why Recommended Bullets */}
+                  {detailData.job.whyRecommended && detailData.job.whyRecommended.length > 0 && (
+                    <div className="space-y-1">
+                      {detailData.job.whyRecommended.map((bullet: string, idx: number) => (
+                        <div key={idx} className="text-xs text-emerald-300 font-medium flex items-center gap-1.5">
+                          <span>✓</span>
+                          <span>{bullet}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Score Breakdown Bar */}
+                  {detailData.job.scoreExplanation?.components && (
+                    <div className="space-y-1.5 pt-2 border-t border-[#1e2a3e]">
+                      <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider">Weighted Component Match:</span>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-[#94a3b8]">
+                        <div>Skills (35%): <span className="text-white font-bold">{detailData.job.scoreExplanation.components.skills}%</span></div>
+                        <div>Experience (20%): <span className="text-white font-bold">{detailData.job.scoreExplanation.components.experience}%</span></div>
+                        <div>Department (10%): <span className="text-white font-bold">{detailData.job.scoreExplanation.components.department}%</span></div>
+                        <div>Location (10%): <span className="text-white font-bold">{detailData.job.scoreExplanation.components.location}%</span></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Action Buttons Grid */}
               <div className="grid grid-cols-3 gap-2">
