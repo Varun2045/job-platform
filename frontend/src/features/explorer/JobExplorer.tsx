@@ -118,20 +118,10 @@ export const JobExplorer: React.FC = () => {
   // Search inside filters state
   const [deptSearch, setDeptSearch] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
-  const [locSearch, setLocSearch] = useState('');
   const [compSearch, setCompSearch] = useState('');
   const [showAllCompanies, setShowAllCompanies] = useState(false);
   const [showAllSkills, setShowAllSkills] = useState(false);
   const [companySort, setCompanySort] = useState<'count' | 'alpha'>('count');
-  const [showAllLocations, setShowAllLocations] = useState(false);
-  const [recentLocations, setRecentLocations] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('recent_locations');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
   const [recentSkills, setRecentSkills] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('recent_skills');
@@ -474,11 +464,6 @@ export const JobExplorer: React.FC = () => {
 
   const selectLocation = (locVal: string) => {
     toggleArrayFilter(location, locVal, setLocation);
-    setRecentLocations(prev => {
-      const next = [locVal, ...prev.filter(l => l !== locVal)].slice(0, 5);
-      localStorage.setItem('recent_locations', JSON.stringify(next));
-      return next;
-    });
   };
 
   const selectSkill = (skillVal: string) => {
