@@ -111,10 +111,10 @@ const hasResend = !!process.env.RESEND_API_KEY;
 // Check production prerequisites
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 const isProduction = isGitHubActions || process.env.NODE_ENV === 'production';
+const isFileStorageMode = process.env.STORAGE_MODE === 'file' || !hasSupabase;
 
-// In production/GitHub Actions we fail fast if secrets are missing.
-// Locally, if they are missing, we fall back to FileStorage and disable email (Offline mode).
-if (isProduction && process.env.IS_LOCAL !== 'true') {
+// In production, only require Supabase keys if STORAGE_MODE is explicitly set to supabase or keys are provided
+if (isProduction && !isFileStorageMode && process.env.IS_LOCAL !== 'true') {
   validateEnv('SUPABASE_URL', true);
   validateEnv('SUPABASE_SERVICE_KEY', true);
   if (process.env.RESEND_API_KEY) {
@@ -143,7 +143,7 @@ export const config: Config = {
     ruleEngine: process.env.FEATURE_RULE_ENGINE !== 'false',
     weightedKeywords: process.env.FEATURE_WEIGHTED_KEYWORDS !== 'false',
   },
-  isLocal: process.env.IS_LOCAL === 'true' || !hasSupabase,
+  isLocal: isFileStorageMode,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   googleRedirectUri: process.env.GOOGLE_REDIRECT_URI,
