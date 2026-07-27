@@ -5,10 +5,10 @@
   "main": "dist/core/server.js",
   "type": "module",
   "engines": {
-    "node": ">=18.0.0"
+    "node": "18.x"
   },
   "scripts": {
-    "build": "tsc && npm --prefix frontend run build",
+    "build": "npm --prefix frontend install && tsc && npm --prefix frontend run build",
     "start": "node dist/core/server.js",
     "server": "node dist/core/server.js",
     "prod:start": "npm run build && npm start",
