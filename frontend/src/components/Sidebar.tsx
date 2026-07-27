@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Search, Building2, Hammer, ClipboardList, FileText, Mail, Globe, Brain, Bot, Code, DollarSign, Handshake, Settings, Shield, LogOut, Bell, Check, ChevronLeft, ChevronRight, X, Calendar, Activity, Trophy } from 'lucide-react';
+import { Home, Search, Building2, Hammer, ClipboardList, FileText, Mail, Globe, Brain, Bot, Code, DollarSign, Handshake, Settings, Shield, LogOut, Bell, Check, ChevronLeft, ChevronRight, X, Calendar, Activity, Trophy, Download, Layers } from 'lucide-react';
 
 interface SidebarProps {
   onLogout: () => void;
@@ -70,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
       category: 'Job Search',
       items: [
         { name: 'Job Explorer', path: '/explorer', icon: Search },
+        { name: 'Supported ATS', path: '/ats-explorer', icon: Layers },
         { name: 'Company Monitor', path: '/companies', icon: Building2 },
         { name: 'Scraper Builder', path: '/scraper-builder', icon: Hammer }
       ]
@@ -79,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
       items: [
         { name: 'Applications', path: '/tracker', icon: ClipboardList },
         { name: 'Resume Manager', path: '/resumes', icon: FileText },
+        { name: 'ATS Heatmap', path: '/ats-heatmap', icon: Brain },
         { name: 'Cover Letter Builder', path: '/cover-letter-builder', icon: Mail },
         { name: 'Portfolio Exporter', path: '/profile-builder', icon: Globe }
       ]
@@ -111,12 +113,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
     {
       category: 'Networking',
       items: [
+        { name: 'Recruiter CRM', path: '/crm', icon: Handshake },
         { name: 'Referrals', path: '/referrals', icon: Handshake }
       ]
     },
     {
       category: 'Administration',
       items: [
+        { name: 'Analytics', path: '/analytics', icon: Activity },
+        { name: 'Export Center', path: '/export-center', icon: Download },
         { name: 'Settings', path: '/settings', icon: Settings },
         { name: 'Admin Console', path: '/admin', icon: Shield }
       ]

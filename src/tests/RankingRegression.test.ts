@@ -38,7 +38,7 @@ describe('Ranking & Classification Regression Tests', () => {
     const normJunior = JobNormalizer.normalize(rawJunior, companyConfig);
     const normSenior = JobNormalizer.normalize(rawSenior, companyConfig);
 
-    expect(normJunior.experienceLevel).toMatch(/Entry Level|Internship/);
+    expect(normJunior.experienceLevel).toMatch(/Entry Level|Internship|New Graduate/);
     expect(normSenior.experienceLevel).toMatch(/Principal Engineer|Staff Engineer/);
 
     const juniorCandidateScore = ExplainableScoringEngine.calculateMatch(

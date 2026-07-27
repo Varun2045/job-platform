@@ -26,6 +26,12 @@ import { CheatsheetDashboard } from './features/flashcards/CheatsheetDashboard.j
 import { ProfileBuilder } from './features/profile-builder/ProfileBuilder.js';
 import { ErrorBoundary } from './components/ErrorBoundary.js';
 import { Menu } from 'lucide-react';
+import { AtsHeatmapView } from './features/resumes/AtsHeatmapView.js';
+import { RecruiterCrmView } from './features/networking/RecruiterCrmView.js';
+import { NotificationSettingsView } from './features/settings/NotificationSettingsView.js';
+import { AnalyticsDashboardView } from './features/analytics/AnalyticsDashboardView.js';
+import { ExportCenterView } from './features/export/ExportCenterView.js';
+import { AtsExplorerView } from './features/ats/AtsExplorerView.js';
 
 const queryClient = new QueryClient();
 
@@ -127,6 +133,12 @@ export const App: React.FC = () => {
                 <Route path="/cheatsheets" element={<CheatsheetDashboard />} />
                 <Route path="/flashcards" element={<FlashcardDashboard />} />
                 <Route path="/flashcard-achievements" element={<FlashcardAchievements />} />
+                <Route path="/ats-heatmap" element={<AtsHeatmapView />} />
+                <Route path="/crm" element={<RecruiterCrmView />} />
+                <Route path="/notification-settings" element={<NotificationSettingsView />} />
+                <Route path="/analytics" element={<AnalyticsDashboardView />} />
+                <Route path="/export-center" element={<ExportCenterView />} />
+                <Route path="/ats-explorer" element={<AtsExplorerView />} />
                 <Route path="/profile-builder" element={<ProfileBuilder />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

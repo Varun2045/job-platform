@@ -1,217 +1,134 @@
-# Job Monitor Platform
+# 🚀 Job Search Tracker — AI Career Operating System (v2.0)
 
-An enterprise-grade, autonomous career copilot and job monitoring system featuring intelligent resume matching, skill gap analytics, automated apply workflows, recruiter CRM tracking, and multi-channel notification pipelines.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-51%20Suites%20%7C%20223%20Passing-success.svg)]()
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)](https://www.postgresql.org/)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-
----
-
-## Project Overview
-
-Modern job hunting is fragmented and highly manual. The **Job Monitor Platform** bridges this gap by acting as a personal, autonomous career agent. Instead of checking job boards, the system actively crawls them (supporting Greenhouse, Lever, and Workday portals). It normalizes postings, calculates an algorithmic fit score using tokenization and TF-IDF cosine-similarity NLP, detects technical skill gaps, drafts learning syllabi, tracks outreach CRM contacts, and leverages a background queue to auto-apply to target openings.
-
----
-
-## Features
-
-- **Auto Apply Engine**: Automated form filler for Lever and Greenhouse portals with queue scheduling, payload validation, and retry handles.
-- **Resume Version Manager**: Manage multiple resumes (Backend, Frontend, FullStack, AI, ML) and auto-recommend matching profiles.
-- **LLM Resume Tailoring & Cover Letters**: Analyze technical skill gaps to optimize summaries, bullets, and export PDF/Markdown cover letters.
-- **Recruiter CRM**: Log recruiter conversations, follow-up alerts, LinkedIn connections import, and touchpoints history.
-- **Calendar Integrations**: Generate standard RFC-5545 compliant `.ics` calendar invitation files for interviews and calls.
-- **Opportunity Rankings & Portfolio Recommender**: Rank jobs by weighted opportunity fit scores and suggest matching GitHub repos.
-- **Autonomous Scraper Queue**: Priority-based task runner scraping Lever, Greenhouse, Workday, and other career boards.
-- **Express REST API & Analytics**: Rich metrics exporter dashboard, feature flags switcher, and exports center.
+**Job Search Tracker** is an open-source, full-stack **AI Career Operating System** engineered to streamline, organize, and automate every phase of the modern technology job search. Featuring a Manifest V3 Chrome Extension, a 3-tier Job Inbox queue, per-job AI Workspaces, zero-fabrication ATS resume tailoring, tone-tailored cover letter generation, multi-channel daily career digests, calendar `.ics` event sync, and empirical conversion analytics.
 
 ---
 
-## Technology Stack
-
-- **Core**: TypeScript, Node.js (ESM), Express 5
-- **Frontend**: React 19, Vite v8, TailwindCSS v4, TanStack React Query v5, Recharts
-- **Scraping**: Playwright, Cheerio, HttpClient
-- **Database**: Supabase / Postgres (with FileStorage local mode flat-file fallback)
-- **Email Alerts**: Resend API
-- **Testing**: Jest, ts-jest, Playwright (E2E)
+## 📑 Table of Contents
+- [✨ Key Features](#-key-features)
+- [🏗️ System Architecture](#️-system-architecture)
+- [🧩 Chrome Extension (Manifest V3)](#-chrome-extension-manifest-v3)
+- [🧠 Zero-Fabrication AI Workspaces](#-zero-fabrication-ai-workspaces)
+- [🔒 Security & SSRF Defense](#-security--ssrf-defense)
+- [🛠️ Technology Stack](#️-technology-stack)
+- [🚀 Quick Start & Installation](#-quick-start--installation)
+- [🐳 Docker Deployment](#-docker-deployment)
+- [🧪 Testing & Quality Assurance](#-testing--quality-assurance)
+- [❓ FAQ](#-faq)
+- [📄 License](#-license)
 
 ---
 
-## Architecture Overview
+## ✨ Key Features
 
-The system runs on a decoupled React SPA frontend and a TypeScript Node.js backend. To prevent scraping conflicts between duplicate instances in production, it utilizes Postgres distributed advisory locks.
+- 🧩 **Manifest V3 Chrome Extension**: One-click job capture from LinkedIn, Greenhouse, Lever, Workday, Ashby, Wellfound, SmartRecruiters, Taleo, Indeed, and Glassdoor with offline queueing (`chrome.storage.local`).
+- 📥 **Job Inbox Queue**: Intermediate staging queue separating raw web captures from active application cards.
+- 📋 **11-Stage Kanban Tracker**: Visual drag-and-drop workflow tracking applications through 11 customizable lifecycle stages with fractional sorting algorithms.
+- 🧠 **Zero-Fabrication AI Workspaces**: Keyword match density heatmaps, ATS bullet optimization suggestions, and DSA/system design interview topic extraction without experience hallucination.
+- ✉️ **Tone-Tailored Cover Letter Generator**: Generates customized cover letter drafts matching specific company profiles with customizable tone and length constraints.
+- 🔔 **Multi-Channel Daily Career Digest**: Scheduled digest dispatching notifications via Email, Slack Webhooks (with SSRF protection), and Telegram Bots.
+- 📅 **Calendar `.ics` Sync**: One-click RFC-5545 calendar invite export for Google Calendar, Apple Calendar, and Outlook.
+- 📊 **Empirical Conversion Analytics**: Real-time insights tracking application response rates, interview conversion percentages, and top-performing resume profiles.
 
-For more details, view the [Architecture Guide](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/ARCHITECTURE.md).
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
-graph TD
-    A[Scheduler / Orchestrator] --> B[Scraper Registry]
-    B --> C[Playwright Scraper]
-    B --> D[Cheerio Scraper]
-    A --> E[Job Normalizer]
-    E --> F[Resume Matcher]
-    F --> G[Storage Provider]
-    G --> H[FileStorage local]
-    G --> I[Supabase DB cloud]
-    A --> J[Notification Dispatcher]
+flowchart TD
+    Ext[Chrome Manifest V3 Extension] -->|Captured Jobs| API[Express REST API /api/v1]
+    Client[React Vite Frontend] -->|HTTP / JSON| API
+
+    subgraph CoreEngine [Backend Domain Layer]
+        API --> Inbox[JobInboxService]
+        API --> Kanban[KanbanService]
+        API --> Tailor[AiResumeTailorEngine]
+        API --> Cover[AiCoverLetterEngine]
+        API --> Digest[DailyDigestEngine]
+        API --> Insights[AiInsightsEngine]
+    end
+
+    subgraph StorageLayer [Dual Storage Provider Pattern]
+        Inbox & Kanban & Tailor & Cover & Digest & Insights --> Storage[StorageProvider Interface]
+        Storage -->|Local Mode| FileStorage[FileStorage - Local JSON]
+        Storage -->|Cloud Mode| Supabase[SupabaseStorage - PostgreSQL]
+    end
 ```
 
 ---
 
-## Installation & Setup
+## 🛠️ Technology Stack
 
-### Prerequisites
-- Node.js >= 20.0.0
-- npm >= 9.0.0
-
-### Steps
-1. Clone and install dependencies:
-   ```bash
-   git clone https://github.com/your-username/job-monitor.git
-   cd job-monitor
-   npm install
-   ```
-2. Configure environment variables in `.env` (see table below).
-3. Build the project:
-   ```bash
-   npm run build
-   ```
+- **Frontend**: React 18, TypeScript, Vite, React Query, Lucide Icons, Vanilla CSS Design System
+- **Backend**: Node.js, Express, TypeScript, REST APIs
+- **Database / Persistence**: PostgreSQL (Supabase) & Local JSON File Storage
+- **Browser Extension**: Chrome Extension Manifest V3 (Service Workers, Content Scripts)
+- **DevOps & Testing**: Docker, Docker Compose, Jest, ESLint, GitHub Actions
 
 ---
 
-## Local Development
+## 🚀 Quick Start & Installation
 
-Run the API server, TypeScript compiler watcher, and frontend in parallel:
+### 1. Clone & Install Dependencies
 ```bash
-npm run dev:start
+git clone https://github.com/Varun2045/job-search-tracker.git
+cd job-search-tracker
+npm install
+npm --prefix frontend install
 ```
 
-Run test suite sequentially (due to shared FileStorage assets during local testing runs):
+### 2. Environment Configuration
+Copy `.env.example` to `.env`:
 ```bash
-npm test -- --runInBand
+PORT=3000
+STORAGE_MODE=file
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
 ```
 
-### Local Development Authentication
-
-When running in local offline mode (`IS_LOCAL=true` / absence of Supabase environment secrets), the application uses mock credentials for role check testing:
-
+### 3. Run Locally
 ```bash
-# Local Development Credentials
-LOCAL_ADMIN_EMAIL=admin@jobmonitor.com
-LOCAL_ADMIN_PASSWORD=admin123
-LOCAL_USER_EMAIL=user@jobmonitor.com
-LOCAL_USER_PASSWORD=user123
-LOCAL_VIEWER_EMAIL=viewer@jobmonitor.com
-LOCAL_VIEWER_PASSWORD=viewer123
+# Start backend REST API server
+npm run dev
+
+# Start frontend development client (in another terminal)
+npm --prefix frontend run dev
 ```
 
-- **Admin:** admin@jobmonitor.com / admin123
-- **User:** user@jobmonitor.com / user123  
-- **Viewer:** viewer@jobmonitor.com / viewer123
-
 ---
 
-## Environment Variables
-
-| Variable | Description | Default | Required |
-| -------- | ----------- | ------- | -------- |
-| `PORT` | API Server listening port | `3000` | No |
-| `NODE_ENV` | Mode (`development` or `production`) | `development` | No |
-| `SUPABASE_URL` | Supabase Cloud Database URL | - | Yes (Prod) |
-| `SUPABASE_SERVICE_KEY` | Supabase Service API Key | - | Yes (Prod) |
-| `RESEND_API_KEY` | Resend SMTP API Key | - | Yes (Prod) |
-| `NOTIFICATION_EMAIL_SENDER` | Email address sending digests | `alerts@yourdomain.com` | Yes (Prod) |
-| `NOTIFICATION_EMAIL_RECIPIENT`| Candidate email receiving digests| - | Yes (Prod) |
-
----
-
-## Docker Deployment
-
-A `Dockerfile` and `docker-compose.yml` are provided in the repository root.
-
-1. **Build Container**:
-   ```bash
-   docker build -t job-monitor:latest .
-   ```
-2. **Run Container**:
-   ```bash
-   docker run -d \
-     --name job-monitor \
-     -p 3000:3000 \
-     --env-file .env \
-     job-monitor:latest
-   ```
-
-*Note: Headless environments must verify that Playwright Chromium dependencies are installed: `npx playwright install --with-deps chromium`.*
-
----
-
-## Heroku Deployment
-
-Deploy your platform to a Heroku Basic Dyno ($7/mo) using the pre-configured container stack (`heroku.yml` + `Dockerfile`):
-
-### Automated One-Click Command
-Run the interactive deployment script which executes pre-push verification (`npm run lint`, `npm run build`, `npm test`) locally before deploying:
+## 🧪 Testing & Quality Assurance
 
 ```bash
-# Command Prompt
-npm run deploy:heroku
+# Run backend unit & integration tests
+npm test
 
-# PowerShell
-.\deploy_heroku.ps1
-```
+# Run TypeScript typecheck
+npx tsc --noEmit
 
-### Manual Deployment Steps
-1. Set stack to container:
-   ```bash
-   heroku stack:set container -a <your-app-name>
-   ```
-2. Configure basic environment flags:
-   ```bash
-   heroku config:set NODE_ENV=production IS_LOCAL=false FEATURE_PLAYWRIGHT=true -a <your-app-name>
-   ```
-3. Push to Heroku git remote:
-   ```bash
-   git push heroku main
-   ```
-
----
-
-## Documentation Index
-
-Comprehensive reference guides are located under the `/docs` directory:
-
-1. **[Product Requirements (PRD)](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/PRD.md)**: Details vision, personas, requirements, success metrics, and scope.
-2. **[Architecture Guide](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/ARCHITECTURE.md)**: Diagrams system components, matching heuristics, and database workflows.
-3. **[Engineering Rules](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/RULES.md)**: Coding standards, conventions, logging schemas, security rules, and code review checklists.
-4. **[Development Phases](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/PHASES.md)**: History of implementation stages from MVP to current automation upgrades.
-5. **[UI Design System](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/DESIGN.md)**: Dark theme variables, glassmorphic layout components, and typography.
-6. **[Project Memory](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/MEMORY.md)**: Active project state ledger, recent fixes, schema summaries, and current technical debt.
-7. **[Directory Structure](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/FOLDER_STRUCTURE.md)**: Directory maps and file cleanup rules.
-8. **[REST API Reference](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/API.md)**: Endpoints query models, JSON payload examples, and auth rules.
-9. **[Database Schema](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/DATABASE.md)**: Table definitions, RLS policies, trigger rules, and migration indices.
-10. **[Feature Inventory](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/FEATURES.md)**: List of all capabilities, code locations, and planned updates.
-11. **[Technology Stack](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/TECH_STACK.md)**: Framework dependencies and packages usage purposes.
-12. **[Changelog](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/CHANGELOG.md)**: Details of changes added in v1.0.0 through v5.0.0 releases.
-
----
-
-## CLI Usage
-
-Command-line utilities are exposed via `dist/cli/admin.js`:
-
-```bash
-# Force runs the scraper orchestrator
-npm run monitor
-
-# Show system health metrics
-npm run health
-
-# Show scrape run statistics
-npm run stats
+# Run ESLint validation
+npm run lint
 ```
 
 ---
 
-## License
+## ❓ FAQ
 
-This project is licensed under the [MIT License](./LICENSE).
+**Q: Does the AI generator invent candidate experience?**  
+*A: No. All AI engines operate under strict zero-fabrication guardrails, extracting keywords and rephrasing existing candidate skills without inventing titles, dates, or false metrics.*
+
+**Q: Can I run this locally without PostgreSQL?**  
+*A: Yes! By setting `STORAGE_MODE=file` in your `.env` file, the application operates entirely using local JSON files.*
+
+---
+
+## 📄 License
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.

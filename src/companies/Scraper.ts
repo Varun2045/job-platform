@@ -124,9 +124,11 @@ export interface Application {
   jobHash: string;
   company: string;
   jobId: string;
-  status: 'New' | 'Saved' | 'Applied' | 'OA Scheduled' | 'OA Completed' | 'Interview' | 'Offer' | 'Rejected' | 'Closed';
+  status: string;
+  stageOrder?: number;
   appliedDate?: string | null;
   resumeUsed?: string | null;
+  resumeProfileId?: string | null;
   notes?: string | null;
   lastUpdated: string;
   title?: string;

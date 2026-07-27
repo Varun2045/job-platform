@@ -43,6 +43,7 @@ import { FollowUpAssistant } from './FollowUpAssistant.js';
 import { AssistantChatService } from './AssistantChatService.js';
 import { FlashcardGenerator } from './FlashcardGenerator.js';
 import { CheatsheetGenerator } from './cheatsheet.js';
+import { createApiV1Router } from '../routes/apiV1Routes.js';
 
 // Version 5.0.0 Intelligent Application Automation Imports
 import { AutoApplyEngine } from './AutoApplyEngine.js';
@@ -252,7 +253,6 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
     } catch {}
   }
 
-  // Fallback guest user mode for unauthenticated callers so endpoints load cleanly with 200 OK
   (req as any).user = {
     id: 'guest-user-00000000-0000-0000-0000-000000000000',
     email: 'guest@jobmonitor.com',
@@ -260,6 +260,9 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
   };
   return next();
 };
+
+// Mount Version 1.1 REST API Routes
+app.use('/api/v1', authMiddleware, createApiV1Router(storage));
 
 // Observability & Classification Metrics Endpoint
 app.get('/api/metrics/classification', (req, res) => {

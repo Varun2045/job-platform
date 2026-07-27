@@ -11,6 +11,26 @@ export interface CalendarEventOptions {
 }
 
 export class CalendarService {
+  private storage?: any;
+
+  constructor(storage?: any) {
+    this.storage = storage;
+  }
+
+  public async getEvents(userId: string): Promise<any[]> {
+    if (this.storage && typeof this.storage.getCalendarEvents === 'function') {
+      return this.storage.getCalendarEvents(userId);
+    }
+    return [];
+  }
+
+  public async saveEvent(userId: string, options: CalendarEventOptions): Promise<any> {
+    if (this.storage && typeof this.storage.saveCalendarEvent === 'function') {
+      await this.storage.saveCalendarEvent(userId, options);
+    }
+    return options;
+  }
+
   /**
    * Generates a compliant RFC-5545 ICS calendar event string.
    */

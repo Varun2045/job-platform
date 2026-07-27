@@ -7,6 +7,38 @@
 - **Current Version**: v5.0.0
 - **Cross-References**: [PHASES.md](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/PHASES.md), [PRD.md](file:///c:/Users/varun/Downloads/Job%20Monitor/docs/PRD.md)
 
+## [v2.0.0] - 2026-07-28
+
+### Added
+- **AI Career Operating System**: Complete evolution into an AI-powered job search platform combining automated discovery, evaluation, application preparation, progress tracking, and offer negotiation.
+- **Job Inbox Architecture**: Introduced captured job queue separation (`JobInboxService`) allowing users to save jobs via Chrome Extension into an intermediate inbox before promoting to active Kanban tracker cards.
+- **AI Job Workspace**: Per-job AI workspace consolidating keyword heatmap density, ATS bullet point optimizations, DSA/system design interview preparation topics, and tone-tailored cover letter drafts.
+- **Chrome Manifest V3 Extension**: Integrated browser extension supporting 10 major job boards (LinkedIn, Greenhouse, Lever, Workday, Ashby, Wellfound, SmartRecruiters, Taleo, Indeed, Glassdoor) with encrypted offline capture queue (`chrome.storage.local`).
+- **Zero-Fabrication AI Tools**: Built `AiResumeTailorEngine` and `AiCoverLetterEngine` with strict prompt safety guardrails prohibiting work experience hallucination.
+- **Daily Career Digest & Calendar Sync**: Built `DailyDigestEngine` (multi-channel dispatch via Email, Slack, Telegram) and `CalendarService` (RFC-5545 `.ics` export).
+- **Empirical AI Application Insights**: Built `AiInsightsEngine` calculating historical response rates, interview conversion rates, and optimal submission timings.
+
+### Migration Notes (Upgrading to v2.0.0)
+- Execute PostgreSQL DDL migration script `supabase/migrations/V1.2__automation_extension.sql`.
+- Local `FileStorage` automatically initializes `extension_saved_jobs.json` on startup.
+
+---
+
+## [v1.1.0] - 2026-07-28
+
+### Added
+- **Kanban Board & CRM Engine**: Implemented `KanbanService` supporting drag-and-drop state transitions, fractional `stageOrder` reordering, and 11 Kanban status columns.
+- **Offer Compensation Analyzer**: Implemented `OfferAnalyzer` calculating multi-year total comp breakdowns, offer comparison ranking, and AI negotiation message generation.
+- **Keyword Match Heatmap Engine**: Implemented `HeatmapEngine` extracting skills, calculating keyword match density, and identifying matched vs missing terms.
+- **Visa Sponsorship Intelligence**: Implemented `VisaIntelligenceService` querying historical H1B visa LCA statistics and company approval ratings.
+- **Slack & Telegram Webhook Providers**: Implemented `SlackNotificationProvider` (with SSRF protection against private IP ranges) and `TelegramNotificationProvider`.
+- **Database Layer**: Added PostgreSQL DDL migration `supabase/migrations/V1.1__kanban_crm_offers.sql` and automatic JSON migration support in `FileStorage`.
+- **REST API Routes**: Added Express router under `/api/v1` exposing 14 new endpoints with standardized JSON response envelopes.
+
+### Migration Notes (Upgrading to v1.1.0)
+- Execute PostgreSQL DDL migration script `supabase/migrations/V1.1__kanban_crm_offers.sql`.
+- For `FileStorage` local installations, new storage JSON files are automatically initialized with default arrays on startup.
+
 ---
 
 ## [v5.0.0] - 2026-07-08

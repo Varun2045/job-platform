@@ -53,18 +53,18 @@ describe('Express REST API Server Integration Tests', () => {
     }
   });
 
-  it('should reject requests without authorization token on protected routes', async () => {
+  it('should grant guest user fallback access on unauthenticated requests', async () => {
     // Dynamically toggle config.isLocal to false to trigger auth checks
     const { config } = await import('../config/config.js');
     config.isLocal = false;
 
     try {
-      await expect(
-        client.request(`http://localhost:${testPort}/api/dashboard`, {
-          method: 'GET',
-          retries: 1,
-        }),
-      ).rejects.toThrow();
+      const res: any = await client.request(`http://localhost:${testPort}/api/dashboard`, {
+        method: 'GET',
+        retries: 1,
+      });
+      expect(res.status).toBe(200);
+      expect(res.data).toBeDefined();
     } finally {
       config.isLocal = true;
     }

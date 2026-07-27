@@ -13,7 +13,7 @@ export class HttpError extends Error {
 }
 
 export interface HttpRequestConfig {
-  method?: 'GET' | 'POST';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: any;
   timeoutMs?: number;

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { StorageProvider } from './StorageProvider.js';
+import { StorageProvider, Offer, FollowUp, NotificationPreference, VisaSponsor, SavedExtensionJob } from './StorageProvider.js';
 import { CompanyConfig, Job, Application } from '../companies/Scraper.js';
 import { Logger } from '../core/Logger.js';
 
@@ -78,6 +78,41 @@ export class FileStorage implements StorageProvider {
         ),
         'utf-8',
       );
+    }
+
+    // Auto-create missing V1.1 JSON files
+    const v11JsonFiles = [
+      'offers.json',
+      'followups.json',
+      'notification_preferences.json',
+      'visa_sponsors.json',
+      'export_jobs.json',
+      'keyword_heatmaps.json',
+      'recruiter_interactions.json',
+    ];
+    for (const file of v11JsonFiles) {
+      const p = path.join(this.storageDir, file);
+      if (!fs.existsSync(p)) {
+        fs.writeFileSync(p, '[]', 'utf-8');
+      }
+    }
+
+    // Migration helper: Gracefully populate stageOrder = 0.0 for V1.0 applications missing stageOrder
+    try {
+      const rawApps = this.readJsonFile<any[]>(this.applicationsPath, []);
+      let appMigrated = false;
+      const updatedApps = rawApps.map((app) => {
+        if (typeof app.stageOrder === 'undefined') {
+          appMigrated = true;
+          return { ...app, stageOrder: 0.0 };
+        }
+        return app;
+      });
+      if (appMigrated) {
+        this.writeJsonFile(this.applicationsPath, updatedApps);
+      }
+    } catch {
+      // Ignore migration errors during initialization
     }
   }
 
@@ -800,5 +835,130 @@ export class FileStorage implements StorageProvider {
     let list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'cover_letters.json'), []);
     list = list.filter((e) => !(e.id === id && e.user_id === userId));
     this.writeJsonFile(path.join(process.cwd(), 'storage', 'cover_letters.json'), list);
+  }
+
+  // V1.1 Offers
+  public async getOffers(userId: string): Promise<Offer[]> {
+    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'offers.json'), []);
+    return list.filter((o) => o.userId === userId || o.user_id === userId);
+  }
+
+  public async getOfferByApplicationId(applicationId: string): Promise<Offer | null> {
+    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'offers.json'), []);
+    return list.find((o) => o.applicationId === applicationId || o.application_id === applicationId) || null;
+  }
+
+  public async saveOffer(userId: string, offer: Offer): Promise<void> {
+    const filePath = path.join(process.cwd(), 'storage', 'offers.json');
+    const list = this.readJsonFile<any[]>(filePath, []);
+    const idx = list.findIndex((o) => o.id === offer.id);
+    const item = { ...offer, userId, updatedAt: new Date().toISOString() };
+    if (idx >= 0) {
+      list[idx] = item;
+    } else {
+      list.push(item);
+    }
+    this.writeJsonFile(filePath, list);
+  }
+
+  public async deleteOffer(userId: string, id: string): Promise<void> {
+    const filePath = path.join(process.cwd(), 'storage', 'offers.json');
+    let list = this.readJsonFile<any[]>(filePath, []);
+    list = list.filter((o) => !(o.id === id && (o.userId === userId || o.user_id === userId)));
+    this.writeJsonFile(filePath, list);
+  }
+
+  // V1.1 Follow-Ups
+  public async getFollowUps(userId: string): Promise<FollowUp[]> {
+    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'followups.json'), []);
+    return list.filter((f) => f.userId === userId || f.user_id === userId);
+  }
+
+  public async saveFollowUp(userId: string, followUp: FollowUp): Promise<void> {
+    const filePath = path.join(process.cwd(), 'storage', 'followups.json');
+    const list = this.readJsonFile<any[]>(filePath, []);
+    const idx = list.findIndex((f) => f.id === followUp.id);
+    const item = { ...followUp, userId, updatedAt: new Date().toISOString() };
+    if (idx >= 0) {
+      list[idx] = item;
+    } else {
+      list.push(item);
+    }
+    this.writeJsonFile(filePath, list);
+  }
+
+  public async deleteFollowUp(userId: string, id: string): Promise<void> {
+    const filePath = path.join(process.cwd(), 'storage', 'followups.json');
+    let list = this.readJsonFile<any[]>(filePath, []);
+    list = list.filter((f) => !(f.id === id && (f.userId === userId || f.user_id === userId)));
+    this.writeJsonFile(filePath, list);
+  }
+
+  // V1.1 Notification Preferences
+  public async getNotificationPreference(userId: string): Promise<NotificationPreference | null> {
+    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'notification_preferences.json'), []);
+    return list.find((p) => p.userId === userId || p.user_id === userId) || null;
+  }
+
+  public async saveNotificationPreference(userId: string, pref: NotificationPreference): Promise<void> {
+    const filePath = path.join(process.cwd(), 'storage', 'notification_preferences.json');
+    const list = this.readJsonFile<any[]>(filePath, []);
+    const idx = list.findIndex((p) => p.userId === userId || p.user_id === userId);
+    const item = { ...pref, userId, updatedAt: new Date().toISOString() };
+    if (idx >= 0) {
+      list[idx] = item;
+    } else {
+      list.push(item);
+    }
+    this.writeJsonFile(filePath, list);
+  }
+
+  // V1.1 Visa Sponsors
+  public async getVisaSponsor(companyName: string): Promise<VisaSponsor | null> {
+    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'visa_sponsors.json'), []);
+    const norm = companyName.trim().toLowerCase();
+    return list.find((v) => v.normalizedName === norm || v.companyName.toLowerCase() === norm) || null;
+  }
+
+  public async searchVisaSponsors(query: string): Promise<VisaSponsor[]> {
+    const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'visa_sponsors.json'), []);
+    const q = query.trim().toLowerCase();
+    return list.filter((v) => v.companyName.toLowerCase().includes(q) || v.normalizedName.includes(q));
+  }
+
+  public async saveVisaSponsor(sponsor: VisaSponsor): Promise<void> {
+    const filePath = path.join(process.cwd(), 'storage', 'visa_sponsors.json');
+    const list = this.readJsonFile<any[]>(filePath, []);
+    const idx = list.findIndex((v) => v.id === sponsor.id);
+    if (idx >= 0) {
+      list[idx] = sponsor;
+    } else {
+      list.push(sponsor);
+    }
+    this.writeJsonFile(filePath, list);
+  }
+
+  // Extension Jobs
+  public async saveExtensionJob(job: SavedExtensionJob): Promise<SavedExtensionJob> {
+    const filePath = path.join(process.cwd(), 'storage', 'extension_saved_jobs.json');
+    const list = this.readJsonFile<SavedExtensionJob[]>(filePath, []);
+    const record: SavedExtensionJob = {
+      ...job,
+      id: job.id || `ext-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      createdAt: job.createdAt || new Date().toISOString(),
+      status: job.status || 'Captured',
+    };
+    list.push(record);
+    this.writeJsonFile(filePath, list);
+    return record;
+  }
+
+  public async getExtensionJobs(userId?: string): Promise<SavedExtensionJob[]> {
+    const filePath = path.join(process.cwd(), 'storage', 'extension_saved_jobs.json');
+    const list = this.readJsonFile<SavedExtensionJob[]>(filePath, []);
+    if (userId) {
+      return list.filter((j) => j.userId === userId);
+    }
+    return list;
   }
 }

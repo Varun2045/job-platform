@@ -227,6 +227,98 @@ export interface StorageProvider {
   getCoverLetters(userId: string): Promise<any[]>;
   saveCoverLetter(userId: string, coverLetter: any): Promise<void>;
   deleteCoverLetter(userId: string, id: string): Promise<void>;
+
+  // V1.1 Offers Management
+  getOffers(userId: string): Promise<Offer[]>;
+  getOfferByApplicationId(applicationId: string): Promise<Offer | null>;
+  saveOffer(userId: string, offer: Offer): Promise<void>;
+  deleteOffer(userId: string, id: string): Promise<void>;
+
+  // V1.1 Follow-Ups
+  getFollowUps(userId: string): Promise<FollowUp[]>;
+  saveFollowUp(userId: string, followUp: FollowUp): Promise<void>;
+  deleteFollowUp(userId: string, id: string): Promise<void>;
+
+  // V1.1 Notification Preferences
+  getNotificationPreference(userId: string): Promise<NotificationPreference | null>;
+  saveNotificationPreference(userId: string, pref: NotificationPreference): Promise<void>;
+
+  // V1.1 Visa Sponsors Intelligence
+  getVisaSponsor(companyName: string): Promise<VisaSponsor | null>;
+  searchVisaSponsors(query: string): Promise<VisaSponsor[]>;
+  saveVisaSponsor(sponsor: VisaSponsor): Promise<void>;
+  // Extension Job Methods
+  saveExtensionJob(job: SavedExtensionJob): Promise<SavedExtensionJob>;
+  getExtensionJobs(userId?: string): Promise<SavedExtensionJob[]>;
+}
+
+export interface Offer {
+  id: string;
+  applicationId: string;
+  baseSalary: number;
+  signingBonus?: number;
+  annualBonusPct?: number;
+  equityValue?: number;
+  vestingYears?: number;
+  location: string;
+  remoteStatus: string;
+  status: 'Draft' | 'Active' | 'Accepted' | 'Rejected' | 'Expired';
+  offerDeadline?: string;
+  createdAt?: string;
+}
+
+export interface FollowUp {
+  id: string;
+  applicationId: string;
+  scheduledDate: string;
+  status: 'Pending' | 'Sent' | 'Completed' | 'Skipped' | 'Snoozed';
+  note?: string;
+}
+
+export interface NotificationPreference {
+  userId: string;
+  emailEnabled: boolean;
+  slackWebhookUrl?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  digestFrequency: 'Realtime' | 'Daily' | 'Weekly';
+}
+
+export interface VisaSponsor {
+  id: string;
+  companyName: string;
+  normalizedName: string;
+  totalLcas: number;
+  approvalRatePct: number;
+  avgSalary: number;
+  fiscalYear: number;
+}
+
+export interface ExportJob {
+  id: string;
+  userId: string;
+  format: 'PDF' | 'CSV' | 'JSON';
+  status: 'Pending' | 'Processing' | 'Completed' | 'Failed';
+  fileUrl?: string;
+  errorMessage?: string;
+}
+
+export interface KeywordHeatmap {
+  jobId: string;
+  resumeProfileId: string;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  matchDensityPct: number;
+}
+
+export interface RecruiterInteraction {
+  id: string;
+  recruiterId: string;
+  applicationId?: string;
+  type: 'Email' | 'LinkedInMessage' | 'PhoneCall' | 'Meeting' | 'Other';
+  direction: 'Outbound' | 'Inbound';
+  summary: string;
+  interactionDate: string;
 }
 
 export interface JobAnalysis {
@@ -299,4 +391,19 @@ export interface ReferralAnalytics {
   successRate: number;
   topCompanies: Array<{ company: string; count: number }>;
   contactsByCategory: Record<string, number>;
+}
+
+export interface SavedExtensionJob {
+  id: string;
+  userId?: string;
+  companyName: string;
+  jobTitle: string;
+  location?: string;
+  salaryRange?: string;
+  jobUrl: string;
+  description?: string;
+  skills?: string[];
+  platformSource: string;
+  status: string;
+  createdAt: string;
 }

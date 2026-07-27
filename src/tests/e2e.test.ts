@@ -53,7 +53,7 @@ describe('Playwright E2E Browser Flows', () => {
 
   beforeEach(async () => {
     page = await browser.newPage();
-  });
+  }, 15000);
 
   afterEach(async () => {
     if (page) {

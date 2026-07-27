@@ -209,6 +209,63 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Version 1.1 Kanban & Follow-Up Reminders Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-400" /> Kanban Board Quick Summary
+            </h3>
+            <button
+              onClick={() => navigate('/tracker')}
+              className="text-sm text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer"
+            >
+              Open Kanban →
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mb-4">
+            Track applications across 11 stages. Drag and drop cards in the Kanban tracker to trigger automatic status updates.
+          </p>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="p-3 bg-[#1b2535] rounded-xl border border-[#232d3f]">
+              <span className="text-xs text-slate-400 block">Applied</span>
+              <span className="text-lg font-bold text-indigo-400">{stats.applications || 0}</span>
+            </div>
+            <div className="p-3 bg-[#1b2535] rounded-xl border border-[#232d3f]">
+              <span className="text-xs text-slate-400 block">Interviews</span>
+              <span className="text-lg font-bold text-purple-400">{stats.interviews || 0}</span>
+            </div>
+            <div className="p-3 bg-[#1b2535] rounded-xl border border-[#232d3f]">
+              <span className="text-xs text-slate-400 block">Offers</span>
+              <span className="text-lg font-bold text-emerald-400">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-emerald-400" /> Upcoming Follow-Up Alerts
+            </h3>
+            <button
+              onClick={() => navigate('/crm')}
+              className="text-sm text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer"
+            >
+              Manage Reminders →
+            </button>
+          </div>
+          <p className="text-xs text-slate-400 mb-4">
+            Never miss a recruiter check-in date. Schedule reminders and track outreach interactions.
+          </p>
+          <div className="p-4 bg-[#1b2535] rounded-xl border border-[#232d3f] flex items-center justify-between text-xs">
+            <span className="text-slate-300 font-medium">Recruiter Outreach & Follow-Ups Active</span>
+            <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+              Synced
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

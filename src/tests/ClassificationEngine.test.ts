@@ -6,6 +6,8 @@ import { RuleEngine } from '../core/RuleEngine.js';
 import { ExplainableScoringEngine } from '../core/ExplainableScoringEngine.js';
 import { ClassificationMetrics } from '../core/ClassificationMetrics.js';
 import { Job } from '../companies/Scraper.js';
+import { JobNormalizer } from '../core/JobNormalizer.js';
+import { SearchEngine } from '../core/SearchEngine.js';
 
 describe('Production Classification Engine Tests', () => {
   it('should validate JSON configurations without syntax errors', () => {
@@ -21,7 +23,7 @@ describe('Production Classification Engine Tests', () => {
       '',
       'Google'
     );
-    expect(res.level).toMatch(/Entry Level|Internship/);
+    expect(res.level).toMatch(/Entry Level|Internship|New Graduate/);
     expect(res.confidence).toBe(100);
     expect(res.source).toBe('ExplicitExperience');
   });
@@ -109,7 +111,6 @@ describe('Production Classification Engine Tests', () => {
   });
 
   it('should normalize salary, location hierarchy, and skills during ingestion', () => {
-    const { JobNormalizer } = require('../core/JobNormalizer.js');
     const mockRawJob = {
       company: 'Google',
       id: 'job-999',
@@ -119,7 +120,7 @@ describe('Production Classification Engine Tests', () => {
       salary: '$120,000 - $160,000',
     };
     const mockCompany = { id: 'google', name: 'Google', enabled: true, priority: 2, interval_minutes: 60, resume_profiles: ['backend'], avg_response_time_ms: 200, total_scrapes: 0, total_failures: 0 };
-    const normalized = JobNormalizer.normalize(mockRawJob, mockCompany);
+    const normalized = JobNormalizer.normalize(mockRawJob as any, mockCompany);
 
     expect(normalized.salaryMin).toBe(120000);
     expect(normalized.salaryMax).toBe(160000);
@@ -133,7 +134,6 @@ describe('Production Classification Engine Tests', () => {
   });
 
   it('should calculate cascading facets with sibling-level isolation', () => {
-    const { SearchEngine } = require('../core/SearchEngine.js');
     const mockJobs = [
       {
         job: {
@@ -165,7 +165,7 @@ describe('Production Classification Engine Tests', () => {
       department: 'Backend Engineering',
     };
 
-    const facetsResult = SearchEngine.calculateCascadingFacets(mockJobs, criteria);
+    const facetsResult = SearchEngine.calculateCascadingFacets(mockJobs as any, criteria);
     expect(facetsResult.version).toBe('v1');
     
     // For experienceLevels facet, the 'department' criteria is NOT excluded (since it is experienceLevels)

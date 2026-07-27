@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { StorageProvider } from './StorageProvider.js';
+import { StorageProvider, Offer, FollowUp, NotificationPreference, VisaSponsor, SavedExtensionJob } from './StorageProvider.js';
 import { CompanyConfig, Job, Application } from '../companies/Scraper.js';
 import { config } from '../config/config.js';
 import { Logger } from '../core/Logger.js';
@@ -1233,5 +1233,221 @@ export class SupabaseStorage implements StorageProvider {
     if (error) {
       Logger.error(`Error deleting cover letter ${id}`, error);
     }
+  }
+
+  // V1.1 Offers Management
+  public async getOffers(userId: string): Promise<Offer[]> {
+    const { data, error } = await this.client.from('offers').select('*').eq('user_id', userId);
+    if (error) return [];
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      applicationId: row.application_id,
+      baseSalary: Number(row.base_salary),
+      signingBonus: Number(row.signing_bonus || 0),
+      annualBonusPct: Number(row.annual_bonus_pct || 0),
+      equityValue: Number(row.equity_value || 0),
+      vestingYears: Number(row.vesting_years || 4),
+      location: row.location,
+      remoteStatus: row.remote_status,
+      status: row.status,
+      offerDeadline: row.offer_deadline,
+      createdAt: row.created_at,
+    }));
+  }
+
+  public async getOfferByApplicationId(applicationId: string): Promise<Offer | null> {
+    const { data, error } = await this.client.from('offers').select('*').eq('application_id', applicationId).single();
+    if (error || !data) return null;
+    return {
+      id: data.id,
+      applicationId: data.application_id,
+      baseSalary: Number(data.base_salary),
+      signingBonus: Number(data.signing_bonus || 0),
+      annualBonusPct: Number(data.annual_bonus_pct || 0),
+      equityValue: Number(data.equity_value || 0),
+      vestingYears: Number(data.vesting_years || 4),
+      location: data.location,
+      remoteStatus: data.remote_status,
+      status: data.status,
+      offerDeadline: data.offer_deadline,
+      createdAt: data.created_at,
+    };
+  }
+
+  public async saveOffer(userId: string, offer: Offer): Promise<void> {
+    const payload = {
+      id: offer.id,
+      application_id: offer.applicationId,
+      user_id: userId,
+      base_salary: offer.baseSalary,
+      signing_bonus: offer.signingBonus || 0,
+      annual_bonus_pct: offer.annualBonusPct || 0,
+      equity_value: offer.equityValue || 0,
+      vesting_years: offer.vestingYears || 4,
+      location: offer.location,
+      remote_status: offer.remoteStatus,
+      status: offer.status,
+      offer_deadline: offer.offerDeadline,
+    };
+    await this.client.from('offers').upsert(payload);
+  }
+
+  public async deleteOffer(userId: string, id: string): Promise<void> {
+    await this.client.from('offers').delete().eq('id', id).eq('user_id', userId);
+  }
+
+  // V1.1 Follow-Ups
+  public async getFollowUps(userId: string): Promise<FollowUp[]> {
+    const { data, error } = await this.client.from('followups').select('*').eq('user_id', userId);
+    if (error) return [];
+    return (data || []).map((r: any) => ({
+      id: r.id,
+      applicationId: r.application_id,
+      scheduledDate: r.scheduled_date,
+      status: r.status,
+      note: r.note,
+    }));
+  }
+
+  public async saveFollowUp(userId: string, followUp: FollowUp): Promise<void> {
+    const payload = {
+      id: followUp.id,
+      application_id: followUp.applicationId,
+      user_id: userId,
+      scheduled_date: followUp.scheduledDate,
+      status: followUp.status,
+      note: followUp.note,
+    };
+    await this.client.from('followups').upsert(payload);
+  }
+
+  public async deleteFollowUp(userId: string, id: string): Promise<void> {
+    await this.client.from('followups').delete().eq('id', id).eq('user_id', userId);
+  }
+
+  // V1.1 Notification Preferences
+  public async getNotificationPreference(userId: string): Promise<NotificationPreference | null> {
+    const { data, error } = await this.client.from('notification_preferences').select('*').eq('user_id', userId).single();
+    if (error || !data) return null;
+    return {
+      userId: data.user_id,
+      emailEnabled: data.email_enabled,
+      slackWebhookUrl: data.slack_webhook_url,
+      telegramBotToken: data.telegram_bot_token,
+      telegramChatId: data.telegram_chat_id,
+      digestFrequency: data.digest_frequency,
+    };
+  }
+
+  public async saveNotificationPreference(userId: string, pref: NotificationPreference): Promise<void> {
+    const payload = {
+      user_id: userId,
+      email_enabled: pref.emailEnabled,
+      slack_webhook_url: pref.slackWebhookUrl,
+      telegram_bot_token: pref.telegramBotToken,
+      telegram_chat_id: pref.telegramChatId,
+      digest_frequency: pref.digestFrequency,
+    };
+    await this.client.from('notification_preferences').upsert(payload);
+  }
+
+  // V1.1 Visa Sponsors
+  public async getVisaSponsor(companyName: string): Promise<VisaSponsor | null> {
+    const norm = companyName.trim().toLowerCase();
+    const { data, error } = await this.client.from('visa_sponsors').select('*').eq('normalized_name', norm).single();
+    if (error || !data) return null;
+    return {
+      id: data.id,
+      companyName: data.company_name,
+      normalizedName: data.normalized_name,
+      totalLcas: data.total_lcas,
+      approvalRatePct: data.approval_rate_pct,
+      avgSalary: data.avg_salary,
+      fiscalYear: data.fiscal_year,
+    };
+  }
+
+  public async searchVisaSponsors(query: string): Promise<VisaSponsor[]> {
+    const q = `%${query.trim().toLowerCase()}%`;
+    const { data, error } = await this.client.from('visa_sponsors').select('*').ilike('company_name', q);
+    if (error) return [];
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      companyName: row.company_name,
+      normalizedName: row.normalized_name,
+      totalLcas: row.total_lcas,
+      approvalRatePct: row.approval_rate_pct,
+      avgSalary: row.avg_salary,
+      fiscalYear: row.fiscal_year,
+    }));
+  }
+
+  public async saveVisaSponsor(sponsor: VisaSponsor): Promise<void> {
+    const payload = {
+      id: sponsor.id,
+      company_name: sponsor.companyName,
+      normalized_name: sponsor.normalizedName,
+      total_lcas: sponsor.totalLcas,
+      approval_rate_pct: sponsor.approvalRatePct,
+      avg_salary: sponsor.avgSalary,
+      fiscal_year: sponsor.fiscalYear,
+    };
+    await this.client.from('visa_sponsors').upsert(payload);
+  }
+
+  // Extension Jobs
+  public async saveExtensionJob(job: SavedExtensionJob): Promise<SavedExtensionJob> {
+    const payload = {
+      id: job.id || `ext-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      user_id: job.userId,
+      company_name: job.companyName,
+      job_title: job.jobTitle,
+      location: job.location,
+      salary_range: job.salaryRange,
+      job_url: job.jobUrl,
+      description: job.description,
+      skills: job.skills,
+      platform_source: job.platformSource,
+      status: job.status || 'Captured',
+      created_at: job.createdAt || new Date().toISOString(),
+    };
+    await this.client.from('extension_saved_jobs').upsert(payload);
+    return {
+      id: payload.id,
+      userId: payload.user_id,
+      companyName: payload.company_name,
+      jobTitle: payload.job_title,
+      location: payload.location,
+      salaryRange: payload.salary_range,
+      jobUrl: payload.job_url,
+      description: payload.description,
+      skills: payload.skills,
+      platformSource: payload.platform_source,
+      status: payload.status,
+      createdAt: payload.created_at,
+    };
+  }
+
+  public async getExtensionJobs(userId?: string): Promise<SavedExtensionJob[]> {
+    let query = this.client.from('extension_saved_jobs').select('*');
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+    const { data, error } = await query;
+    if (error || !data) return [];
+    return data.map((r: any) => ({
+      id: r.id,
+      userId: r.user_id,
+      companyName: r.company_name,
+      jobTitle: r.job_title,
+      location: r.location,
+      salaryRange: r.salary_range,
+      jobUrl: r.job_url,
+      description: r.description,
+      skills: r.skills,
+      platformSource: r.platform_source,
+      status: r.status,
+      createdAt: r.created_at,
+    }));
   }
 }

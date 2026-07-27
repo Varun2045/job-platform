@@ -1,5 +1,4 @@
 import { ClassificationConfig, ExperienceLevelConfig } from './ClassificationConfig.js';
-import { SynonymNormalizer } from './SynonymNormalizer.js';
 
 export type ExperienceClassificationSource =
   | 'ExplicitExperience'

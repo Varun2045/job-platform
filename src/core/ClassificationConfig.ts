@@ -107,7 +107,7 @@ export class ClassificationConfig {
         const raw = fs.readFileSync(filePath, 'utf-8');
         return JSON.parse(raw);
       }
-    } catch (e) {
+    } catch {
       // Return fallback cleanly if file load fails
     }
     return fallback;

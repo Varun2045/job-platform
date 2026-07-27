@@ -1,14 +1,17 @@
 {
-  "name": "job-monitor",
-  "version": "1.0.0",
-  "description": "Enterprise-grade Job Monitor Platform with hybrid resume matching",
-  "main": "dist/core/index.js",
+  "name": "job-platform",
+  "version": "2.1.0",
+  "description": "Open-Source AI Career Operating System",
+  "main": "dist/core/server.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/core/index.js",
+    "build": "tsc && npm --prefix frontend run build",
+    "start": "node dist/core/server.js",
     "server": "node dist/core/server.js",
-    "prod:start": "npm run build && npm run server",
+    "prod:start": "npm run build && npm start",
     "dev:start": "concurrently \"tsc -w\" \"node --watch dist/core/server.js\" \"npm run dev --prefix frontend\"",
     "monitor": "node dist/cli/admin.js monitor",
     "health": "node dist/cli/admin.js health",
