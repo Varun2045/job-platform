@@ -23,17 +23,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
         <div className="flex items-center gap-3 mb-1.5">
-          {Icon && (
-            <div className={`p-2.5 rounded-xl border ${theme.accentBgClass} ${theme.accentBorderClass} ${theme.iconColorClass}`}>
-              <Icon className="w-6 h-6" />
-            </div>
-          )}
+          {Icon && <Icon className={`w-8 h-8 ${theme.headingColorClass} shrink-0`} />}
           <h1 className={`text-2xl sm:text-3xl font-black tracking-tight ${theme.headingColorClass}`}>
             {title}
           </h1>
         </div>
         {description && (
-          <p className="text-sm text-[#94a3b8] max-w-3xl font-medium">
+          <p className="text-sm font-medium text-[#94a3b8] max-w-3xl">
             {description}
           </p>
         )}
