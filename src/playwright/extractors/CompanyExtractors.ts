@@ -102,6 +102,12 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'indeed', name: 'Indeed', pattern: 'indeed.com', careerPage: 'https://careers.indeed.com', jobBoardUrl: 'https://careers.indeed.com' },
   { id: 'mygate', name: 'MyGate', pattern: 'mygate.in', careerPage: 'https://mygate.in/careers/', jobBoardUrl: 'https://mygate.in/careers/' },
   { id: 'navi', name: 'Navi', pattern: 'navi.com', careerPage: 'https://navi.com/careers', jobBoardUrl: 'https://navi.com/careers' },
+  { id: 'dream11', name: 'Dream11', pattern: 'dream11.com', careerPage: 'https://www.dream11.com/careers', jobBoardUrl: 'https://www.dream11.com/careers' },
+  { id: 'ola', name: 'Ola', pattern: 'olacabs.com', careerPage: 'https://www.olacabs.com/careers', jobBoardUrl: 'https://www.olacabs.com/careers' },
+  { id: 'swiggy', name: 'Swiggy', pattern: 'swiggy.com', careerPage: 'https://careers.swiggy.com', jobBoardUrl: 'https://careers.swiggy.com' },
+  { id: 'zomato', name: 'Zomato', pattern: 'zomato.com', careerPage: 'https://www.zomato.com/careers', jobBoardUrl: 'https://www.zomato.com/careers' },
+  { id: 'ea', name: 'EA', pattern: 'ea.com', careerPage: 'https://www.ea.com/careers/careers-overview', jobBoardUrl: 'https://www.ea.com/careers/careers-overview' },
+  { id: 'supercell', name: 'Supercell', pattern: 'supercell.com', careerPage: 'https://supercell.com/en/careers/', jobBoardUrl: 'https://supercell.com/en/careers/' },
 
   // Infrastructure & Global Portals
   { id: 'bytedance', name: 'ByteDance', pattern: 'bytedance.com', careerPage: 'https://jobs.bytedance.com/en/', jobBoardUrl: 'https://jobs.bytedance.com/en/' },
