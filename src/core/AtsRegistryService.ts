@@ -218,6 +218,9 @@ export class AtsRegistryService {
       if (name === 'Twitch') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/twitch', jobBoardNeedsReview: false };
       }
+      if (name === 'Razorpay') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited', jobBoardNeedsReview: false };
+      }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }
     if (platformId === 'lever') {
