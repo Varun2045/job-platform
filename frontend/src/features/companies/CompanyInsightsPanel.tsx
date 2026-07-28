@@ -1,7 +1,7 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { Activity, Clock } from 'lucide-react';
+import { Activity, Clock, Pencil, Check, X, ExternalLink, Globe } from 'lucide-react';
 
 interface CompanyInsightsPanelProps {
   companyId: string;
@@ -10,6 +10,11 @@ interface CompanyInsightsPanelProps {
 }
 
 export const CompanyInsightsPanel: React.FC<CompanyInsightsPanelProps> = ({ companyId, companyName, onClose }) => {
+  const queryClient = useQueryClient();
+  const [isEditingUrl, setIsEditingUrl] = useState(false);
+  const [editUrlVal, setEditUrlVal] = useState('');
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['company-insights', companyId],
     queryFn: async () => {
@@ -19,6 +24,35 @@ export const CompanyInsightsPanel: React.FC<CompanyInsightsPanelProps> = ({ comp
     }
   });
 
+  useEffect(() => {
+    if (data?.api_endpoint) {
+      setEditUrlVal(data.api_endpoint);
+    }
+  }, [data?.api_endpoint]);
+
+  const updateUrlMutation = useMutation({
+    mutationFn: async (newEndpoint: string) => {
+      const res = await fetch(`/api/companies/${companyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_endpoint: newEndpoint || null })
+      });
+      if (!res.ok) throw new Error('Failed to update career URL');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['company-insights', companyId] });
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      setIsEditingUrl(false);
+      setSaveSuccessMsg(true);
+      setTimeout(() => setSaveSuccessMsg(false), 3000);
+    }
+  });
+
+  const handleSaveUrl = () => {
+    updateUrlMutation.mutate(editUrlVal.trim());
+  };
+
   if (isLoading) {
     return <div className="p-6 text-center text-[#94a3b8] animate-pulse">Loading Insights and Trends...</div>;
   }
@@ -27,18 +61,81 @@ export const CompanyInsightsPanel: React.FC<CompanyInsightsPanelProps> = ({ comp
     return <div className="p-6 text-center text-red-400">Error loading insights: {(error as any)?.message}</div>;
   }
 
-  const { hiringTrend, averageJobs, commonTechnologies, mostFrequentRoles, typicalExperience, mostActiveLocations, scraperHealth } = data;
+  const { api_endpoint, hiringTrend, averageJobs, commonTechnologies, mostFrequentRoles, typicalExperience, mostActiveLocations, scraperHealth } = data;
 
   return (
     <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-6">
       <div className="flex justify-between items-center border-b border-[#232d3f] pb-4">
         <div>
           <h2 className="text-xl font-bold text-white">{companyName} Insights</h2>
-          <p className="text-xs text-[#94a3b8]">Telemetry and hiring trends overview</p>
+          <p className="text-xs text-[#94a3b8]">Telemetry, portal settings, and hiring trends</p>
         </div>
         <button onClick={onClose} className="text-xs text-indigo-400 hover:text-indigo-300 font-bold cursor-pointer">
           Close Insights
         </button>
+      </div>
+
+      {/* Editable Career Portal URL Section */}
+      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex-1 min-w-0 w-full">
+          <div className="flex items-center gap-2">
+            <Globe className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">Career Portal URL</span>
+            {saveSuccessMsg && (
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Check className="w-3 h-3" /> Updated Live
+              </span>
+            )}
+          </div>
+
+          {isEditingUrl ? (
+            <div className="flex items-center gap-2 mt-2 w-full">
+              <input
+                type="url"
+                value={editUrlVal}
+                onChange={(e) => setEditUrlVal(e.target.value)}
+                placeholder="https://careers.company.com"
+                className="bg-[#0b0f19] border border-indigo-500/60 rounded-lg px-3 py-1.5 text-xs text-white w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <button
+                onClick={handleSaveUrl}
+                disabled={updateUrlMutation.isPending}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 text-xs rounded-lg font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
+              >
+                <Check className="w-3.5 h-3.5" /> Save
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditingUrl(false);
+                  setEditUrlVal(api_endpoint || '');
+                }}
+                className="bg-[#232d3f] hover:bg-[#2e3b52] text-[#94a3b8] px-2.5 py-1.5 text-xs rounded-lg font-bold transition cursor-pointer shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mt-1.5 min-w-0">
+              <span className="text-xs font-semibold text-indigo-300 truncate">
+                {api_endpoint || 'No career URL configured'}
+              </span>
+              {api_endpoint && (
+                <a href={api_endpoint} target="_blank" rel="noopener noreferrer" className="text-[#64748b] hover:text-white shrink-0">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+
+        {!isEditingUrl && (
+          <button
+            onClick={() => setIsEditingUrl(true)}
+            className="bg-[#0b0f19] hover:bg-[#192438] text-indigo-400 hover:text-indigo-300 border border-[#232d3f] px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+          >
+            <Pencil className="w-3.5 h-3.5" /> Edit Link
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

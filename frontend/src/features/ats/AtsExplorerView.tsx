@@ -57,9 +57,23 @@ const ExplorerSection: React.FC<{
   onToggleGroup: () => void;
   onSelectCompany: (companyName: string, platformName: string, category: string, extractionMs: number, pattern?: string) => void;
 }> = ({ group, isExpanded, onToggleGroup, onSelectCompany }) => {
-  // Collect all companies in alphabetical order across sub-parsers
-  const allCompanies: { name: string; platformName: string; extractionMs: number; pattern?: string }[] = [];
+  const isNativeAts = group.id === 'native-ats' || group.category === 'Native ATS';
 
+  // Sub-parser collapsible state for Native ATS job boards
+  const [openSubParsers, setOpenSubParsers] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    group.parsers.forEach((p) => {
+      initial[p.id] = true; // open all by default
+    });
+    return initial;
+  });
+
+  const toggleSubParser = (id: string) => {
+    setOpenSubParsers((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // Flat collection of companies for non-Native ATS sections
+  const allCompanies: { name: string; platformName: string; extractionMs: number; pattern?: string }[] = [];
   group.parsers.forEach((p) => {
     p.companies.forEach((cName) => {
       allCompanies.push({
@@ -70,7 +84,6 @@ const ExplorerSection: React.FC<{
       });
     });
   });
-
   allCompanies.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
@@ -87,7 +100,7 @@ const ExplorerSection: React.FC<{
 
         <div className="flex items-center gap-6 text-xs text-[#94a3b8]">
           <span>
-            Parsers: <strong className="text-white">{group.totalParsers}</strong>
+            Job Boards / Parsers: <strong className="text-white">{group.totalParsers}</strong>
           </span>
           <span>
             Companies: <strong className="text-white">{group.totalCompanies}</strong>
@@ -101,21 +114,72 @@ const ExplorerSection: React.FC<{
         </div>
       </div>
 
-      {/* Uniform Responsive Grid Layout */}
+      {/* Sub-Section Classification for Native ATS Job Boards */}
       {isExpanded && (
-        <div className="p-5 border-t border-[#232d3f] bg-[#0b0f19]/60">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {allCompanies.map((item) => (
-              <button
-                key={`${item.platformName}-${item.name}`}
-                onClick={() => onSelectCompany(item.name, item.platformName, group.category, item.extractionMs, item.pattern)}
-                className="px-3.5 py-2.5 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
-              >
-                <span className="truncate">{item.name}</span>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
-              </button>
-            ))}
-          </div>
+        <div className="p-5 border-t border-[#232d3f] bg-[#0b0f19]/60 space-y-4">
+          {isNativeAts ? (
+            group.parsers.map((parser) => {
+              const isOpen = openSubParsers[parser.id] ?? true;
+              const sortedComps = [...parser.companies].sort((a, b) => a.localeCompare(b));
+
+              return (
+                <div key={parser.id} className="bg-[#131a26] border border-[#232d3f] rounded-xl overflow-hidden shadow-md">
+                  {/* Job Board Sub-Section Header */}
+                  <div
+                    onClick={() => toggleSubParser(parser.id)}
+                    className="px-4 py-3 bg-[#192438]/80 hover:bg-[#1e2c45] flex items-center justify-between cursor-pointer transition select-none"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {isOpen ? <ChevronDown className="w-4 h-4 text-indigo-400" /> : <ChevronRight className="w-4 h-4 text-[#64748b]" />}
+                      <span className="text-sm font-bold text-white flex items-center gap-2">
+                        {parser.name} Job Board
+                        <span className="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-500/30">
+                          {parser.companies.length} Companies
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs text-[#94a3b8]">
+                      <span>
+                        Latency: <strong className="text-emerald-400">{parser.averageExtractionMs}ms</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Sub-Section Companies Grid */}
+                  {isOpen && (
+                    <div className="p-4 border-t border-[#232d3f]/60 bg-[#090d16]/70">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                        {sortedComps.map((cName) => (
+                          <button
+                            key={`${parser.id}-${cName}`}
+                            onClick={() => onSelectCompany(cName, parser.name, group.category, parser.averageExtractionMs, parser.pattern)}
+                            className="px-3 py-2 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
+                          >
+                            <span className="truncate">{cName}</span>
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {allCompanies.map((item) => (
+                <button
+                  key={`${item.platformName}-${item.name}`}
+                  onClick={() => onSelectCompany(item.name, item.platformName, group.category, item.extractionMs, item.pattern)}
+                  className="px-3.5 py-2.5 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
+                >
+                  <span className="truncate">{item.name}</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

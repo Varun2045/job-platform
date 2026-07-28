@@ -1487,6 +1487,7 @@ app.get('/api/companies/:id/insights', authMiddleware, async (req, res) => {
     const typicalExperience = Object.entries(expCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Mid Level';
 
     const insights = {
+      api_endpoint: company.api_endpoint || null,
       hiringTrend,
       averageJobs: jobs.length,
       commonTechnologies,
