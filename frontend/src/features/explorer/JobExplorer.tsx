@@ -31,64 +31,47 @@ export const JobExplorer: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Search input & debouncing
+  // Saved Filters Helper for Persistence (Requirement 10)
+  const getSavedFilter = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem('job_explorer_filters_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch {}
+    return defaultValue;
+  };
+
+  // Primary State
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [debouncedQuery, setDebouncedQuery] = useState(searchParams.get('q') || '');
+  const [selectedJobHash, setSelectedJobHash] = useState<string | null>(null);
 
-  // Filter state
+  // Faceted Filters State with Persistence
   const [location, setLocation] = useState<string[]>(
-    searchParams.get('location') ? searchParams.get('location')!.split(',') : []
+    searchParams.get('location') ? searchParams.get('location')!.split(',') : getSavedFilter('location', [])
   );
   const [remote, setRemote] = useState<string[]>(
-    searchParams.get('remote') ? searchParams.get('remote')!.split(',') : []
+    searchParams.get('remote') ? searchParams.get('remote')!.split(',') : getSavedFilter('remote', [])
   );
   const [experience, setExperience] = useState<string[]>(
-    searchParams.get('experience') ? searchParams.get('experience')!.split(',') : []
+    searchParams.get('experience') ? searchParams.get('experience')!.split(',') : getSavedFilter('experience', [])
   );
   const [department, setDepartment] = useState<string[]>(
-    searchParams.get('department') ? searchParams.get('department')!.split(',') : []
+    searchParams.get('department') ? searchParams.get('department')!.split(',') : getSavedFilter('department', [])
   );
   const [company, setCompany] = useState<string[]>(
-    searchParams.get('company') ? searchParams.get('company')!.split(',') : []
-  );
-  const [minScore, setMinScore] = useState<number>(
-    searchParams.get('minScore') ? Number(searchParams.get('minScore')) : 0
+    searchParams.get('company') ? searchParams.get('company')!.split(',') : getSavedFilter('company', [])
   );
   const [employmentType, setEmploymentType] = useState<string[]>(
-    searchParams.get('employmentType') ? searchParams.get('employmentType')!.split(',') : []
-  );
-  const [tags, setTags] = useState<string[]>(
-    searchParams.get('tags') ? searchParams.get('tags')!.split(',') : []
-  );
-  const [qualityFlags, setQualityFlags] = useState<string[]>(
-    searchParams.get('qualityFlags') ? searchParams.get('qualityFlags')!.split(',') : []
-  );
-  const [recommendations, setRecommendations] = useState<string[]>(
-    searchParams.get('recommendations') ? searchParams.get('recommendations')!.split(',') : []
-  );
-  const [requiredSkills, setRequiredSkills] = useState<string[]>(
-    searchParams.get('requiredSkills') ? searchParams.get('requiredSkills')!.split(',') : []
-  );
-  const [minYearsExp, setMinYearsExp] = useState<number>(
-    searchParams.get('minYearsExp') ? Number(searchParams.get('minYearsExp')) : 0
-  );
-  const [maxYearsExp, setMaxYearsExp] = useState<number>(
-    searchParams.get('maxYearsExp') ? Number(searchParams.get('maxYearsExp')) : 15
-  );
-  const [minSalary, setMinSalary] = useState<number>(
-    searchParams.get('minSalary') ? Number(searchParams.get('minSalary')) : 0
-  );
-  const [maxSalary, setMaxSalary] = useState<number>(
-    searchParams.get('maxSalary') ? Number(searchParams.get('maxSalary')) : 250000
-  );
-  const [salaryCurrency, setSalaryCurrency] = useState<string>(
-    searchParams.get('salaryCurrency') || 'all'
+    searchParams.get('employmentType') ? searchParams.get('employmentType')!.split(',') : getSavedFilter('employmentType', [])
   );
   const [dateRange, setDateRange] = useState<string>(
-    searchParams.get('dateRange') || ''
+    searchParams.get('dateRange') || getSavedFilter('dateRange', '')
   );
-  const [sortBy] = useState<'opportunity' | 'match' | 'newest' | 'highest_salary' | 'company_name'>(
-    (searchParams.get('sort') as any) || 'newest'
+  const [sortBy, setSortBy] = useState<'newest' | 'relevance' | 'company_name' | 'experience_asc'>(
+    (searchParams.get('sort') as any) || getSavedFilter('sortBy', 'newest')
   );
 
   // Company Favorites & Recently Viewed tracking
@@ -112,7 +95,6 @@ export const JobExplorer: React.FC = () => {
   // Infinite Scroll & Cursor Pagination state
   const [accumulatedJobs, setAccumulatedJobs] = useState<any[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
-  const [selectedJobHash, setSelectedJobHash] = useState<string | null>(null);
   const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('bookmarked_jobs');
@@ -196,17 +178,7 @@ export const JobExplorer: React.FC = () => {
     if (experience.length > 0) params.experience = experience.join(',');
     if (department.length > 0) params.department = department.join(',');
     if (company.length > 0) params.company = company.join(',');
-    if (minScore > 0) params.minScore = minScore.toString();
     if (employmentType.length > 0) params.employmentType = employmentType.join(',');
-    if (tags.length > 0) params.tags = tags.join(',');
-    if (qualityFlags.length > 0) params.qualityFlags = qualityFlags.join(',');
-    if (recommendations.length > 0) params.recommendations = recommendations.join(',');
-    if (requiredSkills.length > 0) params.requiredSkills = requiredSkills.join(',');
-    if (minYearsExp > 0) params.minYearsExp = minYearsExp.toString();
-    if (maxYearsExp < 15) params.maxYearsExp = maxYearsExp.toString();
-    if (minSalary > 0) params.minSalary = minSalary.toString();
-    if (maxSalary < 250000) params.maxSalary = maxSalary.toString();
-    if (salaryCurrency !== 'all') params.salaryCurrency = salaryCurrency;
     if (dateRange) {
       params.dateRange = dateRange;
       params.dateLimit = calculateDateLimit(dateRange);
@@ -223,17 +195,7 @@ export const JobExplorer: React.FC = () => {
     experience,
     department,
     company,
-    minScore,
     employmentType,
-    tags,
-    qualityFlags,
-    recommendations,
-    requiredSkills,
-    minYearsExp,
-    maxYearsExp,
-    minSalary,
-    maxSalary,
-    salaryCurrency,
     dateRange,
     sortBy,
   ]);
@@ -248,17 +210,7 @@ export const JobExplorer: React.FC = () => {
       experience,
       department,
       company,
-      minScore,
       employmentType,
-      tags,
-      qualityFlags,
-      recommendations,
-      requiredSkills,
-      minYearsExp,
-      maxYearsExp,
-      minSalary,
-      maxSalary,
-      salaryCurrency,
       dateRange,
     ],
     queryFn: async () => {
@@ -269,17 +221,7 @@ export const JobExplorer: React.FC = () => {
         experience: experience.join(','),
         department: department.join(','),
         company: company.join(','),
-        minScore: minScore.toString(),
         employmentType: employmentType.join(','),
-        tags: tags.join(','),
-        qualityFlags: qualityFlags.join(','),
-        recommendations: recommendations.join(','),
-        requiredSkills: requiredSkills.join(','),
-        minYearsExp: minYearsExp.toString(),
-        maxYearsExp: maxYearsExp.toString(),
-        minSalary: minSalary.toString(),
-        maxSalary: maxSalary.toString(),
-        salaryCurrency,
         dateRange,
         dateLimit: calculateDateLimit(dateRange),
       });
@@ -299,17 +241,7 @@ export const JobExplorer: React.FC = () => {
       experience,
       department,
       company,
-      minScore,
       employmentType,
-      tags,
-      qualityFlags,
-      recommendations,
-      requiredSkills,
-      minYearsExp,
-      maxYearsExp,
-      minSalary,
-      maxSalary,
-      salaryCurrency,
       dateRange,
       sortBy,
       cursor,
@@ -322,17 +254,7 @@ export const JobExplorer: React.FC = () => {
         experience: experience.join(','),
         department: department.join(','),
         company: company.join(','),
-        minScore: minScore.toString(),
         employmentType: employmentType.join(','),
-        tags: tags.join(','),
-        qualityFlags: qualityFlags.join(','),
-        recommendations: recommendations.join(','),
-        requiredSkills: requiredSkills.join(','),
-        minYearsExp: minYearsExp.toString(),
-        maxYearsExp: maxYearsExp.toString(),
-        minSalary: minSalary.toString(),
-        maxSalary: maxSalary.toString(),
-        salaryCurrency,
         dateRange,
         dateLimit: calculateDateLimit(dateRange),
         sort: sortBy,
@@ -438,20 +360,31 @@ export const JobExplorer: React.FC = () => {
     setExperience([]);
     setDepartment([]);
     setCompany([]);
-    setMinScore(0);
     setEmploymentType([]);
-    setTags([]);
-    setQualityFlags(['hide_expired', 'hide_broken', 'hide_duplicate']);
-    setRecommendations([]);
-    setRequiredSkills([]);
-    setMinYearsExp(0);
-    setMaxYearsExp(15);
-    setMinSalary(0);
-    setMaxSalary(250000);
-    setSalaryCurrency('all');
     setDateRange('');
+    setSortBy('newest');
     setSearchParams({});
+    try {
+      localStorage.removeItem('job_explorer_filters_v2');
+    } catch {}
   };
+
+  // Persist filter selections to local storage (Requirement 10)
+  useEffect(() => {
+    try {
+      const stored = {
+        location,
+        remote,
+        experience,
+        department,
+        company,
+        employmentType,
+        dateRange,
+        sortBy
+      };
+      localStorage.setItem('job_explorer_filters_v2', JSON.stringify(stored));
+    } catch {}
+  }, [location, remote, experience, department, company, employmentType, dateRange, sortBy]);
 
   // Toggle array filter helper
   const toggleArrayFilter = (arr: string[], val: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
@@ -524,7 +457,7 @@ export const JobExplorer: React.FC = () => {
       'Noida',
       'Mumbai',
       'International',
-      'Other States'
+      'Other Locations'
     ];
 
     const getLocCount = (locOption: string) => {
@@ -534,6 +467,18 @@ export const JobExplorer: React.FC = () => {
         if (aliases.some(a => f.label.toLowerCase().includes(a.toLowerCase()))) {
           total += f.count;
         }
+      });
+      return total;
+    };
+
+    const getExperienceCount = (expOpt: string) => {
+      let total = 0;
+      (facets.experienceLevels || []).forEach((f: any) => {
+        const lbl = f.label.toLowerCase();
+        if (expOpt === 'Freshers' && (lbl.includes('fresher') || lbl.includes('intern') || lbl.includes('entry') || lbl.includes('0'))) total += f.count;
+        else if (expOpt === '0–2 Years' && (lbl.includes('0') || lbl.includes('1') || lbl.includes('2') || lbl.includes('entry') || lbl.includes('associate'))) total += f.count;
+        else if (expOpt === '2–5 Years' && (lbl.includes('2') || lbl.includes('3') || lbl.includes('4') || lbl.includes('5') || lbl.includes('mid'))) total += f.count;
+        else if (expOpt === '5+ Years' && (lbl.includes('5') || lbl.includes('6') || lbl.includes('7') || lbl.includes('8') || lbl.includes('senior') || lbl.includes('lead') || lbl.includes('principal') || lbl.includes('manager') || lbl.includes('director'))) total += f.count;
       });
       return total;
     };
@@ -609,6 +554,45 @@ export const JobExplorer: React.FC = () => {
                   );
                 })()}
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2. EXPERIENCE */}
+        <div className="border-t border-[#243147]/40 pt-3">
+          <button
+            onClick={() => toggleSection('experience')}
+            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
+              Experience {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
+            </span>
+            {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.experience && (
+            <div className="space-y-0.5 mt-1.5 transition-all">
+              {['Freshers', '0–2 Years', '2–5 Years', '5+ Years'].map((expOpt) => {
+                const count = getExperienceCount(expOpt);
+                return (
+                  <label key={expOpt} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={experience.includes(expOpt)}
+                        onChange={() => toggleArrayFilter(experience, expOpt, setExperience)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{expOpt}</span>
+                    </div>
+                    {count > 0 && (
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                        {count}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
             </div>
           )}
         </div>
@@ -929,7 +913,7 @@ export const JobExplorer: React.FC = () => {
       </div>
 
       {/* ACTIVE FILTER CHIPS BAR */}
-      {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || minScore > 0 || employmentType.length > 0 || tags.length > 0 || qualityFlags.length > 0 || recommendations.length > 0 || requiredSkills.length > 0 || minYearsExp > 0 || minSalary > 0 || maxSalary < 250000 || dateRange) && (
+      {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || employmentType.length > 0 || dateRange) && (
         <div className="flex flex-wrap items-center gap-2 bg-[#111827] border border-[#243147] rounded-xl p-3 shadow-sm">
           <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mr-1">Active Filters:</span>
 
@@ -941,79 +925,43 @@ export const JobExplorer: React.FC = () => {
 
           {location.map(loc => (
             <span key={loc} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Loc: {loc} <button onClick={() => toggleArrayFilter(location, loc, setLocation)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              {loc} <button onClick={() => toggleArrayFilter(location, loc, setLocation)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
 
           {remote.map(rem => (
             <span key={rem} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Mode: {rem === 'true' ? 'Remote Only' : rem === 'hybrid' ? 'Hybrid' : 'On-site'} <button onClick={() => toggleArrayFilter(remote, rem, setRemote)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              {rem === 'true' ? 'Remote Only' : rem === 'hybrid' ? 'Hybrid' : 'On-site'} <button onClick={() => toggleArrayFilter(remote, rem, setRemote)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+            </span>
+          ))}
+
+          {experience.map(exp => (
+            <span key={exp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
 
           {department.map(dept => (
             <span key={dept} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Dept: {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
 
           {company.map(comp => (
             <span key={comp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Company: {comp} <button onClick={() => toggleArrayFilter(company, comp, setCompany)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              {comp} <button onClick={() => toggleArrayFilter(company, comp, setCompany)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
-
-          {minScore > 0 && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Min {minScore}% Score <button onClick={() => setMinScore(0)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          )}
 
           {employmentType.map(emp => (
             <span key={emp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Emp: {emp} <button onClick={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              {emp} <button onClick={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
-
-          {tags.map(t => (
-            <span key={t} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Tag: #{t} <button onClick={() => toggleArrayFilter(tags, t, setTags)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {qualityFlags.map(f => (
-            <span key={f} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Flag: {f} <button onClick={() => toggleArrayFilter(qualityFlags, f, setQualityFlags)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {recommendations.map(r => (
-            <span key={r} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Badge: {r} <button onClick={() => toggleArrayFilter(recommendations, r, setRecommendations)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {requiredSkills.map(s => (
-            <span key={s} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Skill: {s} <button onClick={() => toggleArrayFilter(requiredSkills, s, setRequiredSkills)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {minYearsExp > 0 && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Min {minYearsExp} Yrs Exp <button onClick={() => setMinYearsExp(0)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          )}
-
-          {(minSalary > 0 || maxSalary < 250000) && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Salary: {minSalary / 1000}k - {maxSalary / 1000}k <button onClick={() => { setMinSalary(0); setMaxSalary(250000); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          )}
 
           {dateRange && (
             <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Range: {dateRange} <button onClick={() => setDateRange('')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              Posted: {dateRange} <button onClick={() => setDateRange('')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           )}
 
@@ -1030,14 +978,13 @@ export const JobExplorer: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
         {/* COLLAPSIBLE FACETED LEFT SIDEBAR */}
-        {/* COLLAPSIBLE FACETED LEFT SIDEBAR */}
         <div className="hidden lg:block lg:col-span-3 space-y-6 bg-[#111827] border border-[#243147] rounded-2xl p-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar shadow-lg">
           <div className="flex items-center justify-between border-b border-[#243147] pb-3 mb-4">
             <h3 className="text-xs font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
               <Filter className="w-4 h-4 text-indigo-400" /> Faceted Filters
             </h3>
             <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold px-2 py-0.5 rounded-full">
-              {totalCount} jobs
+              {totalCount.toLocaleString()} jobs
             </span>
           </div>
 
@@ -1056,11 +1003,24 @@ export const JobExplorer: React.FC = () => {
         {/* CENTRAL INFINITE SCROLL JOB FEED */}
         <div className="lg:col-span-5 space-y-4">
           
-          {/* Feed Toolbar */}
-          <div className="flex items-center justify-between bg-[#111827] border border-[#243147] rounded-2xl p-4 shadow-sm">
+          {/* Feed Toolbar with Sort & Results Counter */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111827] border border-[#243147] rounded-2xl p-4 shadow-sm">
             <span className="text-xs font-bold text-[#94a3b8]">
-              Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount}</span> postings
+              Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount.toLocaleString()}</span> Jobs
             </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-[#64748b]">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-[#090d16] border border-[#243147] text-white text-xs rounded-xl px-3 py-1.5 font-semibold focus:outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="newest">Newest (Default)</option>
+                <option value="relevance">Relevance</option>
+                <option value="company_name">Company (A–Z)</option>
+                <option value="experience_asc">Experience (Low → High)</option>
+              </select>
+            </div>
           </div>
 
           {/* Job Feed List */}
@@ -1070,20 +1030,23 @@ export const JobExplorer: React.FC = () => {
             </div>
           ) : visibleJobs.length === 0 ? (
             /* CONTEXTUAL SMART EMPTY STATE */
-            <div className="bg-[#111827] border border-[#243147] rounded-2xl p-10 text-center space-y-4 shadow-md">
+            <div className="bg-[#111827] border border-[#243147] rounded-2xl p-8 text-center space-y-4 shadow-md">
               <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto">
                 <Search className="w-6 h-6" />
               </div>
-              <div>
-                <h3 className="text-base font-bold text-white">No matching job listings found</h3>
-                <p className="text-xs text-[#94a3b8] mt-2 max-w-sm mx-auto">
-                  We couldn't find any jobs matching your current criteria. Try clearing restrictive filters or broadening keywords.
-                </p>
+              <div className="space-y-2">
+                <h3 className="text-base font-bold text-white">No jobs matched your current filters</h3>
+                <div className="text-xs text-[#94a3b8] max-w-xs mx-auto text-left bg-[#090d16] border border-[#243147] p-3.5 rounded-xl space-y-1">
+                  <p className="font-semibold text-white mb-1">Try:</p>
+                  <p>• Expanding your location</p>
+                  <p>• Selecting a broader experience range</p>
+                  <p>• Clearing some filters</p>
+                </div>
               </div>
-              <div className="flex flex-wrap justify-center gap-2 pt-2">
+              <div className="pt-2">
                 <button
                   onClick={clearAllFilters}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition duration-200 cursor-pointer"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition duration-200 cursor-pointer shadow-md"
                 >
                   Clear All Filters
                 </button>
