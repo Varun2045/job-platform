@@ -13,7 +13,7 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
   explorer: {
     key: 'explorer',
     name: 'Job Explorer',
-    headingColorClass: 'text-[#6366f1]', // Indigo
+    headingColorClass: 'text-[#2dd4bf]', // Turquoise Mint
   },
   atsExplorer: {
     key: 'atsExplorer',
@@ -98,7 +98,7 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
   referrals: {
     key: 'referrals',
     name: 'Recruiter CRM & Follow-Ups',
-    headingColorClass: 'text-[#6366f1]', // Indigo (Matches Job Explorer)
+    headingColorClass: 'text-[#2dd4bf]', // Turquoise Mint (Matching screenshot)
   },
   analytics: {
     key: 'analytics',
