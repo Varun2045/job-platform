@@ -126,7 +126,7 @@ export class AtsRegistryService {
         'Airbnb', 'Asana', 'Brex', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'DataStax', 'Databricks', 'Datadog',
         'dbt Labs', 'Docker', 'Figma', 'GitLab', 'Instacart', 'Klaviyo', 'MongoDB',
         'Palantir', 'Reddit', 'Retool', 'Robinhood', 'Sentry', 'Twitch', 'Twilio',
-        'Vercel', 'Wiz', 'Zapier',
+        'Wiz', 'Zapier',
       ],
       companyDetails: [],
     },
