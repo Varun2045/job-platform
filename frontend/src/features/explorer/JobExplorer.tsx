@@ -122,16 +122,7 @@ export const JobExplorer: React.FC = () => {
   const [locSearch, setLocSearch] = useState('');
   const [compSearch, setCompSearch] = useState('');
   const [showAllCompanies, setShowAllCompanies] = useState(false);
-  const [showAllSkills, setShowAllSkills] = useState(false);
   const [companySort, setCompanySort] = useState<'count' | 'alpha'>('count');
-  const [recentSkills, setRecentSkills] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('recent_skills');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
 
   // Accordion Sections for Faceted Filters
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -451,8 +442,6 @@ export const JobExplorer: React.FC = () => {
     setSalaryCurrency('all');
     setDateRange('');
     setSearchParams({});
-    setShowAllCompanies(false);
-    setShowAllSkills(false);
   };
 
   // Toggle array filter helper
@@ -470,11 +459,6 @@ export const JobExplorer: React.FC = () => {
 
   const selectSkill = (skillVal: string) => {
     toggleArrayFilter(requiredSkills, skillVal, setRequiredSkills);
-    setRecentSkills(prev => {
-      const next = [skillVal, ...prev.filter(s => s !== skillVal)].slice(0, 5);
-      localStorage.setItem('recent_skills', JSON.stringify(next));
-      return next;
-    });
   };
 
   const renderSidebarContents = () => {
@@ -502,10 +486,6 @@ export const JobExplorer: React.FC = () => {
     });
     const filteredComps = sortedComps.filter((c: any) =>
       c.label.toLowerCase().includes(compSearch.toLowerCase())
-    );
-
-    const filteredSkills = (facets.skills || []).filter((s: any) =>
-      s.label.toLowerCase().includes(skillSearch.toLowerCase())
     );
 
     // Global Suggestions search (Searches across all categories)
@@ -594,15 +574,16 @@ export const JobExplorer: React.FC = () => {
 
     return (
       <div className="space-y-4">
-        {/* Global Auto-suggest inside Sidebar */}
+        {/* 1. SEARCH */}
         <div className="relative">
           <div className="relative flex items-center">
+            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
             <input
               type="text"
-              placeholder="Search inside filters (Java, Remote, Google...)"
+              placeholder="Search inside filters..."
               value={skillSearch}
               onChange={(e) => setSkillSearch(e.target.value)}
-              className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500 pr-8"
+              className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 pl-8 pr-8 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
             />
             {skillSearch && (
               <button onClick={() => setSkillSearch('')} className="absolute right-2.5 text-[#64748b] hover:text-white">
@@ -623,8 +604,6 @@ export const JobExplorer: React.FC = () => {
                     else if (item.type === 'skill') selectSkill(item.label);
                     else if (item.type === 'employmentType') toggleArrayFilter(employmentType, item.label, setEmploymentType);
                     else if (item.type === 'experience') toggleArrayFilter(experience, item.label, setExperience);
-                    else if (item.type === 'tag') toggleArrayFilter(tags, item.label, setTags);
-                    else if (item.type === 'recommendation') toggleArrayFilter(recommendations, item.label, setRecommendations);
                     setSkillSearch('');
                   }}
                   className="w-full text-left text-xs hover:bg-[#192438] px-2 py-1 rounded-lg flex justify-between items-center transition-colors"
@@ -647,124 +626,14 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 1. EXPERIENCE LEVEL */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('experience')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Experience Level {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
-            </span>
-            {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.experience && (
-            <div className="space-y-1 mt-1.5 transition-all">
-              <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
-                {canonicalLevels.map((lvl) => {
-                  const match = (facets.experienceLevels || []).find((f: any) => f.label.toLowerCase() === lvl.toLowerCase());
-                  const count = match ? match.count : 0;
-                  return (
-                    <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={experience.includes(lvl)}
-                          onChange={() => toggleArrayFilter(experience, lvl, setExperience)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span>{lvl}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                        {count}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 2. EXPERIENCE RANGE */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('expSlider')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Experience Range {(minYearsExp > 0 || maxYearsExp < 15) && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
-            </span>
-            {openSections.expSlider ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.expSlider && (
-            <div className="space-y-3 mt-1.5 transition-all">
-              <div className="flex justify-between items-center text-xs text-[#94a3b8] gap-2">
-                <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2">
-                  <span className="text-[9px] text-[#64748b] uppercase">Min:</span>
-                  <input
-                    type="number"
-                    min="0"
-                    max={maxPossibleYears}
-                    value={minYearsExp}
-                    onChange={(e) => setMinYearsExp(Math.max(0, Math.min(maxPossibleYears, Number(e.target.value))))}
-                    className="w-8 bg-transparent text-white text-center text-xs font-bold outline-none"
-                  />
-                </div>
-                <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2">
-                  <span className="text-[9px] text-[#64748b] uppercase">Max:</span>
-                  <input
-                    type="number"
-                    min="0"
-                    max={maxPossibleYears}
-                    value={maxYearsExp}
-                    onChange={(e) => setMaxYearsExp(Math.max(0, Math.min(maxPossibleYears, Number(e.target.value))))}
-                    className="w-8 bg-transparent text-white text-center text-xs font-bold outline-none"
-                  />
-                </div>
-              </div>
-              <div className="relative h-6 mt-1 px-1">
-                <div className="absolute w-[calc(100%-8px)] h-1 bg-[#243147] rounded-lg top-2.5 left-1 z-0"></div>
-                <div 
-                  className="absolute h-1 bg-indigo-500 rounded-lg top-2.5 z-0"
-                  style={{
-                    left: `calc(4px + ${(minYearsExp / maxPossibleYears) * 100}% * 0.95)`,
-                    width: `${((maxYearsExp - minYearsExp) / maxPossibleYears) * 100}%`
-                  }}
-                ></div>
-                <input
-                  type="range"
-                  min="0"
-                  max={maxPossibleYears}
-                  step="1"
-                  value={minYearsExp}
-                  onChange={(e) => setMinYearsExp(Math.min(maxYearsExp, Number(e.target.value)))}
-                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-25 range-slider-single-line"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max={maxPossibleYears}
-                  step="1"
-                  value={maxYearsExp}
-                  onChange={(e) => setMaxYearsExp(Math.max(minYearsExp, Number(e.target.value)))}
-                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-20 range-slider-single-line"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 3. DEPARTMENTS */}
+        {/* 2. DEPARTMENT */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('department')}
             className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
           >
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Departments {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
+              Department {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
             </span>
             {openSections.department ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
@@ -781,7 +650,6 @@ export const JobExplorer: React.FC = () => {
               
               <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-2 pr-1">
                 {Object.entries(deptGroups).map(([groupName, deptList]) => {
-                  // Filter group items matching local search query
                   const matchingDepts = deptList.filter(d => d.toLowerCase().includes(deptSearch.toLowerCase()));
                   if (matchingDepts.length === 0) return null;
 
@@ -812,7 +680,6 @@ export const JobExplorer: React.FC = () => {
                   );
                 })}
 
-                {/* Leftovers / Fallback Group */}
                 {(() => {
                   const groupedDeptsSet = new Set(Object.values(deptGroups).flat());
                   const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label) && d.label.toLowerCase().includes(deptSearch.toLowerCase()));
@@ -845,14 +712,111 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 4. COMPANIES SELECTOR */}
+        {/* 3. EXPERIENCE */}
+        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
+          <button
+            onClick={() => toggleSection('experience')}
+            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+          >
+            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
+              Experience {(experience.length > 0 || minYearsExp > 0 || maxYearsExp < 15) && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
+            </span>
+            {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+          </button>
+          
+          {openSections.experience && (
+            <div className="space-y-3 mt-1.5 transition-all">
+              <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
+                {canonicalLevels.map((lvl) => {
+                  const match = (facets.experienceLevels || []).find((f: any) => f.label.toLowerCase() === lvl.toLowerCase());
+                  const count = match ? match.count : 0;
+                  return (
+                    <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={experience.includes(lvl)}
+                          onChange={() => toggleArrayFilter(experience, lvl, setExperience)}
+                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span>{lvl}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                        {count}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {/* Range Slider */}
+              <div className="pt-2 border-t border-[#243147]/30 space-y-2">
+                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Years of Experience</span>
+                <div className="flex justify-between items-center text-xs text-[#94a3b8] gap-2">
+                  <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2">
+                    <span className="text-[9px] text-[#64748b] uppercase">Min:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={maxPossibleYears}
+                      value={minYearsExp}
+                      onChange={(e) => setMinYearsExp(Math.max(0, Math.min(maxPossibleYears, Number(e.target.value))))}
+                      className="w-8 bg-transparent text-white text-center text-xs font-bold outline-none"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2">
+                    <span className="text-[9px] text-[#64748b] uppercase">Max:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={maxPossibleYears}
+                      value={maxYearsExp}
+                      onChange={(e) => setMaxYearsExp(Math.max(0, Math.min(maxPossibleYears, Number(e.target.value))))}
+                      className="w-8 bg-transparent text-white text-center text-xs font-bold outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="relative h-6 mt-1 px-1">
+                  <div className="absolute w-[calc(100%-8px)] h-1 bg-[#243147] rounded-lg top-2.5 left-1 z-0"></div>
+                  <div 
+                    className="absolute h-1 bg-indigo-500 rounded-lg top-2.5 z-0"
+                    style={{
+                      left: `calc(4px + ${(minYearsExp / maxPossibleYears) * 100}% * 0.95)`,
+                      width: `${((maxYearsExp - minYearsExp) / maxPossibleYears) * 100}%`
+                    }}
+                  ></div>
+                  <input
+                    type="range"
+                    min="0"
+                    max={maxPossibleYears}
+                    step="1"
+                    value={minYearsExp}
+                    onChange={(e) => setMinYearsExp(Math.min(maxYearsExp, Number(e.target.value)))}
+                    className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-25 range-slider-single-line"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max={maxPossibleYears}
+                    step="1"
+                    value={maxYearsExp}
+                    onChange={(e) => setMaxYearsExp(Math.max(minYearsExp, Number(e.target.value)))}
+                    className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-20 range-slider-single-line"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 4. COMPANY */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('companies')}
             className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
           >
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Companies {company.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{company.length}</span>}
+              Company {company.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{company.length}</span>}
             </span>
             {openSections.companies ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
@@ -867,7 +831,6 @@ export const JobExplorer: React.FC = () => {
                 className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500"
               />
 
-              {/* Sorting options toggle */}
               <div className="flex gap-2 justify-end text-[9px] font-bold text-[#64748b] px-1">
                 <button
                   onClick={() => setCompanySort('count')}
@@ -884,7 +847,6 @@ export const JobExplorer: React.FC = () => {
                 </button>
               </div>
 
-              {/* Recently Viewed Companies */}
               {recentlyViewedCompanies.length > 0 && (
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Recently Viewed</span>
@@ -904,7 +866,6 @@ export const JobExplorer: React.FC = () => {
                 </div>
               )}
 
-              {/* Main List */}
               <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
                 {(showAllCompanies ? filteredComps : filteredComps.slice(0, 10)).map((f: any) => {
                   const isFavorite = favoriteCompanies.includes(f.label);
@@ -921,7 +882,6 @@ export const JobExplorer: React.FC = () => {
                           onChange={() => toggleArrayFilter(company, f.label, setCompany)}
                           className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
                         />
-                        {/* Logo representation */}
                         <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-extrabold ${badgeColors[colorIndex]}`}>
                           {firstChar}
                         </div>
@@ -956,45 +916,7 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 5. EMPLOYMENT TYPE */}
-        <div className="border-t border-[#243147]/40 pt-3">
-          <button
-            onClick={() => toggleSection('employment')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Employment Type {employmentType.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{employmentType.length}</span>}
-            </span>
-            {openSections.employment ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.employment && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
-              {canonicalEmps.map((emp) => {
-                const match = (facets.employmentTypes || []).find((f: any) => f.label.toLowerCase() === emp.toLowerCase());
-                const count = match ? match.count : 0;
-                return (
-                  <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={employmentType.includes(emp)}
-                        onChange={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{emp}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {count}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* 6. WORK MODE */}
+        {/* 5. WORK MODE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('remote')}
@@ -1032,7 +954,7 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 7. LOCATION HIERARCHY */}
+        {/* 6. LOCATION */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('location')}
@@ -1047,7 +969,6 @@ export const JobExplorer: React.FC = () => {
           {openSections.location && (
             <div className="space-y-3 mt-1.5 transition-all">
               <div className="space-y-1.5">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Search Locations</span>
                 <input
                   type="text"
                   placeholder="Filter country, state or city..."
@@ -1078,230 +999,45 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 8. SALARY FILTER */}
+        {/* 7. EMPLOYMENT TYPE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
-            onClick={() => toggleSection('salary')}
+            onClick={() => toggleSection('employment')}
             className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
           >
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Salary range {(minSalary > 0 || maxSalary < 250000 || salaryCurrency !== 'all') && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
+              Employment Type {employmentType.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{employmentType.length}</span>}
             </span>
-            {openSections.salary ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
+            {openSections.employment ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
-          {openSections.salary && (
-            <div className="space-y-3.5 mt-1.5 transition-all">
-              {/* Currency Selector */}
-              <div className="space-y-1">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Currency</span>
-                <select
-                  value={salaryCurrency}
-                  onChange={(e) => setSalaryCurrency(e.target.value)}
-                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
-                >
-                  <option value="all">Any Currency</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="INR">INR (₹)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                </select>
-              </div>
-
-              {/* Min/Max Inputs */}
-              <div className="flex justify-between items-center text-xs text-[#94a3b8] gap-2">
-                <div className="flex items-center gap-1 bg-[#090d16] border border-[#243147] rounded-lg p-1.5 px-2">
-                  <span className="text-[9px] text-[#64748b] uppercase">Min:</span>
-                  <input
-                    type="number"
-                    min="0"
-                    max="250000"
-                    step="5000"
-                    value={minSalary}
-                    onChange={(e) => setMinSalary(Math.max(0, Number(e.target.value)))}
-                    className="w-14 bg-transparent text-white text-xs font-bold outline-none"
-                  />
-                </div>
-                <div className="flex items-center gap-1 bg-[#090d16] border border-[#243147] rounded-lg p-1.5 px-2">
-                  <span className="text-[9px] text-[#64748b] uppercase">Max:</span>
-                  <input
-                    type="text"
-                    value={maxSalary >= 250000 ? '∞' : maxSalary}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '∞' || val === '') {
-                        setMaxSalary(250000);
-                      } else {
-                        setMaxSalary(Math.max(0, Number(val)));
-                      }
-                    }}
-                    className="w-14 bg-transparent text-white text-center text-xs font-bold outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Range sliders */}
-              <div className="relative h-6 mt-1 px-1">
-                <div className="absolute w-[calc(100%-8px)] h-1 bg-[#243147] rounded-lg top-2.5 left-1 z-0"></div>
-                <div 
-                  className="absolute h-1 bg-indigo-500 rounded-lg top-2.5 z-0"
-                  style={{
-                    left: `calc(4px + ${(minSalary / 250000) * 100}% * 0.95)`,
-                    width: `${((maxSalary - minSalary) / 250000) * 100}%`
-                  }}
-                ></div>
-                <input
-                  type="range"
-                  min="0"
-                  max="250000"
-                  step="5000"
-                  value={minSalary}
-                  onChange={(e) => setMinSalary(Math.min(maxSalary, Number(e.target.value)))}
-                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-25 range-slider-single-line"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="250000"
-                  step="5000"
-                  value={maxSalary}
-                  onChange={(e) => setMaxSalary(Math.max(minSalary, Number(e.target.value)))}
-                  className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-20 range-slider-single-line"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 9. REQUIRED SKILLS TAG PICKER */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('skills')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Required Skills {requiredSkills.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{requiredSkills.length}</span>}
-            </span>
-            {openSections.skills ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.skills && (
-            <div className="space-y-2 mt-1.5 transition-all">
-              {/* Autocomplete Input Search */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Type skills (e.g. Java, Python...)"
-                  value={skillSearch}
-                  onChange={(e) => setSkillSearch(e.target.value)}
-                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
-                />
-                {skillSearch && (
-                  <div className="absolute top-full left-0 right-0 z-50 bg-[#111827] border border-[#243147] rounded-xl p-1.5 mt-1 shadow-2xl max-h-40 overflow-y-auto space-y-0.5 custom-scrollbar">
-                    {/* Direct Search option */}
-                    <button
-                      onClick={() => { selectSkill(skillSearch.trim()); setSkillSearch(''); }}
-                      className="w-full text-left text-xs text-indigo-400 hover:bg-[#192438] px-2 py-1.5 rounded-lg flex justify-between items-center transition-colors font-bold border-b border-[#243147]/50 mb-1"
-                    >
-                      <span>Search for "{skillSearch.trim()}" in all jobs</span>
-                      <span className="text-[9px] text-[#64748b] bg-[#090d16] px-1.5 py-0.5 rounded-full border border-[#243147]/30">Net Search</span>
-                    </button>
-                    {filteredSkills.slice(0, 8).map((s: any) => (
-                      <button
-                        key={s.label}
-                        onClick={() => { selectSkill(s.label); setSkillSearch(''); }}
-                        className="w-full text-left text-xs text-indigo-300 hover:bg-[#192438] px-2 py-1 rounded-lg flex justify-between items-center transition-colors"
-                      >
-                        <span>{s.label}</span>
-                        <span className="text-[9px] text-[#64748b] font-bold bg-[#090d16] px-1.5 py-0.5 rounded-full">{s.count}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Active Selected Skills tags */}
-              {requiredSkills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 border-b border-[#243147]/30 pb-2 mb-2">
-                  {requiredSkills.map(s => (
-                    <span key={s} className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
-                      {s} <button onClick={() => toggleArrayFilter(requiredSkills, s, setRequiredSkills)} className="cursor-pointer hover:text-white"><X className="w-2.5 h-2.5" /></button>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Suggested / Popular skills suggestions */}
-              <div className="space-y-1">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Suggested Skills</span>
-                <div className="flex flex-wrap gap-1 px-1">
-                  {['AI', 'Generative AI', 'Python', 'React', 'Node.js', 'Docker', 'AWS', 'SQL'].map(popSkill => (
-                    <button
-                      key={popSkill}
-                      onClick={() => selectSkill(popSkill)}
-                      className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                        requiredSkills.includes(popSkill) ? 'bg-[#1e1b4b] border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147] text-[#94a3b8] hover:text-white'
-                      }`}
-                    >
-                      {popSkill}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Skills */}
-              {recentSkills.length > 0 && (
-                <div className="space-y-1 pt-1 border-t border-[#243147]/20">
-                  <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Recent Skills</span>
-                  <div className="flex flex-wrap gap-1 px-1">
-                    {recentSkills.map(sVal => (
-                      <button
-                        key={sVal}
-                        onClick={() => selectSkill(sVal)}
-                        className={`text-[9px] px-2 py-0.5 rounded-md border font-semibold transition-all cursor-pointer ${
-                          requiredSkills.includes(sVal) ? 'bg-[#1e1b4b] border-indigo-500 text-indigo-200' : 'bg-[#090d16] border-[#243147]/50 text-[#94a3b8] hover:text-white'
-                        }`}
-                      >
-                        {sVal}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Main List */}
-              <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5 pr-1 mt-2">
-                {(showAllSkills ? filteredSkills : filteredSkills.slice(0, 10)).map((f: any) => (
-                  <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+          {openSections.employment && (
+            <div className="space-y-0.5 mt-1.5 transition-all">
+              {canonicalEmps.map((emp) => {
+                const match = (facets.employmentTypes || []).find((f: any) => f.label.toLowerCase() === emp.toLowerCase());
+                const count = match ? match.count : 0;
+                return (
+                  <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
-                        checked={requiredSkills.includes(f.label)}
-                        onChange={() => selectSkill(f.label)}
+                        checked={employmentType.includes(emp)}
+                        onChange={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}
                         className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span>{f.label}</span>
+                      <span>{emp}</span>
                     </div>
                     <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {f.count}
+                      {count}
                     </span>
                   </label>
-                ))}
-              </div>
-
-              {filteredSkills.length > 10 && (
-                <button
-                  onClick={() => setShowAllSkills(!showAllSkills)}
-                  className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
-                >
-                  {showAllSkills ? 'Show Less' : `Show All (${filteredSkills.length})`}
-                </button>
-              )}
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* 10. POSTING DATE */}
+        {/* 8. POSTING DATE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('datePosted')}
@@ -1333,152 +1069,6 @@ export const JobExplorer: React.FC = () => {
                   <span>{opt.label}</span>
                 </label>
               ))}
-            </div>
-          )}
-        </div>
-
-        {/* 11. JOB TAGS */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('tags')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Job Tags {tags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{tags.length}</span>}
-            </span>
-            {openSections.tags ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-
-          {openSections.tags && (
-            <div className="space-y-0.5 mt-1.5 transition-all max-h-48 overflow-y-auto custom-scrollbar">
-              {[
-                'Visa Sponsorship', 'Easy Apply', 'Featured', 'Urgent Hiring',
-                'Referral Available', 'High Salary', 'Graduate', 'Internship',
-                'AI Recommended', 'Remote', 'Hybrid', 'On-site'
-              ].map((tagVal) => {
-                const match = (facets.tags || []).find((f: any) => f.label.toLowerCase() === tagVal.toLowerCase());
-                const count = match ? match.count : 0;
-                return (
-                  <label key={tagVal} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={tags.includes(tagVal)}
-                        onChange={() => toggleArrayFilter(tags, tagVal, setTags)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>#{tagVal}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {count}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* 12. QUALITY FILTERS */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('quality')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Quality & Exclusions {qualityFlags.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{qualityFlags.length}</span>}
-            </span>
-            {openSections.quality ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.quality && (
-            <div className="space-y-3 mt-1.5 transition-all">
-              {/* Positives */}
-              <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block px-1 mb-1">Quality Requirements</span>
-                {[
-                  { label: 'Verified Job', value: 'verified_job' },
-                  { label: 'Verified Company', value: 'verified_company' },
-                  { label: 'Salary Available', value: 'salary_available' },
-                  { label: 'Recently Updated', value: 'recently_updated' },
-                  { label: 'Direct Apply', value: 'direct_apply' },
-                  { label: 'External Apply', value: 'external_apply' }
-                ].map(opt => (
-                  <label key={opt.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={qualityFlags.includes(opt.value)}
-                        onChange={() => toggleArrayFilter(qualityFlags, opt.value, setQualityFlags)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{opt.label}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-
-              {/* Exclusions */}
-              <div className="space-y-0.5 border-t border-[#243147]/20 pt-2">
-                <span className="text-[10px] font-bold text-[#64748b] uppercase tracking-wider block px-1 mb-1">Hide Filters</span>
-                {[
-                  { label: 'Hide Expired Jobs', value: 'hide_expired' },
-                  { label: 'Hide Broken Apply Links', value: 'hide_broken' },
-                  { label: 'Hide Duplicate Jobs', value: 'hide_duplicate' }
-                ].map(opt => (
-                  <label key={opt.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={qualityFlags.includes(opt.value)}
-                        onChange={() => toggleArrayFilter(qualityFlags, opt.value, setQualityFlags)}
-                        className="rounded border-[#243147] bg-[#090d16] text-rose-500 focus:ring-rose-500"
-                      />
-                      <span>{opt.label}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 13. RECOMMENDATION BADGES */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('recommendations')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Job Badges {recommendations.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{recommendations.length}</span>}
-            </span>
-            {openSections.recommendations ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.recommendations && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
-              {[
-                'Recently Posted', 'Hiring Actively', 'Salary Available', 'Direct Apply', 'Verified Company'
-              ].map((badgeVal) => {
-                const match = (facets.recommendations || []).find((f: any) => f.label.toLowerCase() === badgeVal.toLowerCase());
-                const count = match ? match.count : 0;
-                return (
-                  <label key={badgeVal} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={recommendations.includes(badgeVal)}
-                        onChange={() => toggleArrayFilter(recommendations, badgeVal, setRecommendations)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{badgeVal}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {count}
-                    </span>
-                  </label>
-                );
-              })}
             </div>
           )}
         </div>
