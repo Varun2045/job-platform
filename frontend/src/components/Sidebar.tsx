@@ -111,7 +111,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
     {
       category: 'Networking',
       items: [
-        { name: 'Recruiter CRM', path: '/crm', icon: Handshake },
         { name: 'Referrals', path: '/referrals', icon: Handshake }
       ]
     },

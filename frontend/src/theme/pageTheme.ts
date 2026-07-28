@@ -98,7 +98,7 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
   referrals: {
     key: 'referrals',
     name: 'Recruiter CRM & Follow-Ups',
-    headingColorClass: 'text-[#2dd4bf]', // Bright Teal
+    headingColorClass: 'text-[#6366f1]', // Indigo (Matches Job Explorer)
   },
   analytics: {
     key: 'analytics',

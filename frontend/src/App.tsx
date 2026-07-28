@@ -25,7 +25,6 @@ import { ProfileBuilder } from './features/profile-builder/ProfileBuilder.js';
 import { ErrorBoundary } from './components/ErrorBoundary.js';
 import { Menu } from 'lucide-react';
 import { AtsHeatmapView } from './features/resumes/AtsHeatmapView.js';
-import { RecruiterCrmView } from './features/networking/RecruiterCrmView.js';
 import { NotificationSettingsView } from './features/settings/NotificationSettingsView.js';
 import { AnalyticsDashboardView } from './features/analytics/AnalyticsDashboardView.js';
 import { ExportCenterView } from './features/export/ExportCenterView.js';
@@ -132,7 +131,7 @@ export const App: React.FC = () => {
                 <Route path="/flashcards" element={<FlashcardDashboard />} />
                 <Route path="/flashcard-achievements" element={<FlashcardAchievements />} />
                 <Route path="/ats-heatmap" element={<AtsHeatmapView />} />
-                <Route path="/crm" element={<RecruiterCrmView />} />
+                <Route path="/crm" element={<Navigate to="/referrals" replace />} />
                 <Route path="/notification-settings" element={<NotificationSettingsView />} />
                 <Route path="/analytics" element={<AnalyticsDashboardView />} />
                 <Route path="/export-center" element={<ExportCenterView />} />
