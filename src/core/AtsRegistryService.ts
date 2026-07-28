@@ -83,6 +83,7 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Palo Alto Networks': { careerPage: 'https://www.paloaltonetworks.com/company/careers', jobBoardUrl: 'https://paloaltonetworks.wd1.myworkdayjobs.com/External' },
   'PayPal': { careerPage: 'https://www.paypal.com/us/webapps/mpp/jobs', jobBoardUrl: 'https://paypal.wd1.myworkdayjobs.com/paypal-careers' },
   'Zoom': { careerPage: 'https://careers.zoom.us', jobBoardUrl: 'https://zoom.wd5.myworkdayjobs.com/Zoom' },
+  'PwC': { careerPage: 'https://www.pwc.com/careers', jobBoardUrl: 'https://pwc.wd1.myworkdayjobs.com/PwC_Careers' },
   'Okta': { careerPage: 'https://www.okta.com/company/careers', jobBoardUrl: 'https://okta.wd1.myworkdayjobs.com/External' },
   'Red Hat': { careerPage: 'https://www.redhat.com/en/jobs', jobBoardUrl: 'https://redhat.wd5.myworkdayjobs.com/jobs' },
   'Splunk': { careerPage: 'https://www.splunk.com/en_us/careers.html', jobBoardUrl: 'https://splunk.wd1.myworkdayjobs.com/External' },
@@ -113,7 +114,7 @@ export class AtsRegistryService {
       companies: [
         'Adobe', 'AMD', 'Broadcom', 'CrowdStrike', 'Dell', 'EY', 'GE', 'Goldman Sachs',
         'Honeywell', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo', 'Mastercard', 'NVIDIA',
-        'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'Qualcomm', 'Red Hat', 'Salesforce',
+        'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'PwC', 'Qualcomm', 'Red Hat', 'Salesforce',
         'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
       ],
       companyDetails: [],

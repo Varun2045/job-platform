@@ -74,6 +74,8 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'flipkart', name: 'Flipkart', pattern: 'flipkartcareers.com', careerPage: 'https://www.flipkartcareers.com/', jobBoardUrl: 'https://www.flipkartcareers.com/' },
   { id: 'hsbc', name: 'HSBC', pattern: 'hsbc.com', careerPage: 'https://www.hsbc.com/careers', jobBoardUrl: 'https://www.hsbc.com/careers' },
   { id: 'uber', name: 'Uber', pattern: 'uber.com', careerPage: 'https://www.uber.com/us/en/careers', jobBoardUrl: 'https://www.uber.com/us/en/careers/list' },
+  { id: 'deloitte', name: 'Deloitte', pattern: 'deloitte.com', careerPage: 'https://careers.deloitte.com', jobBoardUrl: 'https://careers.deloitte.com' },
+  { id: 'zs', name: 'ZS Associates', pattern: 'zs.com', careerPage: 'https://jobs.zs.com', jobBoardUrl: 'https://jobs.zs.com' },
 
   // Infrastructure & Global Portals
   { id: 'bytedance', name: 'ByteDance', pattern: 'bytedance.com', careerPage: 'https://jobs.bytedance.com/en/', jobBoardUrl: 'https://jobs.bytedance.com/en/' },
