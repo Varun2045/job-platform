@@ -123,7 +123,7 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Airbnb', 'Brex', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'DataStax', 'Datadog',
+        'Airbnb', 'Asana', 'Brex', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'DataStax', 'Databricks', 'Datadog',
         'dbt Labs', 'Docker', 'Figma', 'GitLab', 'Instacart', 'Klaviyo', 'MongoDB',
         'Palantir', 'Reddit', 'Retool', 'Robinhood', 'Sentry', 'Twitch', 'Twilio',
         'Vercel', 'Wiz', 'Zapier',
@@ -141,7 +141,7 @@ export class AtsRegistryService {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'Linear', 'Loom', 'Notion', 'OpenAI', 'Perplexity', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Vercel'],
+      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'Linear', 'Loom', 'Notion', 'OpenAI', 'Perplexity', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Vercel'],
       companyDetails: [],
     },
     {
@@ -184,6 +184,7 @@ export class AtsRegistryService {
       'Rippling': 'rippling',
       'Snowflake': 'snowflake',
       'Supabase': 'supabase',
+      'Temporal': 'temporal',
     };
 
     const SMARTRECRUITERS_SLUG_OVERRIDES: Record<string, string> = {
