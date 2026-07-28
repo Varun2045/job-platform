@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Trash2, Eye, Download } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const ResumeManager: React.FC = () => {
   const queryClient = useQueryClient();
@@ -57,11 +58,32 @@ export const ResumeManager: React.FC = () => {
     }
   });
 
+  const base64ToBlobUrl = (base64Data: string): string => {
+    try {
+      const base64Clean = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+      const binaryStr = atob(base64Clean);
+      const len = binaryStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      return URL.createObjectURL(blob);
+    } catch (err) {
+      console.error('Failed to convert base64 PDF to blob URL', err);
+      return base64Data;
+    }
+  };
+
   const handlePreview = async (rName: string) => {
     setPreviewName(rName);
     const resume = resumes?.find((r: any) => r.name === rName);
     setPreviewContent(resume ? resume.content : '');
-    setPreviewPdf(resume ? resume.pdf_data : null);
+    if (resume?.pdf_data) {
+      setPreviewPdf(base64ToBlobUrl(resume.pdf_data));
+    } else {
+      setPreviewPdf(null);
+    }
   };
 
   const handleDownload = async (rName: string) => {
@@ -109,10 +131,12 @@ export const ResumeManager: React.FC = () => {
   return (
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Resume Manager</h1>
-          <p className="text-sm text-[#94a3b8]">Upload and manage profiles used for resume matching</p>
-        </div>
+        <PageHeader
+          themeKey="resumeManager"
+          title="Resume Manager"
+          description="Upload and manage profiles used for resume matching"
+          icon={FileText}
+        />
 
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-4">
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add Resume Profile</h3>
@@ -244,11 +268,22 @@ export const ResumeManager: React.FC = () => {
               </button>
             </div>
             {previewPdf ? (
-              <iframe
-                src={previewPdf}
-                title="PDF Resume Preview"
-                className="w-full h-[500px] rounded-xl border border-[#232d3f] bg-white"
-              />
+              <object
+                data={previewPdf}
+                type="application/pdf"
+                className="w-full h-[550px] rounded-xl border border-[#232d3f] bg-white overflow-hidden shadow-inner"
+              >
+                <div className="p-6 text-center text-xs text-[#94a3b8] space-y-3">
+                  <p>Your browser does not support embedded PDF rendering.</p>
+                  <a
+                    href={previewPdf}
+                    download={`${previewName}.pdf`}
+                    className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg transition"
+                  >
+                    Download PDF Document
+                  </a>
+                </div>
+              </object>
             ) : (
               <pre className="text-xs text-[#94a3b8] leading-relaxed whitespace-pre-wrap bg-[#1b2535] p-4 rounded-xl border border-[#232d3f] max-h-96 overflow-y-auto">
                 {previewContent}

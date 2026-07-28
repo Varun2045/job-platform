@@ -76,6 +76,8 @@ app.use(
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'blob:'],
         connectSrc: ["'self'", 'https://*.supabase.co'],
+        frameSrc: ["'self'", 'data:', 'blob:'],
+        objectSrc: ["'self'", 'data:', 'blob:'],
       },
     },
   }),

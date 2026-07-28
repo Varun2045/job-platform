@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export type CompanyHealthType = 'Healthy' | 'Warning' | 'Failing';
 
@@ -225,15 +226,12 @@ export const AtsExplorerView: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto text-white bg-[#0b0f19] min-h-screen relative">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Layers className="w-8 h-8 text-indigo-400" />
-          <h1 className="text-3xl font-black tracking-tight text-white">Supported ATS & Portal Explorer</h1>
-        </div>
-        <p className="text-[#94a3b8] text-sm max-w-3xl">
-          Single source of truth for all supported ATS platforms and company career portals.
-        </p>
-      </div>
+      <PageHeader
+        themeKey="atsExplorer"
+        title="Supported ATS & Portal Explorer"
+        description="Single source of truth for all supported ATS platforms and company career portals."
+        icon={Layers}
+      />
 
       {/* Metrics Summary Cards */}
       {overview && (
