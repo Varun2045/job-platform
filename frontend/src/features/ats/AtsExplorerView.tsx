@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp } from 'lucide-react';
 
 export type CompanyHealthType = 'Healthy' | 'Warning' | 'Failing';
 
@@ -39,7 +39,6 @@ export interface UrlDetectionResult {
   category: string;
   parser: string;
   supported: string;
-  priority: number;
 }
 
 export interface AtsRegistryOverview {
@@ -50,6 +49,78 @@ export interface AtsRegistryOverview {
   groups: AtsCategoryGroup[];
 }
 
+// Reusable Explorer Section Component for both Native ATS & Company Portals
+const ExplorerSection: React.FC<{
+  group: AtsCategoryGroup;
+  isExpanded: boolean;
+  onToggleGroup: () => void;
+  onSelectCompany: (companyName: string, platformName: string, category: string, extractionMs: number, pattern?: string) => void;
+}> = ({ group, isExpanded, onToggleGroup, onSelectCompany }) => {
+  // Collect all companies in alphabetical order across sub-parsers
+  const allCompanies: { name: string; platformName: string; extractionMs: number; pattern?: string }[] = [];
+
+  group.parsers.forEach((p) => {
+    p.companies.forEach((cName) => {
+      allCompanies.push({
+        name: cName,
+        platformName: p.name,
+        extractionMs: p.averageExtractionMs,
+        pattern: p.pattern,
+      });
+    });
+  });
+
+  allCompanies.sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <div className="bg-[#131a26] border border-[#232d3f] rounded-xl overflow-hidden shadow-lg">
+      {/* Category Header Bar */}
+      <div
+        onClick={onToggleGroup}
+        className="p-5 flex items-center justify-between cursor-pointer hover:bg-[#1b2535] transition select-none"
+      >
+        <div className="flex items-center gap-3">
+          {isExpanded ? <ChevronDown className="w-5 h-5 text-indigo-400" /> : <ChevronRight className="w-5 h-5 text-[#64748b]" />}
+          <h2 className="text-lg font-bold text-white">{group.category}</h2>
+        </div>
+
+        <div className="flex items-center gap-6 text-xs text-[#94a3b8]">
+          <span>
+            Parsers: <strong className="text-white">{group.totalParsers}</strong>
+          </span>
+          <span>
+            Companies: <strong className="text-white">{group.totalCompanies}</strong>
+          </span>
+          <span>
+            Last Verified: <strong className="text-indigo-300">{group.lastVerified}</strong>
+          </span>
+          <span>
+            Avg Extraction: <strong className="text-emerald-400">{group.averageExtractionMs}ms</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* Uniform Responsive Grid Layout */}
+      {isExpanded && (
+        <div className="p-5 border-t border-[#232d3f] bg-[#0b0f19]/60">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {allCompanies.map((item) => (
+              <button
+                key={`${item.platformName}-${item.name}`}
+                onClick={() => onSelectCompany(item.name, item.platformName, group.category, item.extractionMs, item.pattern)}
+                className="px-3.5 py-2.5 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
+              >
+                <span className="truncate">{item.name}</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const AtsExplorerView: React.FC = () => {
   const [overview, setOverview] = useState<AtsRegistryOverview | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,9 +130,9 @@ export const AtsExplorerView: React.FC = () => {
     'native-ats': true,
     'company-portals': true,
   });
-  const [expandedParsers, setExpandedParsers] = useState<Record<string, boolean>>({});
+  const [showDevDetails, setShowDevDetails] = useState(false);
 
-  // Slide-over Modal State
+  // Inspector Side Drawer State
   const [selectedCompany, setSelectedCompany] = useState<{
     name: string;
     platformName: string;
@@ -73,7 +144,6 @@ export const AtsExplorerView: React.FC = () => {
     lastVerified: string;
     supportedUrl?: string;
     recentErrors?: string[];
-    priority: number;
   } | null>(null);
 
   useEffect(() => {
@@ -113,16 +183,11 @@ export const AtsExplorerView: React.FC = () => {
     setExpandedGroups((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const toggleParser = (id: string) => {
-    setExpandedParsers((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
   const openCompanyModal = (
     companyName: string,
     platformName: string,
     category: string,
     averageExtractionMs: number,
-    priority: number,
     pattern?: string,
   ) => {
     setSelectedCompany({
@@ -136,7 +201,6 @@ export const AtsExplorerView: React.FC = () => {
       lastVerified: category === 'Native ATS' ? '2 hours ago' : 'Today',
       supportedUrl: pattern ? `https://${pattern}/careers` : `https://${companyName.toLowerCase().replace(/\s+/g, '')}.com/careers`,
       recentErrors: [],
-      priority,
     });
   };
 
@@ -167,7 +231,7 @@ export const AtsExplorerView: React.FC = () => {
           <h1 className="text-3xl font-black tracking-tight text-white">Supported ATS & Portal Explorer</h1>
         </div>
         <p className="text-[#94a3b8] text-sm max-w-3xl">
-          Single authoritative registry mapping native recruitment engines and dedicated company career plugins.
+          Single source of truth for all supported ATS platforms and company career portals.
         </p>
       </div>
 
@@ -252,7 +316,7 @@ export const AtsExplorerView: React.FC = () => {
         )}
       </div>
 
-      {/* Global Search Filter */}
+      {/* Search Input Filter */}
       <div className="relative mb-6">
         <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748b]" />
         <input
@@ -264,98 +328,20 @@ export const AtsExplorerView: React.FC = () => {
         />
       </div>
 
-      {/* Categorized Accordion Groups */}
+      {/* Categorized Reusable Sections List */}
       <div className="space-y-4">
-        {filteredGroups.map((group) => {
-          const isGroupExpanded = expandedGroups[group.id];
-          return (
-            <div key={group.id} className="bg-[#131a26] border border-[#232d3f] rounded-xl overflow-hidden shadow-lg">
-              {/* Category Header */}
-              <div
-                onClick={() => toggleGroup(group.id)}
-                className="p-5 flex items-center justify-between cursor-pointer hover:bg-[#1b2535] transition select-none"
-              >
-                <div className="flex items-center gap-3">
-                  {isGroupExpanded ? <ChevronDown className="w-5 h-5 text-indigo-400" /> : <ChevronRight className="w-5 h-5 text-[#64748b]" />}
-                  <h2 className="text-lg font-bold text-white">{group.category}</h2>
-                </div>
-
-                <div className="flex items-center gap-6 text-xs text-[#94a3b8]">
-                  <span>
-                    Parsers: <strong className="text-white">{group.totalParsers}</strong>
-                  </span>
-                  <span>
-                    Companies: <strong className="text-white">{group.totalCompanies}</strong>
-                  </span>
-                  <span>
-                    Last Verified: <strong className="text-indigo-300">{group.lastVerified}</strong>
-                  </span>
-                  <span>
-                    Avg Extraction: <strong className="text-emerald-400">{group.averageExtractionMs}ms</strong>
-                  </span>
-                </div>
-              </div>
-
-              {/* Category Content */}
-              {isGroupExpanded && (
-                <div className="p-5 border-t border-[#232d3f] bg-[#0b0f19]/50 space-y-3">
-                  {group.parsers.map((parser) => {
-                    const isParserExpanded = expandedParsers[parser.id] ?? (group.id === 'native-ats');
-                    return (
-                      <div key={parser.id} className="bg-[#131a26] border border-[#232d3f] rounded-lg overflow-hidden">
-                        <div
-                          onClick={() => toggleParser(parser.id)}
-                          className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#1b2535] transition text-sm"
-                        >
-                          <div className="flex items-center gap-2.5 font-bold text-white">
-                            {parser.companies.length > 1 ? (
-                              isParserExpanded ? <ChevronDown className="w-4 h-4 text-indigo-400" /> : <ChevronRight className="w-4 h-4 text-[#64748b]" />
-                            ) : null}
-                            <span>{parser.name}</span>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-[#94a3b8]">
-                            <span>Companies: <strong className="text-white">{parser.companies.length}</strong></span>
-                            <span>Latency: <strong className="text-emerald-400">{parser.averageExtractionMs}ms</strong></span>
-                          </div>
-                        </div>
-
-                        {/* Company Card Grid with Health Status Borders */}
-                        {isParserExpanded && parser.companies.length > 0 && (
-                          <div className="p-3.5 border-t border-[#232d3f] bg-[#0b0f19]/80">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-                              {parser.companies.map((company) => (
-                                <button
-                                  key={company}
-                                  onClick={() =>
-                                    openCompanyModal(
-                                      company,
-                                      parser.name,
-                                      group.category,
-                                      parser.averageExtractionMs,
-                                      group.priority,
-                                      parser.pattern,
-                                    )
-                                  }
-                                  className="px-3 py-2 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
-                                >
-                                  <span className="truncate">{company}</span>
-                                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {filteredGroups.map((group) => (
+          <ExplorerSection
+            key={group.id}
+            group={group}
+            isExpanded={expandedGroups[group.id] ?? true}
+            onToggleGroup={() => toggleGroup(group.id)}
+            onSelectCompany={openCompanyModal}
+          />
+        ))}
       </div>
 
-      {/* Clickable Company Detail Side Modal Drawer */}
+      {/* Side Inspector Modal */}
       {selectedCompany && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex justify-end z-50 transition-opacity">
           <div className="w-full max-w-md bg-[#131a26] border-l border-[#232d3f] h-full p-6 overflow-y-auto flex flex-col justify-between shadow-2xl">
@@ -382,10 +368,10 @@ export const AtsExplorerView: React.FC = () => {
                 </div>
               </div>
 
-              {/* Metadata Details Grid */}
+              {/* Metadata Details */}
               <div className="space-y-4 text-xs">
                 <div className="bg-[#0b0f19] p-3.5 rounded-lg border border-[#232d3f] flex items-center justify-between">
-                  <span className="text-[#64748b]">Parser Implementation</span>
+                  <span className="text-[#64748b]">Parser</span>
                   <span className="font-bold text-white">{selectedCompany.parserType}</span>
                 </div>
 
@@ -403,7 +389,7 @@ export const AtsExplorerView: React.FC = () => {
                 </div>
 
                 <div className="bg-[#0b0f19] p-3.5 rounded-lg border border-[#232d3f] flex items-center justify-between">
-                  <span className="text-[#64748b]">Average Extraction Latency</span>
+                  <span className="text-[#64748b]">Average Extraction</span>
                   <span className="font-bold text-emerald-400">{selectedCompany.averageExtractionMs}ms</span>
                 </div>
 
@@ -422,10 +408,23 @@ export const AtsExplorerView: React.FC = () => {
                   </div>
                 )}
 
-                {/* Developer Priority Details */}
-                <div className="bg-[#0b0f19] p-3.5 rounded-lg border border-[#232d3f] flex items-center justify-between">
-                  <span className="text-[#64748b]">Developer Priority Rank</span>
-                  <span className="font-mono text-xs font-bold text-slate-300">Priority {selectedCompany.priority}</span>
+                {/* Collapsible Developer Details */}
+                <div className="pt-2">
+                  <button
+                    onClick={() => setShowDevDetails(!showDevDetails)}
+                    className="w-full flex items-center justify-between p-2.5 bg-[#0b0f19] rounded-lg border border-[#232d3f] text-[#64748b] hover:text-white text-xs transition cursor-pointer"
+                  >
+                    <span className="font-semibold">Developer Details</span>
+                    {showDevDetails ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {showDevDetails && (
+                    <div className="mt-2 p-3 bg-[#0b0f19] rounded-lg border border-[#232d3f] space-y-2 text-[11px] font-mono text-[#94a3b8]">
+                      <div>Category: {selectedCompany.category}</div>
+                      <div>Engine: {selectedCompany.platformName}</div>
+                      <div>Auto-Register Status: Active</div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
