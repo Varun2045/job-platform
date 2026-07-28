@@ -424,7 +424,7 @@ export const AtsExplorerView: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">Total Companies Tracked</p>
-              <p className="text-2xl font-black text-white">{overview.totalCompanies}+</p>
+              <p className="text-2xl font-black text-white">{overview.totalCompanies}</p>
             </div>
           </div>
         </div>
