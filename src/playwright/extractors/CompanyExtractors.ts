@@ -102,6 +102,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'qualcomm', name: 'Qualcomm', pattern: 'qualcomm.com', careerPage: 'https://www.qualcomm.com/company/careers', jobBoardUrl: 'https://qualcomm.wd5.myworkdayjobs.com/External' },
   { id: 'amd', name: 'AMD', pattern: 'amd.com', careerPage: 'https://www.amd.com/en/corporate/careers.html', jobBoardUrl: 'https://amd.wd1.myworkdayjobs.com/External' },
   { id: 'broadcom', name: 'Broadcom', pattern: 'broadcom.com', careerPage: 'https://www.broadcom.com/company/careers', jobBoardUrl: 'https://broadcom.wd1.myworkdayjobs.com/External_Career' },
+  { id: 'bytedance', name: 'ByteDance', pattern: 'bytedance.com', careerPage: 'https://jobs.bytedance.com/en/', jobBoardUrl: 'https://jobs.bytedance.com/en/' },
   { id: 'arm', name: 'ARM', pattern: 'arm.com', careerPage: 'https://careers.arm.com', jobBoardUrl: 'https://careers.arm.com/search-jobs' },
   { id: 'ericsson', name: 'Ericsson', pattern: 'ericsson.com', careerPage: 'https://www.ericsson.com/en/careers', jobBoardUrl: 'https://jobs.ericsson.com' },
   { id: 'nokia', name: 'Nokia', pattern: 'nokia.com', careerPage: 'https://www.nokia.com/about-us/careers', jobBoardUrl: 'https://www.nokia.com/about-us/careers/search-jobs' },

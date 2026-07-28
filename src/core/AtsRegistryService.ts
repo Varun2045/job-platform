@@ -83,6 +83,10 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Palo Alto Networks': { careerPage: 'https://www.paloaltonetworks.com/company/careers', jobBoardUrl: 'https://paloaltonetworks.wd1.myworkdayjobs.com/External' },
   'PayPal': { careerPage: 'https://www.paypal.com/us/webapps/mpp/jobs', jobBoardUrl: 'https://paypal.wd1.myworkdayjobs.com/paypal-careers' },
   'Zoom': { careerPage: 'https://careers.zoom.us', jobBoardUrl: 'https://zoom.wd5.myworkdayjobs.com/Zoom' },
+  'Okta': { careerPage: 'https://www.okta.com/company/careers', jobBoardUrl: 'https://okta.wd1.myworkdayjobs.com/External' },
+  'Red Hat': { careerPage: 'https://www.redhat.com/en/jobs', jobBoardUrl: 'https://redhat.wd5.myworkdayjobs.com/jobs' },
+  'Splunk': { careerPage: 'https://www.splunk.com/en_us/careers.html', jobBoardUrl: 'https://splunk.wd1.myworkdayjobs.com/External' },
+  'Zscaler': { careerPage: 'https://www.zscaler.com/careers', jobBoardUrl: 'https://zscaler.wd1.myworkdayjobs.com/Zscaler' },
 };
 
 // Custom portal overrides for companies that left their listed ATS
@@ -109,7 +113,8 @@ export class AtsRegistryService {
       companies: [
         'Adobe', 'AMD', 'Broadcom', 'CrowdStrike', 'Dell', 'EY', 'GE', 'Goldman Sachs',
         'Honeywell', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo', 'Mastercard', 'NVIDIA',
-        'Palo Alto Networks', 'PayPal', 'Pfizer', 'Qualcomm', 'Salesforce', 'Siemens', 'Tesla', 'Walmart', 'Zoom',
+        'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'Qualcomm', 'Red Hat', 'Salesforce',
+        'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
       ],
       companyDetails: [],
     },
@@ -118,9 +123,10 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Airbnb', 'Cloudflare', 'Datadog', 'Figma',
-        'GitLab', 'MongoDB', 'Robinhood',
-        'Twitch', 'Vercel',
+        'Airbnb', 'Brex', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'DataStax', 'Datadog',
+        'dbt Labs', 'Docker', 'Figma', 'GitLab', 'Instacart', 'Klaviyo', 'MongoDB',
+        'Palantir', 'Reddit', 'Retool', 'Robinhood', 'Sentry', 'Twitch', 'Twilio',
+        'Vercel', 'Wiz', 'Zapier',
       ],
       companyDetails: [],
     },
@@ -135,7 +141,7 @@ export class AtsRegistryService {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'Linear', 'Notion', 'OpenAI', 'Perplexity', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Vercel'],
+      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'Linear', 'Loom', 'Notion', 'OpenAI', 'Perplexity', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Vercel'],
       companyDetails: [],
     },
     {
@@ -171,10 +177,13 @@ export class AtsRegistryService {
       'Scale AI': 'scaleai',
       'Canva': 'canva',        // Canva uses SmartRecruiters but listed in Ashby for fallback
       'Discord': 'discord',
+      'Loom': 'loom',
       'Notion': 'notion',
       'OpenAI': 'openai',
+      'PostHog': 'posthog',
       'Rippling': 'rippling',
       'Snowflake': 'snowflake',
+      'Supabase': 'supabase',
     };
 
     const SMARTRECRUITERS_SLUG_OVERRIDES: Record<string, string> = {
