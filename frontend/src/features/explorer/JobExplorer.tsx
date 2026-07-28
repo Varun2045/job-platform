@@ -12,6 +12,20 @@ import { InterviewPrepPanel } from './InterviewPrepPanel.js';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader.js';
 
+const expandLocationAliases = (locs: string[]) => {
+  const result: string[] = [];
+  locs.forEach(loc => {
+    result.push(loc);
+    if (loc === 'Bangalore') result.push('Bengaluru');
+    if (loc === 'Gurgaon') result.push('Gurugram');
+    if (loc === 'Mumbai') result.push('Bombay');
+    if (loc === 'Kolkata') result.push('Calcutta');
+    if (loc === 'Thiruvananthapuram') result.push('Trivandrum');
+    if (loc === 'Vadodara') result.push('Baroda');
+  });
+  return Array.from(new Set(result));
+};
+
 export const JobExplorer: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -116,11 +130,6 @@ export const JobExplorer: React.FC = () => {
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
 
-  // Search inside filters state
-  const [deptSearch, setDeptSearch] = useState('');
-  const [skillSearch, setSkillSearch] = useState('');
-  const [locSearch, setLocSearch] = useState('');
-  const [compSearch, setCompSearch] = useState('');
   const [showAllCompanies, setShowAllCompanies] = useState(false);
   const [companySort, setCompanySort] = useState<'count' | 'alpha'>('count');
 
@@ -255,7 +264,7 @@ export const JobExplorer: React.FC = () => {
     queryFn: async () => {
       const params = new URLSearchParams({
         q: debouncedQuery,
-        location: location.join(','),
+        location: expandLocationAliases(location).join(','),
         remote: remote.join(','),
         experience: experience.join(','),
         department: department.join(','),
@@ -308,7 +317,7 @@ export const JobExplorer: React.FC = () => {
     queryFn: async () => {
       const params = new URLSearchParams({
         q: debouncedQuery,
-        location: location.join(','),
+        location: expandLocationAliases(location).join(','),
         remote: remote.join(','),
         experience: experience.join(','),
         department: department.join(','),
@@ -453,26 +462,9 @@ export const JobExplorer: React.FC = () => {
     }
   };
 
-  const selectLocation = (locVal: string) => {
-    toggleArrayFilter(location, locVal, setLocation);
-  };
-
-  const selectSkill = (skillVal: string) => {
-    toggleArrayFilter(requiredSkills, skillVal, setRequiredSkills);
-  };
-
   const renderSidebarContents = () => {
     const facets = facetsData?.facets || {};
 
-    // Auto-expand maximum experience years if backend returns higher bounds
-    const maxPossibleYears = facetsData?.ranges?.experienceYears?.max || 15;
-
-    // Filter lists by local search query inside section
-    const filteredLocs = (facets.locations || []).filter((l: any) =>
-      l.label.toLowerCase().includes(locSearch.toLowerCase())
-    );
-    
-    // Sort companies dynamically
     const rawComps = facets.companies || [];
     const sortedComps = [...rawComps].sort((a: any, b: any) => {
       const aFav = favoriteCompanies.includes(a.label);
@@ -484,55 +476,6 @@ export const JobExplorer: React.FC = () => {
       }
       return b.count - a.count;
     });
-    const filteredComps = sortedComps.filter((c: any) =>
-      c.label.toLowerCase().includes(compSearch.toLowerCase())
-    );
-
-    // Global Suggestions search (Searches across all categories)
-    const suggestionsList: { type: string; label: string; count: number; category: string }[] = [];
-    if (skillSearch.trim()) {
-      const query = skillSearch.toLowerCase();
-      
-      (facets.departments || []).forEach((d: any) => {
-        if (d.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'department', label: d.label, count: d.count, category: 'Department' });
-      });
-      (facets.companies || []).forEach((c: any) => {
-        if (c.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'company', label: c.label, count: c.count, category: 'Company' });
-      });
-      (facets.locations || []).forEach((l: any) => {
-        if (l.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'location', label: l.label, count: l.count, category: 'Location' });
-      });
-      (facets.skills || []).forEach((s: any) => {
-        if (s.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'skill', label: s.label, count: s.count, category: 'Skill' });
-      });
-      (facets.employmentTypes || []).forEach((e: any) => {
-        if (e.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'employmentType', label: e.label, count: e.count, category: 'Employment Type' });
-      });
-      (facets.experienceLevels || []).forEach((ex: any) => {
-        if (ex.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'experience', label: ex.label, count: ex.count, category: 'Experience Level' });
-      });
-      (facets.tags || []).forEach((t: any) => {
-        if (t.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'tag', label: t.label, count: t.count, category: 'Tag' });
-      });
-      (facets.recommendations || []).forEach((r: any) => {
-        if (r.label.toLowerCase().includes(query)) suggestionsList.push({ type: 'recommendation', label: r.label, count: r.count, category: 'Badge' });
-      });
-    }
-
-    // Canonical list mappings to ensure ALL values appear
-    const canonicalLevels = [
-      'Internship',
-      'New Graduate',
-      'Entry Level (0–2 Years)',
-      'Associate (1–3 Years)',
-      'Mid Level (2–5 Years)',
-      'Senior (5–8 Years)',
-      'Staff Engineer',
-      'Principal Engineer',
-      'Engineering Manager',
-      'Director',
-      'Executive'
-    ];
 
     const canonicalEmps = [
       'Full-time',
@@ -571,63 +514,34 @@ export const JobExplorer: React.FC = () => {
         'Customer Success', 'Developer Relations', 'Solutions Engineering'
       ]
     };
+    const quickLocations = [
+      'India',
+      'Bangalore',
+      'Hyderabad',
+      'Pune',
+      'Chennai',
+      'Gurgaon',
+      'Noida',
+      'Mumbai',
+      'International',
+      'Other States'
+    ];
+
+    const getLocCount = (locOption: string) => {
+      const aliases = expandLocationAliases([locOption]);
+      let total = 0;
+      (facets.locations || []).forEach((f: any) => {
+        if (aliases.some(a => f.label.toLowerCase().includes(a.toLowerCase()))) {
+          total += f.count;
+        }
+      });
+      return total;
+    };
 
     return (
       <div className="space-y-4">
-        {/* 1. SEARCH */}
-        <div className="relative">
-          <div className="relative flex items-center">
-            <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-indigo-400" />
-            <input
-              type="text"
-              placeholder="Search inside filters..."
-              value={skillSearch}
-              onChange={(e) => setSkillSearch(e.target.value)}
-              className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1.5 pl-8 pr-8 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500"
-            />
-            {skillSearch && (
-              <button onClick={() => setSkillSearch('')} className="absolute right-2.5 text-[#64748b] hover:text-white">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-          {skillSearch && suggestionsList.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 bg-[#111827] border border-[#243147] rounded-xl p-1.5 mt-1 shadow-2xl max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar">
-              <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-2 pb-1 border-b border-[#243147]/50 mb-1">Suggestions</span>
-              {suggestionsList.slice(0, 15).map((item, idx) => (
-                <button
-                  key={`${item.type}-${item.label}-${idx}`}
-                  onClick={() => {
-                    if (item.type === 'department') toggleArrayFilter(department, item.label, setDepartment);
-                    else if (item.type === 'company') toggleArrayFilter(company, item.label, setCompany);
-                    else if (item.type === 'location') selectLocation(item.label);
-                    else if (item.type === 'skill') selectSkill(item.label);
-                    else if (item.type === 'employmentType') toggleArrayFilter(employmentType, item.label, setEmploymentType);
-                    else if (item.type === 'experience') toggleArrayFilter(experience, item.label, setExperience);
-                    setSkillSearch('');
-                  }}
-                  className="w-full text-left text-xs hover:bg-[#192438] px-2 py-1 rounded-lg flex justify-between items-center transition-colors"
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className={`text-[9px] font-extrabold uppercase px-1 rounded ${
-                      item.type === 'skill' ? 'bg-indigo-500/20 text-indigo-300' :
-                      item.type === 'company' ? 'bg-emerald-500/20 text-emerald-300' :
-                      item.type === 'location' ? 'bg-sky-500/20 text-sky-300' :
-                      item.type === 'department' ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-500/20 text-slate-300'
-                    }`}>
-                      {item.category}
-                    </span>
-                    <span className="truncate text-white font-medium">{item.label}</span>
-                  </div>
-                  <span className="text-[10px] bg-[#090d16] text-[#64748b] px-1.5 py-0.5 rounded-full border border-[#243147]/50 font-bold">{item.count}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 2. DEPARTMENT */}
-        <div className="border-t border-[#243147]/40 pt-3">
+        {/* 1. DEPARTMENT */}
+        <div>
           <button
             onClick={() => toggleSection('department')}
             className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
@@ -640,49 +554,36 @@ export const JobExplorer: React.FC = () => {
           
           {openSections.department && (
             <div className="space-y-2 mt-1.5 transition-all">
-              <input
-                type="text"
-                placeholder="Search departments..."
-                value={deptSearch}
-                onChange={(e) => setDeptSearch(e.target.value)}
-                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500"
-              />
-              
               <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-                {Object.entries(deptGroups).map(([groupName, deptList]) => {
-                  const matchingDepts = deptList.filter(d => d.toLowerCase().includes(deptSearch.toLowerCase()));
-                  if (matchingDepts.length === 0) return null;
-
-                  return (
-                    <div key={groupName} className="space-y-0.5">
-                      <span className="text-[9px] font-extrabold text-[#64748b] uppercase tracking-wider block px-1">{groupName}</span>
-                      {matchingDepts.map((lvl) => {
-                        const match = (facets.departments || []).find((f: any) => f.label.toLowerCase() === lvl.toLowerCase());
-                        const count = match ? match.count : 0;
-                        return (
-                          <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={department.includes(lvl)}
-                                onChange={() => toggleArrayFilter(department, lvl, setDepartment)}
-                                className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <span>{lvl}</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                              {count}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+                {Object.entries(deptGroups).map(([groupName, deptList]) => (
+                  <div key={groupName} className="space-y-0.5">
+                    <span className="text-[9px] font-extrabold text-[#64748b] uppercase tracking-wider block px-1">{groupName}</span>
+                    {deptList.map((lvl) => {
+                      const match = (facets.departments || []).find((f: any) => f.label.toLowerCase() === lvl.toLowerCase());
+                      const count = match ? match.count : 0;
+                      return (
+                        <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={department.includes(lvl)}
+                              onChange={() => toggleArrayFilter(department, lvl, setDepartment)}
+                              className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <span>{lvl}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                            {count}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                ))}
 
                 {(() => {
                   const groupedDeptsSet = new Set(Object.values(deptGroups).flat());
-                  const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label) && d.label.toLowerCase().includes(deptSearch.toLowerCase()));
+                  const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label));
                   if (leftovers.length === 0) return null;
 
                   return (
@@ -712,104 +613,7 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 3. EXPERIENCE */}
-        <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
-          <button
-            onClick={() => toggleSection('experience')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Experience {(experience.length > 0 || minYearsExp > 0 || maxYearsExp < 15) && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
-            </span>
-            {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.experience && (
-            <div className="space-y-3 mt-1.5 transition-all">
-              <div className="max-h-40 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
-                {canonicalLevels.map((lvl) => {
-                  const match = (facets.experienceLevels || []).find((f: any) => f.label.toLowerCase() === lvl.toLowerCase());
-                  const count = match ? match.count : 0;
-                  return (
-                    <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={experience.includes(lvl)}
-                          onChange={() => toggleArrayFilter(experience, lvl, setExperience)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span>{lvl}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                        {count}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-
-              {/* Range Slider */}
-              <div className="pt-2 border-t border-[#243147]/30 space-y-2">
-                <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block">Years of Experience</span>
-                <div className="flex justify-between items-center text-xs text-[#94a3b8] gap-2">
-                  <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2">
-                    <span className="text-[9px] text-[#64748b] uppercase">Min:</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max={maxPossibleYears}
-                      value={minYearsExp}
-                      onChange={(e) => setMinYearsExp(Math.max(0, Math.min(maxPossibleYears, Number(e.target.value))))}
-                      className="w-8 bg-transparent text-white text-center text-xs font-bold outline-none"
-                    />
-                  </div>
-                  <div className="flex items-center gap-1.5 bg-[#090d16] border border-[#243147] rounded-lg p-1 px-2">
-                    <span className="text-[9px] text-[#64748b] uppercase">Max:</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max={maxPossibleYears}
-                      value={maxYearsExp}
-                      onChange={(e) => setMaxYearsExp(Math.max(0, Math.min(maxPossibleYears, Number(e.target.value))))}
-                      className="w-8 bg-transparent text-white text-center text-xs font-bold outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="relative h-6 mt-1 px-1">
-                  <div className="absolute w-[calc(100%-8px)] h-1 bg-[#243147] rounded-lg top-2.5 left-1 z-0"></div>
-                  <div 
-                    className="absolute h-1 bg-indigo-500 rounded-lg top-2.5 z-0"
-                    style={{
-                      left: `calc(4px + ${(minYearsExp / maxPossibleYears) * 100}% * 0.95)`,
-                      width: `${((maxYearsExp - minYearsExp) / maxPossibleYears) * 100}%`
-                    }}
-                  ></div>
-                  <input
-                    type="range"
-                    min="0"
-                    max={maxPossibleYears}
-                    step="1"
-                    value={minYearsExp}
-                    onChange={(e) => setMinYearsExp(Math.min(maxYearsExp, Number(e.target.value)))}
-                    className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-25 range-slider-single-line"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max={maxPossibleYears}
-                    step="1"
-                    value={maxYearsExp}
-                    onChange={(e) => setMaxYearsExp(Math.max(minYearsExp, Number(e.target.value)))}
-                    className="absolute w-full h-1 bg-transparent appearance-none pointer-events-auto cursor-pointer accent-indigo-500 top-2.5 left-0 z-20 range-slider-single-line"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 4. COMPANY */}
+        {/* 2. COMPANY */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('companies')}
@@ -823,14 +627,6 @@ export const JobExplorer: React.FC = () => {
           
           {openSections.companies && (
             <div className="space-y-2 mt-1.5 transition-all">
-              <input
-                type="text"
-                placeholder="Search companies..."
-                value={compSearch}
-                onChange={(e) => setCompSearch(e.target.value)}
-                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500"
-              />
-
               <div className="flex gap-2 justify-end text-[9px] font-bold text-[#64748b] px-1">
                 <button
                   onClick={() => setCompanySort('count')}
@@ -867,7 +663,7 @@ export const JobExplorer: React.FC = () => {
               )}
 
               <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
-                {(showAllCompanies ? filteredComps : filteredComps.slice(0, 10)).map((f: any) => {
+                {(showAllCompanies ? sortedComps : sortedComps.slice(0, 10)).map((f: any) => {
                   const isFavorite = favoriteCompanies.includes(f.label);
                   const firstChar = f.label.charAt(0).toUpperCase();
                   const badgeColors = ['bg-rose-500/20 text-rose-300', 'bg-blue-500/20 text-blue-300', 'bg-emerald-500/20 text-emerald-300', 'bg-amber-500/20 text-amber-300', 'bg-purple-500/20 text-purple-300'];
@@ -904,19 +700,19 @@ export const JobExplorer: React.FC = () => {
                 })}
               </div>
 
-              {filteredComps.length > 10 && (
+              {sortedComps.length > 10 && (
                 <button
                   onClick={() => setShowAllCompanies(!showAllCompanies)}
                   className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
                 >
-                  {showAllCompanies ? 'Show Less' : `Show All (${filteredComps.length})`}
+                  {showAllCompanies ? 'Show Less' : `Show All (${sortedComps.length})`}
                 </button>
               )}
             </div>
           )}
         </div>
 
-        {/* 5. WORK MODE */}
+        {/* 3. WORK MODE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('remote')}
@@ -954,7 +750,7 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 6. LOCATION */}
+        {/* 4. LOCATION */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('location')}
@@ -967,39 +763,33 @@ export const JobExplorer: React.FC = () => {
           </button>
           
           {openSections.location && (
-            <div className="space-y-3 mt-1.5 transition-all">
-              <div className="space-y-1.5">
-                <input
-                  type="text"
-                  placeholder="Filter country, state or city..."
-                  value={locSearch}
-                  onChange={(e) => setLocSearch(e.target.value)}
-                  className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-1 px-3 text-[11px] text-white focus:outline-none focus:border-indigo-500 mb-2"
-                />
-                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
-                  {filteredLocs.map((f: any) => (
-                    <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={location.includes(f.label)}
-                          onChange={() => selectLocation(f.label)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span>{f.label}</span>
-                      </div>
+            <div className="space-y-0.5 mt-1.5 transition-all">
+              {quickLocations.map((locOpt) => {
+                const count = getLocCount(locOpt);
+                return (
+                  <label key={locOpt} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={location.includes(locOpt)}
+                        onChange={() => toggleArrayFilter(location, locOpt, setLocation)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{locOpt}</span>
+                    </div>
+                    {count > 0 && (
                       <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                        {f.count}
+                        {count}
                       </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                    )}
+                  </label>
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* 7. EMPLOYMENT TYPE */}
+        {/* 5. EMPLOYMENT TYPE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('employment')}
@@ -1037,7 +827,7 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 8. POSTING DATE */}
+        {/* 6. POSTING DATE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
             onClick={() => toggleSection('datePosted')}
@@ -1102,7 +892,7 @@ export const JobExplorer: React.FC = () => {
       <PageHeader
         themeKey="explorer"
         title="Job Explorer"
-        description="Search, rank by Opportunity Score, and tailor your applications."
+        description="Browse verified opportunities, filter results, and manage your job search efficiently."
         icon={Search}
       />
 
@@ -1158,12 +948,6 @@ export const JobExplorer: React.FC = () => {
           {remote.map(rem => (
             <span key={rem} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
               Mode: {rem === 'true' ? 'Remote Only' : rem === 'hybrid' ? 'Hybrid' : 'On-site'} <button onClick={() => toggleArrayFilter(remote, rem, setRemote)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {experience.map(exp => (
-            <span key={exp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Exp: {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           ))}
 
