@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, X, Download, MoveLeft, MoveRight, Layers, AlertCircle } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export type KanbanStage =
   | 'Wishlist'
@@ -131,22 +132,19 @@ export const KanbanTracker: React.FC = () => {
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto min-h-screen text-white">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent flex items-center gap-2">
-            <Layers className="w-8 h-8 text-indigo-400" /> Application Kanban CRM
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Track applications across 11 workflow stages with drag-and-drop ordering.
-          </p>
-        </div>
+      <PageHeader
+        themeKey="kanban"
+        title="Application Kanban CRM"
+        description="Track applications across 11 workflow stages with drag-and-drop ordering."
+        icon={Layers}
+      >
         <button
           onClick={handleExportCSV}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-medium text-sm transition-colors cursor-pointer shadow-lg shadow-indigo-600/20"
         >
           <Download className="w-4 h-4" /> Export Board CSV
         </button>
-      </div>
+      </PageHeader>
 
       {/* Filter Bar */}
       <div className="bg-[#131a26] p-4 rounded-2xl border border-[#232d3f] mb-6 flex flex-col lg:flex-row items-stretch lg:items-center gap-3">

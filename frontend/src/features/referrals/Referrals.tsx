@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 type Tab = 'contacts' | 'pipeline' | 'messages' | 'followup' | 'analytics';
 
@@ -305,6 +306,12 @@ ${body}`;
 
   return (
     <div className="space-y-6">
+      <PageHeader
+        themeKey="referrals"
+        title="Recruiter CRM & Referrals"
+        description="Request and track employee referral contacts across target companies."
+        icon={Handshake}
+      />
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-white">Company Contacts</h2>
         <div className="flex gap-2">

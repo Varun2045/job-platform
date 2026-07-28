@@ -10,6 +10,7 @@ import { CoverLetterModal } from './CoverLetterModal.js';
 import { ResumeTailoringModal } from './ResumeTailoringModal.js';
 import { InterviewPrepPanel } from './InterviewPrepPanel.js';
 import { useSearchParams } from 'react-router-dom';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const JobExplorer: React.FC = () => {
   const queryClient = useQueryClient();
@@ -1557,14 +1558,12 @@ export const JobExplorer: React.FC = () => {
     <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen text-white font-sans bg-[#090d16]">
       
       {/* PAGE TITLE HEADER AT THE TOP */}
-      <div className="pb-2">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-          Job Explorer
-        </h1>
-        <p className="text-xs md:text-sm text-[#94a3b8] mt-1">
-          Search, rank by Opportunity Score, and tailoring your applications
-        </p>
-      </div>
+      <PageHeader
+        themeKey="explorer"
+        title="Job Explorer"
+        description="Search, rank by Opportunity Score, and tailor your applications."
+        icon={Search}
+      />
 
       {/* STICKY GLOBAL SEARCH BAR */}
       <div className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md pb-2 pt-1">

@@ -1,7 +1,8 @@
 import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, ShieldAlert, Award, FileText, Calendar, Users, CheckCircle2, AlertTriangle, XCircle, Search, Mail, Handshake, Play, MessageSquare, TrendingUp } from 'lucide-react';
+import { Activity, ShieldAlert, Award, FileText, Calendar, Users, CheckCircle2, AlertTriangle, XCircle, Search, Mail, Handshake, Play, MessageSquare, TrendingUp, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -83,10 +84,12 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-fluid-title font-extrabold text-white tracking-tight">Dashboard</h1>
-        <p className="text-sm text-[#94a3b8]">Your job search overview and quick actions</p>
-      </div>
+      <PageHeader
+        themeKey="dashboard"
+        title="Dashboard"
+        description="Your job search overview and quick actions"
+        icon={Home}
+      />
 
       <div className="grid-fluid-stats gap-4">
         {cardItems.map((item) => (
