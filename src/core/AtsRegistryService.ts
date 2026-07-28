@@ -120,7 +120,7 @@ export class AtsRegistryService {
       name: 'Workday',
       averageExtractionMs: 18,
       companies: [
-        'Adobe', 'Akamai', 'AMD', 'Autodesk', 'BlackRock', 'Broadcom', 'CrowdStrike', 'Dell', 'EY', 'Expedia',
+        'Adobe', 'Akamai', 'AMD', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Dell', 'EY', 'Expedia',
         'GE', 'Goldman Sachs', 'Honeywell', 'HP Inc.', 'HPE', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo',
         'Logitech', 'Mastercard', 'Nike', 'NVIDIA', 'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'PwC',
         'Qualcomm', 'Red Hat', 'Salesforce', 'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
@@ -132,11 +132,11 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Airbnb', 'Asana', 'Brex', 'Canonical', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'Confluent',
+        'Adyen', 'Airbnb', 'Asana', 'Brex', 'Canonical', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'Confluent',
         'DataStax', 'Databricks', 'Datadog', 'dbt Labs', 'Docker', 'Dropbox', 'Figma', 'GitLab',
-        'Grafana Labs', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'Palantir', 'Reddit', 'Retool',
-        'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio', 'Unacademy',
-        'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
+        'Grafana Labs', 'Groww', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
+        'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio',
+        'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
       ],
       companyDetails: [],
     },
@@ -144,7 +144,7 @@ export class AtsRegistryService {
       id: 'lever',
       name: 'Lever',
       averageExtractionMs: 16,
-      companies: ['JetBrains', 'Spotify'],
+      companies: ['Freshworks', 'JetBrains', 'Meesho', 'Spotify'],
       companyDetails: [],
     },
     {
