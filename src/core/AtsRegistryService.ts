@@ -133,10 +133,10 @@ export class AtsRegistryService {
       averageExtractionMs: 15,
       companies: [
         'Airbnb', 'Asana', 'Brex', 'Canonical', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'Confluent',
-        'Darwinbox', 'DataStax', 'Databricks', 'Datadog', 'dbt Labs', 'Docker', 'Figma', 'GitLab',
+        'Darwinbox', 'DataStax', 'Databricks', 'Datadog', 'dbt Labs', 'Docker', 'Dropbox', 'Figma', 'GitLab',
         'Grafana Labs', 'Hugging Face', 'Indeed', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'MyGate',
-        'Navi', 'Palantir', 'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Sentry', 'ShareChat', 'Twitch',
-        'Twilio', 'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'Zapier', 'Zepto',
+        'Navi', 'Palantir', 'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch',
+        'Twilio', 'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
       ],
       companyDetails: [],
     },
@@ -151,7 +151,7 @@ export class AtsRegistryService {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'Linear', 'Loom', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Vercel', 'Weights & Biases'],
+      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'ElevenLabs', 'LangChain', 'Linear', 'Loom', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
       companyDetails: [],
     },
     {
@@ -187,7 +187,10 @@ export class AtsRegistryService {
       'Scale AI': 'scaleai',
       'Canva': 'canva',        // Canva uses SmartRecruiters but listed in Ashby for fallback
       'Discord': 'discord',
+      'ElevenLabs': 'elevenlabs',
+      'LangChain': 'langchain',
       'Loom': 'loom',
+      'Modal Labs': 'modal',
       'Neon': 'neon',
       'Notion': 'notion',
       'OpenAI': 'openai',
@@ -198,6 +201,7 @@ export class AtsRegistryService {
       'Snowflake': 'snowflake',
       'Supabase': 'supabase',
       'Temporal': 'temporal',
+      'Together AI': 'together',
       'Weights & Biases': 'wandb',
     };
 

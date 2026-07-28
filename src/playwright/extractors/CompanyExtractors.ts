@@ -90,6 +90,8 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'morganstanley', name: 'Morgan Stanley', pattern: 'morganstanley.com', careerPage: 'https://www.morganstanley.com/people', jobBoardUrl: 'https://www.morganstanley.com/people' },
   { id: 'shopify', name: 'Shopify', pattern: 'shopify.com', careerPage: 'https://www.shopify.com/careers', jobBoardUrl: 'https://www.shopify.com/careers' },
   { id: 'sony', name: 'Sony', pattern: 'sony.com', careerPage: 'https://www.sony.com/en/SonyInfo/Careers/', jobBoardUrl: 'https://www.sony.com/en/SonyInfo/Careers/' },
+  { id: 'gartner', name: 'Gartner', pattern: 'gartner.com', careerPage: 'https://jobs.gartner.com', jobBoardUrl: 'https://jobs.gartner.com' },
+  { id: 'wayfair', name: 'Wayfair', pattern: 'wayfair.com', careerPage: 'https://www.wayfair.com/careers', jobBoardUrl: 'https://www.wayfair.com/careers' },
 
   // Infrastructure & Global Portals
   { id: 'bytedance', name: 'ByteDance', pattern: 'bytedance.com', careerPage: 'https://jobs.bytedance.com/en/', jobBoardUrl: 'https://jobs.bytedance.com/en/' },
