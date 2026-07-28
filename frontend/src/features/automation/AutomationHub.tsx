@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Download, Clock, Activity, AlertCircle, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Download, Clock, Activity, AlertCircle, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight, Mail } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 type Tab = 'monitoring' | 'email' | 'calendar';
 
@@ -35,10 +36,12 @@ export const AutomationHub: React.FC<{ tab?: Tab }> = ({ tab = 'monitoring' }) =
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">{header.title}</h1>
-        <p className="text-sm text-[#94a3b8]">{header.desc}</p>
-      </div>
+      <PageHeader
+        themeKey={activeTab === 'monitoring' ? 'automationMonitoring' : activeTab === 'email' ? 'automationEmail' : 'automationCalendar'}
+        title={header.title}
+        description={header.desc}
+        icon={activeTab === 'monitoring' ? Activity : activeTab === 'email' ? Mail : Calendar}
+      />
 
       {/* Tab Contents */}
       {activeTab === 'monitoring' && <JobMonitoring />}

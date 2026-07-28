@@ -8,7 +8,12 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
   dashboard: {
     key: 'dashboard',
     name: 'Dashboard',
-    headingColorClass: 'text-[#38bdf8]', // Vibrant Blue
+    headingColorClass: 'text-[#38bdf8]', // Sky Blue
+  },
+  explorer: {
+    key: 'explorer',
+    name: 'Job Explorer',
+    headingColorClass: 'text-[#6366f1]', // Indigo
   },
   atsExplorer: {
     key: 'atsExplorer',
@@ -20,15 +25,45 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
     name: 'Application Kanban CRM',
     headingColorClass: 'text-[#a855f7]', // Purple
   },
+  resumeManager: {
+    key: 'resumeManager',
+    name: 'Resume Manager',
+    headingColorClass: 'text-[#f97316]', // Warm Coral
+  },
   heatmap: {
     key: 'heatmap',
     name: 'ATS Keyword Match Heatmap',
-    headingColorClass: 'text-[#10b981]', // Emerald (Match screenshot)
+    headingColorClass: 'text-[#10b981]', // Emerald Green
   },
   coverLetter: {
     key: 'coverLetter',
     name: 'Cover Letter Builder',
-    headingColorClass: 'text-[#f43f5e]', // Rose
+    headingColorClass: 'text-[#f43f5e]', // Rose Pink
+  },
+  profileBuilder: {
+    key: 'profileBuilder',
+    name: 'Portfolio Exporter',
+    headingColorClass: 'text-[#14b8a6]', // Teal
+  },
+  automationMonitoring: {
+    key: 'automationMonitoring',
+    name: 'Monitoring Hub',
+    headingColorClass: 'text-[#f59e0b]', // Warm Amber
+  },
+  automationEmail: {
+    key: 'automationEmail',
+    name: 'Email Alerts',
+    headingColorClass: 'text-[#3b82f6]', // Sapphire Blue
+  },
+  automationCalendar: {
+    key: 'automationCalendar',
+    name: 'Calendar',
+    headingColorClass: 'text-[#d946ef]', // Fuchsia
+  },
+  careerCopilot: {
+    key: 'careerCopilot',
+    name: 'Career Copilot',
+    headingColorClass: 'text-[#818cf8]', // Bright Indigo
   },
   careerAssistant: {
     key: 'careerAssistant',
@@ -75,25 +110,15 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
     name: 'Export & Report Center',
     headingColorClass: 'text-[#a78bfa]', // Lavender
   },
+  settings: {
+    key: 'settings',
+    name: 'Settings',
+    headingColorClass: 'text-[#94a3b8]', // Slate Gray
+  },
   admin: {
     key: 'admin',
     name: 'Admin Console',
     headingColorClass: 'text-[#ef4444]', // Ruby Red
-  },
-  explorer: {
-    key: 'explorer',
-    name: 'Job Explorer',
-    headingColorClass: 'text-[#6366f1]', // Indigo
-  },
-  resumeManager: {
-    key: 'resumeManager',
-    name: 'Resume Manager',
-    headingColorClass: 'text-[#f97316]', // Warm Coral
-  },
-  settings: {
-    key: 'settings',
-    name: 'Settings',
-    headingColorClass: 'text-[#94a3b8]', // Slate
   },
 };
 

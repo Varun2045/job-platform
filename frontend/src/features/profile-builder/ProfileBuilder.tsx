@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Monitor, Layout, Download, Palette, RefreshCw, CheckCircle, Trash2, Eye, EyeOff, Edit, PlusCircle, X, Globe } from 'lucide-react';
+import { Monitor, Download, Palette, RefreshCw, CheckCircle, Trash2, Eye, EyeOff, Edit, PlusCircle, X, Globe } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export interface PortfolioSection {
   id: string;
@@ -95,13 +96,12 @@ export const ProfileBuilder: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto h-full flex flex-col overflow-hidden">
-      <div className="shrink-0 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Layout className="w-8 h-8 text-indigo-400" /> Developer Portfolio Exporter
-          </h1>
-          <p className="text-sm text-[#94a3b8]">Convert your resume profile and application data into a responsive, single-page HTML portfolio website</p>
-        </div>
+      <PageHeader
+        themeKey="profileBuilder"
+        title="Developer Portfolio Exporter"
+        description="Convert your resume profile and application data into a responsive, single-page HTML portfolio website."
+        icon={Globe}
+      >
         <div className="flex gap-3 items-center shrink-0">
           <button
             onClick={() => publishMutation.mutate()}
@@ -120,7 +120,7 @@ export const ProfileBuilder: React.FC = () => {
             <Download className="w-4 h-4" /> Download HTML Portfolio
           </button>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0 overflow-hidden">
         {/* Left Settings Sidebar */}

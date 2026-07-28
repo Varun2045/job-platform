@@ -1,5 +1,6 @@
 import React from 'react';
 import { Download, FileSpreadsheet, Code } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const ExportCenterView: React.FC = () => {
   const handleExportCSV = () => {
@@ -12,15 +13,12 @@ export const ExportCenterView: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-[1200px] mx-auto min-h-screen text-white">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
-          <Download className="w-8 h-8 text-emerald-400" /> Export & Report Center
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Export full job application history, recruiter outreach notes, and analytics in CSV or JSON format.
-        </p>
-      </div>
+      <PageHeader
+        themeKey="exportCenter"
+        title="Export & Report Center"
+        description="Export full job application history, recruiter outreach notes, and analytics in CSV or JSON format."
+        icon={Download}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* CSV Export */}

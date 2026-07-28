@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart2, TrendingUp, Award, CheckCircle2, PieChart, Layers } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const AnalyticsDashboardView: React.FC = () => {
   const { data: statsData, isLoading } = useQuery({
@@ -34,15 +35,12 @@ export const AnalyticsDashboardView: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-screen text-white">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent flex items-center gap-2">
-          <BarChart2 className="w-8 h-8 text-cyan-400" /> Career Analytics & Conversion Metrics
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Real-time pipeline conversion rates, interview velocity, and stage distribution insights.
-        </p>
-      </div>
+      <PageHeader
+        themeKey="analytics"
+        title="Career Analytics & Conversion Metrics"
+        description="Comprehensive funnel conversion rates, application telemetry, and pipeline health metrics."
+        icon={BarChart2}
+      />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-pulse">

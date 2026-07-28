@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, Calendar, BookOpen, RefreshCw, CheckCircle2, AlertCircle, Clock, FileText, TrendingUp, Target, Zap } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const CopilotDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'brief' | 'gap'>('brief');
@@ -35,12 +36,12 @@ export const CopilotDashboard: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-          <Sparkles className="w-8 h-8 text-indigo-400" /> Career Copilot
-        </h1>
-        <p className="text-sm text-[#94a3b8]">AI autonomous agent tracking your career milestones, mock interviews, and skill roadmaps</p>
-      </div>
+      <PageHeader
+        themeKey="careerCopilot"
+        title="Career Copilot"
+        description="Daily action items, skill gap analysis, and intelligent career recommendations."
+        icon={Sparkles}
+      />
 
       {/* Tabs */}
       <div className="flex border-b border-[#232d3f] gap-4">
