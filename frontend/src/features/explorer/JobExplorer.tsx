@@ -70,9 +70,6 @@ export const JobExplorer: React.FC = () => {
   const [salaryCurrency, setSalaryCurrency] = useState<string>(
     searchParams.get('salaryCurrency') || 'all'
   );
-  const [minConfidence, setMinConfidence] = useState<number>(
-    searchParams.get('minConfidence') ? Number(searchParams.get('minConfidence')) : 0
-  );
   const [dateRange, setDateRange] = useState<string>(
     searchParams.get('dateRange') || ''
   );
@@ -148,7 +145,6 @@ export const JobExplorer: React.FC = () => {
     skills: false,
     salary: false,
     minScore: false,
-    confidence: false,
     recommendations: false,
   });
 
@@ -211,7 +207,6 @@ export const JobExplorer: React.FC = () => {
     if (minSalary > 0) params.minSalary = minSalary.toString();
     if (maxSalary < 250000) params.maxSalary = maxSalary.toString();
     if (salaryCurrency !== 'all') params.salaryCurrency = salaryCurrency;
-    if (minConfidence > 0) params.minConfidence = minConfidence.toString();
     if (dateRange) {
       params.dateRange = dateRange;
       params.dateLimit = calculateDateLimit(dateRange);
@@ -239,7 +234,6 @@ export const JobExplorer: React.FC = () => {
     minSalary,
     maxSalary,
     salaryCurrency,
-    minConfidence,
     dateRange,
     sortBy,
   ]);
@@ -265,7 +259,6 @@ export const JobExplorer: React.FC = () => {
       minSalary,
       maxSalary,
       salaryCurrency,
-      minConfidence,
       dateRange,
     ],
     queryFn: async () => {
@@ -287,7 +280,6 @@ export const JobExplorer: React.FC = () => {
         minSalary: minSalary.toString(),
         maxSalary: maxSalary.toString(),
         salaryCurrency,
-        minConfidence: minConfidence.toString(),
         dateRange,
         dateLimit: calculateDateLimit(dateRange),
       });
@@ -318,7 +310,6 @@ export const JobExplorer: React.FC = () => {
       minSalary,
       maxSalary,
       salaryCurrency,
-      minConfidence,
       dateRange,
       sortBy,
       cursor,
@@ -342,7 +333,6 @@ export const JobExplorer: React.FC = () => {
         minSalary: minSalary.toString(),
         maxSalary: maxSalary.toString(),
         salaryCurrency,
-        minConfidence: minConfidence.toString(),
         dateRange,
         dateLimit: calculateDateLimit(dateRange),
         sort: sortBy,
@@ -360,9 +350,6 @@ export const JobExplorer: React.FC = () => {
     if (apiResponse && apiResponse.jobs) {
       if (!cursor) {
         setAccumulatedJobs(apiResponse.jobs);
-        if (apiResponse.jobs.length > 0 && !selectedJobHash) {
-          setSelectedJobHash(apiResponse.jobs[0].job.jobHash);
-        }
       } else {
         setAccumulatedJobs(prev => {
           const existingHashes = new Set(prev.map(j => j.job.jobHash));
@@ -462,7 +449,6 @@ export const JobExplorer: React.FC = () => {
     setMinSalary(0);
     setMaxSalary(250000);
     setSalaryCurrency('all');
-    setMinConfidence(0);
     setDateRange('');
     setSearchParams({});
     setShowAllCompanies(false);
@@ -1457,44 +1443,14 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 13. CLASSIFICATION CONFIDENCE */}
-        <div className="border-t border-[#243147]/40 pt-3">
-          <button
-            onClick={() => toggleSection('confidence')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              AI Confidence {minConfidence > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{minConfidence}%+</span>}
-            </span>
-            {openSections.confidence ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.confidence && (
-            <div className="mt-1.5 transition-all">
-              <select
-                value={minConfidence}
-                onChange={(e) => setMinConfidence(Number(e.target.value))}
-                className="w-full bg-[#090d16] border border-[#243147] rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
-              >
-                <option value="0">All Confidence Levels</option>
-                <option value="100">100% Precise</option>
-                <option value="95">95%+ Extremely Confident</option>
-                <option value="90">90%+ High Confidence</option>
-                <option value="80">80%+ Good Confidence</option>
-                <option value="70">70%+ Standard Confidence</option>
-              </select>
-            </div>
-          )}
-        </div>
-
-        {/* 14. AI MATCH RECOMMENDATIONS */}
+        {/* 13. RECOMMENDATION BADGES */}
         <div className="border-t border-[#243147]/40 pt-3 animate-fadeIn">
           <button
             onClick={() => toggleSection('recommendations')}
             className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
           >
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Recommendation Badges {recommendations.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{recommendations.length}</span>}
+              Job Badges {recommendations.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{recommendations.length}</span>}
             </span>
             {openSections.recommendations ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
@@ -1502,8 +1458,7 @@ export const JobExplorer: React.FC = () => {
           {openSections.recommendations && (
             <div className="space-y-0.5 mt-1.5 transition-all">
               {[
-                'Skill Match', 'Top Match', 'Resume Match', 'Preferred Company',
-                'Trending Company', 'Recently Posted', 'AI Recommended', 'High Confidence'
+                'Recently Posted', 'Hiring Actively', 'Salary Available', 'Direct Apply', 'Verified Company'
               ].map((badgeVal) => {
                 const match = (facets.recommendations || []).find((f: any) => f.label.toLowerCase() === badgeVal.toLowerCase());
                 const count = match ? match.count : 0;
@@ -1545,12 +1500,6 @@ export const JobExplorer: React.FC = () => {
   };
 
   const visibleJobs = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
-
-  useEffect(() => {
-    if (visibleJobs.length > 0 && (!selectedJobHash || !visibleJobs.some(j => j.job.jobHash === selectedJobHash))) {
-      setSelectedJobHash(visibleJobs[0].job.jobHash);
-    }
-  }, [visibleJobs, selectedJobHash]);
 
   const hasMore = apiResponse?.pagination?.hasMore;
   const nextCursorToken = apiResponse?.pagination?.nextCursor;
@@ -1600,7 +1549,7 @@ export const JobExplorer: React.FC = () => {
       </div>
 
       {/* ACTIVE FILTER CHIPS BAR */}
-      {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || minScore > 0 || employmentType.length > 0 || tags.length > 0 || qualityFlags.length > 0 || recommendations.length > 0 || requiredSkills.length > 0 || minYearsExp > 0 || minSalary > 0 || maxSalary < 250000 || minConfidence > 0 || dateRange) && (
+      {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || minScore > 0 || employmentType.length > 0 || tags.length > 0 || qualityFlags.length > 0 || recommendations.length > 0 || requiredSkills.length > 0 || minYearsExp > 0 || minSalary > 0 || maxSalary < 250000 || dateRange) && (
         <div className="flex flex-wrap items-center gap-2 bg-[#111827] border border-[#243147] rounded-xl p-3 shadow-sm">
           <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mr-1">Active Filters:</span>
 
@@ -1685,12 +1634,6 @@ export const JobExplorer: React.FC = () => {
           {(minSalary > 0 || maxSalary < 250000) && (
             <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
               Salary: {minSalary / 1000}k - {maxSalary / 1000}k <button onClick={() => { setMinSalary(0); setMaxSalary(250000); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          )}
-
-          {minConfidence > 0 && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Conf: {minConfidence}%+ <button onClick={() => setMinConfidence(0)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
             </span>
           )}
 
@@ -1872,8 +1815,8 @@ export const JobExplorer: React.FC = () => {
 
             if (!selectedJobItem) {
               return (
-                <div className="text-center py-12 text-xs text-[#94a3b8]">
-                  Select a job card from the feed to view details.
+                <div className="text-center py-12 text-xs text-[#94a3b8] font-medium">
+                  Select a job card from the feed or click View Details to inspect job summary.
                 </div>
               );
             }
