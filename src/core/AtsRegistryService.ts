@@ -55,6 +55,32 @@ export interface AtsRegistryOverview {
   groups: AtsCategoryGroup[];
 }
 
+// Verified Workday URLs Dictionary
+const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
+  'Adobe': { careerPage: 'https://www.adobe.com/careers.html', jobBoardUrl: 'https://adobe.wd5.myworkdayjobs.com/external_experience' },
+  'AMD': { careerPage: 'https://www.amd.com/en/corporate/careers.html', jobBoardUrl: 'https://amd.wd1.myworkdayjobs.com/External' },
+  'Broadcom': { careerPage: 'https://www.broadcom.com/company/careers', jobBoardUrl: 'https://broadcom.wd1.myworkdayjobs.com/External' },
+  'Cisco': { careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
+  'Dell': { careerPage: 'https://jobs.dell.com', jobBoardUrl: 'https://dell.wd1.myworkdayjobs.com/External' },
+  'EY': { careerPage: 'https://www.ey.com/en_gl/careers', jobBoardUrl: 'https://eygbl.wd3.myworkdayjobs.com/EY_Careers' },
+  'GE': { careerPage: 'https://jobs.gecareers.com', jobBoardUrl: 'https://ge.wd5.myworkdayjobs.com/GECareers' },
+  'Goldman Sachs': { careerPage: 'https://www.goldmansachs.com/careers', jobBoardUrl: 'https://goldmansachs.wd1.myworkdayjobs.com/GoldmanSachs' },
+  'Honeywell': { careerPage: 'https://careers.honeywell.com', jobBoardUrl: 'https://honeywell.wd1.myworkdayjobs.com/HoneywellCareers' },
+  'IBM': { careerPage: 'https://www.ibm.com/careers', jobBoardUrl: 'https://ibm.wd5.myworkdayjobs.com/IBM_Careers' },
+  'Intel': { careerPage: 'https://www.intel.com/content/www/us/en/jobs/jobs-at-intel.html', jobBoardUrl: 'https://intel.wd1.myworkdayjobs.com/External' },
+  'JPMorgan Chase': { careerPage: 'https://careers.jpmorganchase.com', jobBoardUrl: 'https://jpmc.wd5.myworkdayjobs.com/Careers' },
+  'Lenovo': { careerPage: 'https://jobs.lenovo.com', jobBoardUrl: 'https://lenovo.wd3.myworkdayjobs.com/LenovoCareers' },
+  'Mastercard': { careerPage: 'https://careers.mastercard.com', jobBoardUrl: 'https://mastercard.wd1.myworkdayjobs.com/CorporateCareers' },
+  'NVIDIA': { careerPage: 'https://www.nvidia.com/en-us/about-nvidia/careers', jobBoardUrl: 'https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite' },
+  'Oracle': { careerPage: 'https://www.oracle.com/careers', jobBoardUrl: 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch' },
+  'Pfizer': { careerPage: 'https://www.pfizer.com/about/careers', jobBoardUrl: 'https://pfizer.wd1.myworkdayjobs.com/PfizerCareers' },
+  'Qualcomm': { careerPage: 'https://www.qualcomm.com/company/careers', jobBoardUrl: 'https://qualcomm.wd5.myworkdayjobs.com/External' },
+  'Salesforce': { careerPage: 'https://careers.salesforce.com', jobBoardUrl: 'https://salesforce.wd12.myworkdayjobs.com/External_Career_Site' },
+  'Siemens': { careerPage: 'https://jobs.siemens.com', jobBoardUrl: 'https://siemens.wd3.myworkdayjobs.com/Siemens_Careers' },
+  'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://www.tesla.com/careers/search' },
+  'Walmart': { careerPage: 'https://careers.walmart.com', jobBoardUrl: 'https://walmart.wd5.myworkdayjobs.com/WalmartExternal' },
+};
+
 export class AtsRegistryService {
   private customUrlOverrides: Record<string, { careerPage?: string; jobBoardUrl?: string; careerPageNeedsReview?: boolean; jobBoardNeedsReview?: boolean }> = {};
 
@@ -134,7 +160,10 @@ export class AtsRegistryService {
       return { jobBoardUrl: `https://jobs.ashbyhq.com/${clean}`, jobBoardNeedsReview: false };
     }
     if (platformId === 'workday') {
-      return { jobBoardUrl: `https://${clean}.wd1.myworkdayjobs.com/Careers`, jobBoardNeedsReview: false };
+      if (WORKDAY_KNOWN_URLS[name]) {
+        return { jobBoardUrl: WORKDAY_KNOWN_URLS[name].jobBoardUrl, jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: `https://${clean}.wd1.myworkdayjobs.com/Careers`, jobBoardNeedsReview: true };
     }
     if (platformId === 'smartrecruiters') {
       return { jobBoardUrl: `https://jobs.smartrecruiters.com/${clean}`, jobBoardNeedsReview: false };
@@ -185,7 +214,8 @@ export class AtsRegistryService {
     this.nativeAtsPlatforms.forEach((platform) => {
       platform.companyDetails = platform.companies.map((name) => {
         const clean = this.cleanCompanyName(name);
-        const careerPage = `https://${clean}.com/careers`;
+        const knownWorkday = WORKDAY_KNOWN_URLS[name];
+        const careerPage = knownWorkday ? knownWorkday.careerPage : `https://${clean}.com/careers`;
         const inferred = this.inferJobBoardUrl(platform.id, name, careerPage);
 
         return {
