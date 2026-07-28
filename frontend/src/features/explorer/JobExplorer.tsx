@@ -1534,7 +1534,7 @@ export const JobExplorer: React.FC = () => {
   const isJobActive = (jobItem: any) => {
     if (!jobItem) return false;
     const status = (jobItem.status || jobItem.activeStatus || '').toLowerCase();
-    if (status === 'expired' || status === 'removed' || status === 'closed' || status === 'archived') {
+    if (status === 'expired' || status === 'removed' || status === 'closed') {
       return false;
     }
     const rawUrl = jobItem.applyUrl || jobItem.jobUrl || jobItem.postingUrl || jobItem.applicationUrl || jobItem.url;
