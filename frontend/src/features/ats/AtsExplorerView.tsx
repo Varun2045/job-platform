@@ -483,9 +483,6 @@ export const AtsExplorerView: React.FC = () => {
             <Search className="w-5 h-5 text-indigo-400" />
             <h2 className="text-base font-bold text-white">Company Directory Search</h2>
           </div>
-          <span className="text-xs text-[#94a3b8]">
-            {overview ? `${overview.totalCompanies}+ Companies Registered` : '183+ Companies Registered'}
-          </span>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
