@@ -42,8 +42,8 @@
     "enabled": true,
     "priority": 2,
     "interval_minutes": 180,
-    "detected_ats": "workday",
-    "api_endpoint": "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/ExternalCareers",
+    "detected_ats": "fallback",
+    "api_endpoint": "https://www.adobe.com/careers.html",
     "resume_profiles": []
   },
   {
@@ -147,7 +147,8 @@
     "enabled": true,
     "priority": 2,
     "interval_minutes": 180,
-    "detected_ats": "fallback",
+    "detected_ats": "greenhouse",
+    "api_endpoint": "uberfreight",
     "resume_profiles": []
   },
   {
@@ -246,7 +247,7 @@
     "enabled": true,
     "priority": 3,
     "interval_minutes": 360,
-    "detected_ats": "lever",
+    "detected_ats": "greenhouse",
     "api_endpoint": "groww",
     "resume_profiles": []
   },
@@ -267,6 +268,7 @@
     "priority": 3,
     "interval_minutes": 360,
     "detected_ats": "fallback",
+    "api_endpoint": "https://www.flipkartcareers.com/",
     "resume_profiles": []
   },
   {
@@ -314,7 +316,7 @@
     "priority": 2,
     "interval_minutes": 180,
     "detected_ats": "workday",
-    "api_endpoint": "https://paypal.wd5.myworkdayjobs.com/wday/cxs/paypal/jobs",
+    "api_endpoint": "https://paypal.wd5.myworkdayjobs.com/wday/cxs/paypal/PayPal_Jobs",
     "resume_profiles": []
   },
   {
@@ -323,8 +325,8 @@
     "enabled": true,
     "priority": 2,
     "interval_minutes": 180,
-    "detected_ats": "workday",
-    "api_endpoint": "https://visa.wd5.myworkdayjobs.com/wday/cxs/visa/VisaRecruiting",
+    "detected_ats": "fallback",
+    "api_endpoint": "https://www.visa.com/careers",
     "resume_profiles": []
   },
   {
@@ -333,8 +335,8 @@
     "enabled": true,
     "priority": 2,
     "interval_minutes": 180,
-    "detected_ats": "workday",
-    "api_endpoint": "https://mastercard.wd1.myworkdayjobs.com/wday/cxs/mastercard/MastercardCareers",
+    "detected_ats": "fallback",
+    "api_endpoint": "https://www.mastercard.us/en-us/about-mastercard/careers.html",
     "resume_profiles": []
   },
   {

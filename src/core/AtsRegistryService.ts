@@ -59,7 +59,7 @@ export interface AtsRegistryOverview {
 const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
   'Adobe': { careerPage: 'https://www.adobe.com/careers.html', jobBoardUrl: 'https://adobe.wd5.myworkdayjobs.com/external_experience' },
   'AMD': { careerPage: 'https://www.amd.com/en/corporate/careers.html', jobBoardUrl: 'https://amd.wd1.myworkdayjobs.com/External' },
-  'Broadcom': { careerPage: 'https://www.broadcom.com/company/careers', jobBoardUrl: 'https://broadcom.wd1.myworkdayjobs.com/External' },
+  'Broadcom': { careerPage: 'https://www.broadcom.com/company/careers', jobBoardUrl: 'https://broadcom.wd1.myworkdayjobs.com/External_Career' },
   'Cisco': { careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
   'Dell': { careerPage: 'https://jobs.dell.com', jobBoardUrl: 'https://dell.wd1.myworkdayjobs.com/External' },
   'EY': { careerPage: 'https://www.ey.com/en_gl/careers', jobBoardUrl: 'https://eygbl.wd3.myworkdayjobs.com/EY_Careers' },
@@ -77,8 +77,25 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Qualcomm': { careerPage: 'https://www.qualcomm.com/company/careers', jobBoardUrl: 'https://qualcomm.wd5.myworkdayjobs.com/External' },
   'Salesforce': { careerPage: 'https://careers.salesforce.com', jobBoardUrl: 'https://salesforce.wd12.myworkdayjobs.com/External_Career_Site' },
   'Siemens': { careerPage: 'https://jobs.siemens.com', jobBoardUrl: 'https://siemens.wd3.myworkdayjobs.com/Siemens_Careers' },
-  'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://www.tesla.com/careers/search' },
+  'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://tesla.wd1.myworkdayjobs.com/Tesla_Careers' },
   'Walmart': { careerPage: 'https://careers.walmart.com', jobBoardUrl: 'https://walmart.wd5.myworkdayjobs.com/WalmartExternal' },
+  'CrowdStrike': { careerPage: 'https://www.crowdstrike.com/careers', jobBoardUrl: 'https://crowdstrike.wd5.myworkdayjobs.com/crowdstrike_careers' },
+  'Palo Alto Networks': { careerPage: 'https://www.paloaltonetworks.com/company/careers', jobBoardUrl: 'https://paloaltonetworks.wd1.myworkdayjobs.com/External' },
+  'PayPal': { careerPage: 'https://www.paypal.com/us/webapps/mpp/jobs', jobBoardUrl: 'https://paypal.wd1.myworkdayjobs.com/paypal-careers' },
+  'Zoom': { careerPage: 'https://careers.zoom.us', jobBoardUrl: 'https://zoom.wd5.myworkdayjobs.com/Zoom' },
+};
+
+// Custom portal overrides for companies that left their listed ATS
+const LEVER_KNOWN_URLS: Record<string, string> = {};
+
+// Taleo companies have moved to modern portals (taleo.net subdomains are dead)
+const TALEO_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
+  'Bank of America':  { careerPage: 'https://careers.bankofamerica.com', jobBoardUrl: 'https://careers.bankofamerica.com' },
+  'Boeing':           { careerPage: 'https://jobs.boeing.com', jobBoardUrl: 'https://jobs.boeing.com' },
+  'Caterpillar':      { careerPage: 'https://careers.caterpillar.com/en/search-jobs', jobBoardUrl: 'https://careers.caterpillar.com/en/search-jobs' },
+  'FedEx':            { careerPage: 'https://careers.fedex.com', jobBoardUrl: 'https://careers.fedex.com' },
+  'Lockheed Martin':  { careerPage: 'https://www.lockheedmartinjobs.com', jobBoardUrl: 'https://www.lockheedmartinjobs.com' },
+  'UnitedHealth':     { careerPage: 'https://careers.unitedhealthgroup.com', jobBoardUrl: 'https://careers.unitedhealthgroup.com' },
 };
 
 export class AtsRegistryService {
@@ -90,9 +107,9 @@ export class AtsRegistryService {
       name: 'Workday',
       averageExtractionMs: 18,
       companies: [
-        'Adobe', 'AMD', 'Broadcom', 'Cisco', 'Dell', 'EY', 'GE', 'Goldman Sachs',
+        'Adobe', 'AMD', 'Broadcom', 'CrowdStrike', 'Dell', 'EY', 'GE', 'Goldman Sachs',
         'Honeywell', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo', 'Mastercard', 'NVIDIA',
-        'Oracle', 'Pfizer', 'Qualcomm', 'Salesforce', 'Siemens', 'Tesla', 'Walmart',
+        'Palo Alto Networks', 'PayPal', 'Pfizer', 'Qualcomm', 'Salesforce', 'Siemens', 'Tesla', 'Walmart', 'Zoom',
       ],
       companyDetails: [],
     },
@@ -101,9 +118,9 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Airbnb', 'Canva', 'Cloudflare', 'Coinbase', 'Datadog', 'DoorDash', 'Figma',
-        'GitLab', 'HashiCorp', 'MongoDB', 'Notion', 'OpenAI', 'Pinterest', 'Robinhood',
-        'Snowflake', 'Spotify', 'Stripe', 'Uber', 'Vercel',
+        'Airbnb', 'Cloudflare', 'Datadog', 'Figma',
+        'GitLab', 'MongoDB', 'Robinhood',
+        'Twitch', 'Vercel',
       ],
       companyDetails: [],
     },
@@ -111,21 +128,21 @@ export class AtsRegistryService {
       id: 'lever',
       name: 'Lever',
       averageExtractionMs: 16,
-      companies: ['Block', 'CircleCI', 'Discord', 'JetBrains', 'Miro', 'Rippling', 'Twitch'],
+      companies: ['JetBrains', 'Spotify'],
       companyDetails: [],
     },
     {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Anthropic', 'Cursor', 'Linear', 'Perplexity', 'Ramp', 'Scale AI', 'Vercel'],
+      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'Linear', 'Notion', 'OpenAI', 'Perplexity', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Vercel'],
       companyDetails: [],
     },
     {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Bosch', 'Equinix', 'IKEA', 'LinkedIn', 'Square', 'Ubisoft', 'Visa'],
+      companies: ['Block', 'Bosch', 'CircleCI', 'DoorDash', 'Equinix', 'IKEA', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
       companyDetails: [],
     },
     {
@@ -148,16 +165,42 @@ export class AtsRegistryService {
 
   private inferJobBoardUrl(platformId: string, name: string, careerPage: string): { jobBoardUrl: string; jobBoardNeedsReview: boolean } {
     const clean = this.cleanCompanyName(name);
-    
+
+    // Specific overrides for companies whose ATS slug differs from their clean name
+    const ASHBY_SLUG_OVERRIDES: Record<string, string> = {
+      'Scale AI': 'scaleai',
+      'Canva': 'canva',        // Canva uses SmartRecruiters but listed in Ashby for fallback
+      'Discord': 'discord',
+      'Notion': 'notion',
+      'OpenAI': 'openai',
+      'Rippling': 'rippling',
+      'Snowflake': 'snowflake',
+    };
+
+    const SMARTRECRUITERS_SLUG_OVERRIDES: Record<string, string> = {
+      'Block': 'Block1',
+      'CircleCI': 'CircleCI',
+      'DoorDash': 'DoorDash',
+      'Miro': 'RealtimeBoard',
+      'Pinterest': 'Pinterest',
+    };
+
     // Known platform domain patterns
     if (platformId === 'greenhouse') {
+      if (name === 'Twitch') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/twitch', jobBoardNeedsReview: false };
+      }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }
     if (platformId === 'lever') {
+      if (LEVER_KNOWN_URLS[name]) {
+        return { jobBoardUrl: LEVER_KNOWN_URLS[name], jobBoardNeedsReview: false };
+      }
       return { jobBoardUrl: `https://jobs.lever.co/${clean}`, jobBoardNeedsReview: false };
     }
     if (platformId === 'ashby') {
-      return { jobBoardUrl: `https://jobs.ashbyhq.com/${clean}`, jobBoardNeedsReview: false };
+      const slug = ASHBY_SLUG_OVERRIDES[name] || clean;
+      return { jobBoardUrl: `https://jobs.ashbyhq.com/${slug}`, jobBoardNeedsReview: false };
     }
     if (platformId === 'workday') {
       if (WORKDAY_KNOWN_URLS[name]) {
@@ -166,10 +209,16 @@ export class AtsRegistryService {
       return { jobBoardUrl: `https://${clean}.wd1.myworkdayjobs.com/Careers`, jobBoardNeedsReview: true };
     }
     if (platformId === 'smartrecruiters') {
-      return { jobBoardUrl: `https://jobs.smartrecruiters.com/${clean}`, jobBoardNeedsReview: false };
+      const slug = SMARTRECRUITERS_SLUG_OVERRIDES[name] || clean;
+      return { jobBoardUrl: `https://jobs.smartrecruiters.com/${slug}`, jobBoardNeedsReview: false };
     }
 
-    // Default company portal pattern
+    if (platformId === 'taleo') {
+      if (TALEO_KNOWN_URLS[name]) {
+        return { jobBoardUrl: TALEO_KNOWN_URLS[name].jobBoardUrl, jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: `https://${clean}.taleo.net/careersection`, jobBoardNeedsReview: true };
+    }
     if (careerPage && (careerPage.includes('#') || careerPage.includes('/jobs'))) {
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
