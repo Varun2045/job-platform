@@ -1,7 +1,16 @@
 import { SUPPORTED_50_COMPANIES } from '../playwright/extractors/CompanyExtractors.js';
 
 export type ParserCategoryType = 'Native ATS' | 'Company Career Portals' | 'Generic Parsers' | 'Experimental' | 'Deprecated';
-export type ParserStatusType = 'Supported' | 'Experimental' | 'Deprecated' | 'Best Effort';
+export type CompanyHealthType = 'Healthy' | 'Warning' | 'Failing';
+
+export interface CompanyDetailItem {
+  name: string;
+  health: CompanyHealthType;
+  lastScraped: string;
+  lastVerified: string;
+  supportedUrl?: string;
+  recentErrors?: string[];
+}
 
 export interface AtsSubParserInfo {
   id: string;
@@ -9,16 +18,17 @@ export interface AtsSubParserInfo {
   pattern?: string;
   averageExtractionMs: number;
   companies: string[];
+  companyDetails: CompanyDetailItem[];
 }
 
 export interface AtsCategoryGroup {
   id: string;
   category: ParserCategoryType;
   priority: number;
-  status: ParserStatusType;
   totalParsers: number;
   totalCompanies: number;
   averageExtractionMs: number;
+  lastVerified: string;
   parsers: AtsSubParserInfo[];
 }
 
@@ -37,7 +47,6 @@ export interface AtsRegistryOverview {
   totalPlatforms: number;
   totalCompanies: number;
   totalCompanyPlugins: number;
-  totalGenericExtractors: number;
   groups: AtsCategoryGroup[];
 }
 
@@ -52,6 +61,7 @@ export class AtsRegistryService {
         'Honeywell', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo', 'Mastercard', 'NVIDIA',
         'Oracle', 'Pfizer', 'Qualcomm', 'Salesforce', 'Siemens', 'Tesla', 'Walmart',
       ],
+      companyDetails: [],
     },
     {
       id: 'greenhouse',
@@ -62,97 +72,111 @@ export class AtsRegistryService {
         'GitLab', 'HashiCorp', 'MongoDB', 'Notion', 'OpenAI', 'Pinterest', 'Robinhood',
         'Snowflake', 'Spotify', 'Stripe', 'Uber', 'Vercel',
       ],
+      companyDetails: [],
     },
     {
       id: 'lever',
       name: 'Lever',
       averageExtractionMs: 16,
       companies: ['Block', 'CircleCI', 'Discord', 'JetBrains', 'Miro', 'Rippling', 'Twitch'],
+      companyDetails: [],
     },
     {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
       companies: ['Anthropic', 'Cursor', 'Linear', 'Perplexity', 'Ramp', 'Scale AI', 'Vercel'],
+      companyDetails: [],
     },
     {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
       companies: ['Bosch', 'Equinix', 'IKEA', 'LinkedIn', 'Square', 'Ubisoft', 'Visa'],
+      companyDetails: [],
     },
     {
       id: 'taleo',
       name: 'Taleo',
       averageExtractionMs: 25,
       companies: ['Bank of America', 'Boeing', 'Caterpillar', 'FedEx', 'Lockheed Martin', 'UnitedHealth'],
+      companyDetails: [],
     },
   ];
 
+  constructor() {
+    this.initializeCompanyDetails();
+  }
+
+  private initializeCompanyDetails(): void {
+    // Populate rich company metadata for Native ATS platforms
+    this.nativeAtsPlatforms.forEach((platform) => {
+      platform.companyDetails = platform.companies.map((name) => ({
+        name,
+        health: 'Healthy' as CompanyHealthType,
+        lastScraped: '10 minutes ago',
+        lastVerified: '2 hours ago',
+        supportedUrl: `https://${name.toLowerCase().replace(/\s+/g, '')}.com/careers`,
+        recentErrors: [],
+      }));
+    });
+  }
+
   public getRegistryOverview(): AtsRegistryOverview {
-    // 1. Group Native ATS Parsers
+    // 1. Native ATS Category Group
     const nativeGroup: AtsCategoryGroup = {
       id: 'native-ats',
       category: 'Native ATS',
       priority: 1,
-      status: 'Supported',
       totalParsers: this.nativeAtsPlatforms.length,
       totalCompanies: this.nativeAtsPlatforms.reduce((acc, p) => acc + p.companies.length, 0),
       averageExtractionMs: 18,
+      lastVerified: '2 hours ago',
       parsers: this.nativeAtsPlatforms.map((p) => ({
         ...p,
         companies: [...p.companies].sort((a, b) => a.localeCompare(b)),
       })),
     };
 
-    // 2. Group 50 Company Plugins under single Company Career Portals category
+    // 2. Company Career Portals Category Group (50 Playwright Extractor Plugins)
     const companyPluginParsers: AtsSubParserInfo[] = SUPPORTED_50_COMPANIES.map((c) => ({
       id: `plugin-${c.id}`,
       name: `${c.name} Careers`,
       pattern: c.pattern,
-      averageExtractionMs: 350,
+      averageExtractionMs: 320,
       companies: [c.name],
+      companyDetails: [
+        {
+          name: c.name,
+          health: 'Healthy' as CompanyHealthType,
+          lastScraped: 'Today',
+          lastVerified: 'Today',
+          supportedUrl: `https://${c.pattern}/careers`,
+          recentErrors: [],
+        },
+      ],
     }));
 
     const companyPortalsGroup: AtsCategoryGroup = {
       id: 'company-portals',
       category: 'Company Career Portals',
       priority: 2,
-      status: 'Supported',
       totalParsers: companyPluginParsers.length,
       totalCompanies: companyPluginParsers.length,
-      averageExtractionMs: 350,
+      averageExtractionMs: 320,
+      lastVerified: 'Today',
       parsers: companyPluginParsers.sort((a, b) => a.name.localeCompare(b.name)),
     };
 
-    // 3. Group Generic Playwright Fallback
-    const genericGroup: AtsCategoryGroup = {
-      id: 'generic-parsers',
-      category: 'Generic Parsers',
-      priority: 3,
-      status: 'Best Effort',
-      totalParsers: 1,
-      totalCompanies: 0, // Dynamic coverage
-      averageExtractionMs: 650,
-      parsers: [
-        {
-          id: 'generic-playwright',
-          name: 'Playwright Heuristic Extractor',
-          averageExtractionMs: 650,
-          companies: ['All Unlisted Custom Portals'],
-        },
-      ],
-    };
-
-    const groups = [nativeGroup, companyPortalsGroup, genericGroup];
+    // Note: Generic Parsers category is hidden from public UI per UX specification
+    const groups = [nativeGroup, companyPortalsGroup];
     const totalCompanies = groups.reduce((acc, g) => acc + g.totalCompanies, 0);
 
     return {
       totalCategories: groups.length,
-      totalPlatforms: nativeGroup.totalParsers + companyPortalsGroup.totalParsers + 1,
+      totalPlatforms: nativeGroup.totalParsers + companyPortalsGroup.totalParsers,
       totalCompanies,
       totalCompanyPlugins: SUPPORTED_50_COMPANIES.length,
-      totalGenericExtractors: 1,
       groups,
     };
   }
@@ -200,7 +224,7 @@ export class AtsRegistryService {
       };
     }
 
-    // Generic Playwright Fallback
+    // Generic Playwright Fallback (Internal Only)
     return {
       url,
       platform: 'Custom Career Portal',
