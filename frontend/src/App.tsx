@@ -8,7 +8,6 @@ import { Dashboard } from './features/dashboard/Dashboard.js';
 import { JobExplorer } from './features/explorer/JobExplorer.js';
 import { KanbanTracker } from './features/tracker/KanbanTracker.js';
 import { ResumeManager } from './features/resumes/ResumeManager.js';
-import { CompanyMonitor } from './features/companies/CompanyMonitor.js';
 import { Settings } from './features/settings/Settings.js';
 import { AdminPanel } from './features/admin/AdminPanel.js';
 import { ResumeBuilder } from './features/resumes/resume-builder/ResumeBuilder.js';
@@ -17,7 +16,6 @@ import { Referrals } from './features/referrals/Referrals.js';
 import { AICareerAssistant } from './features/career-assistant/AICareerAssistant.js';
 import { CoverLetterBuilder } from './features/cover-letter-builder/CoverLetterBuilder.js';
 import { CopilotDashboard } from './features/_experimental/CopilotDashboard.js';
-import { ScraperBuilder } from './features/scraper-builder/ScraperBuilder.js';
 import { OfferComparison } from './features/offer-comparison/OfferComparison.js';
 import { GithubAnalyzer } from './features/github-analyzer/GithubAnalyzer.js';
 import { FlashcardDashboard } from './features/flashcards/FlashcardDashboard.js';
@@ -117,7 +115,8 @@ export const App: React.FC = () => {
                 <Route path="/referrals" element={<Referrals />} />
                 <Route path="/resumes" element={<ResumeManager />} />
                 <Route path="/cover-letter-builder" element={<CoverLetterBuilder />} />
-                <Route path="/companies" element={<CompanyMonitor />} />
+                <Route path="/companies" element={<Navigate to="/ats-explorer" replace />} />
+                <Route path="/scraper-builder" element={<Navigate to="/ats-explorer" replace />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/resume-builder" element={<ResumeBuilder />} />
                 <Route path="/career-assistant" element={<AICareerAssistant />} />
@@ -127,7 +126,6 @@ export const App: React.FC = () => {
                 <Route path="/automation/email" element={<AutomationHub tab="email" />} />
                 <Route path="/automation/calendar" element={<AutomationHub tab="calendar" />} />
                 <Route path="/career-copilot" element={<CopilotDashboard />} />
-                <Route path="/scraper-builder" element={<ScraperBuilder />} />
                 <Route path="/offer-comparison" element={<OfferComparison />} />
                 <Route path="/github-analyzer" element={<GithubAnalyzer />} />
                 <Route path="/cheatsheets" element={<CheatsheetDashboard />} />

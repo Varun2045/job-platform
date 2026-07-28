@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Search, Building2, Hammer, ClipboardList, FileText, Mail, Globe, Brain, Bot, Code, DollarSign, Handshake, Settings, Shield, LogOut, Bell, Check, ChevronLeft, ChevronRight, X, Calendar, Activity, Trophy, Download, Layers } from 'lucide-react';
+import { Home, Search, ClipboardList, FileText, Mail, Globe, Brain, Bot, Code, DollarSign, Handshake, Settings, Shield, LogOut, Bell, Check, ChevronLeft, ChevronRight, X, Calendar, Activity, Trophy, Download, Layers } from 'lucide-react';
 
 interface SidebarProps {
   onLogout: () => void;
@@ -70,9 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
       category: 'Job Search',
       items: [
         { name: 'Job Explorer', path: '/explorer', icon: Search },
-        { name: 'Supported ATS', path: '/ats-explorer', icon: Layers },
-        { name: 'Company Monitor', path: '/companies', icon: Building2 },
-        { name: 'Scraper Builder', path: '/scraper-builder', icon: Hammer }
+        { name: 'Parser Explorer', path: '/ats-explorer', icon: Layers },
       ]
     },
     {
