@@ -516,14 +516,7 @@ export const JobExplorer: React.FC = () => {
                 const isOpen = openDeptCategories[groupName] ?? false;
                 const isExpanded = expandedDeptCategories[groupName] ?? false;
 
-                // Filter out departments with 0 count unless selected
-                const availableDepts = deptList.filter(lvl => {
-                  const count = getDeptCount(lvl);
-                  return count > 0 || department.includes(lvl);
-                });
-
-                if (availableDepts.length === 0) return null;
-
+                const availableDepts = deptList;
                 const visibleDepts = isExpanded ? availableDepts : availableDepts.slice(0, 5);
                 const totalCategoryJobs = availableDepts.reduce((acc, d) => acc + getDeptCount(d), 0);
 
@@ -537,11 +530,9 @@ export const JobExplorer: React.FC = () => {
                         {isOpen ? <ChevronDown className="w-3 h-3 text-indigo-400" /> : <ChevronRight className="w-3 h-3 text-[#64748b]" />}
                         {groupName}
                       </span>
-                      {totalCategoryJobs > 0 && (
-                        <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
-                          {totalCategoryJobs}
-                        </span>
-                      )}
+                      <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
+                        {totalCategoryJobs}
+                      </span>
                     </button>
 
                     {isOpen && (
@@ -559,11 +550,9 @@ export const JobExplorer: React.FC = () => {
                                 />
                                 <span className="truncate">{lvl}</span>
                               </div>
-                              {count > 0 && (
-                                <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                                  {count}
-                                </span>
-                              )}
+                              <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                                {count}
+                              </span>
                             </label>
                           );
                         })}
@@ -584,7 +573,7 @@ export const JobExplorer: React.FC = () => {
 
               {(() => {
                 const groupedDeptsSet = new Set(Object.values(deptGroups).flat());
-                const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label) && d.count > 0);
+                const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label));
                 if (leftovers.length === 0) return null;
 
                 const isOpen = openDeptCategories['Other Categories'] ?? false;
@@ -774,7 +763,6 @@ export const JobExplorer: React.FC = () => {
             <div className="space-y-0.5 mt-1.5 transition-all">
               {primaryEmpTypes.map((emp) => {
                 const count = getEmpCount(emp);
-                if (count === 0 && !employmentType.includes(emp)) return null;
                 return (
                   <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
@@ -786,18 +774,15 @@ export const JobExplorer: React.FC = () => {
                       />
                       <span>{emp}</span>
                     </div>
-                    {count > 0 && (
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                        {count}
-                      </span>
-                    )}
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                      {count}
+                    </span>
                   </label>
                 );
               })}
 
               {showAllEmpTypes && secondaryEmpTypes.map((emp) => {
                 const count = getEmpCount(emp);
-                if (count === 0 && !employmentType.includes(emp)) return null;
                 return (
                   <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
@@ -809,11 +794,9 @@ export const JobExplorer: React.FC = () => {
                       />
                       <span>{emp}</span>
                     </div>
-                    {count > 0 && (
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                        {count}
-                      </span>
-                    )}
+                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                      {count}
+                    </span>
                   </label>
                 );
               })}
