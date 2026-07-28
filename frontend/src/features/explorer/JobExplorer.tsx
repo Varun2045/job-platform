@@ -1531,7 +1531,20 @@ export const JobExplorer: React.FC = () => {
     );
   };
 
-  const visibleJobs = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash));
+  const isJobActive = (jobItem: any) => {
+    if (!jobItem) return false;
+    const status = (jobItem.status || jobItem.activeStatus || '').toLowerCase();
+    if (status === 'expired' || status === 'removed' || status === 'closed' || status === 'archived') {
+      return false;
+    }
+    const rawUrl = jobItem.applyUrl || jobItem.jobUrl || jobItem.postingUrl || jobItem.applicationUrl || jobItem.url;
+    if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim() || rawUrl === '#' || rawUrl === 'N/A') {
+      return false;
+    }
+    return true;
+  };
+
+  const visibleJobs = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
 
   useEffect(() => {
     if (visibleJobs.length > 0 && (!selectedJobHash || !visibleJobs.some(j => j.job.jobHash === selectedJobHash))) {
@@ -1773,7 +1786,6 @@ export const JobExplorer: React.FC = () => {
                 })();
 
                 const rawApplyUrl = job.applyUrl || job.jobUrl || job.postingUrl || job.applicationUrl || job.url;
-                const isExpired = job.status === 'Expired' || job.status === 'Removed' || job.status === 'Archived' || job.activeStatus === 'Expired' || !rawApplyUrl;
 
                 return (
                   <div
@@ -1821,32 +1833,16 @@ export const JobExplorer: React.FC = () => {
                         {isBookmarked ? 'Saved' : 'Save'}
                       </button>
 
-                      {isExpired ? (
-                        <button
-                          disabled
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-rose-950/40 border border-rose-900/50 text-rose-400 cursor-not-allowed text-center"
-                        >
-                          Apply
-                        </button>
-                      ) : (
-                        <a
-                          href={rawApplyUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer text-center shadow-sm"
-                        >
-                          Apply
-                        </a>
-                      )}
+                      <a
+                        href={rawApplyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer text-center shadow-sm"
+                      >
+                        Apply
+                      </a>
                     </div>
-
-                    {isExpired && (
-                      <p className="text-[10px] text-rose-400 font-medium">
-                        This job posting is no longer available.
-                      </p>
-                    )}
                   </div>
                 );
               })}
@@ -1883,7 +1879,6 @@ export const JobExplorer: React.FC = () => {
             }
 
             const rawApplyUrl = selectedJobItem.applyUrl || selectedJobItem.jobUrl || selectedJobItem.postingUrl || selectedJobItem.applicationUrl || selectedJobItem.url;
-            const isExpired = selectedJobItem.status === 'Expired' || selectedJobItem.status === 'Removed' || selectedJobItem.status === 'Archived' || selectedJobItem.activeStatus === 'Expired' || !rawApplyUrl;
 
             const salaryText = (() => {
               const sal = selectedJobItem.salary || selectedJobItem.salaryRange;
@@ -1973,31 +1968,16 @@ export const JobExplorer: React.FC = () => {
                     {isBookmarked ? 'Saved' : 'Save'}
                   </button>
 
-                  {isExpired ? (
-                    <button
-                      disabled
-                      className="flex items-center justify-center gap-1.5 p-3 bg-rose-950/40 border border-rose-900/50 text-rose-400 font-bold text-xs rounded-xl cursor-not-allowed text-center"
-                    >
-                      Unavailable
-                    </button>
-                  ) : (
-                    <a
-                      href={rawApplyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-1.5 p-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-lg shadow-indigo-500/20 text-center"
-                    >
-                      <Sparkles className="w-4 h-4 text-yellow-300" />
-                      Apply
-                    </a>
-                  )}
+                  <a
+                    href={rawApplyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 p-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-lg shadow-indigo-500/20 text-center"
+                  >
+                    <Sparkles className="w-4 h-4 text-yellow-300" />
+                    Apply
+                  </a>
                 </div>
-
-                {isExpired && (
-                  <p className="text-xs text-rose-400 font-medium">
-                    This job posting is no longer available.
-                  </p>
-                )}
 
                 {/* Secondary Action Grid */}
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#243147]">
