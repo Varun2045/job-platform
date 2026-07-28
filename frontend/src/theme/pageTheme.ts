@@ -28,7 +28,7 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
   resumeManager: {
     key: 'resumeManager',
     name: 'Resume Manager',
-    headingColorClass: 'text-[#f97316]', // Warm Coral
+    headingColorClass: 'text-[#06b6d4]', // Electric Cyan
   },
   heatmap: {
     key: 'heatmap',
@@ -83,7 +83,7 @@ export const PAGE_THEMES: Record<string, PageThemeConfig> = {
   cheatsheets: {
     key: 'cheatsheets',
     name: 'Interview Preparation Hub',
-    headingColorClass: 'text-[#f97316]', // Deep Orange
+    headingColorClass: 'text-[#818cf8]', // Indigo Purple
   },
   flashcards: {
     key: 'flashcards',

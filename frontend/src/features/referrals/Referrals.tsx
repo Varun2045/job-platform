@@ -43,10 +43,12 @@ export const Referrals: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">LinkedIn Referral Assistant</h1>
-        <p className="text-sm text-[#94a3b8]">Manage networking, LinkedIn outreach, and referral pipeline</p>
-      </div>
+      <PageHeader
+        themeKey="referrals"
+        title="Recruiter CRM & Referrals"
+        description="Request and track employee referral contacts across target companies."
+        icon={Handshake}
+      />
 
       <div className="flex gap-2 border-b border-[#232d3f] pb-4">
         {tabs.map((tab) => (
@@ -306,12 +308,6 @@ ${body}`;
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        themeKey="referrals"
-        title="Recruiter CRM & Referrals"
-        description="Request and track employee referral contacts across target companies."
-        icon={Handshake}
-      />
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-white">Company Contacts</h2>
         <div className="flex gap-2">

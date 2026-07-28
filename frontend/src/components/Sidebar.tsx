@@ -70,15 +70,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
       category: 'Job Search',
       items: [
         { name: 'Job Explorer', path: '/explorer', icon: Search },
-        { name: 'Supported ATS & Portal Explorer', path: '/ats-explorer', icon: Layers },
+        { name: 'Parser Explorer', path: '/ats-explorer', icon: Layers },
       ]
     },
     {
       category: 'Applications',
       items: [
-        { name: 'Application Kanban CRM', path: '/tracker', icon: ClipboardList },
+        { name: 'Applications', path: '/tracker', icon: ClipboardList },
         { name: 'Resume Manager', path: '/resumes', icon: FileText },
-        { name: 'ATS Keyword Match Heatmap', path: '/ats-heatmap', icon: Brain },
+        { name: 'ATS Heatmap', path: '/ats-heatmap', icon: Brain },
         { name: 'Cover Letter Builder', path: '/cover-letter-builder', icon: Mail },
         { name: 'Portfolio Exporter', path: '/profile-builder', icon: Globe }
       ]
@@ -96,29 +96,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
       items: [
         { name: 'Career Copilot', path: '/career-copilot', icon: Brain },
         { name: 'AI Career Assistant', path: '/career-assistant', icon: Bot },
-        { name: 'GitHub Profile Analyzer', path: '/github-analyzer', icon: Code },
-        { name: 'Offer Negotiator & Matrix', path: '/offer-comparison', icon: DollarSign }
+        { name: 'GitHub Analyzer', path: '/github-analyzer', icon: Code },
+        { name: 'Offer Negotiator', path: '/offer-comparison', icon: DollarSign }
       ]
     },
     {
       category: 'Interview Prep',
       items: [
-        { name: 'Interview Preparation Hub', path: '/cheatsheets', icon: FileText },
-        { name: 'AI Study Flashcards', path: '/flashcards', icon: Brain },
-        { name: 'Topic Mastery & Achievements', path: '/flashcard-achievements', icon: Trophy }
+        { name: 'Prep Hub', path: '/cheatsheets', icon: FileText },
+        { name: 'Flashcards', path: '/flashcards', icon: Brain },
+        { name: 'Topic Mastery', path: '/flashcard-achievements', icon: Trophy }
       ]
     },
     {
       category: 'Networking',
       items: [
-        { name: 'Recruiter CRM & Follow-Ups', path: '/referrals', icon: Handshake }
+        { name: 'Recruiter CRM', path: '/crm', icon: Handshake },
+        { name: 'Referrals', path: '/referrals', icon: Handshake }
       ]
     },
     {
       category: 'Administration',
       items: [
-        { name: 'Career Analytics & Conversion Metrics', path: '/analytics', icon: Activity },
-        { name: 'Export & Report Center', path: '/export-center', icon: Download },
+        { name: 'Analytics', path: '/analytics', icon: Activity },
+        { name: 'Export Center', path: '/export-center', icon: Download },
         { name: 'Settings', path: '/settings', icon: Settings },
         { name: 'Admin Console', path: '/admin', icon: Shield }
       ]
