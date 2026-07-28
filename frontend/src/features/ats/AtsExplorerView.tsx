@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp, Search } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 export type CompanyHealthType = 'Healthy' | 'Warning' | 'Failing';
@@ -60,7 +60,8 @@ const ExplorerSection: React.FC<{
   isExpanded: boolean;
   onToggleGroup: () => void;
   onSelectCompany: (companyName: string, platformName: string, category: string, extractionMs: number, pattern?: string) => void;
-}> = ({ group, isExpanded, onToggleGroup, onSelectCompany }) => {
+  searchQuery?: string;
+}> = ({ group, isExpanded, onToggleGroup, onSelectCompany, searchQuery = '' }) => {
   const isNativeAts = group.id === 'native-ats' || group.category === 'Native ATS';
 
   // Sub-parser collapsible state for Native ATS job boards
@@ -80,12 +81,14 @@ const ExplorerSection: React.FC<{
   const allCompanies: { name: string; platformName: string; extractionMs: number; pattern?: string }[] = [];
   group.parsers.forEach((p) => {
     p.companies.forEach((cName) => {
-      allCompanies.push({
-        name: cName,
-        platformName: p.name,
-        extractionMs: p.averageExtractionMs,
-        pattern: p.pattern,
-      });
+      if (!searchQuery || cName.toLowerCase().includes(searchQuery.toLowerCase())) {
+        allCompanies.push({
+          name: cName,
+          platformName: p.name,
+          extractionMs: p.averageExtractionMs,
+          pattern: p.pattern,
+        });
+      }
     });
   });
   allCompanies.sort((a, b) => a.name.localeCompare(b.name));
@@ -124,7 +127,12 @@ const ExplorerSection: React.FC<{
           {isNativeAts ? (
             group.parsers.map((parser) => {
               const isOpen = openSubParsers[parser.id] ?? true;
-              const sortedComps = [...parser.companies].sort((a, b) => a.localeCompare(b));
+              const matchingComps = parser.companies.filter((c) =>
+                !searchQuery || c.toLowerCase().includes(searchQuery.toLowerCase())
+              );
+              if (searchQuery && matchingComps.length === 0) return null;
+
+              const sortedComps = [...matchingComps].sort((a, b) => a.localeCompare(b));
 
               return (
                 <div key={parser.id} className="bg-[#131a26] border border-[#232d3f] rounded-xl overflow-hidden shadow-md">
@@ -138,7 +146,7 @@ const ExplorerSection: React.FC<{
                       <span className="text-sm font-bold text-white flex items-center gap-2">
                         {parser.name} Job Board
                         <span className="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-500/30">
-                          {parser.companies.length} Companies
+                          {matchingComps.length} Companies
                         </span>
                       </span>
                     </div>
@@ -194,6 +202,8 @@ export const AtsExplorerView: React.FC = () => {
   const [overview, setOverview] = useState<AtsRegistryOverview | null>(null);
   const [testUrl, setTestUrl] = useState('');
   const [urlResult, setUrlResult] = useState<UrlDetectionResult | null>(null);
+  const [companySearchTerm, setCompanySearchTerm] = useState('');
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     'native-ats': true,
     'company-portals': true,
@@ -466,6 +476,64 @@ export const AtsExplorerView: React.FC = () => {
         )}
       </div>
 
+      {/* Top Company Search Bar */}
+      <div className="bg-[#131a26] border border-indigo-500/30 rounded-xl p-5 mb-8 shadow-xl relative overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Search className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-base font-bold text-white">Company Directory Search</h2>
+          </div>
+          <span className="text-xs text-[#94a3b8]">
+            {overview ? `${overview.totalCompanies}+ Companies Registered` : '183+ Companies Registered'}
+          </span>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search company (e.g. Razorpay, Google, Airbnb, Nike, PwC, Uber, OpenAI)..."
+              value={companySearchTerm}
+              onChange={(e) => {
+                setCompanySearchTerm(e.target.value);
+                setActiveSearchQuery(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') setActiveSearchQuery(companySearchTerm);
+              }}
+              className="w-full bg-[#0b0f19] border border-[#232d3f] rounded-lg pl-10 pr-10 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
+            />
+            <Search className="w-4 h-4 text-[#64748b] absolute left-3.5 top-3.5" />
+            {companySearchTerm && (
+              <button
+                onClick={() => { setCompanySearchTerm(''); setActiveSearchQuery(''); }}
+                className="absolute right-3 top-3 text-[#64748b] hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setActiveSearchQuery(companySearchTerm)}
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-6 py-2.5 rounded-lg transition cursor-pointer shrink-0 flex items-center gap-2 justify-center shadow-lg shadow-indigo-500/20"
+          >
+            <Search className="w-4 h-4" />
+            Search Company
+          </button>
+        </div>
+        {activeSearchQuery && (
+          <div className="mt-3 flex items-center gap-2 text-xs">
+            <span className="text-[#94a3b8]">Filtering by:</span>
+            <span className="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30 font-semibold flex items-center gap-1.5">
+              "{activeSearchQuery}"
+              <X
+                className="w-3 h-3 cursor-pointer hover:text-white"
+                onClick={() => { setCompanySearchTerm(''); setActiveSearchQuery(''); }}
+              />
+            </span>
+          </div>
+        )}
+      </div>
+
       {/* Categorized Reusable Sections List */}
       <div className="space-y-4">
         {(overview?.groups || []).map((group) => (
@@ -475,6 +543,7 @@ export const AtsExplorerView: React.FC = () => {
             isExpanded={expandedGroups[group.id] ?? true}
             onToggleGroup={() => toggleGroup(group.id)}
             onSelectCompany={openCompanyModal}
+            searchQuery={activeSearchQuery}
           />
         ))}
       </div>
