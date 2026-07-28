@@ -74,24 +74,6 @@ export const JobExplorer: React.FC = () => {
     (searchParams.get('sort') as any) || getSavedFilter('sortBy', 'newest')
   );
 
-  // Company Favorites & Recently Viewed tracking
-  const [favoriteCompanies, setFavoriteCompanies] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('favorite_companies');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [recentlyViewedCompanies, setRecentlyViewedCompanies] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('recently_viewed_companies');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
   // Infinite Scroll & Cursor Pagination state
   const [accumulatedJobs, setAccumulatedJobs] = useState<any[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -104,6 +86,7 @@ export const JobExplorer: React.FC = () => {
     }
   });
   const [hiddenJobs] = useState<Set<string>>(new Set());
+  const [showAllEmpTypes, setShowAllEmpTypes] = useState(false);
 
   // UI Drawer & Modal state
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -111,9 +94,6 @@ export const JobExplorer: React.FC = () => {
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
-
-  const [showAllCompanies, setShowAllCompanies] = useState(false);
-  const [companySort, setCompanySort] = useState<'count' | 'alpha'>('count');
 
   // Accordion Sections for Faceted Filters
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -293,27 +273,6 @@ export const JobExplorer: React.FC = () => {
     },
   });
 
-  // Track recently viewed companies
-  useEffect(() => {
-    if (detailData?.job?.company) {
-      const comp = detailData.job.company;
-      setRecentlyViewedCompanies(prev => {
-        const next = [comp, ...prev.filter(c => c !== comp)].slice(0, 5);
-        localStorage.setItem('recently_viewed_companies', JSON.stringify(next));
-        return next;
-      });
-    }
-  }, [detailData]);
-
-  const toggleFavoriteCompany = (comp: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavoriteCompanies(prev => {
-      const next = prev.includes(comp) ? prev.filter(c => c !== comp) : [...prev, comp];
-      localStorage.setItem('favorite_companies', JSON.stringify(next));
-      return next;
-    });
-  };
-
   // Track Application mutation
   const trackMutation = useMutation({
     mutationFn: async (status: string) => {
@@ -398,33 +357,6 @@ export const JobExplorer: React.FC = () => {
   const renderSidebarContents = () => {
     const facets = facetsData?.facets || {};
 
-    const rawComps = facets.companies || [];
-    const sortedComps = [...rawComps].sort((a: any, b: any) => {
-      const aFav = favoriteCompanies.includes(a.label);
-      const bFav = favoriteCompanies.includes(b.label);
-      if (aFav && !bFav) return -1;
-      if (!aFav && bFav) return 1;
-      if (companySort === 'alpha') {
-        return a.label.localeCompare(b.label);
-      }
-      return b.count - a.count;
-    });
-
-    const canonicalEmps = [
-      'Full-time',
-      'Internship',
-      'Contract',
-      'Temporary',
-      'Freelance',
-      'Part-time',
-      'Apprenticeship',
-      'Graduate Program',
-      'Co-op',
-      'Seasonal',
-      'Volunteer',
-      'Consultant'
-    ];
-
     // Department grouping configurations
     const deptGroups: Record<string, string[]> = {
       'Engineering': [
@@ -481,6 +413,14 @@ export const JobExplorer: React.FC = () => {
         else if (expOpt === '5+ Years' && (lbl.includes('5') || lbl.includes('6') || lbl.includes('7') || lbl.includes('8') || lbl.includes('senior') || lbl.includes('lead') || lbl.includes('principal') || lbl.includes('manager') || lbl.includes('director'))) total += f.count;
       });
       return total;
+    };
+
+    const primaryEmpTypes = ['Full-time', 'Internship', 'Graduate Program', 'Part-time', 'Contract'];
+    const secondaryEmpTypes = ['Temporary', 'Freelance', 'Apprenticeship', 'Co-op', 'Consultant', 'Seasonal', 'Volunteer'];
+
+    const getEmpCount = (empLabel: string) => {
+      const match = (facets.employmentTypes || []).find((f: any) => f.label.toLowerCase() === empLabel.toLowerCase());
+      return match ? match.count : 0;
     };
 
     return (
@@ -597,105 +537,6 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 2. COMPANY */}
-        <div className="border-t border-[#243147]/40 pt-3">
-          <button
-            onClick={() => toggleSection('companies')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Company {company.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{company.length}</span>}
-            </span>
-            {openSections.companies ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
-          </button>
-          
-          {openSections.companies && (
-            <div className="space-y-2 mt-1.5 transition-all">
-              <div className="flex gap-2 justify-end text-[9px] font-bold text-[#64748b] px-1">
-                <button
-                  onClick={() => setCompanySort('count')}
-                  className={`hover:text-white cursor-pointer ${companySort === 'count' ? 'text-indigo-400 underline decoration-2' : ''}`}
-                >
-                  By Hiring Count
-                </button>
-                <span>|</span>
-                <button
-                  onClick={() => setCompanySort('alpha')}
-                  className={`hover:text-white cursor-pointer ${companySort === 'alpha' ? 'text-indigo-400 underline decoration-2' : ''}`}
-                >
-                  Alphabetical
-                </button>
-              </div>
-
-              {recentlyViewedCompanies.length > 0 && (
-                <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-[#64748b] uppercase tracking-wider block px-1">Recently Viewed</span>
-                  <div className="flex flex-wrap gap-1 px-1">
-                    {recentlyViewedCompanies.map(c => (
-                      <button
-                        key={c}
-                        onClick={() => toggleArrayFilter(company, c, setCompany)}
-                        className={`text-[10px] px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
-                          company.includes(c) ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300 font-bold' : 'bg-[#192438] border-[#243147]/50 text-[#94a3b8] hover:text-white'
-                        }`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-0.5 pr-1">
-                {(showAllCompanies ? sortedComps : sortedComps.slice(0, 10)).map((f: any) => {
-                  const isFavorite = favoriteCompanies.includes(f.label);
-                  const firstChar = f.label.charAt(0).toUpperCase();
-                  const badgeColors = ['bg-rose-500/20 text-rose-300', 'bg-blue-500/20 text-blue-300', 'bg-emerald-500/20 text-emerald-300', 'bg-amber-500/20 text-amber-300', 'bg-purple-500/20 text-purple-300'];
-                  const colorIndex = f.label.charCodeAt(0) % badgeColors.length;
-
-                  return (
-                    <div key={f.label} className="flex items-center justify-between text-xs py-0.5 px-1.5 rounded-lg hover:bg-[#192438] transition-all group">
-                      <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                        <input
-                          type="checkbox"
-                          checked={company.includes(f.label)}
-                          onChange={() => toggleArrayFilter(company, f.label, setCompany)}
-                          className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-extrabold ${badgeColors[colorIndex]}`}>
-                          {firstChar}
-                        </div>
-                        <span className="truncate text-[#94a3b8] group-hover:text-white">{f.label}</span>
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={(e) => toggleFavoriteCompany(f.label, e)}
-                          className={`focus:outline-none transition-all cursor-pointer text-xs ${isFavorite ? 'text-rose-500 font-bold' : 'text-[#64748b] opacity-0 group-hover:opacity-100 hover:text-rose-400'}`}
-                          title="Favorite Company"
-                        >
-                          ♥
-                        </button>
-                        <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                          {f.count}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {sortedComps.length > 10 && (
-                <button
-                  onClick={() => setShowAllCompanies(!showAllCompanies)}
-                  className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
-                >
-                  {showAllCompanies ? 'Show Less' : `Show All (${sortedComps.length})`}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
         {/* 3. WORK MODE */}
         <div className="border-t border-[#243147]/40 pt-3">
           <button
@@ -787,9 +628,9 @@ export const JobExplorer: React.FC = () => {
           
           {openSections.employment && (
             <div className="space-y-0.5 mt-1.5 transition-all">
-              {canonicalEmps.map((emp) => {
-                const match = (facets.employmentTypes || []).find((f: any) => f.label.toLowerCase() === emp.toLowerCase());
-                const count = match ? match.count : 0;
+              {primaryEmpTypes.map((emp) => {
+                const count = getEmpCount(emp);
+                if (count === 0 && !employmentType.includes(emp)) return null;
                 return (
                   <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
                     <div className="flex items-center gap-2">
@@ -801,12 +642,44 @@ export const JobExplorer: React.FC = () => {
                       />
                       <span>{emp}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {count}
-                    </span>
+                    {count > 0 && (
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                        {count}
+                      </span>
+                    )}
                   </label>
                 );
               })}
+
+              {showAllEmpTypes && secondaryEmpTypes.map((emp) => {
+                const count = getEmpCount(emp);
+                if (count === 0 && !employmentType.includes(emp)) return null;
+                return (
+                  <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={employmentType.includes(emp)}
+                        onChange={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}
+                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>{emp}</span>
+                    </div>
+                    {count > 0 && (
+                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                        {count}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
+
+              <button
+                onClick={() => setShowAllEmpTypes(!showAllEmpTypes)}
+                className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1.5 cursor-pointer"
+              >
+                {showAllEmpTypes ? 'Show Less' : 'Show More'}
+              </button>
             </div>
           )}
         </div>
@@ -1036,8 +909,8 @@ export const JobExplorer: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <h3 className="text-base font-bold text-white">No jobs matched your current filters</h3>
-                <div className="text-xs text-[#94a3b8] max-w-xs mx-auto text-left bg-[#090d16] border border-[#243147] p-3.5 rounded-xl space-y-1">
-                  <p className="font-semibold text-white mb-1">Try:</p>
+                <div className="text-xs text-[#94a3b8] space-y-1 pt-1">
+                  <p className="font-semibold text-white">Try:</p>
                   <p>• Expanding your location</p>
                   <p>• Selecting a broader experience range</p>
                   <p>• Clearing some filters</p>
