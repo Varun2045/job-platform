@@ -87,11 +87,16 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'intuit', name: 'Intuit', pattern: 'intuit.com', careerPage: 'https://www.intuit.com/careers', jobBoardUrl: 'https://www.intuit.com/careers' },
   { id: 'kpmg', name: 'KPMG', pattern: 'kpmg.com', careerPage: 'https://www.kpmg.com/careers', jobBoardUrl: 'https://www.kpmg.com/careers' },
   { id: 'mckinsey', name: 'McKinsey', pattern: 'mckinsey.com', careerPage: 'https://www.mckinsey.com/careers', jobBoardUrl: 'https://www.mckinsey.com/careers' },
-  { id: 'morganstanley', name: 'Morgan Stanley', pattern: 'morganstanley.com', careerPage: 'https://www.morganstanley.com/people', jobBoardUrl: 'https://www.morganstanley.com/people' },
+  { id: 'morganstanley', name: 'Morgan Stanley', pattern: 'morganstanley.com', careerPage: 'https://www.morganstanley.com/careers/career-opportunities-search/', jobBoardUrl: 'https://www.morganstanley.com/careers/career-opportunities-search/' },
   { id: 'shopify', name: 'Shopify', pattern: 'shopify.com', careerPage: 'https://www.shopify.com/careers', jobBoardUrl: 'https://www.shopify.com/careers' },
   { id: 'sony', name: 'Sony', pattern: 'sony.com', careerPage: 'https://www.sony.com/en/SonyInfo/Careers/', jobBoardUrl: 'https://www.sony.com/en/SonyInfo/Careers/' },
   { id: 'gartner', name: 'Gartner', pattern: 'gartner.com', careerPage: 'https://jobs.gartner.com', jobBoardUrl: 'https://jobs.gartner.com' },
   { id: 'wayfair', name: 'Wayfair', pattern: 'wayfair.com', careerPage: 'https://www.wayfair.com/careers', jobBoardUrl: 'https://www.wayfair.com/careers' },
+  { id: 'darwinbox', name: 'Darwinbox', pattern: 'darwinbox.com', careerPage: 'https://www.darwinbox.com/careers', jobBoardUrl: 'https://www.darwinbox.com/careers' },
+  { id: 'huggingface', name: 'Hugging Face', pattern: 'huggingface.co', careerPage: 'https://huggingface.co/jobs', jobBoardUrl: 'https://huggingface.co/jobs' },
+  { id: 'indeed', name: 'Indeed', pattern: 'indeed.com', careerPage: 'https://careers.indeed.com', jobBoardUrl: 'https://careers.indeed.com' },
+  { id: 'mygate', name: 'MyGate', pattern: 'mygate.in', careerPage: 'https://mygate.in/careers/', jobBoardUrl: 'https://mygate.in/careers/' },
+  { id: 'navi', name: 'Navi', pattern: 'navi.com', careerPage: 'https://navi.com/careers', jobBoardUrl: 'https://navi.com/careers' },
 
   // Infrastructure & Global Portals
   { id: 'bytedance', name: 'ByteDance', pattern: 'bytedance.com', careerPage: 'https://jobs.bytedance.com/en/', jobBoardUrl: 'https://jobs.bytedance.com/en/' },
