@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DollarSign, Trash2, Plus, Scale, Upload, Sparkles, FileText, GripVertical, X } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 interface JobOffer {
   id: string;
@@ -359,12 +360,12 @@ export const OfferComparison: React.FC = () => {
 
   return (
     <div className="absolute inset-0 p-6 space-y-4 max-w-7xl mx-auto flex flex-col overflow-hidden">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-          <Scale className="w-8 h-8 text-indigo-400" /> Offer Negotiation Matrix
-        </h1>
-        <p className="text-sm text-[#94a3b8]">Compare multiple job offers side-by-side, analyze vesting schedules, and draft negotiation request pitches</p>
-      </div>
+      <PageHeader
+        themeKey="offerComparison"
+        title="Offer Negotiator & Matrix"
+        description="Compare multiple job offers side-by-side, analyze vesting schedules, and draft negotiation request pitches."
+        icon={DollarSign}
+      />
 
       {/* Premium Tab Navigation Pills */}
       <div className="flex border-b border-[#232d3f/60] pb-1 shrink-0">

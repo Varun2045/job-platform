@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Search, Star, Code, Lightbulb, CheckCircle2 } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 interface LanguageStat {
   name: string;
@@ -66,12 +67,12 @@ export const GithubAnalyzer: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto h-full flex flex-col overflow-y-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-          <Code className="w-8 h-8 text-indigo-400" /> GitHub Profile Analyzer
-        </h1>
-        <p className="text-sm text-[#94a3b8]">Evaluate developer repository statistics, language shares, and get recruiter-oriented profile optimization checklists</p>
-      </div>
+      <PageHeader
+        themeKey="githubAnalyzer"
+        title="GitHub Profile Analyzer"
+        description="Evaluate developer repository statistics, language shares, and get recruiter-oriented profile optimization checklists."
+        icon={Code}
+      />
 
       {/* Search Bar */}
       <form onSubmit={handleSearch} className="max-w-md shrink-0">

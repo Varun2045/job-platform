@@ -7,6 +7,7 @@ import {
   ChevronDown, ExternalLink, RefreshCw, Star,
   Bookmark, Download
 } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 interface Concept {
   name: string;
@@ -545,14 +546,12 @@ export const CheatsheetDashboard: React.FC = () => {
     <div className="p-8 max-w-[1600px] mx-auto min-h-screen flex flex-col text-slate-100 pb-16 bg-[#090d16]" ref={containerRef}>
       
       {/* Header Panel */}
-      <div className="shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-slate-800 pb-6 gap-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-indigo-400" /> Interview Preparation Hub
-          </h1>
-          <p className="text-sm text-slate-400">Generate comprehensive, production-grade technical interview study guides, code challenges, and company-specific resources</p>
-        </div>
-
+      <PageHeader
+        themeKey="cheatsheets"
+        title="Interview Preparation Hub"
+        description="Generate comprehensive, production-grade technical interview study guides, code challenges, and company-specific resources."
+        icon={BookOpen}
+      >
         {/* Difficulty Selectors */}
         <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl">
           {(['Beginner', 'Intermediate', 'Advanced'] as const).map(diff => (
@@ -569,7 +568,7 @@ export const CheatsheetDashboard: React.FC = () => {
             </button>
           ))}
         </div>
-      </div>
+      </PageHeader>
 
       {/* Dashboard Navigation Tabs - 2 Tabs Only */}
       <div className="flex gap-2 border-b-2 border-slate-700 pb-px mb-8">

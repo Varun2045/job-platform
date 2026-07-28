@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageSquare, Download, Eye, Sparkles, Save, Trash2, AlertCircle, RefreshCw } from 'lucide-react';
+import { MessageSquare, Download, Eye, Sparkles, Save, Trash2, AlertCircle, RefreshCw, Mail } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 type Tone = 'professional' | 'formal' | 'startup' | 'big-tech';
 
@@ -196,24 +197,21 @@ export const CoverLetterBuilder: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <MessageSquare className="w-8 h-8 text-indigo-400" /> Cover Letter Builder
-          </h1>
-          <p className="text-sm text-[#94a3b8]">Generate personalized cover letters with AI assistance</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab(activeTab === 'build' ? 'saved' : 'build')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              activeTab === 'build' ? 'bg-indigo-600 text-white' : 'bg-[#1b2535] text-[#94a3b8]'
-            }`}
-          >
-            {activeTab === 'build' ? 'View Saved' : 'Build New'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        themeKey="coverLetter"
+        title="Cover Letter Builder"
+        description="Generate personalized cover letters with AI assistance"
+        icon={Mail}
+      >
+        <button
+          onClick={() => setActiveTab(activeTab === 'build' ? 'saved' : 'build')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            activeTab === 'build' ? 'bg-indigo-600 text-white' : 'bg-[#1b2535] text-[#94a3b8]'
+          }`}
+        >
+          {activeTab === 'build' ? 'View Saved' : 'Build New'}
+        </button>
+      </PageHeader>
 
       {activeTab === 'build' && (
         <div className="space-y-6">

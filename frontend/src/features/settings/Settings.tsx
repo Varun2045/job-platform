@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Save, Settings as SettingsIcon, Heart, User, Search, Trash2, Plus, Upload, Layout } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const Settings: React.FC = () => {
   const queryClient = useQueryClient();
@@ -185,12 +186,12 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8 max-w-2xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-          <SettingsIcon className="w-8 h-8 text-indigo-400" /> Account Settings
-        </h1>
-        <p className="text-sm text-[#94a3b8]">Manage your profile, career match priorities, and search watchlists</p>
-      </div>
+      <PageHeader
+        themeKey="settings"
+        title="Account Settings"
+        description="Manage your profile, career match priorities, and search watchlists."
+        icon={SettingsIcon}
+      />
 
       <div className="flex border-b border-[#232d3f] gap-4">
         {[

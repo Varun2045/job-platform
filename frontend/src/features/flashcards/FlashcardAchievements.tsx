@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Star, ArrowLeft, Brain, Search } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 interface Flashcard {
   id: string;
@@ -204,18 +205,19 @@ export const FlashcardAchievements: React.FC = () => {
     <div className="p-8 max-w-7xl mx-auto min-h-screen flex flex-col text-white pb-16">
       
       {/* Header controls */}
-      <div className="shrink-0 flex items-center justify-between mb-8">
+      <PageHeader
+        themeKey="flashcardAchievements"
+        title="Topic Mastery & Achievements"
+        description="Track star mastery thresholds across topics and difficulty tiers."
+        icon={Trophy}
+      >
         <button
           onClick={() => navigate('/flashcards')}
-          className="flex items-center gap-1.5 text-xs text-[#94a3b8] hover:text-white transition cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-xs font-semibold text-[#94a3b8] hover:text-white transition cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Flashcards
         </button>
-
-        <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
-          <Trophy className="w-6 h-6 text-indigo-400" /> Topic Mastery
-        </h1>
-      </div>
+      </PageHeader>
 
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">

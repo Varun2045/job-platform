@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles, Send, FileText, Target, BookOpen, MessageSquare, TrendingUp, DollarSign, Briefcase, Building2, GraduationCap, Award, Mail } from 'lucide-react';
+import { Sparkles, Send, FileText, Target, BookOpen, MessageSquare, TrendingUp, DollarSign, Briefcase, Building2, GraduationCap, Award, Mail, Bot } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 type Capability = 'resume' | 'match' | 'cover-letter' | 'interview' | 'referral' | 'career' | 'salary' | 'skills' | 'mock' | 'company' | 'linkedin-opt' | 'cold-email';
 
@@ -80,14 +81,12 @@ export const AICareerAssistant: React.FC = () => {
 
   return (
     <div className="pt-8 px-8 pb-4 space-y-6 max-w-7xl mx-auto h-[calc(100vh-1.5rem)] flex flex-col">
-      <div className="shrink-0 flex items-center justify-between border-b border-[#232d3f]/60 pb-5">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Sparkles className="w-8 h-8 text-indigo-400 animate-pulse" /> AI Career Assistant
-          </h1>
-          <p className="text-sm text-[#94a3b8] mt-1">Your personal AI career coach for job search, interviews, and career growth</p>
-        </div>
-      </div>
+      <PageHeader
+        themeKey="careerAssistant"
+        title="AI Career Assistant"
+        description="Your personal AI career coach for job search, interviews, and career growth"
+        icon={Bot}
+      />
 
       <div className="flex-1 flex gap-6 overflow-hidden">
         {/* Left Panel: Capability Selection */}

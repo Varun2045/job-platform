@@ -4,6 +4,7 @@ import {
   Brain, Trash2, Award, CheckCircle, AlertCircle, 
   ArrowLeft, ArrowRight, RotateCw, Filter, Search, Sparkles, BookOpen, Clock
 } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 interface Flashcard {
   id: string;
@@ -276,20 +277,19 @@ export const FlashcardDashboard: React.FC = () => {
     <div className="p-8 max-w-7xl mx-auto min-h-screen flex flex-col text-white pb-16">
       
       {/* Header Panel */}
-      <div className="shrink-0 flex justify-between items-center mb-10">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
-            <Brain className="w-8 h-8 text-indigo-400 animate-pulse" /> AI Study Flashcards
-          </h1>
-          <p className="text-sm text-[#94a3b8]">Generate custom MCQ question decks dynamically using Groq, and master key tech topics</p>
-        </div>
+      <PageHeader
+        themeKey="flashcards"
+        title="AI Study Flashcards"
+        description="Generate custom MCQ question decks dynamically using Groq, and master key tech topics."
+        icon={Brain}
+      >
         <button
           onClick={() => setShowGeneratorModal(true)}
           className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition duration-300 transform hover:scale-105 shadow-md shadow-indigo-500/10 cursor-pointer"
         >
           <Sparkles className="w-4 h-4" /> AI Generate Decks
         </button>
-      </div>
+      </PageHeader>
 
       {!isStudyMode ? (
         /* ==================== DASHBOARD VIEW ==================== */

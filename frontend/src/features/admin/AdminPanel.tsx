@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Shield, Activity, Cpu, Database, Mail, RefreshCw, Download, Upload, Server, CheckCircle, ToggleRight, List, AlertTriangle } from 'lucide-react';
+import { PageHeader } from '../../components/PageHeader.js';
 
 export const AdminPanel: React.FC = () => {
   const queryClient = useQueryClient();
@@ -134,20 +135,19 @@ export const AdminPanel: React.FC = () => {
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Shield className="w-8 h-8 text-indigo-400" /> Admin Console
-          </h1>
-          <p className="text-sm text-[#94a3b8]">Production health metrics, real-time worker pools, and data backups</p>
-        </div>
+      <PageHeader
+        themeKey="admin"
+        title="Admin Console"
+        description="Production health metrics, real-time worker pools, and data backups."
+        icon={Shield}
+      >
         <button
           onClick={handleRefresh}
           className="flex items-center gap-2 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-white px-4 py-2 rounded-xl text-xs font-bold transition duration-200 cursor-pointer"
         >
           <RefreshCw className="w-4 h-4" /> Refresh Data
         </button>
-      </div>
+      </PageHeader>
 
       {/* Tabs */}
       <div className="flex border-b border-[#232d3f] gap-4">
