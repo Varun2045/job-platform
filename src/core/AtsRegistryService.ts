@@ -288,10 +288,10 @@ export class AtsRegistryService {
     };
 
     // 2. Company Career Portals Category Group (50 Playwright Extractor Plugins)
-    const companyPluginParsers: AtsSubParserInfo[] = SUPPORTED_50_COMPANIES.map((c) => {
+    const companyPluginParsers: AtsSubParserInfo[] = SUPPORTED_50_COMPANIES.map((c: any) => {
       const override = this.customUrlOverrides[c.name];
-      const careerPage = override?.careerPage || `https://${c.pattern}/careers`;
-      const jobBoardUrl = override?.jobBoardUrl || `https://${c.pattern}/careers#all-jobs`;
+      const careerPage = override?.careerPage || c.careerPage || `https://${c.pattern}/careers`;
+      const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `https://${c.pattern}/careers#all-jobs`;
 
       return {
         id: `plugin-${c.id}`,
