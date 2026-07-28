@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 export type CompanyHealthType = 'Healthy' | 'Warning' | 'Failing';
@@ -188,7 +188,6 @@ const ExplorerSection: React.FC<{
 
 export const AtsExplorerView: React.FC = () => {
   const [overview, setOverview] = useState<AtsRegistryOverview | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [testUrl, setTestUrl] = useState('');
   const [urlResult, setUrlResult] = useState<UrlDetectionResult | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
@@ -268,24 +267,6 @@ export const AtsExplorerView: React.FC = () => {
       recentErrors: [],
     });
   };
-
-  const filteredGroups = overview?.groups.map((group) => {
-    const q = searchQuery.toLowerCase();
-    if (!q) return group;
-
-    const groupMatches = group.category.toLowerCase().includes(q);
-    const matchingParsers = group.parsers.filter((parser) => {
-      const parserMatches = parser.name.toLowerCase().includes(q) || (parser.pattern && parser.pattern.includes(q));
-      const companyMatches = parser.companies.some((c) => c.toLowerCase().includes(q));
-      return parserMatches || companyMatches;
-    });
-
-    if (groupMatches) return group;
-    return {
-      ...group,
-      parsers: matchingParsers,
-    };
-  }).filter((g) => g.parsers.length > 0 || searchQuery === '') || [];
 
   return (
     <div className="p-6 max-w-7xl mx-auto text-white bg-[#0b0f19] min-h-screen relative">
@@ -378,21 +359,9 @@ export const AtsExplorerView: React.FC = () => {
         )}
       </div>
 
-      {/* Search Input Filter */}
-      <div className="relative mb-6">
-        <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748b]" />
-        <input
-          type="text"
-          placeholder="Filter by ATS platform or company name..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-[#131a26] border border-[#232d3f] rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition"
-        />
-      </div>
-
       {/* Categorized Reusable Sections List */}
       <div className="space-y-4">
-        {filteredGroups.map((group) => (
+        {(overview?.groups || []).map((group) => (
           <ExplorerSection
             key={group.id}
             group={group}
