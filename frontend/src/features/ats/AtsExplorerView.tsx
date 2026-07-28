@@ -9,6 +9,10 @@ export interface CompanyDetailItem {
   health: CompanyHealthType;
   lastScraped: string;
   lastVerified: string;
+  careerPage: string;
+  jobBoardUrl: string;
+  careerPageNeedsReview?: boolean;
+  jobBoardNeedsReview?: boolean;
   supportedUrl?: string;
   recentErrors?: string[];
 }
@@ -197,6 +201,7 @@ export const AtsExplorerView: React.FC = () => {
   const [showDevDetails, setShowDevDetails] = useState(false);
 
   // Inspector Side Drawer State
+  // Inspector Side Drawer State
   const [selectedCompany, setSelectedCompany] = useState<{
     name: string;
     platformName: string;
@@ -206,9 +211,20 @@ export const AtsExplorerView: React.FC = () => {
     health: CompanyHealthType;
     lastScraped: string;
     lastVerified: string;
-    supportedUrl?: string;
+    careerPage: string;
+    jobBoardUrl: string;
+    careerPageNeedsReview?: boolean;
+    jobBoardNeedsReview?: boolean;
     recentErrors?: string[];
   } | null>(null);
+
+  // URL Editing State inside Inspector
+  const [editingField, setEditingField] = useState<'careerPage' | 'jobBoardUrl' | null>(null);
+  const [editCareerPageVal, setEditCareerPageVal] = useState('');
+  const [editJobBoardUrlVal, setEditJobBoardUrlVal] = useState('');
+  const [urlErrorMsg, setUrlErrorMsg] = useState<string | null>(null);
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
+  const [isSavingUrl, setIsSavingUrl] = useState(false);
 
   useEffect(() => {
     fetchRegistry();
@@ -254,6 +270,27 @@ export const AtsExplorerView: React.FC = () => {
     averageExtractionMs: number,
     pattern?: string,
   ) => {
+    let careerPage = `https://${companyName.toLowerCase().replace(/\s+/g, '')}.com/careers`;
+    let jobBoardUrl = pattern ? `https://${pattern}/careers` : `${careerPage}#all-jobs`;
+    let careerPageNeedsReview = false;
+    let jobBoardNeedsReview = false;
+
+    // Search overview for rich companyDetails
+    if (overview) {
+      for (const group of overview.groups) {
+        for (const parser of group.parsers) {
+          const detail = parser.companyDetails?.find((d) => d.name.toLowerCase() === companyName.toLowerCase());
+          if (detail) {
+            if (detail.careerPage) careerPage = detail.careerPage;
+            if (detail.jobBoardUrl) jobBoardUrl = detail.jobBoardUrl;
+            careerPageNeedsReview = detail.careerPageNeedsReview ?? false;
+            jobBoardNeedsReview = detail.jobBoardNeedsReview ?? false;
+            break;
+          }
+        }
+      }
+    }
+
     setSelectedCompany({
       name: companyName,
       platformName,
@@ -263,9 +300,79 @@ export const AtsExplorerView: React.FC = () => {
       health: 'Healthy',
       lastScraped: '10 minutes ago',
       lastVerified: category === 'Native ATS' ? '2 hours ago' : 'Today',
-      supportedUrl: pattern ? `https://${pattern}/careers` : `https://${companyName.toLowerCase().replace(/\s+/g, '')}.com/careers`,
+      careerPage,
+      jobBoardUrl,
+      careerPageNeedsReview,
+      jobBoardNeedsReview,
       recentErrors: [],
     });
+
+    setEditingField(null);
+    setEditCareerPageVal(careerPage);
+    setEditJobBoardUrlVal(jobBoardUrl);
+    setUrlErrorMsg(null);
+    setSaveSuccessMsg(null);
+  };
+
+  const handleSaveUrlUpdate = async (field: 'careerPage' | 'jobBoardUrl') => {
+    if (!selectedCompany) return;
+    const targetUrl = field === 'careerPage' ? editCareerPageVal.trim() : editJobBoardUrlVal.trim();
+
+    // Client-side HTTPS URL validation
+    try {
+      const parsed = new URL(targetUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        setUrlErrorMsg('URL must use HTTP or HTTPS protocol (e.g. https://domain.com)');
+        return;
+      }
+    } catch {
+      setUrlErrorMsg('Invalid URL format. Please enter a complete HTTPS URL (e.g. https://company.com/careers)');
+      return;
+    }
+
+    setUrlErrorMsg(null);
+    setIsSavingUrl(true);
+
+    try {
+      const payload = {
+        companyName: selectedCompany.name,
+        careerPage: field === 'careerPage' ? targetUrl : selectedCompany.careerPage,
+        jobBoardUrl: field === 'jobBoardUrl' ? targetUrl : selectedCompany.jobBoardUrl,
+      };
+
+      const res = await fetch('/api/v1/ats/update-urls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || 'Failed to save URL update');
+      }
+
+      // Update local modal state
+      setSelectedCompany((prev) =>
+        prev
+          ? {
+              ...prev,
+              careerPage: payload.careerPage,
+              jobBoardUrl: payload.jobBoardUrl,
+              careerPageNeedsReview: field === 'careerPage' ? false : prev.careerPageNeedsReview,
+              jobBoardNeedsReview: field === 'jobBoardUrl' ? false : prev.jobBoardNeedsReview,
+            }
+          : null,
+      );
+
+      setEditingField(null);
+      setSaveSuccessMsg(`${field === 'careerPage' ? 'Career Page' : 'Job Board URL'} updated successfully!`);
+      setTimeout(() => setSaveSuccessMsg(null), 3000);
+      await fetchRegistry();
+    } catch (err: any) {
+      setUrlErrorMsg(err.message || 'Failed to save URL update');
+    } finally {
+      setIsSavingUrl(false);
+    }
   };
 
   return (
@@ -424,20 +531,164 @@ export const AtsExplorerView: React.FC = () => {
                   <span className="font-bold text-emerald-400">{selectedCompany.averageExtractionMs}ms</span>
                 </div>
 
-                {selectedCompany.supportedUrl && (
-                  <div className="bg-[#0b0f19] p-3.5 rounded-lg border border-[#232d3f]">
-                    <span className="text-[#64748b] block mb-1.5">Supported URL Pattern</span>
-                    <a
-                      href={selectedCompany.supportedUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-[11px] text-indigo-400 hover:underline flex items-center gap-1 break-all"
-                    >
-                      {selectedCompany.supportedUrl}
-                      <ExternalLink className="w-3 h-3 shrink-0" />
-                    </a>
+                {/* Error & Success Messages */}
+                {urlErrorMsg && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-semibold">
+                    ⚠️ {urlErrorMsg}
                   </div>
                 )}
+                {saveSuccessMsg && (
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-semibold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    {saveSuccessMsg}
+                  </div>
+                )}
+
+                {/* 1. CAREER PAGE CARD */}
+                <div className="bg-[#0b0f19] p-3.5 rounded-xl border border-[#232d3f] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#64748b] font-bold uppercase tracking-wider text-[10px]">Career Page</span>
+                      {selectedCompany.careerPageNeedsReview && (
+                        <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-0.5 text-[9px] font-bold rounded-full">
+                          ⚠️ Needs Review
+                        </span>
+                      )}
+                    </div>
+
+                    {!editingField && (
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={selectedCompany.careerPage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] rounded-lg text-indigo-400 hover:text-indigo-300 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Open
+                        </a>
+                        <button
+                          onClick={() => {
+                            setEditingField('careerPage');
+                            setEditCareerPageVal(selectedCompany.careerPage);
+                            setUrlErrorMsg(null);
+                          }}
+                          className="px-2.5 py-1 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] rounded-lg text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {editingField === 'careerPage' ? (
+                    <div className="space-y-2 pt-1">
+                      <input
+                        type="url"
+                        value={editCareerPageVal}
+                        onChange={(e) => setEditCareerPageVal(e.target.value)}
+                        placeholder="https://company.com/careers"
+                        className="w-full bg-[#131a26] border border-indigo-500/60 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                      />
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => setEditingField(null)}
+                          className="px-3 py-1 bg-[#131a26] text-[#94a3b8] hover:text-white text-xs font-semibold rounded-lg border border-[#232d3f] transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleSaveUrlUpdate('careerPage')}
+                          disabled={isSavingUrl}
+                          className="px-3.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
+                        >
+                          {isSavingUrl ? 'Saving...' : 'Save Career Page'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <a
+                      href={selectedCompany.careerPage}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-[11px] text-indigo-400 hover:underline flex items-center gap-1 break-all block"
+                    >
+                      {selectedCompany.careerPage}
+                    </a>
+                  )}
+                </div>
+
+                {/* 2. JOB BOARD URL CARD */}
+                <div className="bg-[#0b0f19] p-3.5 rounded-xl border border-[#232d3f] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#64748b] font-bold uppercase tracking-wider text-[10px]">Job Board URL</span>
+                      {selectedCompany.jobBoardNeedsReview && (
+                        <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-0.5 text-[9px] font-bold rounded-full">
+                          ⚠️ Needs Review
+                        </span>
+                      )}
+                    </div>
+
+                    {!editingField && (
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={selectedCompany.jobBoardUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] rounded-lg text-emerald-400 hover:text-emerald-300 text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Open
+                        </a>
+                        <button
+                          onClick={() => {
+                            setEditingField('jobBoardUrl');
+                            setEditJobBoardUrlVal(selectedCompany.jobBoardUrl);
+                            setUrlErrorMsg(null);
+                          }}
+                          className="px-2.5 py-1 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] rounded-lg text-slate-300 hover:text-white text-[11px] font-bold transition flex items-center gap-1 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {editingField === 'jobBoardUrl' ? (
+                    <div className="space-y-2 pt-1">
+                      <input
+                        type="url"
+                        value={editJobBoardUrlVal}
+                        onChange={(e) => setEditJobBoardUrlVal(e.target.value)}
+                        placeholder="https://boards.greenhouse.io/company"
+                        className="w-full bg-[#131a26] border border-indigo-500/60 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                      />
+                      <div className="flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() => setEditingField(null)}
+                          className="px-3 py-1 bg-[#131a26] text-[#94a3b8] hover:text-white text-xs font-semibold rounded-lg border border-[#232d3f] transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleSaveUrlUpdate('jobBoardUrl')}
+                          disabled={isSavingUrl}
+                          className="px-3.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1"
+                        >
+                          {isSavingUrl ? 'Saving...' : 'Save Job Board URL'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <a
+                      href={selectedCompany.jobBoardUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-[11px] text-emerald-400 hover:underline flex items-center gap-1 break-all block"
+                    >
+                      {selectedCompany.jobBoardUrl}
+                    </a>
+                  )}
+                </div>
 
                 {/* Collapsible Developer Details */}
                 <div className="pt-2">

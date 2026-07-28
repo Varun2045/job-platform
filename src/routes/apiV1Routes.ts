@@ -677,5 +677,21 @@ export function createApiV1Router(storage: StorageProvider): Router {
     }
   });
 
+  // POST /api/v1/ats/update-urls
+  router.post('/ats/update-urls', async (req: Request, res: Response) => {
+    try {
+      const { companyName, careerPage, jobBoardUrl } = req.body;
+      if (!companyName) {
+        return sendError(res, 'companyName is a required field', 'INVALID_INPUT', 400);
+      }
+
+      const result = atsRegistryService.updateCompanyUrls(companyName, careerPage, jobBoardUrl);
+      return sendSuccess(res, result.data, 200);
+    } catch (err: any) {
+      Logger.error('API Error POST /ats/update-urls', err);
+      return sendError(res, err.message || 'Failed to update parser URLs', 'UPDATE_FAILED', 400);
+    }
+  });
+
   return router;
 }
