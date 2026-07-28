@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, Briefcase, Globe, ExternalLink, X, Sparkles, 
   FileText, CheckSquare, Bookmark, Filter, RefreshCw,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, ChevronRight
 } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
@@ -94,6 +94,45 @@ export const JobExplorer: React.FC = () => {
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
+  // Department Sub-Category Collapsible States (Requirement 6)
+  const [openDeptCategories, setOpenDeptCategories] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('job_explorer_open_dept_cats_v1');
+      return saved ? JSON.parse(saved) : {
+        'Engineering': true,
+        'AI & Data': true,
+        'Analytics': true,
+        'Product': false,
+        'Design': false,
+        'Business': false
+      };
+    } catch {
+      return {
+        'Engineering': true,
+        'AI & Data': true,
+        'Analytics': true,
+        'Product': false,
+        'Design': false,
+        'Business': false
+      };
+    }
+  });
+
+  const [expandedDeptCategories, setExpandedDeptCategories] = useState<Record<string, boolean>>({});
+
+  const toggleDeptCategoryOpen = (catName: string) => {
+    setOpenDeptCategories(prev => {
+      const next = { ...prev, [catName]: !prev[catName] };
+      try {
+        localStorage.setItem('job_explorer_open_dept_cats_v1', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const toggleDeptCategoryExpand = (catName: string) => {
+    setExpandedDeptCategories(prev => ({ ...prev, [catName]: !prev[catName] }));
+  };
 
   // Accordion Sections for Faceted Filters
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -360,25 +399,59 @@ export const JobExplorer: React.FC = () => {
     // Department grouping configurations
     const deptGroups: Record<string, string[]> = {
       'Engineering': [
-        'Backend Engineering', 'Frontend Engineering', 'Full Stack Engineering',
-        'Software Engineering', 'Mobile Development', 'Cloud Engineering',
-        'DevOps / SRE', 'QA Automation', 'Cybersecurity', 'Embedded Systems',
+        'Software Engineering',
+        'Backend Engineering',
+        'Frontend Engineering',
+        'Full Stack Engineering',
+        'Mobile Development',
+        'Cloud Engineering',
+        'DevOps / SRE',
+        'QA Automation',
+        'Cybersecurity',
+        'Embedded Systems',
         'Hardware Engineering'
       ],
       'AI & Data': [
-        'AI / Machine Learning', 'Data Science', 'Data Engineering', 'Analytics / BI'
+        'AI / Machine Learning',
+        'Data Science',
+        'Data Engineering'
+      ],
+      'Analytics': [
+        'Data Analyst',
+        'Business Analyst',
+        'Product Analyst',
+        'Financial Analyst',
+        'Security Analyst',
+        'Research Analyst',
+        'BI / Reporting Analyst'
       ],
       'Product': [
-        'Product Management', 'Program Management', 'Project Management'
+        'Product Management',
+        'Program Management',
+        'Project Management'
       ],
       'Design': [
-        'UI / UX', 'Graphic Design'
+        'UI / UX',
+        'Graphic Design'
       ],
       'Business': [
-        'Sales', 'Marketing', 'Finance', 'HR', 'Legal', 'Operations',
-        'Customer Success', 'Developer Relations', 'Solutions Engineering'
+        'Sales',
+        'Marketing',
+        'Finance',
+        'HR',
+        'Legal',
+        'Operations',
+        'Customer Success',
+        'Developer Relations',
+        'Solutions Engineering'
       ]
     };
+
+    const getDeptCount = (deptName: string) => {
+      const match = (facets.departments || []).find((f: any) => f.label.toLowerCase() === deptName.toLowerCase());
+      return match ? match.count : 0;
+    };
+
     const quickLocations = [
       'India',
       'Bangalore',
@@ -438,62 +511,133 @@ export const JobExplorer: React.FC = () => {
           </button>
           
           {openSections.department && (
-            <div className="space-y-2 mt-1.5 transition-all">
-              <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-2 pr-1">
-                {Object.entries(deptGroups).map(([groupName, deptList]) => (
-                  <div key={groupName} className="space-y-0.5">
-                    <span className="text-[9px] font-extrabold text-[#64748b] uppercase tracking-wider block px-1">{groupName}</span>
-                    {deptList.map((lvl) => {
-                      const match = (facets.departments || []).find((f: any) => f.label.toLowerCase() === lvl.toLowerCase());
-                      const count = match ? match.count : 0;
-                      return (
-                        <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={department.includes(lvl)}
-                              onChange={() => toggleArrayFilter(department, lvl, setDepartment)}
-                              className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span>{lvl}</span>
-                          </div>
-                          <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                            {count}
-                          </span>
-                        </label>
-                      );
-                    })}
+            <div className="space-y-2 mt-2 transition-all">
+              {Object.entries(deptGroups).map(([groupName, deptList]) => {
+                const isOpen = openDeptCategories[groupName] ?? false;
+                const isExpanded = expandedDeptCategories[groupName] ?? false;
+
+                // Filter out departments with 0 count unless selected
+                const availableDepts = deptList.filter(lvl => {
+                  const count = getDeptCount(lvl);
+                  return count > 0 || department.includes(lvl);
+                });
+
+                if (availableDepts.length === 0) return null;
+
+                const visibleDepts = isExpanded ? availableDepts : availableDepts.slice(0, 5);
+                const totalCategoryJobs = availableDepts.reduce((acc, d) => acc + getDeptCount(d), 0);
+
+                return (
+                  <div key={groupName} className="bg-[#090d16]/60 border border-[#243147]/50 rounded-xl p-2 space-y-1.5">
+                    <button
+                      onClick={() => toggleDeptCategoryOpen(groupName)}
+                      className="w-full flex items-center justify-between text-left cursor-pointer group/cat px-1 py-0.5"
+                    >
+                      <span className="text-[10px] font-extrabold text-[#94a3b8] group-hover/cat:text-white uppercase tracking-wider flex items-center gap-1.5">
+                        {isOpen ? <ChevronDown className="w-3 h-3 text-indigo-400" /> : <ChevronRight className="w-3 h-3 text-[#64748b]" />}
+                        {groupName}
+                      </span>
+                      {totalCategoryJobs > 0 && (
+                        <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
+                          {totalCategoryJobs}
+                        </span>
+                      )}
+                    </button>
+
+                    {isOpen && (
+                      <div className="space-y-0.5 pt-1 pl-1.5 transition-all">
+                        {visibleDepts.map((lvl) => {
+                          const count = getDeptCount(lvl);
+                          return (
+                            <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  checked={department.includes(lvl)}
+                                  onChange={() => toggleArrayFilter(department, lvl, setDepartment)}
+                                  className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="truncate">{lvl}</span>
+                              </div>
+                              {count > 0 && (
+                                <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                                  {count}
+                                </span>
+                              )}
+                            </label>
+                          );
+                        })}
+
+                        {availableDepts.length > 5 && (
+                          <button
+                            onClick={() => toggleDeptCategoryExpand(groupName)}
+                            className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
+                          >
+                            {isExpanded ? 'Show Less' : `Show More (${availableDepts.length - 5})`}
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
-                ))}
+                );
+              })}
 
-                {(() => {
-                  const groupedDeptsSet = new Set(Object.values(deptGroups).flat());
-                  const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label));
-                  if (leftovers.length === 0) return null;
+              {(() => {
+                const groupedDeptsSet = new Set(Object.values(deptGroups).flat());
+                const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label) && d.count > 0);
+                if (leftovers.length === 0) return null;
 
-                  return (
-                    <div className="space-y-0.5">
-                      <span className="text-[9px] font-extrabold text-[#64748b] uppercase tracking-wider block px-1">Other Categories</span>
-                      {leftovers.map((f: any) => (
-                        <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-0.5 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={department.includes(f.label)}
-                              onChange={() => toggleArrayFilter(department, f.label, setDepartment)}
-                              className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span>{f.label}</span>
-                          </div>
-                          <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                            {f.count}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
+                const isOpen = openDeptCategories['Other Categories'] ?? false;
+                const isExpanded = expandedDeptCategories['Other Categories'] ?? false;
+                const visibleLeftovers = isExpanded ? leftovers : leftovers.slice(0, 5);
+
+                return (
+                  <div className="bg-[#090d16]/60 border border-[#243147]/50 rounded-xl p-2 space-y-1.5">
+                    <button
+                      onClick={() => toggleDeptCategoryOpen('Other Categories')}
+                      className="w-full flex items-center justify-between text-left cursor-pointer group/cat px-1 py-0.5"
+                    >
+                      <span className="text-[10px] font-extrabold text-[#94a3b8] group-hover/cat:text-white uppercase tracking-wider flex items-center gap-1.5">
+                        {isOpen ? <ChevronDown className="w-3 h-3 text-indigo-400" /> : <ChevronRight className="w-3 h-3 text-[#64748b]" />}
+                        Other Categories
+                      </span>
+                      <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
+                        {leftovers.reduce((acc: number, d: any) => acc + d.count, 0)}
+                      </span>
+                    </button>
+
+                    {isOpen && (
+                      <div className="space-y-0.5 pt-1 pl-1.5 transition-all">
+                        {visibleLeftovers.map((f: any) => (
+                          <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <input
+                                type="checkbox"
+                                checked={department.includes(f.label)}
+                                onChange={() => toggleArrayFilter(department, f.label, setDepartment)}
+                                className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                              />
+                              <span className="truncate">{f.label}</span>
+                            </div>
+                            <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                              {f.count}
+                            </span>
+                          </label>
+                        ))}
+
+                        {leftovers.length > 5 && (
+                          <button
+                            onClick={() => toggleDeptCategoryExpand('Other Categories')}
+                            className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
+                          >
+                            {isExpanded ? 'Show Less' : `Show More (${leftovers.length - 5})`}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
