@@ -1763,6 +1763,7 @@ export const JobExplorer: React.FC = () => {
             <div className="space-y-3">
               {visibleJobs.map(({ job }: any) => {
                 const isSelected = selectedJobHash === job.jobHash;
+                const isBookmarked = bookmarkedJobs.has(job.jobHash);
                 const postedDateStr = (() => {
                   const val = job.datePosted || job.firstSeen || job.created_at;
                   if (!val) return 'Recently';
@@ -1771,20 +1772,81 @@ export const JobExplorer: React.FC = () => {
                   return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString();
                 })();
 
+                const rawApplyUrl = job.applyUrl || job.jobUrl || job.postingUrl || job.applicationUrl || job.url;
+                const isExpired = job.status === 'Expired' || job.status === 'Removed' || job.status === 'Archived' || job.activeStatus === 'Expired' || !rawApplyUrl;
+
                 return (
                   <div
                     key={job.jobHash}
                     onClick={() => setSelectedJobHash(job.jobHash)}
-                    className={`bg-[#111827] border rounded-xl p-4 transition-all duration-200 cursor-pointer space-y-1.5 shadow-sm ${
+                    className={`bg-[#111827] border rounded-xl p-4 transition-all duration-200 cursor-pointer space-y-3 shadow-sm ${
                       isSelected 
                         ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-[#162035]' 
                         : 'border-[#243147] hover:border-indigo-500/50 hover:bg-[#141d2f]'
                     }`}
                   >
-                    <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{job.company}</div>
-                    <div className="text-sm font-bold text-white leading-snug">{job.title}</div>
-                    <div className="text-xs text-[#94a3b8] font-medium">Experience: {job.experienceLevel || job.experience || '2–5 Years'}</div>
-                    <div className="text-xs text-[#64748b]">Posted: {postedDateStr}</div>
+                    <div>
+                      <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{job.company}</div>
+                      <div className="text-sm font-bold text-white leading-snug mt-0.5">{job.title}</div>
+                      <div className="text-xs text-[#94a3b8] font-medium mt-1">Experience: {job.experienceLevel || job.experience || '2–5 Years'}</div>
+                      <div className="text-xs text-[#64748b]">Posted: {postedDateStr}</div>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#243147]/60 flex items-center justify-between gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedJobHash(job.jobHash);
+                        }}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                          isSelected
+                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
+                            : 'bg-[#090d16] hover:bg-[#162135] text-[#94a3b8] hover:text-white border border-[#243147]'
+                        }`}
+                      >
+                        View Details
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(job.jobHash, e);
+                        }}
+                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                          isBookmarked
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                            : 'bg-[#090d16] hover:bg-[#162135] text-[#94a3b8] hover:text-white border border-[#243147]'
+                        }`}
+                      >
+                        {isBookmarked ? 'Saved' : 'Save'}
+                      </button>
+
+                      {isExpired ? (
+                        <button
+                          disabled
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-rose-950/40 border border-rose-900/50 text-rose-400 cursor-not-allowed text-center"
+                        >
+                          Apply
+                        </button>
+                      ) : (
+                        <a
+                          href={rawApplyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer text-center shadow-sm"
+                        >
+                          Apply
+                        </a>
+                      )}
+                    </div>
+
+                    {isExpired && (
+                      <p className="text-[10px] text-rose-400 font-medium">
+                        This job posting is no longer available.
+                      </p>
+                    )}
                   </div>
                 );
               })}
@@ -1819,6 +1881,9 @@ export const JobExplorer: React.FC = () => {
                 </div>
               );
             }
+
+            const rawApplyUrl = selectedJobItem.applyUrl || selectedJobItem.jobUrl || selectedJobItem.postingUrl || selectedJobItem.applicationUrl || selectedJobItem.url;
+            const isExpired = selectedJobItem.status === 'Expired' || selectedJobItem.status === 'Removed' || selectedJobItem.status === 'Archived' || selectedJobItem.activeStatus === 'Expired' || !rawApplyUrl;
 
             const salaryText = (() => {
               const sal = selectedJobItem.salary || selectedJobItem.salaryRange;
@@ -1888,15 +1953,13 @@ export const JobExplorer: React.FC = () => {
 
                 {/* Primary Action Buttons */}
                 <div className="grid grid-cols-3 gap-2">
-                  <a
-                    href={selectedJobItem.url || selectedJobItem.applyUrl || '#'}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    onClick={() => setSelectedJobHash(selectedJobItem.jobHash)}
                     className="flex items-center justify-center gap-1.5 p-3 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] rounded-xl text-white font-bold text-xs transition duration-200 cursor-pointer text-center"
                   >
                     <ExternalLink className="w-4 h-4 text-cyan-400" />
                     View Details
-                  </a>
+                  </button>
 
                   <button
                     onClick={(e) => toggleBookmark(selectedJobItem.jobHash, e)}
@@ -1910,14 +1973,31 @@ export const JobExplorer: React.FC = () => {
                     {isBookmarked ? 'Saved' : 'Save'}
                   </button>
 
-                  <button
-                    onClick={() => navigate('/career-assistant', { state: { job: selectedJobItem } })}
-                    className="flex items-center justify-center gap-1.5 p-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-lg shadow-indigo-500/20"
-                  >
-                    <Sparkles className="w-4 h-4 text-yellow-300" />
-                    Apply
-                  </button>
+                  {isExpired ? (
+                    <button
+                      disabled
+                      className="flex items-center justify-center gap-1.5 p-3 bg-rose-950/40 border border-rose-900/50 text-rose-400 font-bold text-xs rounded-xl cursor-not-allowed text-center"
+                    >
+                      Unavailable
+                    </button>
+                  ) : (
+                    <a
+                      href={rawApplyUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 p-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-lg shadow-indigo-500/20 text-center"
+                    >
+                      <Sparkles className="w-4 h-4 text-yellow-300" />
+                      Apply
+                    </a>
+                  )}
                 </div>
+
+                {isExpired && (
+                  <p className="text-xs text-rose-400 font-medium">
+                    This job posting is no longer available.
+                  </p>
+                )}
 
                 {/* Secondary Action Grid */}
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#243147]">
