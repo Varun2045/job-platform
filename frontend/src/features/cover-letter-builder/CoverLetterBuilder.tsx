@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare, Download, Eye, Sparkles, Save, Trash2, AlertCircle, RefreshCw, Mail } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 type Tone = 'professional' | 'formal' | 'startup' | 'big-tech';
 
@@ -24,6 +25,7 @@ const TONES: { id: Tone; name: string; description: string }[] = [
 
 export const CoverLetterBuilder: React.FC = () => {
   const queryClient = useQueryClient();
+  const { showToast, confirmAction } = useToast();
   const [activeTab, setActiveTab] = useState<'build' | 'saved'>('build');
   const [selectedTone, setSelectedTone] = useState<Tone>('professional');
   const [showPreview, setShowPreview] = useState(false);
@@ -61,9 +63,9 @@ export const CoverLetterBuilder: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saved-cover-letters'] });
-      alert('Cover letter saved successfully!');
+      showToast('✓ Cover letter saved successfully.', 'success');
     },
-    onError: () => alert('Failed to save cover letter')
+    onError: () => showToast('✕ Failed to save cover letter.', 'error')
   });
 
   // Delete cover letter mutation
@@ -75,15 +77,15 @@ export const CoverLetterBuilder: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['saved-cover-letters'] });
-      alert('Cover letter deleted successfully!');
+      showToast('✓ Cover letter deleted successfully.', 'success');
     },
-    onError: () => alert('Failed to delete cover letter')
+    onError: () => showToast('✕ Failed to delete cover letter.', 'error')
   });
 
   // Generate AI cover letter
   const generateCoverLetter = async () => {
     if (!coverLetterData.companyName || !coverLetterData.jobTitle) {
-      alert('Please enter company name and job title');
+      showToast('⚠ Please enter company name and job title.', 'warning');
       return;
     }
 
@@ -103,10 +105,10 @@ export const CoverLetterBuilder: React.FC = () => {
         const data = await res.json();
         setCoverLetterData({ ...coverLetterData, content: data.content || '' });
       } else {
-        alert('Failed to generate cover letter');
+        showToast('✕ Failed to generate cover letter.', 'error');
       }
     } catch (error) {
-      alert('Error generating cover letter');
+      showToast('✕ Error generating cover letter.', 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -131,10 +133,10 @@ export const CoverLetterBuilder: React.FC = () => {
         const data = await res.json();
         setCoverLetterData({ ...coverLetterData, content: data.content || '' });
       } else {
-        alert('Failed to regenerate cover letter');
+        showToast('✕ Failed to regenerate cover letter.', 'error');
       }
     } catch (error) {
-      alert('Error regenerating cover letter');
+      showToast('✕ Error regenerating cover letter.', 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -160,7 +162,7 @@ export const CoverLetterBuilder: React.FC = () => {
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      alert('Failed to export PDF');
+      showToast('✕ Failed to export PDF.', 'error');
     }
   };
 
@@ -185,7 +187,7 @@ export const CoverLetterBuilder: React.FC = () => {
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      alert('Failed to export LaTeX');
+      showToast('✕ Failed to export LaTeX.', 'error');
     }
   };
 
@@ -378,8 +380,14 @@ export const CoverLetterBuilder: React.FC = () => {
                     <MessageSquare className="w-4 h-4" /> Load
                   </button>
                   <button
-                    onClick={() => { if (window.confirm(`Delete "${coverLetter.name}"?`)) deleteMutation.mutate(coverLetter.id!); }}
-                    className="p-2 hover:bg-red-500/10 rounded text-red-400"
+                    onClick={() => {
+                      confirmAction({
+                        title: 'Delete Cover Letter',
+                        message: `Are you sure you want to delete "${coverLetter.name}"? This action cannot be undone.`,
+                        onConfirm: () => deleteMutation.mutate(coverLetter.id!)
+                      });
+                    }}
+                    className="p-2 hover:bg-red-500/10 rounded text-red-400 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Search, Star, Code, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 interface LanguageStat {
   name: string;
@@ -23,6 +24,7 @@ interface AnalysisResult {
 }
 
 export const GithubAnalyzer: React.FC = () => {
+  const { showToast } = useToast();
   const [username, setUsername] = useState('');
   const [result, setResult] = useState<AnalysisResult | null>(null);
 
@@ -40,7 +42,7 @@ export const GithubAnalyzer: React.FC = () => {
       setResult(data);
     },
     onError: (err: any) => {
-      alert(`GitHub analysis failed: ${err.message}`);
+      showToast(`✕ GitHub analysis failed: ${err.message}`, 'error');
     }
   });
 

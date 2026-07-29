@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Download, Clock, Activity, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight, Mail, Bell } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 type Tab = 'monitoring' | 'email' | 'calendar';
 
@@ -53,6 +54,7 @@ export const AutomationHub: React.FC<{ tab?: Tab }> = ({ tab = 'monitoring' }) =
 
 // Component functions for each tab
 const JobMonitoring: React.FC = () => {
+  const { showToast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
@@ -115,12 +117,12 @@ const JobMonitoring: React.FC = () => {
       const res = await fetch('/api/monitoring/run', { method: 'POST' });
       if (res.ok) {
         refetch();
-        alert('Scrapers started successfully');
+        showToast('✓ Scrapers started successfully.', 'success');
       } else {
-        alert('Failed to start scrapers');
+        showToast('✕ Failed to start scrapers.', 'error');
       }
     } catch (error) {
-      alert('Error starting scrapers');
+      showToast('✕ Error starting scrapers.', 'error');
     } finally {
       setIsRunning(false);
     }
@@ -131,12 +133,12 @@ const JobMonitoring: React.FC = () => {
       const res = await fetch('/api/monitoring/pause', { method: 'POST' });
       if (res.ok) {
         setIsPaused(true);
-        alert('Scrapers paused');
+        showToast('ℹ Scrapers paused.', 'info');
       } else {
-        alert('Failed to pause scrapers');
+        showToast('✕ Failed to pause scrapers.', 'error');
       }
     } catch (error) {
-      alert('Error pausing scrapers');
+      showToast('✕ Error pausing scrapers.', 'error');
     }
   };
 
@@ -145,12 +147,12 @@ const JobMonitoring: React.FC = () => {
       const res = await fetch('/api/monitoring/resume', { method: 'POST' });
       if (res.ok) {
         setIsPaused(false);
-        alert('Scrapers resumed');
+        showToast('✓ Scrapers resumed.', 'success');
       } else {
-        alert('Failed to resume scrapers');
+        showToast('✕ Failed to resume scrapers.', 'error');
       }
     } catch (error) {
-      alert('Error resuming scrapers');
+      showToast('✕ Error resuming scrapers.', 'error');
     }
   };
 
@@ -162,10 +164,10 @@ const JobMonitoring: React.FC = () => {
         setLogs(logsData);
         setShowLogs(true);
       } else {
-        alert('Failed to load logs');
+        showToast('✕ Failed to load logs.', 'error');
       }
     } catch (error) {
-      alert('Error loading logs');
+      showToast('✕ Error loading logs.', 'error');
     }
   };
 

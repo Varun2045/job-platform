@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake, CheckCircle2 } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 type Tab = 'contacts' | 'pipeline' | 'messages' | 'followup' | 'analytics';
 
@@ -110,10 +111,10 @@ export const Referrals: React.FC = () => {
 };
 
 const CompanyContacts: React.FC = () => {
+  const { showToast } = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingContact, setEditingContact] = useState<ReferralContact | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -128,11 +129,6 @@ const CompanyContacts: React.FC = () => {
     tags: '',
     connectionStatus: 'Potential Contact' as ReferralContact['connectionStatus']
   });
-
-  const showToast = (message: string) => {
-    setToast({ message, type: 'success' });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const openGmailCompose = (contact: ReferralContact) => {
     const cleanEmail = extractCleanEmail(contact.email || '');
@@ -281,7 +277,7 @@ const CompanyContacts: React.FC = () => {
 
   const handleCSVExport = () => {
     if (!referrals || referrals.length === 0) {
-      alert('No contacts to export.');
+      showToast('⚠ No contacts to export.', 'warning');
       return;
     }
 
@@ -329,14 +325,6 @@ const CompanyContacts: React.FC = () => {
 
   return (
     <div className="space-y-6 relative">
-      {/* Toast Notification Banner */}
-      {toast && (
-        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-md transition-all text-xs font-bold animate-in fade-in slide-in-from-top-3 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toast.message}</span>
-        </div>
-      )}
-
       {/* Header and Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -1066,6 +1054,7 @@ const ResumeSelector: React.FC<ResumeSelectorProps> = ({ value, onChange, resume
 };
 
 const AIMessageGenerator: React.FC = () => {
+  const { showToast } = useToast();
   const { data: resumes } = useQuery({
     queryKey: ['resumes'],
     queryFn: async () => {
@@ -1175,7 +1164,7 @@ const AIMessageGenerator: React.FC = () => {
 
   const generateMessage = async () => {
     if (['referral', 'cold-email', 'recruiter'].includes(messageType) && !context.resumeVersion) {
-      alert("Please select or upload a resume before generating a message.");
+      showToast("⚠ Please select or upload a resume before generating a message.", "warning");
       return;
     }
 

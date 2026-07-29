@@ -6,6 +6,7 @@ import {
   BarChart3, FileCode, Archive
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 export interface PortfolioSection {
   id: string;
@@ -22,6 +23,7 @@ interface ToastNotification {
 }
 
 export const ProfileBuilder: React.FC = () => {
+  const { showToast, confirmAction } = useToast();
   const [theme, setTheme] = useState<'dark' | 'light' | 'indigo' | 'emerald' | 'rose' | 'amber' | 'custom'>('dark');
   const [customColor, setCustomColor] = useState('#3b82f6');
   const [profileList, setProfileList] = useState<{ id: string; label: string }[]>([
@@ -703,7 +705,7 @@ export const ProfileBuilder: React.FC = () => {
                     if (!customProfileName.trim()) return;
                     const id = customProfileName.trim().toLowerCase().replace(/\s+/g, '-');
                     if (profileList.some(p => p.id === id)) {
-                      alert('Profile already exists!');
+                      showToast('⚠ Profile already exists!', 'warning');
                       return;
                     }
                     const newProfile = { id, label: customProfileName.trim() };
@@ -788,11 +790,15 @@ export const ProfileBuilder: React.FC = () => {
                           {s.type === 'custom' && (
                             <button
                               onClick={() => {
-                                if (confirm('Are you sure you want to delete this custom section?')) {
-                                  const updated = sections.filter(sec => sec.id !== s.id);
-                                  setSections(updated);
-                                  if (editingSectionId === s.id) setEditingSectionId(null);
-                                }
+                                confirmAction({
+                                  title: 'Delete Custom Section',
+                                  message: 'Are you sure you want to delete this custom section?',
+                                  onConfirm: () => {
+                                    const updated = sections.filter(sec => sec.id !== s.id);
+                                    setSections(updated);
+                                    if (editingSectionId === s.id) setEditingSectionId(null);
+                                  }
+                                });
                               }}
                               className="p-1 rounded hover:bg-[#232d3f] text-red-400 hover:text-red-500 transition cursor-pointer"
                               title="Delete Section"

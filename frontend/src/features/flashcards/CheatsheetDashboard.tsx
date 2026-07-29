@@ -8,6 +8,7 @@ import {
   Bookmark, Download
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 interface Concept {
   name: string;
@@ -99,6 +100,7 @@ interface LibraryItem {
 }
 
 export const CheatsheetDashboard: React.FC = () => {
+  const { showToast } = useToast();
   const [topicInput, setTopicInput] = useState('');
   const [difficultyMode, setDifficultyMode] = useState<'Intermediate' | 'Beginner' | 'Advanced'>('Intermediate');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -259,7 +261,7 @@ export const CheatsheetDashboard: React.FC = () => {
           throw new Error(data.error || 'Invalid API response');
         }
       } catch (err: any) {
-        alert(`Failed to load ${tab} data: ${err.message}`);
+        showToast(`✕ Failed to load ${tab} data: ${err.message}`, 'error');
       } finally {
         setIsLoadingTab(false);
       }
@@ -277,7 +279,7 @@ export const CheatsheetDashboard: React.FC = () => {
   const handleGenerate = async (topic: string, diffOverride?: 'Beginner' | 'Advanced') => {
     const targetTopic = topic.trim();
     if (!targetTopic) {
-      alert('Please enter an interview topic');
+      showToast('⚠ Please enter an interview topic.', 'warning');
       return;
     }
 
@@ -295,7 +297,10 @@ export const CheatsheetDashboard: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: targetTopic,
-          options: { mode: 'core', difficulty }
+          options: {
+            difficulty,
+            company: targetCompany
+          }
         })
       });
 
@@ -303,6 +308,7 @@ export const CheatsheetDashboard: React.FC = () => {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || `Server returned status ${res.status}`);
       }
+
       const data = await res.json();
       if (data.success && data.cheatsheet) {
         setCheatsheetData(data.cheatsheet);
@@ -311,7 +317,7 @@ export const CheatsheetDashboard: React.FC = () => {
         throw new Error(data.error || 'Invalid API response structure');
       }
     } catch (err: any) {
-      alert(`Generation failed: ${err.message}`);
+      showToast(`✕ Generation failed: ${err.message}`, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -351,7 +357,7 @@ export const CheatsheetDashboard: React.FC = () => {
         throw new Error(data.error || 'Failed to fetch options data');
       }
     } catch (err: any) {
-      alert(`AI Sub-generation failed: ${err.message}`);
+      showToast(`✕ AI Sub-generation failed: ${err.message}`, 'error');
     } finally {
       setSubLoading(false);
     }
@@ -362,7 +368,7 @@ export const CheatsheetDashboard: React.FC = () => {
     if (!cheatsheetData) return;
     const exists = library.find(item => item.topic.toLowerCase() === cheatsheetData.title.toLowerCase());
     if (exists) {
-      alert('This topic is already saved in your Library.');
+      showToast('⚠ This topic is already saved in your Library.', 'warning');
       return;
     }
 
@@ -373,7 +379,7 @@ export const CheatsheetDashboard: React.FC = () => {
       data: cheatsheetData
     };
     saveLibraryToDisk([newItem, ...library]);
-    alert('Study guide saved to your library successfully!');
+    showToast('✓ Study guide saved to your library successfully.', 'success');
   };
 
   // Load from library

@@ -7,6 +7,7 @@ import { PreviewHeader } from "./components/PreviewHeader";
 import { useResumePreview } from "./hooks/useResumePreview";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useAutosave } from "./hooks/useAutosave";
+import { useToast } from "../../../context/ToastContext.js";
 
 export type ResumeType = "backend" | "fullstack" | "ai-ml" | "data" | "custom";
 
@@ -666,6 +667,7 @@ function parseLatexToResumeData(latex: string): ResumeData {
 }
 
 export const ResumeBuilder: React.FC = () => {
+  const { showToast } = useToast();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1200);
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
@@ -824,7 +826,7 @@ export const ResumeBuilder: React.FC = () => {
       if (!res.ok) throw new Error("Failed to save resume");
       return res.json();
     },
-    onError: () => alert("Failed to save resume"),
+    onError: () => showToast("✕ Failed to save resume.", "error"),
   });
 
   // Autosave configuration
@@ -922,7 +924,7 @@ export const ResumeBuilder: React.FC = () => {
         URL.revokeObjectURL(url);
       }
     } catch {
-      alert("Failed to export PDF");
+      showToast("✕ Failed to export PDF.", "error");
     } finally {
       setIsDownloadingPdf(false);
     }

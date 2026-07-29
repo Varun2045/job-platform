@@ -30,6 +30,8 @@ import { AnalyticsDashboardView } from './features/analytics/AnalyticsDashboardV
 import { ExportCenterView } from './features/export/ExportCenterView.js';
 import { AtsExplorerView } from './features/ats/AtsExplorerView.js';
 
+import { ToastProvider } from './context/ToastContext.js';
+
 const queryClient = new QueryClient();
 
 // Override window.fetch at the module level to ensure it is active immediately on mount
@@ -81,67 +83,72 @@ export const App: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!token) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <ToastProvider>
+        <Login onLogin={handleLogin} />
+      </ToastProvider>
+    );
   }
 
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Router>
-          <div className="flex flex-col md:flex-row bg-[#0b0f19] h-screen text-white overflow-hidden">
-            {/* Mobile Header Bar */}
-            <div className="md:hidden h-14 bg-[#131a26] border-b border-[#232d3f] px-4 flex items-center justify-between shrink-0 z-30">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="p-2 hover:bg-[#1b2535] rounded-xl text-[#94a3b8] hover:text-white transition-colors cursor-pointer"
-                aria-label="Open Sidebar Menu"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-              <span className="font-bold text-base bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                Job Monitor
-              </span>
-              <div className="w-10 h-10 flex items-center justify-center" /> {/* Balance placeholder */}
-            </div>
+        <ToastProvider>
+          <Router>
+            <div className="flex flex-col md:flex-row bg-[#0b0f19] h-screen text-white overflow-hidden">
+              {/* Mobile Header Bar */}
+              <div className="md:hidden h-14 bg-[#131a26] border-b border-[#232d3f] px-4 flex items-center justify-between shrink-0 z-30">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="p-2 hover:bg-[#1b2535] rounded-xl text-[#94a3b8] hover:text-white transition-colors cursor-pointer"
+                  aria-label="Open Sidebar Menu"
+                >
+                  <Menu className="w-6 h-6" />
+                </button>
+                <span className="font-bold text-[#e2e8f0] text-sm flex items-center gap-2">
+                  JobSearch OS
+                </span>
+              </div>
 
-            <Sidebar onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            
-            <main className="flex-1 overflow-y-auto min-h-0 relative">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/explorer" element={<JobExplorer />} />
-                <Route path="/tracker" element={<KanbanTracker />} />
-                <Route path="/referrals" element={<Referrals />} />
-                <Route path="/resumes" element={<ResumeManager />} />
-                <Route path="/cover-letter-builder" element={<CoverLetterBuilder />} />
-                <Route path="/companies" element={<Navigate to="/ats-explorer" replace />} />
-                <Route path="/scraper-builder" element={<Navigate to="/ats-explorer" replace />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/resume-builder" element={<ResumeBuilder />} />
-                <Route path="/career-assistant" element={<AICareerAssistant />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="/automation" element={<AutomationHub tab="monitoring" />} />
-                <Route path="/automation/monitoring" element={<AutomationHub tab="monitoring" />} />
-                <Route path="/automation/email" element={<AutomationHub tab="email" />} />
-                <Route path="/automation/calendar" element={<AutomationHub tab="calendar" />} />
-                <Route path="/career-copilot" element={<CopilotDashboard />} />
-                <Route path="/offer-comparison" element={<OfferComparison />} />
-                <Route path="/github-analyzer" element={<GithubAnalyzer />} />
-                <Route path="/cheatsheets" element={<CheatsheetDashboard />} />
-                <Route path="/flashcards" element={<FlashcardDashboard />} />
-                <Route path="/flashcard-achievements" element={<FlashcardAchievements />} />
-                <Route path="/ats-heatmap" element={<AtsHeatmapView />} />
-                <Route path="/crm" element={<Navigate to="/referrals" replace />} />
-                <Route path="/notification-settings" element={<NotificationSettingsView />} />
-                <Route path="/analytics" element={<AnalyticsDashboardView />} />
-                <Route path="/export-center" element={<ExportCenterView />} />
-                <Route path="/ats-explorer" element={<AtsExplorerView />} />
-                <Route path="/profile-builder" element={<ProfileBuilder />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-          </div>
-        </Router>
+              {/* Sidebar */}
+              <Sidebar
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                onLogout={handleLogout}
+              />
+
+              {/* Main Workspace Area */}
+              <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#0b0f19] text-white">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/explorer" element={<JobExplorer />} />
+                  <Route path="/tracker" element={<KanbanTracker />} />
+                  <Route path="/resumes" element={<ResumeManager />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/admin" element={<AdminPanel />} />
+                  <Route path="/resume-builder" element={<ResumeBuilder />} />
+                  <Route path="/automation" element={<AutomationHub />} />
+                  <Route path="/referrals" element={<Referrals />} />
+                  <Route path="/copilot" element={<CopilotDashboard />} />
+                  <Route path="/career-assistant" element={<AICareerAssistant />} />
+                  <Route path="/cover-letter" element={<CoverLetterBuilder />} />
+                  <Route path="/offers" element={<OfferComparison />} />
+                  <Route path="/github" element={<GithubAnalyzer />} />
+                  <Route path="/flashcards" element={<FlashcardDashboard />} />
+                  <Route path="/flashcard-achievements" element={<FlashcardAchievements />} />
+                  <Route path="/cheatsheets" element={<CheatsheetDashboard />} />
+                  <Route path="/ats-heatmap" element={<AtsHeatmapView />} />
+                  <Route path="/notification-settings" element={<NotificationSettingsView />} />
+                  <Route path="/analytics" element={<AnalyticsDashboardView />} />
+                  <Route path="/export-center" element={<ExportCenterView />} />
+                  <Route path="/ats-explorer" element={<AtsExplorerView />} />
+                  <Route path="/profile-builder" element={<ProfileBuilder />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </main>
+            </div>
+          </Router>
+        </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

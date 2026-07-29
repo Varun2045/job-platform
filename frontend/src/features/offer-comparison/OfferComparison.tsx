@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DollarSign, Trash2, Plus, Scale, Upload, Sparkles, FileText, GripVertical, X } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 interface JobOffer {
   id: string;
@@ -24,6 +25,7 @@ const CURRENCIES = [
 ];
 
 export const OfferComparison: React.FC = () => {
+  const { showToast } = useToast();
   const [currencyCode, setCurrencyCode] = useState<string>(() => localStorage.getItem('offer_currency') || 'USD');
   const activeCurrency = CURRENCIES.find(c => c.code === currencyCode) || CURRENCIES[0];
 
@@ -311,7 +313,7 @@ export const OfferComparison: React.FC = () => {
   const handleAddOffer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !company || !baseSalary) {
-      alert('Please fill out Name, Company, and Base Salary');
+      showToast('⚠ Please fill out Name, Company, and Base Salary.', 'warning');
       return;
     }
 

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CompanyInsightsPanel } from './CompanyInsightsPanel.js';
 import { Trash2, Pencil, Check, X } from 'lucide-react';
+import { useToast } from '../../context/ToastContext.js';
 
 export const CompanyMonitor: React.FC = () => {
   const queryClient = useQueryClient();
+  const { showToast, confirmAction } = useToast();
   const [selectedComp, setSelectedComp] = useState<{ id: string; name: string } | null>(null);
 
   // Add Company Form State
@@ -112,9 +114,9 @@ export const CompanyMonitor: React.FC = () => {
       setNewAts('none'); setNewEndpoint(''); setNewProfiles('backend');
       setNewEnableResume(true);
       setShowAddForm(false);
-      alert('Company scraper registered successfully!');
+      showToast('✓ Company scraper registered successfully.', 'success');
     },
-    onError: (err: any) => alert(`Error: ${err.message}`)
+    onError: (err: any) => showToast(`✕ Error: ${err.message}`, 'error')
   });
 
   if (isLoading) {
@@ -359,7 +361,13 @@ export const CompanyMonitor: React.FC = () => {
                       {isEditing ? <X className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
                     </button>
                     <button
-                      onClick={() => { if (window.confirm(`Delete ${c.name} scraper? This cannot be undone.`)) deleteMutation.mutate(c.id); }}
+                      onClick={() => {
+                        confirmAction({
+                          title: 'Delete Company Scraper',
+                          message: `Are you sure you want to delete ${c.name} scraper? This action cannot be undone.`,
+                          onConfirm: () => deleteMutation.mutate(c.id)
+                        });
+                      }}
                       className="p-1 hover:bg-[#232d3f] rounded text-[#94a3b8] hover:text-red-400 cursor-pointer transition-colors"
                       title="Delete company"
                     >

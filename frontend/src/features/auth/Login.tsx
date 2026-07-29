@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Lock, Mail, AlertCircle, User } from 'lucide-react';
+import { useToast } from '../../context/ToastContext.js';
 
 interface LoginProps {
   onLogin: (token: string, email: string) => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const { showToast } = useToast();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -43,7 +45,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const handleOAuth = async (provider: 'google' | 'github') => {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocalhost) {
-      alert(`${provider} login initiated. Redirecting to OAuth callback...`);
+      showToast(`ℹ ${provider} login initiated. Redirecting to OAuth callback...`, 'info');
       onLogin(`mock-${provider}-token`, `${provider}-user@jobmonitor.com`);
       return;
     }

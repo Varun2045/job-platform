@@ -3,10 +3,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, ShieldAlert, Award, FileText, Calendar, Users, CheckCircle2, AlertTriangle, XCircle, Search, Mail, Handshake, Play, MessageSquare, TrendingUp, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const { data, isLoading, error } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
@@ -71,14 +73,14 @@ export const Dashboard: React.FC = () => {
     try {
       const res = await fetch('/api/monitoring/trigger', { method: 'POST' });
       if (res.ok) {
-        alert('🚀 Manual scraper run triggered successfully! Scrapers are now crawling job boards.');
+        showToast('🚀 Manual scraper run triggered successfully! Scrapers are now crawling job boards.', 'info');
         queryClient.invalidateQueries();
       } else {
         const body = await res.json().catch(() => ({}));
-        alert(`Notice: ${body.message || body.error || 'Scrapers run started'}`);
+        showToast(`Notice: ${body.message || body.error || 'Scrapers run started'}`, 'info');
       }
     } catch (err: any) {
-      alert('Triggered scraper run. Monitoring live status in Automation Hub.');
+      showToast('Triggered scraper run. Monitoring live status in Automation Hub.', 'info');
     }
   };
 

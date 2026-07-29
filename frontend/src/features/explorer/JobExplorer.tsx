@@ -11,6 +11,7 @@ import { ResumeTailoringModal } from './ResumeTailoringModal.js';
 import { InterviewPrepPanel } from './InterviewPrepPanel.js';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 const expandLocationAliases = (locs: string[]) => {
   const result: string[] = [];
@@ -29,6 +30,7 @@ const expandLocationAliases = (locs: string[]) => {
 export const JobExplorer: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Saved Filters Helper for Persistence (Requirement 10)
@@ -333,7 +335,7 @@ export const JobExplorer: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['applications'] });
       setTrackNotes('');
-      alert('Application status tracked successfully!');
+      showToast('✓ Application status tracked successfully.', 'success');
     }
   });
 

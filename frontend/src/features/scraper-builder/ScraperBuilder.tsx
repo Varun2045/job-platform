@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Cpu, Terminal, Play, CheckCircle, List, Code, HelpCircle, Save, Clock } from 'lucide-react';
+import { useToast } from '../../context/ToastContext.js';
 
 export const ScraperBuilder: React.FC = () => {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'no-code' | 'selector'>('no-code');
 
   // No-Code Configurator States
@@ -112,7 +114,7 @@ export const ScraperBuilder: React.FC = () => {
       return res.json();
     },
     onSuccess: () => {
-      alert('Custom scraper successfully deployed to the background runner!');
+      showToast('✓ Custom scraper successfully deployed to the background runner!', 'success');
       // Reset form
       setCompanyName('');
       setBoardUrl('');
@@ -122,7 +124,7 @@ export const ScraperBuilder: React.FC = () => {
       setTestStats(null);
     },
     onError: (err: any) => {
-      alert(`Deployment failed: ${err.message}`);
+      showToast(`✕ Deployment failed: ${err.message}`, 'error');
     }
   });
 
@@ -145,13 +147,13 @@ export const ScraperBuilder: React.FC = () => {
       setSelectorMatches(data.preview || []);
     },
     onError: (err: any) => {
-      alert(`Parsing failed: ${err.message}`);
+      showToast(`✕ Parsing failed: ${err.message}`, 'error');
     }
   });
 
   const handleTestScrape = () => {
     if (!companyName || !boardUrl) {
-      alert('Please fill out Company Name and Job Board URL');
+      showToast('⚠ Please fill out Company Name and Job Board URL.', 'warning');
       return;
     }
     setScrapeLogs(['[INFO] Dispatching test scrape task to worker...']);
@@ -162,7 +164,7 @@ export const ScraperBuilder: React.FC = () => {
 
   const handleTestSelector = () => {
     if (!rawHtml || !titleSelector) {
-      alert('Please input HTML and at least a Title Selector');
+      showToast('⚠ Please input HTML and at least a Title Selector.', 'warning');
       return;
     }
     testSelectorMutation.mutate();

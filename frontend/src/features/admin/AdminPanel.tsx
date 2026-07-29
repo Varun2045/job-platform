@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Shield, Activity, Cpu, Database, Mail, RefreshCw, Download, Upload, Server, CheckCircle, ToggleRight, List, AlertTriangle } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 export const AdminPanel: React.FC = () => {
   const queryClient = useQueryClient();
+  const { showToast, confirmAction } = useToast();
   const [activeTab, setActiveTab] = useState<'health' | 'flags' | 'audits'>('health');
   const [importJson, setImportJson] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -117,7 +119,7 @@ export const AdminPanel: React.FC = () => {
       setTimeout(() => setSuccessMsg(''), 5000);
     },
     onError: (err: any) => {
-      alert(`Restore failed: ${err.message}`);
+      showToast(`✕ Restore failed: ${err.message}`, 'error');
     }
   });
 
@@ -445,9 +447,12 @@ export const AdminPanel: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
-                          if (window.confirm(`Are you sure you want to ${val ? 'disable' : 'enable'} "${f.label}"?`)) {
-                            toggleFlagMutation.mutate({ key: f.key, enabled: !val });
-                          }
+                          confirmAction({
+                            title: `${val ? 'Disable' : 'Enable'} Feature Flag`,
+                            message: `Are you sure you want to ${val ? 'disable' : 'enable'} "${f.label}"?`,
+                            confirmLabel: val ? 'Disable' : 'Enable',
+                            onConfirm: () => toggleFlagMutation.mutate({ key: f.key, enabled: !val })
+                          });
                         }}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition duration-200 cursor-pointer ${
                           val 
@@ -459,9 +464,12 @@ export const AdminPanel: React.FC = () => {
                       </button>
                       <button
                         onClick={() => {
-                          if (window.confirm(`Are you sure you want to rollback "${f.label}" to its default state?`)) {
-                            toggleFlagMutation.mutate({ key: f.key, enabled: true });
-                          }
+                          confirmAction({
+                            title: 'Rollback Feature Flag',
+                            message: `Are you sure you want to rollback "${f.label}" to its default state?`,
+                            confirmLabel: 'Rollback',
+                            onConfirm: () => toggleFlagMutation.mutate({ key: f.key, enabled: true })
+                          });
                         }}
                         className="px-3 py-1.5 bg-[#232d3f] hover:bg-[#1f2937] border border-[#232d3f] text-[#94a3b8] hover:text-white rounded-lg text-xs font-bold transition duration-200 cursor-pointer"
                       >

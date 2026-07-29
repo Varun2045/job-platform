@@ -3,9 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Save, Settings as SettingsIcon, Heart, User, Search, Trash2, Plus, Upload, Layout } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 export const Settings: React.FC = () => {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'searches'>('profile');
   const { register: registerProfile, handleSubmit: handleSubmitProfile, reset: resetProfile, setValue, watch } = useForm();
   const { register: registerExt, handleSubmit: handleSubmitExt, reset: resetExt } = useForm();
@@ -102,7 +104,7 @@ export const Settings: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      alert('Profile updated successfully!');
+      showToast('✓ Profile updated successfully.', 'success');
     }
   });
 
@@ -126,7 +128,7 @@ export const Settings: React.FC = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings-extended'] });
-      alert('Career preferences updated successfully!');
+      showToast('✓ Career preferences updated successfully.', 'success');
     }
   });
 

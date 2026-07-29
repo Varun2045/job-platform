@@ -5,6 +5,7 @@ import {
   ArrowLeft, ArrowRight, RotateCw, Filter, Search, Sparkles, BookOpen, Clock
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
+import { useToast } from '../../context/ToastContext.js';
 
 interface Flashcard {
   id: string;
@@ -28,6 +29,7 @@ interface FlashcardDeck {
 
 export const FlashcardDashboard: React.FC = () => {
   const queryClient = useQueryClient();
+  const { showToast, confirmAction } = useToast();
   
   // Dashboard navigation states
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
@@ -90,7 +92,7 @@ export const FlashcardDashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['flashcards'] });
       setSelectedDeckId(null);
       setIsStudyMode(false);
-      alert('Deck deleted successfully.');
+      showToast('✓ Deck deleted successfully.', 'success');
     }
   });
 
@@ -105,31 +107,20 @@ export const FlashcardDashboard: React.FC = () => {
     return ['All', ...Array.from(cats)];
   }, [decks]);
 
-  // Filter Decks
+  // Filtered Decks
   const filteredDecks = useMemo(() => {
     return decks.filter(deck => {
-      // 1. Search Query
-      const matchesSearch = deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = deck.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             deck.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // 2. Category Filter
       const matchesCategory = categoryFilter === 'All' || deck.category === categoryFilter;
-
-      // 3. Difficulty Filter (any card matches)
-      const matchesDifficulty = difficultyFilter === 'All' || 
-        deck.cards.some(c => c.difficulty === difficultyFilter.toLowerCase().replace(' ', '_'));
-
-      // 4. Mastery Filter
-      let matchesMastery = true;
-      if (masteryFilter !== 'All') {
-        const total = deck.cards.length;
-        const mastered = deck.cards.filter(c => c.masteryStatus === 'mastered').length;
-        const completionRate = total > 0 ? (mastered / total) * 100 : 0;
-
-        if (masteryFilter === 'completed') matchesMastery = completionRate === 100;
-        if (masteryFilter === 'in_progress') matchesMastery = completionRate > 0 && completionRate < 100;
-        if (masteryFilter === 'unstarted') matchesMastery = completionRate === 0;
-      }
+      
+      const matchesDifficulty = difficultyFilter === 'All' || deck.cards.some(c => c.difficulty === difficultyFilter);
+      
+      const matchesMastery = masteryFilter === 'All' || (
+        masteryFilter === 'Mastered' && deck.cards.every(c => c.masteryStatus === 'mastered')
+      ) || (
+        masteryFilter === 'Needs Practice' && deck.cards.some(c => c.masteryStatus === 'needs_practice')
+      );
 
       return matchesSearch && matchesCategory && matchesDifficulty && matchesMastery;
     });
@@ -139,11 +130,11 @@ export const FlashcardDashboard: React.FC = () => {
   const handleAiGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!generatorTopic.trim()) {
-      alert('Please enter a topic');
+      showToast('⚠ Please enter a topic.', 'warning');
       return;
     }
     if (!generatorCount) {
-      alert('Please enter a valid card count between 1 and 50');
+      showToast('⚠ Please enter a valid card count between 1 and 50.', 'warning');
       return;
     }
 
@@ -189,7 +180,7 @@ export const FlashcardDashboard: React.FC = () => {
         throw new Error(data.error || 'Failed to extract generated cards');
       }
     } catch (err: any) {
-      alert(`AI Generation failed: ${err.message}`);
+      showToast(`✕ AI Generation failed: ${err.message}`, 'error');
     } finally {
       setIsGenerating(false);
       setGenerationStep('');
@@ -252,22 +243,26 @@ export const FlashcardDashboard: React.FC = () => {
 
   const handleReattemptDeck = () => {
     if (!activeDeck) return;
-    if (!window.confirm('Are you sure you want to reset all answers and progress to reattempt this quiz?')) {
-      return;
-    }
-    const resetCards = activeDeck.cards.map(c => ({
-      ...c,
-      userAnswer: null,
-      masteryStatus: 'unstudied' as const
-    }));
-    
-    saveMutation.mutate({
-      ...activeDeck,
-      cards: resetCards
-    });
+    confirmAction({
+      title: 'Reset Quiz Progress',
+      message: 'Are you sure you want to reset all answers and progress to reattempt this quiz?',
+      confirmLabel: 'Reset',
+      onConfirm: () => {
+        const resetCards = activeDeck.cards.map(c => ({
+          ...c,
+          userAnswer: null,
+          masteryStatus: 'unstudied' as const
+        }));
+        
+        saveMutation.mutate({
+          ...activeDeck,
+          cards: resetCards
+        });
 
-    setCurrentCardIndex(0);
-    setIsFlipped(false);
+        setCurrentCardIndex(0);
+        setIsFlipped(false);
+      }
+    });
   };
 
   // Predefined prompt pills

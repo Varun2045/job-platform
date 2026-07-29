@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Plus, Save, Trash2, Eye, Edit3, BookOpen } from 'lucide-react';
+import { useToast } from '../../context/ToastContext.js';
 
 interface CheatSheet {
   id?: string;
@@ -14,6 +15,7 @@ interface CheatSheet {
 
 export const CheatSheetDashboard: React.FC = () => {
   const queryClient = useQueryClient();
+  const { showToast, confirmAction } = useToast();
   const [selectedSheetId, setSelectedSheetId] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(true);
 
@@ -48,10 +50,10 @@ export const CheatSheetDashboard: React.FC = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['cheat-sheets'] });
       setSelectedSheetId(data.cheatSheet.id);
-      alert('Cheat sheet successfully saved!');
+      showToast('✓ Cheat sheet saved successfully.', 'success');
     },
     onError: (err: any) => {
-      alert(`Save failed: ${err.message}`);
+      showToast(`✕ Save failed: ${err.message}`, 'error');
     }
   });
 
@@ -68,10 +70,10 @@ export const CheatSheetDashboard: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['cheat-sheets'] });
       setSelectedSheetId(null);
       handleNewSheet();
-      alert('Cheat sheet deleted.');
+      showToast('✓ Cheat sheet deleted successfully.', 'success');
     },
     onError: (err: any) => {
-      alert(`Delete failed: ${err.message}`);
+      showToast(`✕ Delete failed: ${err.message}`, 'error');
     }
   });
 
@@ -98,7 +100,7 @@ export const CheatSheetDashboard: React.FC = () => {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName.trim()) {
-      alert('Company Name is required');
+      showToast('⚠ Company Name is required.', 'warning');
       return;
     }
     saveMutation.mutate({
@@ -185,7 +187,13 @@ export const CheatSheetDashboard: React.FC = () => {
 
               {selectedSheetId && (
                 <button
-                  onClick={() => deleteMutation.mutate(selectedSheetId)}
+                  onClick={() => {
+                    confirmAction({
+                      title: 'Delete Cheat Sheet',
+                      message: 'Are you sure you want to delete this cheat sheet? This action cannot be undone.',
+                      onConfirm: () => deleteMutation.mutate(selectedSheetId)
+                    });
+                  }}
                   className="p-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg cursor-pointer transition"
                   title="Delete Sheet"
                 >
