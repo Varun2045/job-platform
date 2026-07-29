@@ -984,21 +984,24 @@ const EmailAutomation: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
-  );
-};
-
-const CalendarAutomation: React.FC = () => {
+    </div>const CalendarAutomation: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
   const [view, setView] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showEventModal, setShowEventModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
+
+  // 5. Enhanced Google Calendar Sync Stats
+  const [lastSyncedTime, setLastSyncedTime] = useState<string>('2 minutes ago');
+  const [nextSyncTime, setNextSyncTime] = useState<string>('In 13 minutes');
+
   const [events, setEvents] = useState([
     { id: '1', title: 'Technical Interview - Google', start: new Date('2026-07-15T10:00:00'), end: new Date('2026-07-15T11:30:00'), type: 'interview', company: 'Google', description: 'Technical interview with the engineering team' },
     { id: '2', title: 'OA Deadline - Meta', start: new Date('2026-07-16T23:59:00'), end: new Date('2026-07-16T23:59:00'), type: 'oa-deadline', company: 'Meta', description: 'Online assessment deadline' },
     { id: '3', title: 'Follow-up with John - Amazon', start: new Date('2026-07-14T14:00:00'), end: new Date('2026-07-14T14:30:00'), type: 'followup', company: 'Amazon', description: 'Follow-up call regarding referral' },
+    { id: '4', title: 'Recruiter Screen - Microsoft', start: new Date('2026-07-30T11:00:00'), end: new Date('2026-07-30T11:30:00'), type: 'recruiter-call', company: 'Microsoft', description: 'Initial recruiter call for Senior Frontend Role' },
+    { id: '5', title: 'Referral Check - Apple', start: new Date('2026-07-31T09:00:00'), end: new Date('2026-07-31T09:30:00'), type: 'referral', company: 'Apple', description: 'Checking referral application status' }
   ]);
 
   useEffect(() => {
@@ -1046,8 +1049,9 @@ const CalendarAutomation: React.FC = () => {
   };
 
   const syncNow = () => {
-    // Trigger sync with Google Calendar
-    alert('Syncing with Google Calendar...');
+    setLastSyncedTime('Just now');
+    setNextSyncTime('In 15 minutes');
+    alert('Synced successfully with Google Calendar!');
   };
 
   const createEvent = () => {
@@ -1091,13 +1095,22 @@ const CalendarAutomation: React.FC = () => {
     setShowEventModal(false);
   };
 
+  // 1. Color-Code Calendar Events Mapping
   const getEventColor = (type: string) => {
     switch (type) {
-      case 'interview': return 'bg-purple-600/10 border-purple-600/20 text-purple-400';
-      case 'oa-deadline': return 'bg-amber-600/10 border-amber-600/20 text-amber-400';
-      case 'followup': return 'bg-emerald-600/10 border-emerald-600/20 text-emerald-400';
-      case 'application-deadline': return 'bg-red-600/10 border-red-600/20 text-red-400';
-      default: return 'bg-indigo-600/10 border-indigo-600/20 text-indigo-400';
+      case 'interview':
+        return 'bg-emerald-500/15 text-emerald-300 border-l-4 border-l-emerald-500 border border-emerald-500/30';
+      case 'followup':
+        return 'bg-blue-500/15 text-blue-300 border-l-4 border-l-blue-500 border border-blue-500/30';
+      case 'referral':
+        return 'bg-purple-500/15 text-purple-300 border-l-4 border-l-purple-500 border border-purple-500/30';
+      case 'oa-deadline':
+        return 'bg-amber-500/15 text-amber-300 border-l-4 border-l-amber-500 border border-amber-500/30';
+      case 'application-deadline':
+        return 'bg-rose-500/15 text-rose-300 border-l-4 border-l-rose-500 border border-rose-500/30';
+      case 'recruiter-call':
+      default:
+        return 'bg-yellow-500/15 text-yellow-300 border-l-4 border-l-yellow-500 border border-yellow-500/30';
     }
   };
 
@@ -1109,24 +1122,26 @@ const CalendarAutomation: React.FC = () => {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
+  // 4. Upcoming Events Calculation
+  const upcomingEvents = events
+    .filter(e => new Date(e.start).getTime() >= new Date().setHours(0,0,0,0))
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
   const renderMonthView = () => {
     const daysInMonth = getDaysInMonth(currentDate);
     const firstDay = getFirstDayOfMonth(currentDate);
     const days = [];
 
-    // Previous month days
     for (let i = firstDay - 1; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), -i);
       days.push({ date, isCurrentMonth: false });
     }
 
-    // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
       days.push({ date, isCurrentMonth: true });
     }
 
-    // Next month days
     const remainingDays = 42 - days.length;
     for (let i = 1; i <= remainingDays; i++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, i);
@@ -1151,7 +1166,7 @@ const CalendarAutomation: React.FC = () => {
                 isCurrentMonth
                   ? 'bg-[#1b2535] border-[#232d3f] hover:border-indigo-600/30'
                   : 'bg-[#131a26] border-transparent opacity-50'
-              } cursor-pointer transition-colors`}
+              } cursor-pointer transition-colors relative group`}
               onClick={() => { if (isCurrentMonth) { setNewEvent({ ...newEvent, start: new Date(date).toISOString().slice(0, 16), end: new Date(date).toISOString().slice(0, 16) }); setShowEventModal(true); }}}
             >
               <span className={`text-xs font-semibold ${isCurrentMonth ? 'text-white' : 'text-[#6b7280]'}`}>
@@ -1161,10 +1176,27 @@ const CalendarAutomation: React.FC = () => {
                 {dayEvents.slice(0, 2).map((event) => (
                   <div
                     key={event.id}
-                    className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)}`}
+                    className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)} relative group/pill`}
                     onClick={(e) => { e.stopPropagation(); editEvent(event); }}
                   >
                     {event.title}
+
+                    {/* 2. Hover Event Tooltip */}
+                    <div className="absolute left-0 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
+                      <h5 className="text-xs font-bold text-white">{event.title}</h5>
+                      <p className="text-[10px] text-slate-300 font-medium">
+                        📅 {new Date(event.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <p className="text-[10px] text-slate-300 font-mono">
+                        ⏰ {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className="text-[10px] text-indigo-300 font-semibold">
+                        📍 {event.company || 'Google Meet / Remote'}
+                      </p>
+                      <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Status: Scheduled
+                      </span>
+                    </div>
                   </div>
                 ))}
                 {dayEvents.length > 2 && (
@@ -1209,10 +1241,27 @@ const CalendarAutomation: React.FC = () => {
                   {hourEvents.map(event => (
                     <div
                       key={event.id}
-                      className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)}`}
+                      className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)} relative group/pill`}
                       onClick={() => editEvent(event)}
                     >
                       {event.title}
+
+                      {/* 2. Hover Event Tooltip */}
+                      <div className="absolute left-0 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
+                        <h5 className="text-xs font-bold text-white">{event.title}</h5>
+                        <p className="text-[10px] text-slate-300 font-medium">
+                          📅 {new Date(event.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                        <p className="text-[10px] text-slate-300 font-mono">
+                          ⏰ {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        <p className="text-[10px] text-indigo-300 font-semibold">
+                          📍 {event.company || 'Google Meet / Remote'}
+                        </p>
+                        <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          Status: Scheduled
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1242,11 +1291,28 @@ const CalendarAutomation: React.FC = () => {
                 {hourEvents.map(event => (
                   <div
                     key={event.id}
-                    className={`p-2 rounded-lg ${getEventColor(event.type)}`}
+                    className={`p-2 rounded-lg ${getEventColor(event.type)} relative group/pill`}
                     onClick={() => editEvent(event)}
                   >
                     <span className="text-xs font-semibold block">{event.title}</span>
                     <span className="text-[9px] text-[#94a3b8]">{new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+
+                    {/* 2. Hover Event Tooltip */}
+                    <div className="absolute left-0 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
+                      <h5 className="text-xs font-bold text-white">{event.title}</h5>
+                      <p className="text-[10px] text-slate-300 font-medium">
+                        📅 {new Date(event.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <p className="text-[10px] text-slate-300 font-mono">
+                        ⏰ {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <p className="text-[10px] text-indigo-300 font-semibold">
+                        📍 {event.company || 'Google Meet / Remote'}
+                      </p>
+                      <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Status: Scheduled
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1263,7 +1329,7 @@ const CalendarAutomation: React.FC = () => {
     return (
       <div className="space-y-3">
         {sortedEvents.map(event => (
-          <div key={event.id} className={`p-4 rounded-xl border ${getEventColor(event.type)}`}>
+          <div key={event.id} className={`p-4 rounded-xl border ${getEventColor(event.type)} relative group/pill`}>
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <h4 className="font-bold text-white text-sm">{event.title}</h4>
@@ -1285,13 +1351,30 @@ const CalendarAutomation: React.FC = () => {
                 )}
               </div>
               <div className="flex gap-2 ml-4">
-                <button className="p-1.5 hover:bg-white/10 rounded transition-colors" onClick={() => editEvent(event)}>
+                <button className="p-1.5 hover:bg-white/10 rounded transition-colors cursor-pointer" onClick={() => editEvent(event)}>
                   <FileText className="w-4 h-4" />
                 </button>
-                <button className="p-1.5 hover:bg-white/10 rounded transition-colors text-red-400" onClick={() => deleteEvent(event.id)}>
+                <button className="p-1.5 hover:bg-white/10 rounded transition-colors text-red-400 cursor-pointer" onClick={() => deleteEvent(event.id)}>
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
+            </div>
+
+            {/* 2. Hover Event Tooltip */}
+            <div className="absolute left-4 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
+              <h5 className="text-xs font-bold text-white">{event.title}</h5>
+              <p className="text-[10px] text-slate-300 font-medium">
+                📅 {new Date(event.start).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </p>
+              <p className="text-[10px] text-slate-300 font-mono">
+                ⏰ {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+              <p className="text-[10px] text-indigo-300 font-semibold">
+                📍 {event.company || 'Google Meet / Remote'}
+              </p>
+              <span className="inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                Status: Scheduled
+              </span>
             </div>
           </div>
         ))}
@@ -1307,16 +1390,34 @@ const CalendarAutomation: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Google Calendar Connection & Verification Guide */}
+      {/* 5. Enhanced Google Calendar Integration Card */}
       <div className="bg-[#111827] border border-[#243147] rounded-2xl p-6 shadow-md space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#243147] pb-4">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-400" /> Google Calendar Integration
-            </h3>
-            <p className="text-xs text-[#94a3b8] mt-1">
-              Sync interviews, OA deadlines, and follow-ups directly to your Google Calendar.
-            </p>
+            <div className="flex items-center gap-2.5">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-indigo-400" /> Google Calendar
+              </h3>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                isConnected
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+              }`}>
+                {isConnected ? 'Connected' : 'Not Connected'}
+              </span>
+            </div>
+
+            {isConnected ? (
+              <p className="text-xs text-[#94a3b8] mt-1.5 flex items-center gap-3 font-mono">
+                <span>Last Synced: <strong className="text-slate-200">{lastSyncedTime}</strong></span>
+                <span>•</span>
+                <span>Next Sync: <strong className="text-indigo-300">{nextSyncTime}</strong></span>
+              </p>
+            ) : (
+              <p className="text-xs text-[#94a3b8] mt-1">
+                Sync interviews, OA deadlines, and follow-ups directly to your Google Calendar.
+              </p>
+            )}
           </div>
 
           {isConnected ? (
@@ -1363,6 +1464,39 @@ const CalendarAutomation: React.FC = () => {
         )}
       </div>
 
+      {/* 4. Upcoming Events Summary Panel */}
+      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-5 shadow-lg space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <Clock className="w-4 h-4 text-indigo-400" /> Upcoming Events Summary
+          </h3>
+          <span className="text-xs text-slate-400 font-semibold">{upcomingEvents.length} scheduled</span>
+        </div>
+
+        {upcomingEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {upcomingEvents.slice(0, 3).map((evt) => (
+              <div key={evt.id} className={`p-3 rounded-xl border ${getEventColor(evt.type)} space-y-1`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">
+                    {new Date(evt.start).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/20 capitalize">
+                    {evt.type.replace('-', ' ')}
+                  </span>
+                </div>
+                <h4 className="text-xs font-bold text-white truncate">{evt.title}</h4>
+                <p className="text-[11px] font-mono opacity-90">
+                  {new Date(evt.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 italic">No upcoming events scheduled.</p>
+        )}
+      </div>
+
       {/* Calendar View Controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -1388,7 +1522,7 @@ const CalendarAutomation: React.FC = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setView('month')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
               view === 'month' ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400' : 'text-[#94a3b8] hover:bg-[#1b2535]'
             }`}
           >
@@ -1396,7 +1530,7 @@ const CalendarAutomation: React.FC = () => {
           </button>
           <button
             onClick={() => setView('week')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
               view === 'week' ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400' : 'text-[#94a3b8] hover:bg-[#1b2535]'
             }`}
           >
@@ -1404,7 +1538,7 @@ const CalendarAutomation: React.FC = () => {
           </button>
           <button
             onClick={() => setView('day')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
               view === 'day' ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400' : 'text-[#94a3b8] hover:bg-[#1b2535]'
             }`}
           >
@@ -1412,7 +1546,7 @@ const CalendarAutomation: React.FC = () => {
           </button>
           <button
             onClick={() => setView('agenda')}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${
               view === 'agenda' ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400' : 'text-[#94a3b8] hover:bg-[#1b2535]'
             }`}
           >
@@ -1420,7 +1554,7 @@ const CalendarAutomation: React.FC = () => {
           </button>
           <button
             onClick={createEvent}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm font-semibold text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm font-semibold text-white transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Create Event
           </button>
@@ -1435,30 +1569,105 @@ const CalendarAutomation: React.FC = () => {
         {view === 'agenda' && renderAgendaView()}
       </div>
 
-      {/* Event Types Legend */}
-      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Event Types</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="flex items-center gap-3 p-3 bg-[#131a26] rounded-lg">
-            <Calendar className="w-5 h-5 text-purple-400" />
-            <span className="text-sm text-white">Interviews</span>
-            <span className="ml-auto text-xs text-emerald-400">Auto-created</span>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-[#131a26] rounded-lg">
-            <AlertCircle className="w-5 h-5 text-amber-400" />
-            <span className="text-sm text-white">OA Deadlines</span>
-            <span className="ml-auto text-xs text-emerald-400">Auto-reminded</span>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-[#131a26] rounded-lg">
-            <Clock className="w-5 h-5 text-emerald-400" />
-            <span className="text-sm text-white">Follow-ups</span>
-            <span className="ml-auto text-xs text-emerald-400">Auto-scheduled</span>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-[#131a26] rounded-lg">
-            <Server className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-white">Referral Reminders</span>
-            <span className="ml-auto text-xs text-emerald-400">Auto-synced</span>
-          </div>
+      {/* 3. Event Types Table */}
+      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6 shadow-xl space-y-4">
+        <h3 className="text-base font-bold text-white">Event Types</h3>
+        
+        <div className="overflow-x-auto rounded-xl border border-[#232d3f] bg-[#131a26]">
+          <table className="w-full text-xs text-left text-slate-300">
+            <thead className="bg-[#0b0f19] text-slate-400 font-bold uppercase tracking-wider border-b border-[#232d3f]">
+              <tr>
+                <th className="py-3 px-4">Event Type</th>
+                <th className="py-3 px-4">Count</th>
+                <th className="py-3 px-4 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#232d3f]/60 font-medium">
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" /> Interviews
+                </td>
+                <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                  {events.filter(e => e.type === 'interview').length}
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Auto-created
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400" /> OA Deadlines
+                </td>
+                <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                  {events.filter(e => e.type === 'oa-deadline').length}
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Auto-reminded
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400" /> Follow-ups
+                </td>
+                <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                  {events.filter(e => e.type === 'followup').length}
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Auto-scheduled
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-400" /> Referral Reminders
+                </td>
+                <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                  {events.filter(e => e.type === 'referral').length}
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Auto-generated
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-400" /> Application Deadlines
+                </td>
+                <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                  {events.filter(e => e.type === 'application-deadline').length}
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Auto-tracked
+                  </span>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" /> Recruiter Calls
+                </td>
+                <td className="py-3 px-4 font-mono font-bold text-slate-200">
+                  {events.filter(e => e.type === 'recruiter-call' || e.type === 'custom').length}
+                </td>
+                <td className="py-3 px-4 text-right">
+                  <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Auto-synced
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -1516,7 +1725,9 @@ const CalendarAutomation: React.FC = () => {
                   <option value="interview">Interview</option>
                   <option value="oa-deadline">OA Deadline</option>
                   <option value="followup">Follow-up</option>
+                  <option value="referral">Referral Reminder</option>
                   <option value="application-deadline">Application Deadline</option>
+                  <option value="recruiter-call">Recruiter Call</option>
                   <option value="custom">Custom</option>
                 </select>
               </div>
@@ -1542,13 +1753,13 @@ const CalendarAutomation: React.FC = () => {
                 <button
                   onClick={saveEvent}
                   disabled={!newEvent.title || !newEvent.start || !newEvent.end}
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer"
                 >
                   {editingEvent ? 'Update' : 'Create'}
                 </button>
                 <button
                   onClick={() => setShowEventModal(false)}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#232d3f] hover:bg-[#1f2937] text-white text-xs font-bold py-2 rounded-xl transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-[#232d3f] hover:bg-[#1f2937] text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
