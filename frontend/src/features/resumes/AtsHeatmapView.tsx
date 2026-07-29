@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Sparkles, CheckCircle2, XCircle, BarChart3, AlertCircle, Layers, Lightbulb,
-  Download, FileText, FileCode, Target, TrendingUp
+  Download, FileText, FileCode, Target, TrendingUp, User, ClipboardText
 } from 'lucide-react';
 
 export interface KeywordMatchItem {
@@ -54,13 +54,14 @@ export interface EnterpriseHeatmapData {
   timestamp?: string;
 }
 
+const DEMO_JOB = `Seeking a Senior Software Engineer with strong experience in Java, Python, TypeScript, Spring Boot, FastAPI, Node.js, React, and Next.js. Must be proficient with PostgreSQL, MongoDB Atlas, Redis, AWS cloud services, Docker containerization, Kubernetes, Terraform, and CI/CD pipelines. Candidates should demonstrate excellent Problem Solving, Communication, Leadership, and Agile teamwork skills.`;
+
+const DEMO_RESUME = `Experienced Full-Stack Developer skilled in Java, Python, TypeScript, Spring Boot, Express, Nodejs, React, and Next.js. Proven expertise with postgres, mongo, AWS, docker containers, and RESTful APIs. Served as Publicity Head leading event organization and presentations. Conducted benchmarking, performance tuning, and adaptive algorithms optimization.`;
+
 export const AtsHeatmapView: React.FC = () => {
-  const [jobDescription, setJobDescription] = useState(
-    `Seeking a Senior Software Engineer with strong experience in Java, Python, TypeScript, Spring Boot, FastAPI, Node.js, React, and Next.js. Must be proficient with PostgreSQL, MongoDB Atlas, Redis, AWS cloud services, Docker containerization, Kubernetes, Terraform, and CI/CD pipelines. Candidates should demonstrate excellent Problem Solving, Communication, Leadership, and Agile teamwork skills.`,
-  );
-  const [resumeContent, setResumeContent] = useState(
-    `Experienced Full-Stack Developer skilled in Java, Python, TypeScript, Spring Boot, Express, Nodejs, React, and Next.js. Proven expertise with postgres, mongo, AWS, docker containers, and RESTful APIs. Served as Publicity Head leading event organization and presentations. Conducted benchmarking, performance tuning, and adaptive algorithms optimization.`,
-  );
+  // Empty initial state
+  const [jobDescription, setJobDescription] = useState('');
+  const [resumeContent, setResumeContent] = useState('');
 
   // Animated score state
   const [animatedScore, setAnimatedScore] = useState<number>(0);
@@ -87,7 +88,7 @@ export const AtsHeatmapView: React.FC = () => {
   const data = heatmapMutation.data;
   const targetScore = data ? (data.overallAtsScore ?? data.matchDensityPct) : 0;
 
-  // 4. Animate ATS Score from 0 to Target Score in 1 second
+  // Animate ATS Score from 0 to Target Score in 1 second
   useEffect(() => {
     if (!data) {
       setAnimatedScore(0);
@@ -102,7 +103,6 @@ export const AtsHeatmapView: React.FC = () => {
     const timer = setInterval(() => {
       currentStep++;
       const progress = currentStep / steps;
-      // Ease-out cubic animation
       const easeProgress = 1 - Math.pow(1 - progress, 3);
       const val = Math.round(targetScore * easeProgress);
 
@@ -126,7 +126,11 @@ export const AtsHeatmapView: React.FC = () => {
 
   const scoreTheme = getScoreTheme(animatedScore);
 
-  // 2. Export Analysis Report Handlers
+  const handleLoadDemo = () => {
+    setJobDescription(DEMO_JOB);
+    setResumeContent(DEMO_RESUME);
+  };
+
   const handleExportJSON = () => {
     if (!data) return;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -193,7 +197,7 @@ export const AtsHeatmapView: React.FC = () => {
   };
 
   const handleExportPDF = () => {
-    handleExportMarkdown(); // Fallback formatted markdown/text report download
+    handleExportMarkdown();
   };
 
   return (
@@ -209,70 +213,99 @@ export const AtsHeatmapView: React.FC = () => {
           </p>
         </div>
 
-        {/* Export Button (Visible when data present) */}
-        {data && (
-          <div className="relative">
+        <div className="flex items-center gap-3">
+          {(!jobDescription || !resumeContent) && (
             <button
-              onClick={() => setIsExportOpen(!isExportOpen)}
-              className="px-4 py-2.5 bg-[#1b2535] hover:bg-slate-700 border border-[#232d3f] text-slate-200 font-bold rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+              onClick={handleLoadDemo}
+              className="px-3.5 py-2 bg-[#1b2535] hover:bg-slate-700 border border-[#232d3f] text-indigo-300 hover:text-indigo-200 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <Download className="w-4 h-4 text-emerald-400" /> Export Analysis Report
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Load Demo Example
             </button>
+          )}
 
-            {isExportOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-[#131a26] border border-[#232d3f] rounded-xl shadow-2xl z-30 p-1.5 space-y-1">
-                <button
-                  onClick={handleExportMarkdown}
-                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-cyan-400" /> Export as Markdown (.md)
-                </button>
-                <button
-                  onClick={handleExportJSON}
-                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <FileCode className="w-4 h-4 text-amber-400" /> Export as JSON (.json)
-                </button>
-                <button
-                  onClick={handleExportPDF}
-                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-emerald-400" /> Export as Report (.txt)
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+          {/* Export Button (Visible when data present) */}
+          {data && (
+            <div className="relative">
+              <button
+                onClick={() => setIsExportOpen(!isExportOpen)}
+                className="px-4 py-2.5 bg-[#1b2535] hover:bg-slate-700 border border-[#232d3f] text-slate-200 font-bold rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+              >
+                <Download className="w-4 h-4 text-emerald-400" /> Export Analysis Report
+              </button>
+
+              {isExportOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-[#131a26] border border-[#232d3f] rounded-xl shadow-2xl z-30 p-1.5 space-y-1">
+                  <button
+                    onClick={handleExportMarkdown}
+                    className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <FileText className="w-4 h-4 text-cyan-400" /> Export as Markdown (.md)
+                  </button>
+                  <button
+                    onClick={handleExportJSON}
+                    className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <FileCode className="w-4 h-4 text-amber-400" /> Export as JSON (.json)
+                  </button>
+                  <button
+                    onClick={handleExportPDF}
+                    className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <Download className="w-4 h-4 text-emerald-400" /> Export as Report (.txt)
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Input Text Grid */}
+      {/* Input Text Grid with Centered Empty State */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Job Description */}
+        {/* Job Description Box */}
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 shadow-xl flex flex-col">
           <label className="font-semibold text-sm text-slate-200 mb-2 flex items-center gap-2">
             📄 Target Job Description
           </label>
-          <textarea
-            rows={8}
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste target job description text..."
-            className="w-full bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none flex-1 font-mono text-xs leading-relaxed"
-          />
+          <div className="relative border border-[#232d3f] rounded-xl bg-[#0b0f19] flex-1 flex flex-col min-h-[220px]">
+            <textarea
+              rows={9}
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+              className="w-full h-full bg-transparent p-4 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 rounded-xl transition-colors resize-none z-10 relative font-mono leading-relaxed"
+            />
+            {/* Centered Empty State Overlay */}
+            {!jobDescription && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none z-0">
+                <FileText className="w-10 h-10 text-slate-600 mb-2" />
+                <span className="font-bold text-sm text-slate-300">Paste a Job Description</span>
+                <span className="text-xs text-slate-500 mt-1">Paste target job requirements or responsibilities here</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Resume Content */}
+        {/* Candidate Resume Content Box */}
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 shadow-xl flex flex-col">
           <label className="font-semibold text-sm text-slate-200 mb-2 flex items-center gap-2">
             👤 Candidate Resume Content
           </label>
-          <textarea
-            rows={8}
-            value={resumeContent}
-            onChange={(e) => setResumeContent(e.target.value)}
-            placeholder="Paste resume content text..."
-            className="w-full bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none flex-1 font-mono text-xs leading-relaxed"
-          />
+          <div className="relative border border-[#232d3f] rounded-xl bg-[#0b0f19] flex-1 flex flex-col min-h-[220px]">
+            <textarea
+              rows={9}
+              value={resumeContent}
+              onChange={(e) => setResumeContent(e.target.value)}
+              className="w-full h-full bg-transparent p-4 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 rounded-xl transition-colors resize-none z-10 relative font-mono leading-relaxed"
+            />
+            {/* Centered Empty State Overlay */}
+            {!resumeContent && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none z-0">
+                <User className="w-10 h-10 text-slate-600 mb-2" />
+                <span className="font-bold text-sm text-slate-300">Paste a Resume</span>
+                <span className="text-xs text-slate-500 mt-1">Paste candidate profile or resume text here</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -280,7 +313,7 @@ export const AtsHeatmapView: React.FC = () => {
       <div className="flex justify-end mb-8">
         <button
           onClick={() => heatmapMutation.mutate()}
-          disabled={heatmapMutation.isPending || !jobDescription || !resumeContent}
+          disabled={heatmapMutation.isPending || !jobDescription.trim() || !resumeContent.trim()}
           className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer flex items-center gap-2"
         >
           <BarChart3 className="w-5 h-5" />
@@ -296,7 +329,7 @@ export const AtsHeatmapView: React.FC = () => {
         </div>
       )}
 
-      {/* 5. Professional Empty State (Before analysis run) */}
+      {/* Professional Empty State (Before analysis run) */}
       {!data && !heatmapMutation.isPending && !heatmapMutation.isError && (
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-12 shadow-xl text-center space-y-4 max-w-2xl mx-auto my-8">
           <div className="w-16 h-16 mx-auto bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center">
@@ -317,7 +350,7 @@ export const AtsHeatmapView: React.FC = () => {
       {/* Results Panel */}
       {data && (
         <div className="space-y-6">
-          {/* 4. Animated Match Score Meter */}
+          {/* Animated Match Score Meter */}
           <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div>
@@ -336,7 +369,7 @@ export const AtsHeatmapView: React.FC = () => {
             </div>
           </div>
 
-          {/* 3. Improved Recruiter-Style Recommendations & Highest Impact Improvements */}
+          {/* Recruiter-Style Recommendations & Highest Impact Improvements */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Highest Impact Improvements */}
             <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl flex flex-col justify-between">
@@ -420,7 +453,6 @@ export const AtsHeatmapView: React.FC = () => {
                       />
                     </div>
 
-                    {/* 1. Category Keywords List displaying all 3 confidence states */}
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {cat.matched.map((m) => {
                         const isSemantic = m.matchType === 'semantic';
