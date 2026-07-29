@@ -982,9 +982,11 @@ const EmailAutomation: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>const CalendarAutomation: React.FC = () => {
+    </div>
+  );
+};
+
+const CalendarAutomation: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
   const [view, setView] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
