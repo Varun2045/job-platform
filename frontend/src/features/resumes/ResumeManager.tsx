@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FileText, Trash2, Eye, Download, Edit3, Star, Search, UploadCloud,
-  CheckCircle2, AlertCircle, Info, X, HardDrive, ShieldCheck
+  CheckCircle2, AlertCircle, Info, X, HardDrive
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
