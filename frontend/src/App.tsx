@@ -127,8 +127,12 @@ export const App: React.FC = () => {
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/admin" element={<AdminPanel />} />
                   <Route path="/resume-builder" element={<ResumeBuilder />} />
-                  <Route path="/automation" element={<AutomationHub />} />
-                  <Route path="/automation/*" element={<AutomationHub />} />
+                  <Route path="/automation" element={<AutomationHub tab="monitoring" />} />
+                  <Route path="/automation/monitoring" element={<AutomationHub tab="monitoring" />} />
+                  <Route path="/automation/email" element={<AutomationHub tab="email" />} />
+                  <Route path="/automation/calendar" element={<AutomationHub tab="calendar" />} />
+                  <Route path="/automation/*" element={<AutomationHub tab="monitoring" />} />
+                  <Route path="/companies" element={<AutomationHub tab="monitoring" />} />
                   <Route path="/referrals" element={<Referrals />} />
                   <Route path="/copilot" element={<CopilotDashboard />} />
                   <Route path="/career-copilot" element={<CopilotDashboard />} />
