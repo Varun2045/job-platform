@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake, Phone, CheckCircle2 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 type Tab = 'contacts' | 'pipeline' | 'messages' | 'followup' | 'analytics';
@@ -10,10 +10,11 @@ type ReferralContact = {
   userId: string;
   name: string;
   role: string;
-  category: 'Recruiter' | 'Hiring Manager' | 'Engineering Manager' | 'University Alumni' | 'Employee' | 'Talent Acquisition' | 'HR';
+  category: 'Recruiter' | 'Hiring Manager' | 'Engineering Manager' | 'University Alumni' | 'Employee' | 'Talent Acquisition' | 'HR' | 'Referrer';
   company: string;
   linkedInUrl?: string;
   email?: string;
+  phone?: string;
   location?: string;
   notes?: string;
   tags: string[];
@@ -27,7 +28,7 @@ type ReferralContact = {
   updatedAt: string;
 };
 
-const CATEGORIES = ['Recruiter', 'Hiring Manager', 'Engineering Manager', 'University Alumni', 'Employee', 'Talent Acquisition', 'HR'] as const;
+const CATEGORIES = ['Recruiter', 'Hiring Manager', 'Engineering Manager', 'University Alumni', 'Employee', 'Talent Acquisition', 'HR', 'Referrer'] as const;
 const PIPELINE_STAGES = ['Potential Contact', 'LinkedIn Opened', 'Connection Sent', 'Connected', 'Referral Requested', 'Referral Submitted', 'Applied', 'Interview', 'Offer'] as const;
 
 const extractCleanEmail = (rawEmailStr?: string): string => {
@@ -35,6 +36,29 @@ const extractCleanEmail = (rawEmailStr?: string): string => {
   const match = rawEmailStr.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
   if (match) return match[1].trim();
   return rawEmailStr.replace(/^[^(<]*[((<]/, '').replace(/[>)]*$/, '').trim();
+};
+
+const getCategoryBorderColor = (category: string): string => {
+  switch (category) {
+    case 'Recruiter':
+      return 'border-blue-500/50 hover:border-blue-400';
+    case 'Hiring Manager':
+      return 'border-purple-500/50 hover:border-purple-400';
+    case 'Engineering Manager':
+      return 'border-emerald-500/50 hover:border-emerald-400';
+    case 'Employee':
+      return 'border-green-500/50 hover:border-green-400';
+    case 'Talent Acquisition':
+      return 'border-orange-500/50 hover:border-orange-400';
+    case 'HR':
+      return 'border-pink-500/50 hover:border-pink-400';
+    case 'University Alumni':
+      return 'border-cyan-500/50 hover:border-cyan-400';
+    case 'Referrer':
+      return 'border-amber-400/50 hover:border-amber-300';
+    default:
+      return 'border-[#232d3f] hover:border-indigo-500/40';
+  }
 };
 
 export const Referrals: React.FC = () => {
@@ -89,6 +113,8 @@ const CompanyContacts: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingContact, setEditingContact] = useState<ReferralContact | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -96,11 +122,17 @@ const CompanyContacts: React.FC = () => {
     company: '',
     linkedInUrl: '',
     email: '',
+    phone: '',
     location: '',
     notes: '',
     tags: '',
     connectionStatus: 'Potential Contact' as ReferralContact['connectionStatus']
   });
+
+  const showToast = (message: string) => {
+    setToast({ message, type: 'success' });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const openGmailCompose = (contact: ReferralContact) => {
     const cleanEmail = extractCleanEmail(contact.email || '');
@@ -111,10 +143,10 @@ const CompanyContacts: React.FC = () => {
     window.open(gmailUrl, '_blank');
   };
 
-  const copyToClipboard = async (text: string) => {
+  const copyTextToClipboard = async (text: string, successMessage: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('Copied to clipboard!');
+      showToast(successMessage);
     } catch (err) {
       console.error('Failed to copy:', err);
     }
@@ -160,11 +192,13 @@ const CompanyContacts: React.FC = () => {
         company: '',
         linkedInUrl: '',
         email: '',
+        phone: '',
         location: '',
         notes: '',
         tags: '',
         connectionStatus: 'Potential Contact'
       });
+      showToast('✓ Contact created successfully.');
     }
   });
 
@@ -197,11 +231,13 @@ const CompanyContacts: React.FC = () => {
         company: '',
         linkedInUrl: '',
         email: '',
+        phone: '',
         location: '',
         notes: '',
         tags: '',
         connectionStatus: 'Potential Contact'
       });
+      showToast('✓ Contact updated successfully.');
     }
   });
 
@@ -214,6 +250,7 @@ const CompanyContacts: React.FC = () => {
       company: contact.company,
       linkedInUrl: contact.linkedInUrl || '',
       email: contact.email || '',
+      phone: contact.phone || '',
       location: contact.location || '',
       notes: contact.notes || '',
       tags: contact.tags ? contact.tags.join(', ') : '',
@@ -291,12 +328,32 @@ const CompanyContacts: React.FC = () => {
   }, {} as Record<string, ReferralContact[]>);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-white">Company Contacts</h2>
-        <div className="flex gap-2">
+    <div className="space-y-6 relative">
+      {/* Toast Notification Banner */}
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-md transition-all text-xs font-bold animate-in fade-in slide-in-from-top-3 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* Header and Controls */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-white">Company Contacts</h2>
+          <p className="text-xs text-[#94a3b8]">Manage your professional network and referral contacts</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handleCSVExport()}
+            className="flex items-center gap-2 px-4 py-2 bg-[#1b2535] border border-[#232d3f] hover:bg-[#232d3f] rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
           <button
             onClick={() => {
+              setShowAddForm(!showAddForm);
               setEditingContact(null);
               setFormData({
                 name: '',
@@ -305,45 +362,28 @@ const CompanyContacts: React.FC = () => {
                 company: '',
                 linkedInUrl: '',
                 email: '',
+                phone: '',
                 location: '',
                 notes: '',
                 tags: '',
                 connectionStatus: 'Potential Contact'
               });
-              setShowAddForm(!showAddForm);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-semibold text-white transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add Contact
           </button>
-          <button
-            onClick={handleCSVExport}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-sm font-semibold text-white transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
         </div>
       </div>
 
-      {/* Category Filter */}
+      {/* Filter by Category */}
       <div className="flex gap-2 overflow-x-auto pb-2">
-        <button
-          onClick={() => setSelectedCategory('All')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${
-            selectedCategory === 'All'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-[#1b2535] text-[#94a3b8] hover:text-white'
-          }`}
-        >
-          All
-        </button>
-        {CATEGORIES.map(cat => (
+        {['All', ...CATEGORIES].map(cat => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap cursor-pointer ${
               selectedCategory === cat
                 ? 'bg-indigo-600 text-white'
                 : 'bg-[#1b2535] text-[#94a3b8] hover:text-white'
@@ -405,6 +445,13 @@ const CompanyContacts: React.FC = () => {
               className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
             />
             <input
+              type="tel"
+              placeholder="Contact Number (optional)"
+              value={formData.phone}
+              onChange={e => setFormData({ ...formData, phone: e.target.value })}
+              className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+            />
+            <input
               type="text"
               placeholder="Location"
               value={formData.location}
@@ -447,7 +494,7 @@ const CompanyContacts: React.FC = () => {
                 }
               }}
               disabled={(editingContact ? editMutation.isPending : saveMutation.isPending) || !formData.name || !formData.company}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-[#232d3f] disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-[#232d3f] disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white cursor-pointer"
             >
               {editingContact ? (editMutation.isPending ? 'Saving...' : 'Save Changes') : (saveMutation.isPending ? 'Saving...' : 'Save Contact')}
             </button>
@@ -462,13 +509,14 @@ const CompanyContacts: React.FC = () => {
                   company: '',
                   linkedInUrl: '',
                   email: '',
+                  phone: '',
                   location: '',
                   notes: '',
                   tags: '',
                   connectionStatus: 'Potential Contact'
                 });
               }}
-              className="px-4 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-sm font-semibold text-white"
+              className="px-4 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-sm font-semibold text-white cursor-pointer"
             >
               Cancel
             </button>
@@ -491,7 +539,10 @@ const CompanyContacts: React.FC = () => {
               </div>
               <div className="p-4 space-y-3">
                 {contacts.map(contact => (
-                  <div key={contact.id} className="bg-[#131a26] border border-[#232d3f] rounded-lg p-4">
+                  <div
+                    key={contact.id}
+                    className={`bg-[#131a26] border-2 rounded-xl p-4 transition-all duration-200 ${getCategoryBorderColor(contact.category)}`}
+                  >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -512,14 +563,14 @@ const CompanyContacts: React.FC = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleStartEdit(contact)}
-                          className="text-[#94a3b8] hover:text-white transition-colors"
+                          className="text-[#94a3b8] hover:text-white transition-colors cursor-pointer"
                           title="Edit Contact"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => deleteMutation.mutate(contact.id)}
-                          className="text-red-400 hover:text-red-500 transition-colors"
+                          className="text-red-400 hover:text-red-500 transition-colors cursor-pointer"
                           title="Delete Contact"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -538,68 +589,98 @@ const CompanyContacts: React.FC = () => {
                       </div>
                     )}
 
-                    {/* LinkedIn Section */}
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {contact.linkedInUrl ? (
-                        <>
+                    {/* 2. Dedicated LinkedIn Profile Field */}
+                    <div className="mb-2 text-xs">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[#94a3b8]">LinkedIn:</span>
+                        {contact.linkedInUrl ? (
+                          <>
+                            <span className="text-cyan-400 truncate max-w-[200px] font-mono">{contact.linkedInUrl}</span>
+                            <a
+                              href={contact.linkedInUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1 bg-[#0077b5]/20 border border-[#0077b5]/40 text-[#0077b5] hover:bg-[#0077b5] hover:text-white rounded transition-colors flex items-center justify-center cursor-pointer"
+                              title="Open LinkedIn Profile"
+                            >
+                              <span className="font-bold text-xs px-0.5">in</span>
+                            </a>
+                            <button
+                              onClick={() => copyTextToClipboard(contact.linkedInUrl!, '✓ LinkedIn URL copied.')}
+                              className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] hover:bg-[#1f2937] text-slate-300 rounded text-[11px] font-semibold transition-colors cursor-pointer border border-[#232d3f]"
+                              title="Copy LinkedIn URL"
+                            >
+                              <Copy className="w-3 h-3 text-cyan-400" />
+                              Copy
+                            </button>
+                          </>
+                        ) : (
                           <a
-                            href={contact.linkedInUrl}
+                            href={generateLinkedInSearchUrl(contact.name, contact.company)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
+                            className="flex items-center gap-1 px-2.5 py-1 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
                           >
-                            <span className="font-bold">in</span>
-                            Open LinkedIn
+                            <Search className="w-3.5 h-3.5" />
+                            LinkedIn Search
                           </a>
-                          <button
-                            onClick={() => copyToClipboard(contact.linkedInUrl!)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-xs font-semibold text-white transition-colors"
-                            title="Copy URL"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      ) : (
-                        <a
-                          href={generateLinkedInSearchUrl(contact.name, contact.company)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-3 py-1.5 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
-                        >
-                          <Search className="w-3.5 h-3.5" />
-                          LinkedIn Search
-                        </a>
-                      )}
+                        )}
+                      </div>
                     </div>
 
-                    {/* Contact Details */}
+                    {/* 3. Contact Email & Copy Email Button */}
                     {contact.email && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs text-[#94a3b8]">Email:</span>
-                        <a href={`mailto:${contact.email}`} className="text-xs text-indigo-400 hover:underline">
+                      <div className="flex items-center gap-2 mb-2 text-xs flex-wrap">
+                        <span className="text-[#94a3b8]">Email:</span>
+                        <a href={`mailto:${extractCleanEmail(contact.email)}`} className="text-indigo-400 hover:underline font-mono">
                           {contact.email}
                         </a>
-                        <div className="flex gap-1">
+                        <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => openGmailCompose(contact)}
-                            className="flex items-center gap-1 px-2 py-0.5 bg-[#ea4335]/10 border border-[#ea4335]/20 text-[#ea4335] text-xs font-semibold rounded-full hover:bg-[#ea4335]/20 transition-colors"
+                            className="flex items-center gap-1 px-2 py-0.5 bg-[#ea4335]/10 border border-[#ea4335]/20 text-[#ea4335] text-xs font-semibold rounded-full hover:bg-[#ea4335]/20 transition-colors cursor-pointer"
                             title="Open in Gmail"
                           >
                             <Mail className="w-3 h-3" />
                             Gmail
                           </button>
+                          <button
+                            onClick={() => copyTextToClipboard(extractCleanEmail(contact.email!), '✓ Email copied to clipboard.')}
+                            className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] hover:bg-[#1f2937] text-slate-300 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-[#232d3f]"
+                            title="Copy Email Address"
+                          >
+                            <Copy className="w-3 h-3 text-cyan-400" />
+                            Copy Email
+                          </button>
                         </div>
                       </div>
                     )}
+
+                    {/* 1. Optional Contact Number Field */}
+                    {contact.phone && (
+                      <div className="flex items-center gap-2 mb-2 text-xs flex-wrap">
+                        <span className="text-[#94a3b8]">Contact Number:</span>
+                        <span className="text-white font-mono">{contact.phone}</span>
+                        <button
+                          onClick={() => copyTextToClipboard(contact.phone!, '✓ Contact number copied.')}
+                          className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] hover:bg-[#1f2937] text-slate-300 rounded text-[11px] font-semibold transition-colors cursor-pointer border border-[#232d3f]"
+                          title="Copy Contact Number"
+                        >
+                          <Copy className="w-3 h-3 text-cyan-400" />
+                          Copy
+                        </button>
+                      </div>
+                    )}
+
                     {contact.location && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs text-[#94a3b8]">Location:</span>
-                        <span className="text-xs text-white">{contact.location}</span>
+                      <div className="flex items-center gap-2 mb-2 text-xs">
+                        <span className="text-[#94a3b8]">Location:</span>
+                        <span className="text-white">{contact.location}</span>
                       </div>
                     )}
 
                     {/* Tags */}
-                    {contact.tags.length > 0 && (
+                    {contact.tags && contact.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-2">
                         {contact.tags.map(tag => (
                           <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] text-[#94a3b8] text-xs rounded-full">
