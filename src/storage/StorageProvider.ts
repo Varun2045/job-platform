@@ -303,12 +303,41 @@ export interface ExportJob {
   errorMessage?: string;
 }
 
+export interface KeywordMatchItem {
+  keyword: string;
+  category: string;
+  matchType: 'exact' | 'synonym' | 'fuzzy';
+  matchedTerm?: string;
+  matchReason?: string;
+}
+
+export interface KeywordMissingItem {
+  keyword: string;
+  category: string;
+}
+
+export interface CategoryBreakdownItem {
+  category: string;
+  weightPct: number;
+  matchedCount: number;
+  totalCount: number;
+  scorePct: number;
+  matched: KeywordMatchItem[];
+  missing: KeywordMissingItem[];
+}
+
 export interface KeywordHeatmap {
   jobId: string;
   resumeProfileId: string;
   matchedKeywords: string[];
   missingKeywords: string[];
   matchDensityPct: number;
+  // Enterprise ATS Enhanced Fields
+  overallAtsScore: number;
+  categoryBreakdown: CategoryBreakdownItem[];
+  matchedDetails: KeywordMatchItem[];
+  missingDetails: KeywordMissingItem[];
+  insights: string[];
 }
 
 export interface RecruiterInteraction {
