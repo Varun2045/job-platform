@@ -95,36 +95,20 @@ const CompanyContacts: React.FC = () => {
     connectionStatus: 'Potential Contact' as ReferralContact['connectionStatus']
   });
 
-  const openGmailCompose = (contact: ReferralContact) => {
-    const subject = `Inquiry about opportunities at ${contact.company}`;
-    const body = `Hi ${contact.name},\n\nI hope this email finds you well. I'm writing to express my interest in opportunities at ${contact.company}. Given your role as ${contact.role}, I would value any insights you might share about the team culture or potential openings.\n\nBest regards`;
-    
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(contact.email || '')}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(gmailUrl, '_blank');
+  const extractCleanEmail = (rawEmailStr?: string): string => {
+    if (!rawEmailStr) return '';
+    const match = rawEmailStr.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+    if (match) return match[1].trim();
+    return rawEmailStr.replace(/^[^(<]*[((<]/, '').replace(/[>)]*$/, '').trim();
   };
 
-  const downloadEML = (contact: ReferralContact) => {
+  const openGmailCompose = (contact: ReferralContact) => {
+    const cleanEmail = extractCleanEmail(contact.email || '');
     const subject = `Inquiry about opportunities at ${contact.company}`;
     const body = `Hi ${contact.name},\n\nI hope this email finds you well. I'm writing to express my interest in opportunities at ${contact.company}. Given your role as ${contact.role}, I would value any insights you might share about the team culture or potential openings.\n\nBest regards`;
     
-    const emlContent = `From: <>
-To: <${contact.email}>
-Subject: ${subject}
-Date: ${new Date().toISOString().replace(/T/, ' ').replace(/\.\d+Z/, '')}
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-
-${body}`;
-    
-    const blob = new Blob([emlContent], { type: 'message/rfc822' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `email_${contact.name.replace(/\s+/g, '_')}.eml`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(cleanEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(gmailUrl, '_blank');
   };
 
   const copyToClipboard = async (text: string) => {
@@ -550,7 +534,7 @@ ${body}`;
                           <Star className="w-4 h-4 text-amber-400" />
                           <span className="text-xs font-semibold text-white">Recommendation</span>
                         </div>
-                        <p className="text-xs text-[#94a3b8]">{contact.notes}</p>
+                        <p className="text-xs text-[#94a3b8] whitespace-pre-wrap">{contact.notes}</p>
                       </div>
                     )}
 
@@ -604,14 +588,6 @@ ${body}`;
                             <Mail className="w-3 h-3" />
                             Gmail
                           </button>
-                          <button
-                            onClick={() => downloadEML(contact)}
-                            className="flex items-center gap-1 px-2 py-0.5 bg-[#1b2535] border border-[#232d3f] text-[#94a3b8] text-xs font-semibold rounded-full hover:bg-[#232d3f] hover:text-white transition-colors"
-                            title="Download .eml file"
-                          >
-                            <Download className="w-3 h-3" />
-                            .eml
-                          </button>
                         </div>
                       </div>
                     )}
@@ -648,7 +624,7 @@ ${body}`;
 
                     {contact.notes && (
                       <div className="mt-2 pt-2 border-t border-[#232d3f]">
-                        <p className="text-xs text-[#94a3b8]">{contact.notes}</p>
+                        <p className="text-xs text-[#94a3b8] whitespace-pre-wrap">{contact.notes}</p>
                       </div>
                     )}
                   </div>
@@ -1676,29 +1652,18 @@ const AIMessageGenerator: React.FC = () => {
   };
 
   const openGmail = () => {
-    const email = context.recipientEmail || context.recruiterEmail || context.interviewerEmail || context.interviewerEmailFollowup;
-    const subject = generatedSubject || `Regarding ${context.jobTitle || 'opportunity'} at ${context.company}`;
-    const body = encodeURIComponent(generatedMessage);
-    window.open(`https://mail.google.com/mail/?view=cm&to=${email}&su=${encodeURIComponent(subject)}&body=${body}`, '_blank');
+    const rawEmail = context.recipientEmail || context.recruiterEmail || context.interviewerEmail || context.interviewerEmailFollowup || '';
+    const cleanEmail = extractCleanEmail(rawEmail);
+    const subject = generatedSubject || `Regarding ${context.jobTitle || 'opportunity'} at ${context.company || 'company'}`;
+    const body = generatedMessage;
+    
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(cleanEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(gmailUrl, '_blank');
   };
 
   const openLinkedIn = () => {
     const profile = context.linkedInProfile || `https://linkedin.com`;
     window.open(profile, '_blank');
-  };
-
-  const downloadEml = () => {
-    const email = context.recipientEmail || context.recruiterEmail || context.interviewerEmail || context.interviewerEmailFollowup;
-    const subject = generatedSubject || 'Subject';
-    const body = generatedMessage;
-    const emlContent = `To: ${email}\nSubject: ${subject}\n\n${body}`;
-    const blob = new Blob([emlContent], { type: 'message/rfc822' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${subject.replace(/[^a-z0-9]/gi, '_')}.eml`;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const renderDynamicFields = () => {
@@ -2796,15 +2761,6 @@ const AIMessageGenerator: React.FC = () => {
                   className="flex-1 min-w-[120px] px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold text-white transition-colors"
                 >
                   Open LinkedIn
-                </button>
-              )}
-
-              {messageType === 'cold-email' && (
-                <button
-                  onClick={downloadEml}
-                  className="flex-1 min-w-[120px] px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-semibold text-white transition-colors"
-                >
-                  Download .eml
                 </button>
               )}
             </div>
