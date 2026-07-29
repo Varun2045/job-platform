@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake, ChevronDown } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 import { useToast } from '../../context/ToastContext.js';
 
@@ -115,6 +115,12 @@ const CompanyContacts: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingContact, setEditingContact] = useState<ReferralContact | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedContactId, setExpandedContactId] = useState<string | null>(null);
+
+  const toggleExpand = (id: string) => {
+    setExpandedContactId(prev => (prev === id ? null : id));
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -244,6 +250,7 @@ const CompanyContacts: React.FC = () => {
       connectionStatus: contact.connectionStatus
     });
     setShowAddForm(false);
+    setExpandedContactId(contact.id);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -300,9 +307,24 @@ const CompanyContacts: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const filteredContacts = referrals?.filter(r => 
-    selectedCategory === 'All' || r.category === selectedCategory
-  ) || [];
+  const filteredContacts = referrals?.filter(r => {
+    const matchesCategory = selectedCategory === 'All' || r.category === selectedCategory;
+    if (!matchesCategory) return false;
+    if (!searchQuery.trim()) return true;
+
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      r.name?.toLowerCase().includes(q) ||
+      r.company?.toLowerCase().includes(q) ||
+      r.role?.toLowerCase().includes(q) ||
+      r.category?.toLowerCase().includes(q) ||
+      r.email?.toLowerCase().includes(q) ||
+      r.phone?.toLowerCase().includes(q) ||
+      r.linkedInUrl?.toLowerCase().includes(q) ||
+      r.connectionStatus?.toLowerCase().includes(q) ||
+      (r.tags && r.tags.some(t => t.toLowerCase().includes(q)))
+    );
+  }) || [];
 
   const groupedByCompany = filteredContacts.reduce((acc, contact) => {
     if (!acc[contact.company]) {
@@ -320,14 +342,26 @@ const CompanyContacts: React.FC = () => {
           <h2 className="text-xl font-bold text-white">Company Contacts</h2>
           <p className="text-xs text-[#94a3b8]">Manage your professional network and referral contacts</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => handleCSVExport()}
-            className="flex items-center gap-2 px-4 py-2 bg-[#1b2535] border border-[#232d3f] hover:bg-[#232d3f] rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            Export CSV
-          </button>
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          {/* Search Contacts input bar */}
+          <div className="relative flex-1 sm:flex-none min-w-[200px]">
+            <Search className="w-4 h-4 text-[#94a3b8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-white cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
           <button
             onClick={() => {
               setShowAddForm(!showAddForm);
@@ -346,10 +380,17 @@ const CompanyContacts: React.FC = () => {
                 connectionStatus: 'Potential Contact'
               });
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             Add Contact
+          </button>
+          <button
+            onClick={() => handleCSVExport()}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#1b2535] border border-[#232d3f] hover:bg-[#232d3f] rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
           </button>
         </div>
       </div>
@@ -516,8 +557,15 @@ const CompanyContacts: React.FC = () => {
       {isLoading ? (
         <div className="text-center py-12 text-[#94a3b8]">Loading contacts...</div>
       ) : Object.keys(groupedByCompany).length === 0 ? (
-        <div className="text-center py-12 text-[#94a3b8] border border-dashed border-[#232d3f] rounded-xl">
-          No contacts added yet. Click "Add Contact" to get started.
+        <div className="text-center py-12 text-[#94a3b8] border border-dashed border-[#232d3f] rounded-xl space-y-1">
+          {searchQuery ? (
+            <>
+              <p className="text-sm font-semibold text-white">No contacts found.</p>
+              <p className="text-xs text-[#94a3b8]">Try another search keyword.</p>
+            </>
+          ) : (
+            <p className="text-sm text-[#94a3b8]">No contacts added yet. Click "Add Contact" to get started.</p>
+          )}
         </div>
       ) : (
         <div className="space-y-6">
@@ -525,180 +573,225 @@ const CompanyContacts: React.FC = () => {
             <div key={company} className="bg-[#1b2535] border border-[#232d3f] rounded-xl overflow-hidden">
               <div className="flex items-center justify-between p-4 bg-[#131a26] border-b border-[#232d3f]">
                 <h3 className="text-lg font-bold text-white">{company}</h3>
+                <span className="text-xs text-[#94a3b8] font-medium">{contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}</span>
               </div>
               <div className="p-4 space-y-3">
-                {contacts.map(contact => (
-                  <div
-                    key={contact.id}
-                    className={`bg-[#131a26] border-2 rounded-xl p-5 space-y-4 transition-all duration-200 ${getCategoryBorderColor(contact.category)}`}
-                  >
-                    {/* Header: Name, Company, Job Role each on its own line | Top-Right: Edit/Delete + Profession Badge directly below */}
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold text-lg text-white leading-tight">{contact.name}</h4>
-                          {contact.tags?.includes('LinkedIn Import') && (
-                            <span className="px-2 py-0.5 bg-[#0077b5]/10 border border-[#0077b5]/20 text-[#0077b5] text-xs font-semibold rounded-full">
-                              LinkedIn
-                            </span>
+                {contacts.map(contact => {
+                  const isExpanded = expandedContactId === contact.id;
+
+                  return (
+                    <div
+                      key={contact.id}
+                      className={`bg-[#131a26] border-2 rounded-xl transition-all duration-200 overflow-hidden ${getCategoryBorderColor(contact.category)}`}
+                    >
+                      {/* Collapsed Accordion Header */}
+                      <div
+                        onClick={() => toggleExpand(contact.id)}
+                        className="p-4 flex items-center justify-between gap-4 cursor-pointer select-none hover:bg-[#1b2535]/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <ChevronDown
+                            className={`w-4 h-4 text-[#94a3b8] shrink-0 transition-transform duration-200 ${
+                              isExpanded ? 'rotate-180 text-indigo-400' : ''
+                            }`}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-bold text-base text-white leading-tight">{contact.name}</h4>
+                              {contact.tags?.includes('LinkedIn Import') && (
+                                <span className="px-2 py-0.5 bg-[#0077b5]/10 border border-[#0077b5]/20 text-[#0077b5] text-xs font-semibold rounded-full">
+                                  LinkedIn
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs font-semibold text-[#e2e8f0] leading-snug mt-0.5">{contact.company}</p>
+                            <p className="text-xs text-[#94a3b8] leading-snug">{contact.role}</p>
+                          </div>
+                        </div>
+
+                        {/* Badges on far right */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="inline-block px-2.5 py-0.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-semibold rounded-full">
+                            {contact.category}
+                          </span>
+                          <span className={`hidden sm:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                            contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                            contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                            'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                          }`}>
+                            {contact.connectionStatus}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Expanded Accordion Body */}
+                      {isExpanded && (
+                        <div className="px-5 pb-5 pt-2 border-t border-[#232d3f]/60 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                          {/* Action Buttons: Edit and Delete */}
+                          <div className="flex justify-between items-center gap-2 pt-1">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">Contact Information</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStartEdit(contact);
+                                }}
+                                className="text-[#94a3b8] hover:text-white transition-colors cursor-pointer p-1 rounded hover:bg-[#1b2535] flex items-center gap-1 text-xs font-medium"
+                                title="Edit Contact"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  confirmAction({
+                                    title: 'Delete Contact',
+                                    message: `Are you sure you want to delete ${contact.name}? This action cannot be undone.`,
+                                    onConfirm: () => deleteMutation.mutate(contact.id)
+                                  });
+                                }}
+                                className="text-red-400 hover:text-red-500 transition-colors cursor-pointer p-1 rounded hover:bg-[#1b2535] flex items-center gap-1 text-xs font-medium"
+                                title="Delete Contact"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Recommendation note if LinkedIn import */}
+                          {contact.tags?.includes('LinkedIn Import') && contact.notes && (
+                            <div className="p-3 bg-[#1b2535] rounded-lg">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Star className="w-4 h-4 text-amber-400" />
+                                <span className="text-xs font-semibold text-white">Recommendation</span>
+                              </div>
+                              <p className="text-xs text-[#94a3b8] whitespace-pre-wrap">{contact.notes}</p>
+                            </div>
                           )}
-                        </div>
-                        <p className="text-sm font-semibold text-[#e2e8f0] leading-snug">{contact.company}</p>
-                        <p className="text-xs text-[#94a3b8] leading-snug">{contact.role}</p>
-                      </div>
 
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleStartEdit(contact)}
-                            className="text-[#94a3b8] hover:text-white transition-colors cursor-pointer p-1 rounded hover:bg-[#1b2535]"
-                            title="Edit Contact"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              confirmAction({
-                                title: 'Delete Contact',
-                                message: `Are you sure you want to delete ${contact.name}? This action cannot be undone.`,
-                                onConfirm: () => deleteMutation.mutate(contact.id)
-                              });
-                            }}
-                            className="text-red-400 hover:text-red-500 transition-colors cursor-pointer p-1 rounded hover:bg-[#1b2535]"
-                            title="Delete Contact"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <span className="inline-block px-2.5 py-0.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-semibold rounded-full">
-                          {contact.category}
-                        </span>
-                      </div>
-                    </div>
+                          {/* Major Fields - Each on its own row in order: Email -> Contact Number -> LinkedIn -> Location -> (line) -> Status -> Tags -> Notes */}
+                          <div className="space-y-3">
+                            {/* 1. Email */}
+                            {contact.email && (
+                              <div className="space-y-1 text-xs">
+                                <span className="text-[#94a3b8] font-semibold block">Email</span>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <a href={`mailto:${extractCleanEmail(contact.email)}`} onClick={(e) => e.stopPropagation()} className="text-indigo-400 hover:underline font-mono break-all">
+                                    {contact.email}
+                                  </a>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openGmailCompose(contact);
+                                    }}
+                                    className="p-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                                    title="Open in Gmail"
+                                  >
+                                    <Mail className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
 
-                    {/* Recommendation note if LinkedIn import */}
-                    {contact.tags?.includes('LinkedIn Import') && contact.notes && (
-                      <div className="p-3 bg-[#1b2535] rounded-lg">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Star className="w-4 h-4 text-amber-400" />
-                          <span className="text-xs font-semibold text-white">Recommendation</span>
-                        </div>
-                        <p className="text-xs text-[#94a3b8] whitespace-pre-wrap">{contact.notes}</p>
-                      </div>
-                    )}
+                            {/* 2. Contact Number */}
+                            {contact.phone && (
+                              <div className="space-y-1 text-xs">
+                                <span className="text-[#94a3b8] font-semibold block">Contact Number</span>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-white font-mono">{contact.phone}</span>
+                                </div>
+                              </div>
+                            )}
 
-                    {/* Major Fields - Each on its own row in order: Email -> Contact Number -> LinkedIn -> Location -> (line) -> Status -> Tags -> Notes */}
-                    <div className="space-y-3 pt-2 border-t border-[#232d3f]/60">
-                      {/* 1. Email */}
-                      {contact.email && (
-                        <div className="space-y-1 text-xs">
-                          <span className="text-[#94a3b8] font-semibold block">Email</span>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <a href={`mailto:${extractCleanEmail(contact.email)}`} className="text-indigo-400 hover:underline font-mono break-all">
-                              {contact.email}
-                            </a>
-                            <button
-                              onClick={() => openGmailCompose(contact)}
-                              className="p-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center shrink-0"
-                              title="Open in Gmail"
-                            >
-                              <Mail className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                            {/* 3. LinkedIn */}
+                            <div className="space-y-1 text-xs">
+                              <span className="text-[#94a3b8] font-semibold block">LinkedIn</span>
+                              {contact.linkedInUrl ? (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <a
+                                    href={contact.linkedInUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-cyan-400 hover:underline font-mono break-all leading-relaxed"
+                                  >
+                                    {contact.linkedInUrl}
+                                  </a>
+                                  <a
+                                    href={contact.linkedInUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="p-1.5 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/30 text-[#0077b5] rounded-lg transition-colors flex items-center justify-center cursor-pointer shrink-0"
+                                    title="Open LinkedIn Profile"
+                                  >
+                                    <span className="font-bold text-xs leading-none">in</span>
+                                  </a>
+                                </div>
+                              ) : (
+                                <a
+                                  href={generateLinkedInSearchUrl(contact.name, contact.company)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
+                                >
+                                  <Search className="w-3.5 h-3.5" />
+                                  LinkedIn Search
+                                </a>
+                              )}
+                            </div>
 
-                      {/* 2. Contact Number */}
-                      {contact.phone && (
-                        <div className="space-y-1 text-xs">
-                          <span className="text-[#94a3b8] font-semibold block">Contact Number</span>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-white font-mono">{contact.phone}</span>
-                          </div>
-                        </div>
-                      )}
+                            {/* 4. Location */}
+                            {contact.location && (
+                              <div className="space-y-1 text-xs">
+                                <span className="text-[#94a3b8] font-semibold block">Location</span>
+                                <span className="text-white">{contact.location}</span>
+                              </div>
+                            )}
 
-                      {/* 3. LinkedIn */}
-                      <div className="space-y-1 text-xs">
-                        <span className="text-[#94a3b8] font-semibold block">LinkedIn</span>
-                        {contact.linkedInUrl ? (
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <a
-                              href={contact.linkedInUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-cyan-400 hover:underline font-mono break-all leading-relaxed"
-                            >
-                              {contact.linkedInUrl}
-                            </a>
-                            <a
-                              href={contact.linkedInUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/30 text-[#0077b5] rounded-lg transition-colors flex items-center justify-center cursor-pointer shrink-0"
-                              title="Open LinkedIn Profile"
-                            >
-                              <span className="font-bold text-xs leading-none">in</span>
-                            </a>
-                          </div>
-                        ) : (
-                          <a
-                            href={generateLinkedInSearchUrl(contact.name, contact.company)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
-                          >
-                            <Search className="w-3.5 h-3.5" />
-                            LinkedIn Search
-                          </a>
-                        )}
-                      </div>
-
-                      {/* 4. Location */}
-                      {contact.location && (
-                        <div className="space-y-1 text-xs">
-                          <span className="text-[#94a3b8] font-semibold block">Location</span>
-                          <span className="text-white">{contact.location}</span>
-                        </div>
-                      )}
-
-                      {/* 5. Status - with divider line before it */}
-                      <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]">
-                        <span className="text-[#94a3b8] font-semibold block">Status</span>
-                        <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                          contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                          contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                          'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                        }`}>
-                          {contact.connectionStatus}
-                        </span>
-                      </div>
-
-                      {/* 6. Tags */}
-                      {contact.tags && contact.tags.length > 0 && (
-                        <div className="space-y-1 text-xs">
-                          <span className="text-[#94a3b8] font-semibold block">Tags</span>
-                          <div className="flex flex-wrap gap-1">
-                            {contact.tags.map(tag => (
-                              <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] text-[#94a3b8] text-xs rounded-full border border-[#232d3f]">
-                                <Tag className="w-3 h-3" />
-                                {tag}
+                            {/* 5. Status - with divider line before it */}
+                            <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]">
+                              <span className="text-[#94a3b8] font-semibold block">Status</span>
+                              <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                                contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                                'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                              }`}>
+                                {contact.connectionStatus}
                               </span>
-                            ))}
+                            </div>
+
+                            {/* 6. Tags */}
+                            {contact.tags && contact.tags.length > 0 && (
+                              <div className="space-y-1 text-xs">
+                                <span className="text-[#94a3b8] font-semibold block">Tags</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {contact.tags.map(tag => (
+                                    <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] text-[#94a3b8] text-xs rounded-full border border-[#232d3f]">
+                                      <Tag className="w-3 h-3" />
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 7. Notes */}
+                            {contact.notes && !contact.tags?.includes('LinkedIn Import') && (
+                              <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]/60">
+                                <span className="text-[#94a3b8] font-semibold block">Notes</span>
+                                <p className="text-xs text-[#94a3b8] whitespace-pre-wrap leading-relaxed">{contact.notes}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
-
-                      {/* 7. Notes */}
-                      {contact.notes && !contact.tags?.includes('LinkedIn Import') && (
-                        <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]/60">
-                          <span className="text-[#94a3b8] font-semibold block">Notes</span>
-                          <p className="text-xs text-[#94a3b8] whitespace-pre-wrap leading-relaxed">{contact.notes}</p>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
