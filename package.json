@@ -5,7 +5,7 @@
   "main": "dist/core/server.js",
   "type": "module",
   "engines": {
-    "node": "20.x"
+    "node": "20.x || 22.x"
   },
   "scripts": {
     "build": "npm --prefix frontend install --include=dev && tsc && npm --prefix frontend run build",

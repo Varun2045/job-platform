@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search, X, Download, MoveLeft, MoveRight, Layers, AlertCircle, Plus,
-  FileText, Bookmark, Send, Calendar, Award, CheckCircle2, Clock
+  FileText, Bookmark, Send, Calendar, Award
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 

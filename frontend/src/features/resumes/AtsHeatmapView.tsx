@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles, CheckCircle2, XCircle, BarChart3, AlertCircle, Info, Layers, Award, Lightbulb } from 'lucide-react';
+import { Sparkles, CheckCircle2, XCircle, BarChart3, AlertCircle, Layers, Lightbulb } from 'lucide-react';
 
 export interface KeywordMatchItem {
   keyword: string;
