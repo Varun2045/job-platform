@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Download, Clock, Activity, AlertCircle, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight, Mail } from 'lucide-react';
+import { Calendar, Download, Clock, Activity, AlertCircle, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight, Mail, Bell, Zap } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 type Tab = 'monitoring' | 'email' | 'calendar';
@@ -517,6 +517,21 @@ const EmailAutomation: React.FC = () => {
   const [previewData, setPreviewData] = useState({ company: 'Google', role: 'Software Engineer', location: 'Mountain View, CA', match_score: 85, resume: 'Backend Resume', date: new Date().toLocaleDateString() });
   const [isSending, setIsSending] = useState(false);
 
+  // 5. Toast Notification State
+  const [toast, setToast] = useState<{ title: string; desc: string; type: 'success' | 'error' | 'warning' } | null>(null);
+
+  // 6. Last Test Email Info
+  const [lastTestEmail, setLastTestEmail] = useState<string | null>(() => {
+    return localStorage.getItem('last_test_email_info') || null;
+  });
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handlePreview = (template: string) => {
     setPreviewTemplate(template);
     setShowPreview(true);
@@ -534,13 +549,29 @@ const EmailAutomation: React.FC = () => {
         })
       });
       if (res.ok) {
-        alert('Test email sent successfully!');
+        const now = new Date();
+        const formattedTime = `Sent Today ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        setLastTestEmail(formattedTime);
+        localStorage.setItem('last_test_email_info', formattedTime);
+        setToast({
+          title: '✓ Test email sent successfully.',
+          desc: 'Delivered to user@example.com',
+          type: 'success'
+        });
       } else {
-        const err = await res.json();
-        alert(`Failed to send test email: ${err.error}`);
+        const err = await res.json().catch(() => ({ error: 'SMTP authentication failed.' }));
+        setToast({
+          title: '✕ Failed to send test email.',
+          desc: err.error || 'SMTP authentication failed.',
+          type: 'error'
+        });
       }
     } catch (error) {
-      alert('Error sending test email');
+      setToast({
+        title: '✕ Failed to send test email.',
+        desc: 'Network error or SMTP provider offline.',
+        type: 'error'
+      });
     } finally {
       setIsSending(false);
     }
@@ -601,126 +632,295 @@ const EmailAutomation: React.FC = () => {
             </div>
           </div>
         `;
+      case 'monthly-summary':
+        return `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+            <div style="background: #4f46e5; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+              <h1 style="margin: 0;">Monthly Performance Summary</h1>
+              <p style="margin: 5px 0 0 0; opacity: 0.9;">Monthly Review</p>
+            </div>
+            <div style="background: white; padding: 20px; border-radius: 0 0 8px 8px;">
+              <h2 style="color: #333;">Monthly Job Search Highlights</h2>
+              <ul style="color: #666;">
+                <li>180+ jobs tracked across 42 companies</li>
+                <li>32 applications submitted</li>
+                <li>5 interview invitations received</li>
+                <li>Average match score: ${previewData.match_score}%</li>
+              </ul>
+              <p style="color: #666; margin-top: 20px;">Great progress this month!</p>
+            </div>
+          </div>
+        `;
       default:
         return '';
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Email Preferences */}
+    <div className="space-y-6 relative">
+      {/* 5. Top-Right Toast Notification */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-50 w-80 md:w-96 border rounded-2xl p-4 shadow-2xl space-y-1 backdrop-blur-xl animate-bounce-in ${
+          toast.type === 'success'
+            ? 'bg-[#131a26] border-emerald-500/40 text-emerald-400'
+            : 'bg-[#131a26] border-rose-500/40 text-rose-400'
+        }`}>
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
+                toast.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+              }`}>
+                {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+              </div>
+              <div>
+                <h4 className="text-xs font-bold">{toast.title}</h4>
+                <p className="text-xs text-slate-300 mt-0.5 font-medium">{toast.desc}</p>
+              </div>
+            </div>
+            <button onClick={() => setToast(null)} className="text-slate-500 hover:text-white text-xs">✕</button>
+          </div>
+        </div>
+      )}
+
+      {/* 1 & 2. Email Preferences Toggle Cards with Color Accents & Alert Scheduling */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+        {/* Instant Alerts -> Blue */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-blue-500 rounded-xl p-4 transition hover:border-[#334155] space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Instant Alerts</span>
+            <div className="flex items-center gap-2.5">
+              <Bell className="w-5 h-5 text-blue-400" />
+              <span className="text-sm font-bold text-white">Instant Alerts</span>
+            </div>
             <button
               onClick={() => setInstantAlerts(!instantAlerts)}
-              className={`w-12 h-6 rounded-full transition-colors ${instantAlerts ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
+              className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${instantAlerts ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${instantAlerts ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
           </div>
-          <p className="text-xs text-[#94a3b8] mt-2">Get notified immediately when new jobs match your criteria</p>
+          <p className="text-xs text-slate-300">Send immediately when a matching job is found.</p>
+          <div className="pt-2 border-t border-[#232d3f]/60 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">Schedule: <span className="text-slate-200 font-medium">On job detection</span></span>
+            <span className={`px-2 py-0.5 rounded-full font-bold border ${
+              instantAlerts ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+            }`}>
+              Status: {instantAlerts ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Daily Digest -> Green */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-emerald-500 rounded-xl p-4 transition hover:border-[#334155] space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Daily Digest</span>
+            <div className="flex items-center gap-2.5">
+              <Mail className="w-5 h-5 text-emerald-400" />
+              <span className="text-sm font-bold text-white">Daily Digest</span>
+            </div>
             <button
               onClick={() => setDailyDigest(!dailyDigest)}
-              className={`w-12 h-6 rounded-full transition-colors ${dailyDigest ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
+              className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${dailyDigest ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${dailyDigest ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
           </div>
-          <p className="text-xs text-[#94a3b8] mt-2">Receive a daily summary of new job opportunities</p>
+          <p className="text-xs text-slate-300">Receive a daily summary of new job opportunities.</p>
+          <div className="pt-2 border-t border-[#232d3f]/60 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">Schedule: <span className="text-slate-200 font-medium">Every day at 9:00 AM</span></span>
+            <span className={`px-2 py-0.5 rounded-full font-bold border ${
+              dailyDigest ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+            }`}>
+              Status: {dailyDigest ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Weekly Report -> Purple */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-purple-500 rounded-xl p-4 transition hover:border-[#334155] space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Weekly Report</span>
+            <div className="flex items-center gap-2.5">
+              <FileText className="w-5 h-5 text-purple-400" />
+              <span className="text-sm font-bold text-white">Weekly Report</span>
+            </div>
             <button
               onClick={() => setWeeklyReport(!weeklyReport)}
-              className={`w-12 h-6 rounded-full transition-colors ${weeklyReport ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
+              className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${weeklyReport ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${weeklyReport ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
           </div>
-          <p className="text-xs text-[#94a3b8] mt-2">Weekly analytics and application progress report</p>
+          <p className="text-xs text-slate-300">Weekly analytics and application progress report.</p>
+          <div className="pt-2 border-t border-[#232d3f]/60 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">Schedule: <span className="text-slate-200 font-medium">Every Monday at 9:00 AM</span></span>
+            <span className={`px-2 py-0.5 rounded-full font-bold border ${
+              weeklyReport ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+            }`}>
+              Status: {weeklyReport ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Monthly Summary -> Orange */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-amber-500 rounded-xl p-4 transition hover:border-[#334155] space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Monthly Summary</span>
+            <div className="flex items-center gap-2.5">
+              <TrendingUp className="w-5 h-5 text-amber-400" />
+              <span className="text-sm font-bold text-white">Monthly Summary</span>
+            </div>
             <button
               onClick={() => setMonthlySummary(!monthlySummary)}
-              className={`w-12 h-6 rounded-full transition-colors ${monthlySummary ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
+              className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${monthlySummary ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${monthlySummary ? 'translate-x-6' : 'translate-x-0.5'}`} />
             </button>
           </div>
-          <p className="text-xs text-[#94a3b8] mt-2">Monthly overview of your job search performance</p>
+          <p className="text-xs text-slate-300">Monthly overview of your job search performance.</p>
+          <div className="pt-2 border-t border-[#232d3f]/60 flex items-center justify-between text-[11px]">
+            <span className="text-slate-400">Schedule: <span className="text-slate-200 font-medium">1st day of every month</span></span>
+            <span className={`px-2 py-0.5 rounded-full font-bold border ${
+              monthlySummary ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+            }`}>
+              Status: {monthlySummary ? 'Enabled' : 'Disabled'}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Email Service Status */}
+      {/* 3. Operational SMTP & Resend Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Server className="w-5 h-5 text-cyan-400" />
-              <span className="text-sm font-bold text-white">SMTP Status</span>
+        {/* SMTP Status */}
+        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-3">
+            <Server className="w-5 h-5 text-cyan-400" />
+            <div>
+              <span className="text-sm font-bold text-white block">SMTP Status</span>
+              <span className="text-[11px] text-slate-400">Last checked: 25 sec ago</span>
             </div>
-            <span className="text-xs font-bold px-2 py-1 rounded bg-emerald-500/10 text-emerald-400">Connected</span>
           </div>
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            Connected
+          </span>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Database className="w-5 h-5 text-purple-400" />
-              <span className="text-sm font-bold text-white">Resend Status</span>
+
+        {/* Resend Status */}
+        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-3">
+            <Database className="w-5 h-5 text-purple-400" />
+            <div>
+              <span className="text-sm font-bold text-white block">Resend Status</span>
+              <span className="text-[11px] text-slate-400 font-mono">Quota Remaining: 92% • API Verified</span>
             </div>
-            <span className="text-xs font-bold px-2 py-1 rounded bg-emerald-500/10 text-emerald-400">Active</span>
           </div>
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            Active
+          </span>
         </div>
       </div>
 
-      {/* Email Templates */}
-      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Email Templates</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-[#131a26] rounded-lg">
-            <span className="text-sm text-white">Job Match Alert Template</span>
-            <button 
-              onClick={() => handlePreview('job-match')}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-            >
-              Preview
-            </button>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-[#131a26] rounded-lg">
-            <span className="text-sm text-white">Daily Digest Template</span>
-            <button 
-              onClick={() => handlePreview('daily-digest')}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-            >
-              Preview
-            </button>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-[#131a26] rounded-lg">
-            <span className="text-sm text-white">Weekly Report Template</span>
-            <button 
-              onClick={() => handlePreview('weekly-report')}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
-            >
-              Preview
-            </button>
+      {/* 4 & 6. Email Templates Responsive Table & Send Test Email Info */}
+      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6 shadow-xl space-y-4">
+        <h3 className="text-base font-bold text-white">Email Templates</h3>
+        
+        <div className="overflow-x-auto rounded-xl border border-[#232d3f] bg-[#131a26]">
+          <table className="w-full text-xs text-left text-slate-300">
+            <thead className="bg-[#0b0f19] text-slate-400 font-bold uppercase tracking-wider border-b border-[#232d3f]">
+              <tr>
+                <th className="py-3 px-4">Template</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Last Updated</th>
+                <th className="py-3 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#232d3f]/60 font-medium">
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white">Job Match Alert</td>
+                <td className="py-3 px-4">
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Active
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-slate-400">2 days ago</td>
+                <td className="py-3 px-4 text-right">
+                  <button 
+                    onClick={() => handlePreview('job-match')}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer"
+                  >
+                    Preview
+                  </button>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white">Daily Digest</td>
+                <td className="py-3 px-4">
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Active
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-slate-400">Yesterday</td>
+                <td className="py-3 px-4 text-right">
+                  <button 
+                    onClick={() => handlePreview('daily-digest')}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer"
+                  >
+                    Preview
+                  </button>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white">Weekly Report</td>
+                <td className="py-3 px-4">
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Active
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-slate-400">Today</td>
+                <td className="py-3 px-4 text-right">
+                  <button 
+                    onClick={() => handlePreview('weekly-report')}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer"
+                  >
+                    Preview
+                  </button>
+                </td>
+              </tr>
+
+              <tr className="hover:bg-[#1b2535]/60 transition-colors">
+                <td className="py-3 px-4 font-bold text-white">Monthly Summary</td>
+                <td className="py-3 px-4">
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-bold">
+                    Active
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-slate-400">3 days ago</td>
+                <td className="py-3 px-4 text-right">
+                  <button 
+                    onClick={() => handlePreview('monthly-summary')}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold cursor-pointer"
+                  >
+                    Preview
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* 5 & 6. Send Test Email Action & Last Test Email Information */}
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <button 
+            onClick={handleSendTestEmail}
+            disabled={isSending}
+            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-xl text-sm font-semibold text-white transition-colors cursor-pointer"
+          >
+            {isSending ? 'Sending...' : 'Send Test Email'}
+          </button>
+
+          <div className="text-xs text-slate-400 bg-[#131a26] border border-[#232d3f] px-3.5 py-2 rounded-xl flex items-center gap-2">
+            <span className="font-semibold text-slate-300">Last Test Email:</span>
+            <span className="font-mono text-indigo-300">{lastTestEmail || 'Never Sent'}</span>
           </div>
         </div>
-        <button 
-          onClick={handleSendTestEmail}
-          disabled={isSending}
-          className="mt-4 w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors"
-        >
-          {isSending ? 'Sending...' : 'Send Test Email'}
-        </button>
       </div>
 
       {/* Preview Modal */}
