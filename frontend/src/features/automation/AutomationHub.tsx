@@ -982,6 +982,8 @@ const EmailAutomation: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
     </div>
   );
 };
