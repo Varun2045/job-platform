@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Users, MessageSquare, Clock, BarChart3, Search, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
@@ -104,6 +104,29 @@ const getStatusBadgeStyle = (status: string): string => {
     default:
       return 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30';
   }
+};
+
+const HighlightText: React.FC<{ text?: string; highlight?: string; className?: string }> = ({ text, highlight, className = '' }) => {
+  if (!text) return null;
+  if (!highlight || !highlight.trim()) return <span className={className}>{text}</span>;
+
+  const q = highlight.trim().toLowerCase();
+  const escaped = q.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+
+  return (
+    <span className={className}>
+      {parts.map((part, i) =>
+        part.toLowerCase() === q ? (
+          <mark key={i} className="bg-indigo-500/30 text-indigo-300 rounded px-0.5 font-bold">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </span>
+  );
 };
 
 export const Referrals: React.FC = () => {
@@ -364,32 +387,38 @@ const CompanyContacts: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const filteredContacts = referrals?.filter(r => {
-    const matchesCategory = selectedCategory === 'All' || r.category === selectedCategory;
-    if (!matchesCategory) return false;
-    if (!searchQuery.trim()) return true;
-
+  const filteredContacts = useMemo(() => {
+    if (!referrals) return [];
     const q = searchQuery.toLowerCase().trim();
-    return (
-      r.name?.toLowerCase().includes(q) ||
-      r.company?.toLowerCase().includes(q) ||
-      r.role?.toLowerCase().includes(q) ||
-      r.category?.toLowerCase().includes(q) ||
-      r.email?.toLowerCase().includes(q) ||
-      r.phone?.toLowerCase().includes(q) ||
-      r.linkedInUrl?.toLowerCase().includes(q) ||
-      r.connectionStatus?.toLowerCase().includes(q) ||
-      (r.tags && r.tags.some(t => t.toLowerCase().includes(q)))
-    );
-  }) || [];
 
-  const groupedByCompany = filteredContacts.reduce((acc, contact) => {
-    if (!acc[contact.company]) {
-      acc[contact.company] = [];
-    }
-    acc[contact.company].push(contact);
-    return acc;
-  }, {} as Record<string, ReferralContact[]>);
+    return referrals.filter(r => {
+      const matchesCategory = selectedCategory === 'All' || r.category === selectedCategory;
+      if (!matchesCategory) return false;
+      if (!q) return true;
+
+      return (
+        r.name?.toLowerCase().includes(q) ||
+        r.company?.toLowerCase().includes(q) ||
+        r.role?.toLowerCase().includes(q) ||
+        r.category?.toLowerCase().includes(q) ||
+        r.email?.toLowerCase().includes(q) ||
+        r.phone?.toLowerCase().includes(q) ||
+        r.linkedInUrl?.toLowerCase().includes(q) ||
+        r.connectionStatus?.toLowerCase().includes(q) ||
+        (r.tags && r.tags.some(t => t.toLowerCase().includes(q)))
+      );
+    });
+  }, [referrals, selectedCategory, searchQuery]);
+
+  const groupedByCompany = useMemo(() => {
+    return filteredContacts.reduce((acc, contact) => {
+      if (!acc[contact.company]) {
+        acc[contact.company] = [];
+      }
+      acc[contact.company].push(contact);
+      return acc;
+    }, {} as Record<string, ReferralContact[]>);
+  }, [filteredContacts]);
 
   return (
     <div className="space-y-6 relative">
@@ -400,15 +429,15 @@ const CompanyContacts: React.FC = () => {
           <p className="text-xs text-[#94a3b8]">Manage your professional network and referral contacts</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          {/* Search Contacts input bar */}
+          {/* Search Contacts input bar with Indigo/Purple Accent & Glow */}
           <div className="relative flex-1 sm:flex-none min-w-[200px]">
-            <Search className="w-4 h-4 text-[#94a3b8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-indigo-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors" />
             <input
               type="text"
               placeholder="Search contacts..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full pl-9 pr-8 py-2 bg-[#131a26] border border-indigo-500/40 hover:border-indigo-500/60 rounded-lg text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500/30 focus:shadow-[0_0_12px_rgba(99,102,241,0.25)] transition-all"
             />
             {searchQuery && (
               <button
@@ -437,7 +466,7 @@ const CompanyContacts: React.FC = () => {
                 connectionStatus: 'Potential Contact'
               });
             }}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#1b2535] border border-[#232d3f] hover:bg-[#232d3f] rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             Add Contact
@@ -649,15 +678,21 @@ const CompanyContacts: React.FC = () => {
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-bold text-base text-white leading-tight">{contact.name}</h4>
+                              <h4 className="font-bold text-base text-white leading-tight">
+                                <HighlightText text={contact.name} highlight={searchQuery} />
+                              </h4>
                               {contact.tags?.includes('LinkedIn Import') && (
                                 <span className="px-2 py-0.5 bg-[#0077b5]/10 border border-[#0077b5]/20 text-[#0077b5] text-xs font-semibold rounded-full">
                                   LinkedIn
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs font-semibold text-[#e2e8f0] leading-snug mt-0.5">{contact.company}</p>
-                            <p className="text-xs text-[#94a3b8] leading-snug">{contact.role}</p>
+                            <p className="text-xs font-semibold text-[#e2e8f0] leading-snug mt-0.5">
+                              <HighlightText text={contact.company} highlight={searchQuery} />
+                            </p>
+                            <p className="text-xs text-[#94a3b8] leading-snug">
+                              <HighlightText text={contact.role} highlight={searchQuery} />
+                            </p>
                           </div>
                         </div>
 
