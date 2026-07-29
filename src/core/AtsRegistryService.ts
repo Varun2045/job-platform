@@ -132,7 +132,7 @@ export class AtsRegistryService {
       companies: [
         'Adyen', 'Airbnb', 'Anthropic', 'Cloudflare', 'Cockroach Labs',
         'Databricks', 'Datadog', 'GitLab',
-        'Grafana Labs', 'Groww', 'Instacart', 'JetBrains', 'Klaviyo', 'Palantir', 'PhonePe', 'PlanetScale', 'Postman', 'Pure Storage', 'Razorpay',
+        'Grafana Labs', 'Groww', 'Instacart', 'JetBrains', 'Klaviyo', 'PhonePe', 'PlanetScale', 'Postman', 'Pure Storage', 'Razorpay',
         'Reddit', 'SmartBear', 'Sumo Logic', 'Twitch', 'Twilio',
         'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
       ],
@@ -142,7 +142,7 @@ export class AtsRegistryService {
       id: 'lever',
       name: 'Lever',
       averageExtractionMs: 16,
-      companies: ['Mindtickle', 'Paytm', 'Meesho', 'Spotify'],
+      companies: ['Mindtickle', 'Palantir', 'Paytm', 'Meesho', 'Spotify'],
       companyDetails: [],
     },
     {
