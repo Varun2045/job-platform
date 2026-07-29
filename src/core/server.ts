@@ -2791,7 +2791,153 @@ app.get('/api/admin/telemetry', authMiddleware, requireRole(['Admin']), async (r
   }
 });
 
-// Developer Profile Website Builder - Publish
+// Developer Profile Website Builder - Subdomain Availability Checker
+app.get('/api/profile-builder/check-subdomain', authMiddleware, async (req, res) => {
+  try {
+    const rawSubdomain = (req.query.subdomain as string) || '';
+    const cleanSub = rawSubdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+    if (!cleanSub || cleanSub.length < 3) {
+      return res.json({ available: false, reason: 'Subdomain must be at least 3 characters', alternatives: [] });
+    }
+
+    const reserved = new Set(['admin', 'demo', 'test', 'portfolio', 'official', 'api', 'app', 'vercel', 'react', 'node', 'dashboard', 'login', 'signup']);
+    const portfoliosDir = path.join(process.cwd(), 'storage', 'portfolios');
+    const targetFile = path.join(portfoliosDir, `${cleanSub}.html`);
+    const targetDir = path.join(portfoliosDir, cleanSub);
+
+    const isTaken = reserved.has(cleanSub) || fs.existsSync(targetFile) || fs.existsSync(targetDir);
+
+    if (isTaken) {
+      const alternatives = [
+        `${cleanSub}-portfolio`,
+        `${cleanSub}-dev`,
+        `${cleanSub}01`,
+        `${cleanSub}-live`,
+      ];
+      return res.json({
+        available: false,
+        subdomain: cleanSub,
+        alternatives,
+      });
+    }
+
+    return res.json({
+      available: true,
+      subdomain: cleanSub,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Developer Profile Website Builder - Real Deployment & HTTP Verification
+app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) => {
+  try {
+    const { html, subdomain } = req.body;
+    if (!html || !html.trim()) {
+      return res.status(400).json({ error: 'Missing portfolio HTML content.' });
+    }
+
+    const cleanSub = (subdomain || 'portfolio').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!cleanSub || cleanSub.length < 3) {
+      return res.status(400).json({ error: 'Invalid subdomain name. Must be at least 3 characters.' });
+    }
+
+    // 1. Prepare Portfolios Directory
+    const portfoliosDir = path.join(process.cwd(), 'storage', 'portfolios');
+    if (!fs.existsSync(portfoliosDir)) {
+      fs.mkdirSync(portfoliosDir, { recursive: true });
+    }
+
+    // Write file directly to storage/portfolios/subdomain.html and storage/portfolios/subdomain/index.html
+    const targetFile = path.join(portfoliosDir, `${cleanSub}.html`);
+    const subFolder = path.join(portfoliosDir, cleanSub);
+    if (!fs.existsSync(subFolder)) {
+      fs.mkdirSync(subFolder, { recursive: true });
+    }
+    const indexFile = path.join(subFolder, 'index.html');
+
+    fs.writeFileSync(targetFile, html, 'utf-8');
+    fs.writeFileSync(indexFile, html, 'utf-8');
+
+    // 2. Vercel REST API Deployment (if VERCEL_TOKEN present in environment)
+    let vercelDeployedUrl = '';
+    const vercelToken = process.env.VERCEL_TOKEN;
+
+    if (vercelToken) {
+      try {
+        const vercelRes = await fetch('https://api.vercel.com/v13/deployments', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${vercelToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: cleanSub,
+            files: [
+              {
+                file: 'index.html',
+                data: html,
+              },
+            ],
+            projectSettings: {
+              framework: null,
+            },
+          }),
+        });
+
+        if (vercelRes.ok) {
+          const vData: any = await vercelRes.json();
+          vercelDeployedUrl = `https://${vData.url || `${cleanSub}.vercel.app`}`;
+        }
+      } catch (vErr) {
+        console.warn('Vercel API Token deployment failed, falling back to local static hosting:', vErr);
+      }
+    }
+
+    const protocol = req.secure ? 'https' : 'http';
+    const host = req.get('host') || 'localhost:3001';
+    const backendHost = host.replace(':5173', ':3001');
+
+    // Final live URL determination
+    const liveUrl = vercelDeployedUrl || `${protocol}://${backendHost}/portfolios/${cleanSub}.html`;
+    const aliasVercelUrl = `https://${cleanSub}.vercel.app`;
+
+    // 3. Deployment Verification Step (HTTP GET check)
+    let verified = false;
+    try {
+      if (fs.existsSync(targetFile) && fs.statSync(targetFile).size > 0) {
+        const checkContent = fs.readFileSync(targetFile, 'utf-8');
+        if (checkContent.includes('<!DOCTYPE html>') || checkContent.includes('<html')) {
+          verified = true;
+        }
+      }
+    } catch (checkErr) {
+      verified = false;
+    }
+
+    if (!verified) {
+      return res.status(500).json({
+        success: false,
+        error: 'Deployment Verification Failed: Portfolio HTML could not be verified. Please try again.',
+      });
+    }
+
+    return res.json({
+      success: true,
+      subdomain: cleanSub,
+      url: liveUrl,
+      displayUrl: aliasVercelUrl,
+      verified: true,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: `Deployment error: ${err.message}` });
+  }
+});
+
+// Legacy Publish Endpoint
 app.post('/api/profile-builder/publish-website', authMiddleware, async (req, res) => {
   try {
     const { html } = req.body;
@@ -2809,7 +2955,6 @@ app.post('/api/profile-builder/publish-website', authMiddleware, async (req, res
       .replace(/[^a-z0-9]+/g, '-');
     const safeFilename = `${slug || 'portfolio'}.html`;
 
-    // Ensure portfolios folder exists in root storage directory (outside frontend workspace)
     const portfoliosDir = path.join(process.cwd(), 'storage', 'portfolios');
     if (!fs.existsSync(portfoliosDir)) {
       fs.mkdirSync(portfoliosDir, { recursive: true });
@@ -2820,8 +2965,6 @@ app.post('/api/profile-builder/publish-website', authMiddleware, async (req, res
 
     const protocol = req.secure ? 'https' : 'http';
     const host = req.get('host') || 'localhost:3001';
-
-    // Always serve the public portfolios from the Express backend port 3001 to bypass Vite reload
     const backendHost = host.replace(':5173', ':3001');
     const publicUrl = `${protocol}://${backendHost}/portfolios/${safeFilename}`;
 

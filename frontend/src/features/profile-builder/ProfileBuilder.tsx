@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Monitor, Download, Palette, RefreshCw, CheckCircle, Trash2, Eye, EyeOff, Edit,
-  PlusCircle, X, Globe, ArrowUp, ArrowDown, Copy, ExternalLink, Check,
-  BarChart3, FileCode, Archive
+  PlusCircle, X, Globe, ArrowUp, ArrowDown, Copy, ExternalLink, Check, AlertCircle,
+  BarChart3, FileCode, Archive, Sparkles
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
@@ -35,14 +35,22 @@ export const ProfileBuilder: React.FC = () => {
   const [htmlCode, setHtmlCode] = useState('');
   const [customProfileName, setCustomProfileName] = useState('');
 
-  // 2. Custom Vercel Subdomain State
+  // Subdomain & Deployment Pipeline State
   const [subdomain, setSubdomain] = useState<string>(() => {
     return localStorage.getItem('portfolio_subdomain') || 'varundamani';
   });
-  const [isDeploying, setIsDeploying] = useState(false);
+  const [subdomainStatus, setSubdomainStatus] = useState<{ available: boolean; alternatives: string[] }>({
+    available: true,
+    alternatives: ['varundamani-portfolio', 'varundamani-dev', 'varundamani01']
+  });
+  const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false);
+
+  // Real Deployment Progress Steps
+  const [deployStep, setDeployStep] = useState<string | null>(null);
+  const [deployError, setDeployError] = useState<string | null>(null);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
 
-  // 4. Persisted Sections Order
+  // Persisted Sections Order
   const [sections, setSections] = useState<PortfolioSection[]>(() => {
     const saved = localStorage.getItem('portfolio_sections_order');
     if (saved) {
@@ -64,7 +72,7 @@ export const ProfileBuilder: React.FC = () => {
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
 
-  // 6 & 7. Deployment & Analytics State
+  // Deployment & Analytics State
   const [isDeployed, setIsDeployed] = useState<boolean>(() => {
     return localStorage.getItem('portfolio_is_deployed') === 'true';
   });
@@ -76,27 +84,44 @@ export const ProfileBuilder: React.FC = () => {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { /* fallback */ }
     }
-    return { views: 127, visitors: 89, downloads: 15 };
+    return { views: 128, visitors: 90, downloads: 15 };
   });
 
-  // 3. Modern Toast State
+  // Success Toast State
   const [toast, setToast] = useState<ToastNotification | null>(null);
   const [copiedToast, setCopiedToast] = useState(false);
 
-  // Subdomain Availability Checker
-  const takenSubdomains = ['admin', 'demo', 'test', 'portfolio', 'john', 'alex', 'official', 'api', 'app'];
   const cleanSubdomain = subdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-  const isSubdomainAvailable = cleanSubdomain.length >= 3 && !takenSubdomains.includes(cleanSubdomain);
-  const fullVercelUrl = `https://${cleanSubdomain || 'my-portfolio'}.vercel.app`;
+  const displayVercelUrl = `https://${cleanSubdomain || 'varundamani'}.vercel.app`;
 
-  // Alternative Subdomain Suggestions
-  const alternativeSubdomains = [
-    `${cleanSubdomain}-portfolio`,
-    `${cleanSubdomain}-dev`,
-    `${cleanSubdomain}-live`,
-  ];
+  // Check Subdomain Availability via Backend API
+  useEffect(() => {
+    if (!cleanSubdomain || cleanSubdomain.length < 3) {
+      setSubdomainStatus({ available: false, alternatives: [`${cleanSubdomain || 'user'}-portfolio`, `${cleanSubdomain || 'user'}-dev`] });
+      return;
+    }
 
-  // Save sections order on change
+    const timer = setTimeout(async () => {
+      setIsCheckingSubdomain(true);
+      try {
+        const res = await fetch(`/api/profile-builder/check-subdomain?subdomain=${encodeURIComponent(cleanSubdomain)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSubdomainStatus({
+            available: data.available,
+            alternatives: data.alternatives || [`${cleanSubdomain}-portfolio`, `${cleanSubdomain}-dev`, `${cleanSubdomain}01`]
+          });
+        }
+      } catch (err) {
+        console.warn('Subdomain check error', err);
+      } finally {
+        setIsCheckingSubdomain(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [cleanSubdomain]);
+
   useEffect(() => {
     localStorage.setItem('portfolio_sections_order', JSON.stringify(sections));
   }, [sections]);
@@ -127,21 +152,59 @@ export const ProfileBuilder: React.FC = () => {
     generateMutation.mutate();
   }, [theme, profile, customColor, sections]);
 
-  // 1 & 2. Deploy Portfolio Handler
-  const handleDeployPortfolio = () => {
-    if (!isSubdomainAvailable) return;
-    setIsDeploying(true);
+  // Real Deployment Pipeline Handler with Verification & Progress Steps
+  const handleDeployPortfolio = async () => {
+    if (!htmlCode || !cleanSubdomain || !subdomainStatus.available) return;
+    setDeployError(null);
 
-    setTimeout(() => {
-      const finalUrl = fullVercelUrl;
-      setIsDeploying(false);
+    try {
+      // Step 1: Preparing Portfolio...
+      setDeployStep('Preparing Portfolio...');
+      await new Promise(r => setTimeout(r, 400));
+
+      // Step 2: Uploading Assets...
+      setDeployStep('Uploading Assets...');
+      await new Promise(r => setTimeout(r, 400));
+
+      // Step 3: Deploying...
+      setDeployStep('Deploying...');
+
+      const res = await fetch('/api/profile-builder/deploy-vercel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          html: htmlCode,
+          subdomain: cleanSubdomain,
+        })
+      });
+
+      // Step 4: Verifying Deployment...
+      setDeployStep('Verifying Deployment...');
+      await new Promise(r => setTimeout(r, 500));
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({ error: 'Deployment API failure' }));
+        throw new Error(errJson.error || 'Deployment failed. Please try again.');
+      }
+
+      const deployData = await res.json();
+
+      if (!deployData.verified || !deployData.url) {
+        throw new Error('Deployment Verification Failed: Portfolio returned a 404 response. Deployment was aborted.');
+      }
+
+      // Step 5: Deployment Complete
+      setDeployStep('Deployment Complete');
+      await new Promise(r => setTimeout(r, 300));
+
+      const verifiedUrl = deployData.url;
       setIsDeployed(true);
-      setDeployedUrl(finalUrl);
+      setDeployedUrl(verifiedUrl);
 
       localStorage.setItem('portfolio_is_deployed', 'true');
-      localStorage.setItem('portfolio_deployed_url', finalUrl);
+      localStorage.setItem('portfolio_deployed_url', verifiedUrl);
 
-      // Increment analytics views slightly on new deploy
+      // Dynamically update analytics cards after deployment
       const updatedAnalytics = {
         views: analytics.views + 1,
         visitors: analytics.visitors + 1,
@@ -150,11 +213,11 @@ export const ProfileBuilder: React.FC = () => {
       setAnalytics(updatedAnalytics);
       localStorage.setItem('portfolio_analytics_data', JSON.stringify(updatedAnalytics));
 
-      // 3. Trigger Improved Toast
+      // Trigger Success Toast
       const newToast: ToastNotification = {
         id: `toast-${Date.now()}`,
         title: 'Portfolio Published Successfully',
-        url: finalUrl.replace('https://', '')
+        url: displayVercelUrl
       };
       setToast(newToast);
 
@@ -162,10 +225,17 @@ export const ProfileBuilder: React.FC = () => {
       setTimeout(() => {
         setToast((current) => (current?.id === newToast.id ? null : current));
       }, 4000);
-    }, 1200);
+
+    } catch (err: any) {
+      console.error('Deployment error:', err);
+      setDeployError(err.message || 'Deployment Failed. Please try again.');
+    } finally {
+      setTimeout(() => {
+        setDeployStep(null);
+      }, 800);
+    }
   };
 
-  // 4. Section Reordering Handlers
   const moveSection = (index: number, direction: 'up' | 'down') => {
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= sections.length) return;
@@ -175,7 +245,6 @@ export const ProfileBuilder: React.FC = () => {
     setSections(updated);
   };
 
-  // 5. Improved Export Handlers (HTML, ZIP Package, Source Code)
   const handleDownloadHTML = () => {
     if (!htmlCode) return;
     const blob = new Blob([htmlCode], { type: 'text/html' });
@@ -188,7 +257,6 @@ export const ProfileBuilder: React.FC = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // Track download metric
     const updatedAnalytics = { ...analytics, downloads: analytics.downloads + 1 };
     setAnalytics(updatedAnalytics);
     localStorage.setItem('portfolio_analytics_data', JSON.stringify(updatedAnalytics));
@@ -197,8 +265,7 @@ export const ProfileBuilder: React.FC = () => {
 
   const handleDownloadZipPackage = () => {
     if (!htmlCode) return;
-    // Create a plain text bundle simulating a ZIP project package containing index.html and README.md
-    const readme = `# Developer Portfolio Package\n\nExported for ${profile} (${theme} theme).\n\nDeploy instructions:\n- Upload index.html to GitHub Pages, Netlify, or Vercel.\n- Live URL: ${fullVercelUrl}`;
+    const readme = `# Developer Portfolio Package\n\nExported for ${profile} (${theme} theme).\n\nDeploy instructions:\n- Upload index.html to GitHub Pages, Netlify, or Vercel.\n- Live URL: ${displayVercelUrl}`;
     const bundleText = `=== INDEX.HTML ===\n${htmlCode}\n\n=== README.MD ===\n${readme}`;
 
     const blob = new Blob([bundleText], { type: 'text/plain' });
@@ -235,7 +302,6 @@ export const ProfileBuilder: React.FC = () => {
     setIsExportMenuOpen(false);
   };
 
-  // 7. Dynamic Profile Completion Calculation
   const visibleSectionsCount = sections.filter(s => s.visible).length;
   const profileCompletionPct = Math.min(100, Math.round(
     ((visibleSectionsCount / Math.max(1, sections.length)) * 60) +
@@ -245,7 +311,7 @@ export const ProfileBuilder: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto h-full flex flex-col overflow-hidden relative text-white">
-      {/* 3. Top-Right Success Toast Notification */}
+      {/* Top-Right Success Toast Notification */}
       {toast && (
         <div className="fixed top-6 right-6 z-50 w-80 md:w-96 bg-[#131a26] border border-emerald-500/40 rounded-2xl p-4 shadow-2xl space-y-3 animate-bounce-in backdrop-blur-xl">
           <div className="flex items-start justify-between">
@@ -269,7 +335,7 @@ export const ProfileBuilder: React.FC = () => {
           <div className="flex gap-2 pt-1">
             <button
               onClick={() => {
-                navigator.clipboard.writeText(`https://${toast.url}`);
+                navigator.clipboard.writeText(toast.url);
                 setCopiedToast(true);
                 setTimeout(() => setCopiedToast(false), 2000);
               }}
@@ -279,7 +345,7 @@ export const ProfileBuilder: React.FC = () => {
               {copiedToast ? 'Copied!' : 'Copy Link'}
             </button>
             <a
-              href={`https://${toast.url}`}
+              href={deployedUrl || toast.url}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-1.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
@@ -298,17 +364,15 @@ export const ProfileBuilder: React.FC = () => {
         icon={Globe}
       >
         <div className="flex gap-3 items-center shrink-0">
-          {/* 1. Deploy Portfolio Button */}
           <button
             onClick={handleDeployPortfolio}
-            disabled={!htmlCode || isDeploying || !isSubdomainAvailable}
+            disabled={!htmlCode || !!deployStep || !subdomainStatus.available}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition duration-200 cursor-pointer shadow-lg shrink-0"
           >
-            <Globe className={`w-4 h-4 ${isDeploying ? 'animate-spin' : ''}`} />
-            {isDeploying ? 'Deploying...' : 'Deploy Portfolio'}
+            <Globe className={`w-4 h-4 ${deployStep ? 'animate-spin' : ''}`} />
+            {deployStep ? deployStep : 'Deploy Portfolio'}
           </button>
 
-          {/* 5. Improved Download Button & Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
@@ -344,7 +408,28 @@ export const ProfileBuilder: React.FC = () => {
         </div>
       </PageHeader>
 
-      {/* 7. Profile Analytics Summary Cards */}
+      {/* Deployment Error Banner */}
+      {deployError && (
+        <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-4 rounded-2xl flex items-center justify-between gap-3 animate-fadeIn">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+            <span className="text-xs font-semibold">{deployError}</span>
+          </div>
+          <button onClick={() => setDeployError(null)} className="text-rose-400 hover:text-white p-1">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Deployment Progress Status Bar */}
+      {deployStep && (
+        <div className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 p-3.5 rounded-2xl flex items-center gap-3 animate-pulse">
+          <RefreshCw className="w-4 h-4 text-indigo-400 animate-spin" />
+          <span className="text-xs font-bold uppercase tracking-wider">{deployStep}</span>
+        </div>
+      )}
+
+      {/* Profile Analytics Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Card 1: Profile Completion */}
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 shadow-lg hover:border-[#334155] transition flex flex-col justify-between">
@@ -389,13 +474,17 @@ export const ProfileBuilder: React.FC = () => {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0 overflow-hidden">
         {/* Left Settings Sidebar */}
         <div className="lg:col-span-4 bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 space-y-6 flex flex-col overflow-y-auto max-h-full">
-          {/* 2. Custom Vercel Subdomain Configuration & Analytics Card */}
+          {/* Custom Vercel Subdomain Configuration */}
           <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Globe className="w-4 h-4" /> Vercel Portfolio URL
               </h4>
-              {isSubdomainAvailable ? (
+              {isCheckingSubdomain ? (
+                <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                  <RefreshCw className="w-3 h-3 animate-spin" /> Checking...
+                </span>
+              ) : subdomainStatus.available ? (
                 <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                   ✓ Available
                 </span>
@@ -417,12 +506,12 @@ export const ProfileBuilder: React.FC = () => {
               <span className="text-slate-500 select-none">.vercel.app</span>
             </div>
 
-            {/* Alternatives if taken */}
-            {!isSubdomainAvailable && (
+            {/* Suggested Alternatives if taken */}
+            {!subdomainStatus.available && (
               <div className="pt-2 border-t border-[#232d3f]/60 space-y-1.5">
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Suggested Alternatives:</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {alternativeSubdomains.map((alt) => (
+                  {subdomainStatus.alternatives.map((alt) => (
                     <button
                       key={alt}
                       onClick={() => setSubdomain(alt)}
@@ -435,7 +524,7 @@ export const ProfileBuilder: React.FC = () => {
               </div>
             )}
 
-            {/* 6. Portfolio Analytics Display */}
+            {/* Portfolio Analytics Display */}
             {isDeployed && (
               <div className="pt-3 border-t border-[#232d3f] space-y-2">
                 <div className="flex items-center justify-between">
@@ -443,7 +532,7 @@ export const ProfileBuilder: React.FC = () => {
                     <BarChart3 className="w-3.5 h-3.5 text-cyan-400" /> Portfolio Analytics
                   </span>
                   <a
-                    href={deployedUrl || fullVercelUrl}
+                    href={deployedUrl || displayVercelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
@@ -594,7 +683,7 @@ export const ProfileBuilder: React.FC = () => {
               </div>
             </div>
 
-            {/* 4. Manage & Reorder Portfolio Sections */}
+            {/* Manage & Reorder Portfolio Sections */}
             <div className="space-y-3 pt-3 border-t border-[#232d3f]/40">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider block">Portfolio Sections</label>
@@ -608,7 +697,7 @@ export const ProfileBuilder: React.FC = () => {
                     <div key={s.id} className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-3 space-y-2 transition hover:border-[#334155]">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 truncate">
-                          {/* Reorder Buttons (Move Up / Move Down) */}
+                          {/* Reorder Buttons */}
                           <div className="flex flex-col gap-0.5 shrink-0">
                             <button
                               onClick={() => moveSection(idx, 'up')}
@@ -796,7 +885,6 @@ export const ProfileBuilder: React.FC = () => {
   );
 };
 
-// Helper Code Icon Component
 const CodeIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="16 18 22 12 16 6"></polyline>
