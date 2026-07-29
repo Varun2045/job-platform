@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FileText, Trash2, Eye, Download, Edit3, Star, Search, UploadCloud,
-  CheckCircle2, AlertCircle, Info, X, HardDrive
+  CheckCircle2, AlertCircle, Info, X, HardDrive, Clock
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
@@ -41,6 +41,22 @@ function formatDateShort(dateStr?: string): string {
   if (d.toDateString() === today.toDateString()) return 'Today';
   
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// Helper: Formats library last updated timestamp
+function formatLastUpdatedLibrary(dateObj?: Date | null): string {
+  if (!dateObj) return 'Recently';
+  const now = new Date();
+  const diffMs = now.getTime() - dateObj.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  
+  return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export const ResumeManager: React.FC = () => {
@@ -372,6 +388,17 @@ export const ResumeManager: React.FC = () => {
   }, 0);
   const totalStorageFormatted = formatBytes(totalSizeBytes);
 
+  const latestUpdatedDate = resumes.reduce((latest: Date | null, r: ExtendedResume) => {
+    const meta = getResumeMeta(r.name, r.content, r.pdf_data);
+    if (!meta.lastUpdated) return latest;
+    const d = new Date(meta.lastUpdated);
+    if (isNaN(d.getTime())) return latest;
+    if (!latest || d.getTime() > latest.getTime()) return d;
+    return latest;
+  }, null);
+
+  const lastUpdatedFormatted = formatLastUpdatedLibrary(latestUpdatedDate);
+
   // Filtered resumes search
   const filteredResumes = resumes.filter((r) => {
     if (!searchQuery.trim()) return true;
@@ -422,8 +449,8 @@ export const ResumeManager: React.FC = () => {
         icon={FileText}
       />
 
-      {/* 7. Resume Statistics Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* 7. Resume Statistics Cards Row (4 Cards) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200 shadow-lg">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">RESUME PROFILES</span>
@@ -457,6 +484,18 @@ export const ResumeManager: React.FC = () => {
           </div>
           <div className="mt-4">
             <span className="text-3xl font-extrabold text-white">{totalStorageFormatted}</span>
+          </div>
+        </div>
+
+        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">LAST UPDATED</span>
+            <div className="p-2 rounded-xl bg-emerald-500/10">
+              <Clock className="w-5 h-5 text-emerald-400" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <span className="text-xl font-extrabold text-white truncate block">{lastUpdatedFormatted}</span>
           </div>
         </div>
       </div>
@@ -729,7 +768,7 @@ export const ResumeManager: React.FC = () => {
                 <object
                   data={previewPdf}
                   type="application/pdf"
-                  className="w-full h-[550px] rounded-xl border border-[#232d3f] bg-white overflow-hidden shadow-inner"
+                  className="w-full h-[460px] rounded-xl border border-[#232d3f] bg-white overflow-hidden shadow-inner"
                 >
                   <div className="p-6 text-center text-xs text-[#94a3b8] space-y-3">
                     <p>Your browser does not support embedded PDF rendering.</p>
