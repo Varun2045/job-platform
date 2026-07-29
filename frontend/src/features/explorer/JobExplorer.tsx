@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, Briefcase, Globe, ExternalLink, X, Sparkles, 
@@ -25,6 +25,32 @@ const expandLocationAliases = (locs: string[]) => {
     if (loc === 'Vadodara') result.push('Baroda');
   });
   return Array.from(new Set(result));
+};
+
+const HighlightText: React.FC<{ text?: string; highlight?: string; className?: string }> = ({ text, highlight, className = '' }) => {
+  if (!text) return null;
+  if (!highlight || !highlight.trim()) return <span className={className}>{text}</span>;
+
+  const tokens = highlight.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return <span className={className}>{text}</span>;
+
+  const escapedTokens = tokens.map(t => t.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')).join('|');
+  const regex = new RegExp(`(${escapedTokens})`, 'gi');
+  const parts = text.split(regex);
+
+  return (
+    <span className={className}>
+      {parts.map((part, i) =>
+        tokens.some(t => part.toLowerCase() === t) ? (
+          <mark key={i} className="bg-indigo-500/30 text-indigo-300 rounded px-0.5 font-bold">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </span>
+  );
 };
 
 export const JobExplorer: React.FC = () => {
@@ -865,7 +891,42 @@ export const JobExplorer: React.FC = () => {
     return true;
   };
 
-  const visibleJobs = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
+  const visibleJobs = useMemo(() => {
+    const base = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
+    const query = debouncedQuery.toLowerCase().trim();
+    if (!query) return base;
+
+    const tokens = query.split(/\s+/).filter(Boolean);
+
+    return base.filter(({ job }: any) => {
+      const skillsText = Array.isArray(job.skills) ? job.skills.join(' ') : (job.skills || '');
+      const tagsText = Array.isArray(job.tags) ? job.tags.join(' ') : (job.tags || '');
+      const techText = Array.isArray(job.techStack) ? job.techStack.join(' ') : (job.techStack || '');
+      const remoteText = (job.isRemote === true || String(job.isRemote).toLowerCase() === 'remote' || job.workMode?.toLowerCase().includes('remote')) ? 'remote' : '';
+
+      const searchableText = [
+        job.title,
+        job.company,
+        job.location,
+        job.description,
+        job.snippet,
+        job.employmentType,
+        job.jobType,
+        job.experienceLevel,
+        job.experience,
+        job.salary,
+        job.salaryRange,
+        job.department,
+        job.workMode,
+        remoteText,
+        skillsText,
+        tagsText,
+        techText,
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return tokens.every(token => searchableText.includes(token));
+    });
+  }, [accumulatedJobs, hiddenJobs, debouncedQuery]);
 
   const hasMore = apiResponse?.pagination?.hasMore;
   const nextCursorToken = apiResponse?.pagination?.nextCursor;
@@ -886,19 +947,20 @@ export const JobExplorer: React.FC = () => {
       <div className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md pb-2 pt-1">
         <div className="flex items-center gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-3.5 w-5 h-5 text-indigo-400" />
+            <Search className="absolute left-4 top-3.5 w-5 h-5 text-indigo-400 pointer-events-none transition-colors" />
             <input
               ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder='Search "Java Spring Boot Bangalore", "React Remote", "AI Engineer"... (Press "/" to focus)'
-              className="w-full bg-[#111827] border border-[#243147] rounded-2xl py-3 pl-12 pr-12 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-md transition-all"
+              className="w-full bg-[#111827] border border-indigo-500/40 hover:border-indigo-500/60 rounded-2xl py-3 pl-12 pr-12 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 focus:shadow-[0_0_15px_rgba(99,102,241,0.25)] shadow-md transition-all"
             />
             {searchQuery && (
               <button 
                 onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
-                className="absolute right-4 top-3.5 text-[#64748b] hover:text-white"
+                className="absolute right-4 top-3.5 text-[#64748b] hover:text-white cursor-pointer p-1 transition-colors"
+                title="Clear search"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1080,10 +1142,18 @@ export const JobExplorer: React.FC = () => {
                     }`}
                   >
                     <div>
-                      <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{job.company}</div>
-                      <div className="text-sm font-bold text-white leading-snug mt-0.5">{job.title}</div>
-                      <div className="text-xs text-[#94a3b8] font-medium mt-1">Experience: {job.experienceLevel || job.experience || '2–5 Years'}</div>
-                      <div className="text-xs text-[#64748b]">Posted: {postedDateStr}</div>
+                      <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                        <HighlightText text={job.company} highlight={debouncedQuery} />
+                      </div>
+                      <div className="text-sm font-bold text-white leading-snug mt-0.5">
+                        <HighlightText text={job.title} highlight={debouncedQuery} />
+                      </div>
+                      <div className="text-xs text-[#94a3b8] font-medium mt-1">
+                        Experience: <HighlightText text={job.experienceLevel || job.experience || '2–5 Years'} highlight={debouncedQuery} />
+                      </div>
+                      <div className="text-xs text-[#64748b]">
+                        Location: <HighlightText text={job.location || 'Remote / India'} highlight={debouncedQuery} /> • Posted: {postedDateStr}
+                      </div>
                     </div>
 
                     <div className="pt-2 border-t border-[#243147]/60 flex items-center justify-between gap-2">
@@ -1188,23 +1258,33 @@ export const JobExplorer: React.FC = () => {
               <div className="space-y-6">
                 {/* Header */}
                 <div className="border-b border-[#243147] pb-4">
-                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{selectedJobItem.company}</span>
-                  <h2 className="text-xl font-extrabold text-white mt-1">{selectedJobItem.title}</h2>
+                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                    <HighlightText text={selectedJobItem.company} highlight={debouncedQuery} />
+                  </span>
+                  <h2 className="text-xl font-extrabold text-white mt-1">
+                    <HighlightText text={selectedJobItem.title} highlight={debouncedQuery} />
+                  </h2>
                 </div>
 
                 {/* Details List */}
                 <div className="space-y-3 bg-[#090d16] border border-[#243147] rounded-xl p-4 text-xs">
                   <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
                     <span className="font-semibold text-[#64748b]">Company Name</span>
-                    <span className="font-bold text-white">{selectedJobItem.company}</span>
+                    <span className="font-bold text-white">
+                      <HighlightText text={selectedJobItem.company} highlight={debouncedQuery} />
+                    </span>
                   </div>
                   <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
                     <span className="font-semibold text-[#64748b]">Job Title</span>
-                    <span className="font-bold text-white">{selectedJobItem.title}</span>
+                    <span className="font-bold text-white">
+                      <HighlightText text={selectedJobItem.title} highlight={debouncedQuery} />
+                    </span>
                   </div>
                   <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
                     <span className="font-semibold text-[#64748b]">Location</span>
-                    <span className="font-bold text-white">{selectedJobItem.location || 'Not Specified'}</span>
+                    <span className="font-bold text-white">
+                      <HighlightText text={selectedJobItem.location || 'Not Specified'} highlight={debouncedQuery} />
+                    </span>
                   </div>
                   <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
                     <span className="font-semibold text-[#64748b]">Work Mode</span>
