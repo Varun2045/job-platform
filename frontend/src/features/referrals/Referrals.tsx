@@ -65,6 +65,14 @@ const getCategoryBorderColor = (category: string): string => {
 export const Referrals: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('contacts');
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+  }, [activeTab]);
+
   const tabs = [
     { id: 'contacts' as Tab, name: 'Company Contacts', icon: Users },
     { id: 'pipeline' as Tab, name: 'Referral Pipeline', icon: Users },
@@ -86,8 +94,13 @@ export const Referrals: React.FC = () => {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+            onClick={() => {
+              setActiveTab(tab.id);
+              window.scrollTo(0, 0);
+              const mainContent = document.querySelector('main');
+              if (mainContent) mainContent.scrollTop = 0;
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
               activeTab === tab.id
                 ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400'
                 : 'text-[#94a3b8] hover:bg-[#1b2535] hover:text-white'

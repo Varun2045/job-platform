@@ -1,6 +1,20 @@
 // deploy latest date parsing fixes
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+    }
+  }, [pathname]);
+
+  return null;
+};
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Sidebar } from './components/Sidebar.js';
 import { Login } from './features/auth/Login.js';
@@ -95,6 +109,7 @@ export const App: React.FC = () => {
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <Router>
+            <ScrollToTop />
             <div className="flex flex-col md:flex-row bg-[#0b0f19] h-screen text-white overflow-hidden">
               {/* Mobile Header Bar */}
               <div className="md:hidden h-14 bg-[#131a26] border-b border-[#232d3f] px-4 flex items-center justify-between shrink-0 z-30">
