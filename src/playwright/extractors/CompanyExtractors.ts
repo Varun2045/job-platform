@@ -124,11 +124,8 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'doordash', name: 'DoorDash', pattern: 'careersatdoordash.com', careerPage: 'https://careersatdoordash.com', jobBoardUrl: 'https://careersatdoordash.com/job-search/' },
 
   // Infrastructure & Global Portals
-  { id: 'bytedance', name: 'ByteDance', pattern: 'joinbytedance.com', careerPage: 'https://joinbytedance.com', jobBoardUrl: 'https://joinbytedance.com/search' },
+  { id: 'bytedance', name: 'ByteDance', pattern: 'bytedance.com', careerPage: 'https://jobs.bytedance.com/en/', jobBoardUrl: 'https://jobs.bytedance.com/en/' },
   { id: 'arm', name: 'ARM', pattern: 'arm.com', careerPage: 'https://careers.arm.com', jobBoardUrl: 'https://careers.arm.com/search-jobs' },
   { id: 'ericsson', name: 'Ericsson', pattern: 'ericsson.com', careerPage: 'https://www.ericsson.com/en/careers', jobBoardUrl: 'https://jobs.ericsson.com' },
   { id: 'nokia', name: 'Nokia', pattern: 'nokia.com', careerPage: 'https://www.nokia.com/about-us/careers', jobBoardUrl: 'https://www.nokia.com/about-us/careers/search-jobs' },
-  { id: 'canonical', name: 'Canonical', pattern: 'canonical.com', careerPage: 'https://canonical.com/careers', jobBoardUrl: 'https://canonical.com/careers/all' },
-  { id: 'datastax', name: 'DataStax', pattern: 'datastax.com', careerPage: 'https://www.datastax.com/company/careers', jobBoardUrl: 'https://www.datastax.com/company/careers' },
-  { id: 'dell', name: 'Dell', pattern: 'dell.com', careerPage: 'https://jobs.dell.com', jobBoardUrl: 'https://jobs.dell.com/' },
 ];

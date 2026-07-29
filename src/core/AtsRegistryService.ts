@@ -61,6 +61,7 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
 
   'Broadcom': { careerPage: 'https://www.broadcom.com/company/careers', jobBoardUrl: 'https://broadcom.wd1.myworkdayjobs.com/External_Career' },
   'Cisco': { careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
+  'Dell': { careerPage: 'https://jobs.dell.com', jobBoardUrl: 'https://dell.wd1.myworkdayjobs.com/External' },
 
   'EY': { careerPage: 'https://www.ey.com/en_gl/careers', jobBoardUrl: 'https://eygbl.wd3.myworkdayjobs.com/EY_Careers' },
   'GE': { careerPage: 'https://jobs.gecareers.com', jobBoardUrl: 'https://ge.wd5.myworkdayjobs.com/GECareers' },
@@ -119,7 +120,7 @@ export class AtsRegistryService {
       name: 'Workday',
       averageExtractionMs: 18,
       companies: [
-        'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'EY', 'Expedia',
+        'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Dell', 'EY', 'Expedia',
         'GE', 'Goldman Sachs', 'Honeywell', 'HP Inc.', 'HPE', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo',
         'Logitech', 'Mastercard', 'Nike', 'NVIDIA', 'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'PwC',
         'Qualcomm', 'Red Hat', 'Salesforce', 'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
@@ -131,8 +132,8 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Adyen', 'Airbnb', 'Anthropic', 'Cloudflare', 'Cockroach Labs',
-        'Databricks', 'Datadog', 'Dropbox', 'Figma', 'GitLab',
+        'Adyen', 'Airbnb', 'Anthropic', 'Canonical', 'Cloudflare', 'Cockroach Labs',
+        'DataStax', 'Databricks', 'Datadog', 'Dropbox', 'Figma', 'GitLab',
         'Grafana Labs', 'Groww', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
         'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio',
         'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
