@@ -191,6 +191,16 @@ const JobMonitoring: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const filteredLogs = logs.filter((log: any) => {
+    const matchesSearch = !searchTerm || 
+      log.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.status?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = statusFilter === 'all' || 
+      (statusFilter === 'success' && log.status === 'success') ||
+      (statusFilter === 'error' && log.status === 'error');
+    return matchesSearch && matchesFilter;
+  });
+
   return (
     <div className="space-y-6">
       {/* Top Header Controls & Refresh Timestamp */}
