@@ -2904,12 +2904,18 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
     const liveUrl = vercelDeployedUrl || `${protocol}://${backendHost}/portfolios/${cleanSub}.html`;
     const aliasVercelUrl = `https://${cleanSub}.vercel.app`;
 
-    // 3. Deployment Verification Step (HTTP GET check)
+    // 3. Deployment Verification Step (Robust Case-Insensitive Verification)
     let verified = false;
     try {
-      if (fs.existsSync(targetFile) && fs.statSync(targetFile).size > 0) {
-        const checkContent = fs.readFileSync(targetFile, 'utf-8');
-        if (checkContent.includes('<!DOCTYPE html>') || checkContent.includes('<html')) {
+      if (fs.existsSync(targetFile) && fs.statSync(targetFile).size > 50) {
+        const checkContent = fs.readFileSync(targetFile, 'utf-8').toLowerCase();
+        if (
+          checkContent.includes('<!doctype html') ||
+          checkContent.includes('<html') ||
+          checkContent.includes('<head') ||
+          checkContent.includes('<body') ||
+          checkContent.includes('<div')
+        ) {
           verified = true;
         }
       }
@@ -2920,7 +2926,7 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
     if (!verified) {
       return res.status(500).json({
         success: false,
-        error: 'Deployment Verification Failed: Portfolio HTML could not be verified. Please try again.',
+        error: 'Deployment Verification Failed: Portfolio HTML payload was invalid or empty. Please try again.',
       });
     }
 

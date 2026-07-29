@@ -154,17 +154,30 @@ export const ProfileBuilder: React.FC = () => {
 
   // Real Deployment Pipeline Handler with Verification & Progress Steps
   const handleDeployPortfolio = async () => {
-    if (!htmlCode || !cleanSubdomain || !subdomainStatus.available) return;
+    if (!cleanSubdomain || !subdomainStatus.available) return;
     setDeployError(null);
 
     try {
       // Step 1: Preparing Portfolio...
       setDeployStep('Preparing Portfolio...');
-      await new Promise(r => setTimeout(r, 400));
+      let currentHtml = htmlCode;
+      if (!currentHtml || currentHtml.trim() === '') {
+        const genRes = await fetch('/api/profile-builder/generate-website', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme, profile, customColor, sections })
+        });
+        if (genRes.ok) {
+          const genJson = await genRes.json();
+          currentHtml = genJson.html || '';
+          setHtmlCode(currentHtml);
+        }
+      }
+      await new Promise(r => setTimeout(r, 300));
 
       // Step 2: Uploading Assets...
       setDeployStep('Uploading Assets...');
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 300));
 
       // Step 3: Deploying...
       setDeployStep('Deploying...');
@@ -173,7 +186,7 @@ export const ProfileBuilder: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          html: htmlCode,
+          html: currentHtml,
           subdomain: cleanSubdomain,
         })
       });
