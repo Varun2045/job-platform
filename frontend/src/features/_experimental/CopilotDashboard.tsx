@@ -38,6 +38,71 @@ export const CopilotDashboard: React.FC = () => {
     }
   };
 
+  const getTechnologyResources = (title: string, description: string = '') => {
+    const text = `${title} ${description}`.toLowerCase();
+
+    let docUrl = '';
+    let tutUrl = '';
+    let pracUrl = '';
+
+    if (text.includes('react')) {
+      docUrl = 'https://react.dev';
+      tutUrl = 'https://www.youtube.com/watch?v=bMknfKXIFA8';
+      pracUrl = 'https://react.dev/learn';
+    } else if (text.includes('typescript')) {
+      docUrl = 'https://www.typescriptlang.org/docs/';
+      tutUrl = 'https://www.youtube.com/watch?v=d56mG7DezGs';
+      pracUrl = 'https://www.typescriptlang.org/play';
+    } else if (text.includes('node')) {
+      docUrl = 'https://nodejs.org/docs/latest/api/';
+      tutUrl = 'https://www.youtube.com/watch?v=TlB_eWDSMt4';
+      pracUrl = 'https://nodeschool.io/';
+    } else if (text.includes('docker')) {
+      docUrl = 'https://docs.docker.com/';
+      tutUrl = 'https://www.youtube.com/watch?v=3c-iBn73dDE';
+      pracUrl = 'https://labs.play-with-docker.com/';
+    } else if (text.includes('kubernetes') || text.includes('k8s')) {
+      docUrl = 'https://kubernetes.io/docs/';
+      tutUrl = 'https://www.youtube.com/watch?v=X48VuDVv0do';
+      pracUrl = 'https://killercoda.com/playgrounds';
+    } else if (text.includes('postgres') || text.includes('sql')) {
+      docUrl = 'https://www.postgresql.org/docs/';
+      tutUrl = 'https://www.youtube.com/watch?v=qw--VYLpxG4';
+      pracUrl = 'https://sqlbolt.com/';
+    } else if (text.includes('go') || text.includes('golang')) {
+      docUrl = 'https://go.dev/doc/';
+      tutUrl = 'https://www.youtube.com/watch?v=un6ZyFkqFKo';
+      pracUrl = 'https://go.dev/tour/';
+    } else if (text.includes('python')) {
+      docUrl = 'https://docs.python.org/3/';
+      tutUrl = 'https://www.youtube.com/watch?v=rfscVS0vtbw';
+      pracUrl = 'https://futurecoder.io/';
+    } else if (text.includes('fastapi')) {
+      docUrl = 'https://fastapi.tiangolo.com/';
+      tutUrl = 'https://www.youtube.com/watch?v=tLKKmouUams';
+      pracUrl = 'https://fastapi.tiangolo.com/tutorial/';
+    } else if (text.includes('next')) {
+      docUrl = 'https://nextjs.org/docs/';
+      tutUrl = 'https://www.youtube.com/watch?v=wm5gMKCORLk';
+      pracUrl = 'https://nextjs.org/learn/';
+    } else if (text.includes('aws') || text.includes('amazon')) {
+      docUrl = 'https://docs.aws.amazon.com/';
+      tutUrl = 'https://www.youtube.com/watch?v=ulprqHHWlng';
+      pracUrl = 'https://aws.amazon.com/getting-started/hands-on/';
+    } else {
+      const topic = encodeURIComponent(title.replace(/^learn\s+/i, '').replace(/\s+fundamentals$/i, '').trim());
+      docUrl = `https://devdocs.io/#q=${topic}`;
+      tutUrl = `https://www.youtube.com/results?search_query=${topic}+tutorial+freecodecamp`;
+      pracUrl = `https://scrimba.com/search?q=${topic}`;
+    }
+
+    return [
+      { name: 'Documentation', url: docUrl },
+      { name: 'Tutorial', url: tutUrl },
+      { name: 'Practice', url: pracUrl }
+    ];
+  };
+
   const defaultRoadmapTasks = [
     {
       id: 'task-typescript',
@@ -45,12 +110,7 @@ export const CopilotDashboard: React.FC = () => {
       description: 'Master static typing, interfaces, generics, type guards, and strict compiler configurations for production web applications.',
       estimatedHours: 8,
       estimatedTime: '6–8 hours',
-      difficulty: 'Beginner',
-      resources: [
-        { name: 'Documentation', url: 'https://www.typescriptlang.org/docs/' },
-        { name: 'Tutorial', url: 'https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html' },
-        { name: 'Practice', url: 'https://www.typescriptlang.org/play' }
-      ]
+      difficulty: 'Beginner'
     },
     {
       id: 'task-docker',
@@ -58,12 +118,7 @@ export const CopilotDashboard: React.FC = () => {
       description: 'Containerize backend APIs and frontend applications using multi-stage Dockerfiles, Docker Compose networks, and registry publishing.',
       estimatedHours: 6,
       estimatedTime: '4–6 hours',
-      difficulty: 'Intermediate',
-      resources: [
-        { name: 'Documentation', url: 'https://docs.docker.com/get-started/' },
-        { name: 'Tutorial', url: 'https://docker-curriculum.com/' },
-        { name: 'Practice', url: 'https://labs.play-with-docker.com/' }
-      ]
+      difficulty: 'Intermediate'
     },
     {
       id: 'task-kubernetes',
@@ -71,12 +126,7 @@ export const CopilotDashboard: React.FC = () => {
       description: 'Deploy, auto-scale, and manage container workloads using Pods, StatefulSets, Ingress Controllers, and Helm chart configurations.',
       estimatedHours: 12,
       estimatedTime: '10–12 hours',
-      difficulty: 'Advanced',
-      resources: [
-        { name: 'Documentation', url: 'https://kubernetes.io/docs/home/' },
-        { name: 'Tutorial', url: 'https://kubernetes.io/docs/tutorials/' },
-        { name: 'Practice', url: 'https://killercoda.com/playgrounds' }
-      ]
+      difficulty: 'Advanced'
     },
     {
       id: 'task-postgresql',
@@ -84,12 +134,7 @@ export const CopilotDashboard: React.FC = () => {
       description: 'Optimize complex relational database queries using B-tree/GIN indexes, EXPLAIN ANALYZE execution plans, and PgBouncer connection pooling.',
       estimatedHours: 7,
       estimatedTime: '5–7 hours',
-      difficulty: 'Intermediate',
-      resources: [
-        { name: 'Documentation', url: 'https://www.postgresql.org/docs/' },
-        { name: 'Tutorial', url: 'https://postgresqltutorial.com/' },
-        { name: 'Practice', url: 'https://pgtunes.leopard.in.ua/' }
-      ]
+      difficulty: 'Intermediate'
     }
   ];
 
@@ -405,11 +450,7 @@ export const CopilotDashboard: React.FC = () => {
                       ...t,
                       estimatedTime: t.estimatedTime || (t.estimatedHours ? `${Math.max(1, Math.round(t.estimatedHours * 0.7))}–${t.estimatedHours} hours` : '6–8 hours'),
                       difficulty: t.difficulty || (t.estimatedHours > 10 ? 'Advanced' : t.estimatedHours > 5 ? 'Intermediate' : 'Beginner'),
-                      resources: t.resources || [
-                        { name: 'Documentation', url: 'https://developer.mozilla.org/' },
-                        { name: 'Tutorial', url: 'https://freecodecamp.org/' },
-                        { name: 'Practice', url: 'https://leetcode.com/' }
-                      ]
+                      resources: getTechnologyResources(t.title, t.description)
                     }));
 
                     const completedTasks = tasks.filter((t: any) => (roadmapProgress[t.id] ?? (t.completed ? 100 : 0)) === 100).length;
