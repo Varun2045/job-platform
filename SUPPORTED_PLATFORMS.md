@@ -14,8 +14,9 @@ These recruitment engines are extracted using native DOM parsers delivering ~15m
 | **Greenhouse** | Native ATS | 15ms | Airbnb, Canva, Cloudflare, Coinbase, Datadog, Figma, OpenAI, Stripe, Vercel |
 | **Lever** | Native ATS | 16ms | Block, CircleCI, Discord, JetBrains, Miro, Rippling |
 | **Ashby** | Native ATS | 14ms | Anthropic, Cursor, Linear, Perplexity, Ramp, Scale AI |
-| **SmartRecruiters** | Native ATS | 20ms | Bosch, Equinix, IKEA, LinkedIn, Square, Ubisoft, Visa |
-| **Taleo** | Native ATS | 25ms | Bank of America, Boeing, Caterpillar, FedEx, Lockheed Martin |
+| **SmartRecruiters** | Native ATS | 20ms | Bosch, Freshworks, Ubisoft |
+| **Taleo** | Native ATS | 25ms | Boeing, Caterpillar, FedEx, Lockheed Martin |
+| **Oracle Cloud** | Native ATS | 22ms | Honeywell, JPMorgan Chase, KPMG, Oracle |
 
 ---
 

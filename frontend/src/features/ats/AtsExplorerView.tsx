@@ -404,7 +404,9 @@ export const AtsExplorerView: React.FC = () => {
             </div>
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">Native ATS Engines</p>
-              <p className="text-2xl font-black text-white">6 Parsers</p>
+              <p className="text-2xl font-black text-white">
+                {overview.groups.find(g => g.id === 'native-ats' || g.category === 'Native ATS')?.parsers.length || 7} Parsers
+              </p>
             </div>
           </div>
 
