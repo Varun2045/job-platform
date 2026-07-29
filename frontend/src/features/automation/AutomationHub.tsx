@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Download, Clock, Activity, AlertCircle, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight, Mail, Bell } from 'lucide-react';
+import { Calendar, Download, Clock, Activity, Play, Pause, RotateCcw, FileText, CheckCircle, XCircle, TrendingUp, Database, Server, Plus, Trash2, ChevronLeft, ChevronRight, Mail, Bell } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 type Tab = 'monitoring' | 'email' | 'calendar';
