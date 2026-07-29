@@ -985,8 +985,6 @@ const EmailAutomation: React.FC = () => {
         </div>
       )}
     </div>
-  );
-};
 
 const CalendarAutomation: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -996,9 +994,21 @@ const CalendarAutomation: React.FC = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
 
+  // Toast Notifications
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Deletion & Multi-event State
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [selectedDayEventsModal, setSelectedDayEventsModal] = useState<{ date: Date; events: any[] } | null>(null);
+
   // 5. Enhanced Google Calendar Sync Stats
   const [lastSyncedTime, setLastSyncedTime] = useState<string>('2 minutes ago');
   const [nextSyncTime, setNextSyncTime] = useState<string>('In 13 minutes');
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3500);
+  };
 
   const [events, setEvents] = useState([
     { id: '1', title: 'Technical Interview - Google', start: new Date('2026-07-15T10:00:00'), end: new Date('2026-07-15T11:30:00'), type: 'interview', company: 'Google', description: 'Technical interview with the engineering team' },
@@ -1015,6 +1025,24 @@ const CalendarAutomation: React.FC = () => {
       .then(data => {
         if (data && typeof data.linked === 'boolean') {
           setIsConnected(data.linked);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch initial calendar events
+    fetch('/api/calendar')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setEvents(data.map((e: any) => ({
+            id: e.id || String(Date.now()),
+            title: e.title,
+            start: new Date(e.startTime || e.start),
+            end: new Date(e.endTime || e.end),
+            type: e.type || 'interview',
+            company: e.company || '',
+            description: e.description || ''
+          })));
         }
       })
       .catch(() => {});
@@ -1043,27 +1071,29 @@ const CalendarAutomation: React.FC = () => {
         throw new Error('OAuth URL not returned from server');
       }
     } catch (err: any) {
-      alert(`Failed to start Google Calendar connection: ${err.message}`);
+      showToast(`Failed to start Google Calendar connection: ${err.message}`, 'error');
     }
   };
 
   const disconnectGoogleCalendar = () => {
     setIsConnected(false);
     setAutoSync(false);
+    showToast('Google Calendar disconnected.');
   };
 
   const syncNow = () => {
     setLastSyncedTime('Just now');
     setNextSyncTime('In 15 minutes');
-    alert('Synced successfully with Google Calendar!');
+    showToast('✓ Synced successfully with Google Calendar.');
   };
 
   const createEvent = () => {
     setEditingEvent(null);
+    const nowStr = new Date().toISOString().slice(0, 16);
     setNewEvent({
       title: '',
-      start: '',
-      end: '',
+      start: nowStr,
+      end: nowStr,
       type: 'interview',
       company: '',
       description: ''
@@ -1084,19 +1114,63 @@ const CalendarAutomation: React.FC = () => {
     setShowEventModal(true);
   };
 
-  const deleteEvent = (id: string) => {
-    if (window.confirm('Delete this event?')) {
-      setEvents(events.filter(e => e.id !== id));
+  const initiateDelete = (id: string) => {
+    setConfirmDeleteId(id);
+  };
+
+  const handleConfirmDelete = (id: string) => {
+    try {
+      setEvents(prev => prev.filter(e => e.id !== id));
+      setConfirmDeleteId(null);
+      setShowEventModal(false);
+      showToast('✓ Event deleted successfully.', 'success');
+
+      fetch(`/api/calendar/${id}`, { method: 'DELETE' }).catch(() => {});
+    } catch (err: any) {
+      showToast(`Failed to delete event: ${err.message}`, 'error');
     }
   };
 
   const saveEvent = () => {
-    if (editingEvent) {
-      setEvents(events.map(e => e.id === editingEvent.id ? { ...e, ...newEvent, start: new Date(newEvent.start), end: new Date(newEvent.end) } : e));
-    } else {
-      setEvents([...events, { ...newEvent, id: Date.now().toString(), start: new Date(newEvent.start), end: new Date(newEvent.end) }]);
+    if (!newEvent.title || !newEvent.start || !newEvent.end) return;
+
+    const eventPayload = {
+      id: editingEvent ? editingEvent.id : Date.now().toString(),
+      title: newEvent.title,
+      start: new Date(newEvent.start),
+      end: new Date(newEvent.end),
+      type: newEvent.type,
+      company: newEvent.company || '',
+      description: newEvent.description || ''
+    };
+
+    try {
+      if (editingEvent) {
+        setEvents(events.map(e => e.id === editingEvent.id ? eventPayload : e));
+        showToast('✓ Event updated successfully.');
+      } else {
+        setEvents(prev => [...prev, eventPayload]);
+        showToast('✓ Event created successfully.');
+      }
+
+      fetch('/api/calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: eventPayload.id,
+          title: eventPayload.title,
+          startTime: eventPayload.start.toISOString(),
+          endTime: eventPayload.end.toISOString(),
+          type: eventPayload.type,
+          company: eventPayload.company,
+          description: eventPayload.description
+        })
+      }).catch(() => {});
+
+      setShowEventModal(false);
+    } catch (err: any) {
+      showToast(`Failed to save event: ${err.message}`, 'error');
     }
-    setShowEventModal(false);
   };
 
   // 1. Color-Code Calendar Events Mapping
@@ -1158,10 +1232,10 @@ const CalendarAutomation: React.FC = () => {
           <div key={day} className="text-center text-xs font-bold text-[#94a3b8] py-2">{day}</div>
         ))}
         {days.map(({ date, isCurrentMonth }, idx) => {
-          const dayEvents = events.filter(e => {
-            const eventDate = new Date(e.start);
-            return eventDate.toDateString() === date.toDateString();
-          });
+          // 2. Support Multiple Events Per Calendar Day sorted chronologically
+          const dayEvents = events
+            .filter(e => new Date(e.start).toDateString() === date.toDateString())
+            .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
           return (
             <div
@@ -1185,7 +1259,7 @@ const CalendarAutomation: React.FC = () => {
                   >
                     {event.title}
 
-                    {/* 2. Hover Event Tooltip */}
+                    {/* Hover Event Tooltip */}
                     <div className="absolute left-0 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
                       <h5 className="text-xs font-bold text-white">{event.title}</h5>
                       <p className="text-[10px] text-slate-300 font-medium">
@@ -1203,8 +1277,19 @@ const CalendarAutomation: React.FC = () => {
                     </div>
                   </div>
                 ))}
+
+                {/* Multi-event Indicator Button */}
                 {dayEvents.length > 2 && (
-                  <span className="text-[9px] text-[#6b7280]">+{dayEvents.length - 2} more</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedDayEventsModal({ date, events: dayEvents });
+                    }}
+                    className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 hover:underline block cursor-pointer transition-colors mt-0.5"
+                  >
+                    +{dayEvents.length - 2} More
+                  </button>
                 )}
               </div>
             </div>
@@ -1236,12 +1321,15 @@ const CalendarAutomation: React.FC = () => {
           <React.Fragment key={hour}>
             <div className="text-xs text-[#94a3b8] py-2 text-right pr-2">{`${hour + 8}:00`}</div>
             {days.map(date => {
-              const hourEvents = events.filter(e => {
-                const eventDate = new Date(e.start);
-                return eventDate.toDateString() === date.toDateString() && eventDate.getHours() === hour + 8;
-              });
+              const hourEvents = events
+                .filter(e => {
+                  const eventDate = new Date(e.start);
+                  return eventDate.toDateString() === date.toDateString() && eventDate.getHours() === hour + 8;
+                })
+                .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+
               return (
-                <div key={date.toISOString()} className="min-h-12 p-1 bg-[#1b2535] border border-[#232d3f] rounded">
+                <div key={date.toISOString()} className="min-h-12 p-1 bg-[#1b2535] border border-[#232d3f] rounded space-y-1">
                   {hourEvents.map(event => (
                     <div
                       key={event.id}
@@ -1250,7 +1338,6 @@ const CalendarAutomation: React.FC = () => {
                     >
                       {event.title}
 
-                      {/* 2. Hover Event Tooltip */}
                       <div className="absolute left-0 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
                         <h5 className="text-xs font-bold text-white">{event.title}</h5>
                         <p className="text-[10px] text-slate-300 font-medium">
@@ -1283,25 +1370,34 @@ const CalendarAutomation: React.FC = () => {
     return (
       <div className="space-y-1">
         {hours.map(hour => {
-          const hourEvents = events.filter(e => {
-            const eventDate = new Date(e.start);
-            return eventDate.toDateString() === currentDate.toDateString() && eventDate.getHours() === hour;
-          });
+          const hourEvents = events
+            .filter(e => {
+              const eventDate = new Date(e.start);
+              return eventDate.toDateString() === currentDate.toDateString() && eventDate.getHours() === hour;
+            })
+            .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
           return (
             <div key={hour} className="flex gap-2">
               <div className="w-16 text-xs text-[#94a3b8] py-2 text-right pr-2">{`${hour}:00`}</div>
-              <div className="flex-1 min-h-12 p-2 bg-[#1b2535] border border-[#232d3f] rounded">
+              <div className="flex-1 min-h-12 p-2 bg-[#1b2535] border border-[#232d3f] rounded space-y-2">
                 {hourEvents.map(event => (
                   <div
                     key={event.id}
-                    className={`p-2 rounded-lg ${getEventColor(event.type)} relative group/pill`}
+                    className={`p-2 rounded-lg ${getEventColor(event.type)} relative group/pill flex justify-between items-center`}
                     onClick={() => editEvent(event)}
                   >
-                    <span className="text-xs font-semibold block">{event.title}</span>
-                    <span className="text-[9px] text-[#94a3b8]">{new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <div>
+                      <span className="text-xs font-semibold block">{event.title}</span>
+                      <span className="text-[9px] text-[#94a3b8]">{new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); initiateDelete(event.id); }}
+                      className="p-1 hover:bg-rose-500/20 text-rose-400 rounded transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
 
-                    {/* 2. Hover Event Tooltip */}
                     <div className="absolute left-0 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
                       <h5 className="text-xs font-bold text-white">{event.title}</h5>
                       <p className="text-[10px] text-slate-300 font-medium">
@@ -1358,13 +1454,12 @@ const CalendarAutomation: React.FC = () => {
                 <button className="p-1.5 hover:bg-white/10 rounded transition-colors cursor-pointer" onClick={() => editEvent(event)}>
                   <FileText className="w-4 h-4" />
                 </button>
-                <button className="p-1.5 hover:bg-white/10 rounded transition-colors text-red-400 cursor-pointer" onClick={() => deleteEvent(event.id)}>
+                <button className="p-1.5 hover:bg-white/10 rounded transition-colors text-red-400 cursor-pointer" onClick={() => initiateDelete(event.id)}>
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* 2. Hover Event Tooltip */}
             <div className="absolute left-4 bottom-full mb-1 hidden group-hover/pill:block z-50 w-56 bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 shadow-2xl space-y-1 pointer-events-none text-left backdrop-blur-xl">
               <h5 className="text-xs font-bold text-white">{event.title}</h5>
               <p className="text-[10px] text-slate-300 font-medium">
@@ -1393,7 +1488,23 @@ const CalendarAutomation: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Toast Notification Banner */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-[70] px-4 py-3 rounded-xl border shadow-2xl flex items-center gap-2.5 backdrop-blur-xl text-xs font-bold transition-all ${
+          toast.type === 'success'
+            ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40'
+            : 'bg-rose-950/90 text-rose-300 border-rose-500/40'
+        }`}>
+          {toast.type === 'success' ? (
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+          ) : (
+            <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          )}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
       {/* 5. Enhanced Google Calendar Integration Card */}
       <div className="bg-[#111827] border border-[#243147] rounded-2xl p-6 shadow-md space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#243147] pb-4">
@@ -1675,7 +1786,7 @@ const CalendarAutomation: React.FC = () => {
         </div>
       </div>
 
-      {/* Event Modal */}
+      {/* Event Edit / Create Modal */}
       {showEventModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl w-full max-w-md">
@@ -1753,8 +1864,20 @@ const CalendarAutomation: React.FC = () => {
                   className="w-full bg-[#1b2535] border border-[#232d3f] rounded-xl px-4 py-2 text-sm text-white resize-none"
                 />
               </div>
-              <div className="flex gap-3">
+              
+              {/* 1. Add Red Delete Button alongside Update & Cancel */}
+              <div className="flex gap-3 pt-2">
+                {editingEvent && (
+                  <button
+                    type="button"
+                    onClick={() => initiateDelete(editingEvent.id)}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-rose-600/20 border border-rose-500/30 hover:bg-rose-600 text-rose-300 hover:text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Delete
+                  </button>
+                )}
                 <button
+                  type="button"
                   onClick={saveEvent}
                   disabled={!newEvent.title || !newEvent.start || !newEvent.end}
                   className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer"
@@ -1762,12 +1885,116 @@ const CalendarAutomation: React.FC = () => {
                   {editingEvent ? 'Update' : 'Create'}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowEventModal(false)}
                   className="flex-1 flex items-center justify-center gap-2 bg-[#232d3f] hover:bg-[#1f2937] text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-[#131a26] border border-rose-500/40 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center gap-3 text-rose-400">
+              <Trash2 className="w-6 h-6 shrink-0" />
+              <h4 className="text-base font-bold text-white">Delete Event</h4>
+            </div>
+            <p className="text-xs text-[#94a3b8] leading-relaxed">
+              Are you sure you want to delete this event? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => handleConfirmDelete(confirmDeleteId)}
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer shadow-md"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteId(null)}
+                className="flex-1 bg-[#232d3f] hover:bg-[#1f2937] text-white text-xs font-bold py-2 rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Multiple Events Per Day Popover Modal */}
+      {selectedDayEventsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-[#232d3f] pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-indigo-400" />
+                  Events for {selectedDayEventsModal.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </h3>
+                <p className="text-[11px] text-[#94a3b8] mt-0.5">
+                  {selectedDayEventsModal.events.length} events scheduled
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDayEventsModal(null)}
+                className="text-[#94a3b8] hover:text-white cursor-pointer"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+              {selectedDayEventsModal.events.map((event) => (
+                <div
+                  key={event.id}
+                  onClick={() => {
+                    setSelectedDayEventsModal(null);
+                    editEvent(event);
+                  }}
+                  className={`p-3 rounded-xl border ${getEventColor(event.type)} cursor-pointer hover:opacity-90 transition-opacity flex justify-between items-center gap-3`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-white block truncate">{event.title}</span>
+                    <span className="text-[10px] opacity-80 font-mono block mt-0.5">
+                      ⏰ {new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-black/20 capitalize shrink-0">
+                    {event.type.replace('-', ' ')}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const dateStr = selectedDayEventsModal.date.toISOString().slice(0, 16);
+                  setSelectedDayEventsModal(null);
+                  setNewEvent({ title: '', start: dateStr, end: dateStr, type: 'interview', company: '', description: '' });
+                  setEditingEvent(null);
+                  setShowEventModal(true);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Event
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedDayEventsModal(null)}
+                className="px-3.5 py-2 bg-[#232d3f] hover:bg-[#1f2937] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
