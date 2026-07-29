@@ -57,8 +57,8 @@ export interface AtsRegistryOverview {
 
 // Verified Workday URLs Dictionary
 const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
-  'Adobe': { careerPage: 'https://www.adobe.com/careers.html', jobBoardUrl: 'https://adobe.wd5.myworkdayjobs.com/external_experience' },
-  'AMD': { careerPage: 'https://www.amd.com/en/corporate/careers.html', jobBoardUrl: 'https://amd.wd1.myworkdayjobs.com/External' },
+  'Adobe': { careerPage: 'https://www.adobe.com/careers.html', jobBoardUrl: 'https://adobe.wd5.myworkdayjobs.com/external_experienced' },
+
   'Broadcom': { careerPage: 'https://www.broadcom.com/company/careers', jobBoardUrl: 'https://broadcom.wd1.myworkdayjobs.com/External_Career' },
   'Cisco': { careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
   'Dell': { careerPage: 'https://jobs.dell.com', jobBoardUrl: 'https://dell.wd1.myworkdayjobs.com/External' },
@@ -84,9 +84,9 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'PayPal': { careerPage: 'https://www.paypal.com/us/webapps/mpp/jobs', jobBoardUrl: 'https://paypal.wd1.myworkdayjobs.com/paypal-careers' },
   'Zoom': { careerPage: 'https://careers.zoom.us', jobBoardUrl: 'https://zoom.wd5.myworkdayjobs.com/Zoom' },
   'PwC': { careerPage: 'https://www.pwc.com/careers', jobBoardUrl: 'https://pwc.wd1.myworkdayjobs.com/PwC_Careers' },
-  'Akamai': { careerPage: 'https://www.akamai.com/careers', jobBoardUrl: 'https://akamai.wd1.myworkdayjobs.com/External' },
+  'BrowserStack': { careerPage: 'https://www.browserstack.com/careers', jobBoardUrl: 'https://browserstack.wd3.myworkdayjobs.com/External' },
   'Autodesk': { careerPage: 'https://www.autodesk.com/careers', jobBoardUrl: 'https://autodesk.wd1.myworkdayjobs.com/Ext' },
-  'BlackRock': { careerPage: 'https://www.blackrock.com/corporate/careers', jobBoardUrl: 'https://blackrock.wd1.myworkdayjobs.com/BlackRock_Careers' },
+  'BlackRock': { careerPage: 'https://www.blackrock.com/corporate/careers', jobBoardUrl: 'https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional' },
   'Expedia': { careerPage: 'https://www.expediagroup.com/careers', jobBoardUrl: 'https://expedia.wd5.myworkdayjobs.com/External' },
   'HP Inc.': { careerPage: 'https://jobs.hp.com', jobBoardUrl: 'https://hp.wd5.myworkdayjobs.com/External' },
   'HPE': { careerPage: 'https://careers.hpe.com', jobBoardUrl: 'https://hpe.wd5.myworkdayjobs.com/External' },
@@ -103,7 +103,6 @@ const LEVER_KNOWN_URLS: Record<string, string> = {};
 
 // Taleo companies have moved to modern portals (taleo.net subdomains are dead)
 const TALEO_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
-  'Bank of America':  { careerPage: 'https://careers.bankofamerica.com', jobBoardUrl: 'https://careers.bankofamerica.com' },
   'Boeing':           { careerPage: 'https://jobs.boeing.com', jobBoardUrl: 'https://jobs.boeing.com' },
   'Caterpillar':      { careerPage: 'https://careers.caterpillar.com/en/search-jobs', jobBoardUrl: 'https://careers.caterpillar.com/en/search-jobs' },
   'FedEx':            { careerPage: 'https://careers.fedex.com', jobBoardUrl: 'https://careers.fedex.com' },
@@ -120,7 +119,7 @@ export class AtsRegistryService {
       name: 'Workday',
       averageExtractionMs: 18,
       companies: [
-        'Adobe', 'Akamai', 'AMD', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Dell', 'EY', 'Expedia',
+        'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Dell', 'EY', 'Expedia',
         'GE', 'Goldman Sachs', 'Honeywell', 'HP Inc.', 'HPE', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo',
         'Logitech', 'Mastercard', 'Nike', 'NVIDIA', 'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'PwC',
         'Qualcomm', 'Red Hat', 'Salesforce', 'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
@@ -132,7 +131,7 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Adyen', 'Airbnb', 'Asana', 'Brex', 'Canonical', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'Confluent',
+        'Adyen', 'Airbnb', 'Anthropic', 'Canonical', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'Confluent',
         'DataStax', 'Databricks', 'Datadog', 'dbt Labs', 'Docker', 'Dropbox', 'Figma', 'GitLab',
         'Grafana Labs', 'Groww', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
         'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio',
@@ -151,21 +150,21 @@ export class AtsRegistryService {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Anthropic', 'Canva', 'Cursor', 'Discord', 'ElevenLabs', 'LangChain', 'Linear', 'Loom', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
+      companies: ['Canva', 'Cursor', 'Discord', 'ElevenLabs', 'LangChain', 'Linear', 'Loom', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
       companyDetails: [],
     },
     {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Block', 'Bosch', 'CircleCI', 'DoorDash', 'Equinix', 'IKEA', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
+      companies: ['Bosch', 'CircleCI', 'DoorDash', 'Equinix', 'IKEA', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
       companyDetails: [],
     },
     {
       id: 'taleo',
       name: 'Taleo',
       averageExtractionMs: 25,
-      companies: ['Bank of America', 'Boeing', 'Caterpillar', 'FedEx', 'Lockheed Martin', 'UnitedHealth'],
+      companies: ['Boeing', 'Caterpillar', 'FedEx', 'Lockheed Martin', 'UnitedHealth'],
       companyDetails: [],
     },
   ];
@@ -206,7 +205,7 @@ export class AtsRegistryService {
     };
 
     const SMARTRECRUITERS_SLUG_OVERRIDES: Record<string, string> = {
-      'Block': 'Block1',
+      'Bosch': 'BoschGroup',
       'CircleCI': 'CircleCI',
       'DoorDash': 'DoorDash',
       'Miro': 'RealtimeBoard',
@@ -220,6 +219,9 @@ export class AtsRegistryService {
       }
       if (name === 'Razorpay') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited', jobBoardNeedsReview: false };
+      }
+      if (name === 'Anthropic') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/anthropic', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }
