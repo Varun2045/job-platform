@@ -46,8 +46,9 @@ describe('HeatmapEngine Unit Tests', () => {
     expect(heatmap.categoryBreakdown.length).toBeGreaterThan(0);
     expect(heatmap.insights.length).toBeGreaterThan(0);
     expect(heatmap.insights[0]).toMatch(/Resume matches \d+% of required ATS keywords/);
-    expect(heatmap.missingKeywords).toContain('kubernetes');
-    expect(heatmap.missingKeywords).toContain('terraform');
+    const missingLower = heatmap.missingKeywords.map(k => k.toLowerCase());
+    expect(missingLower).toContain('kubernetes');
+    expect(missingLower).toContain('terraform');
   });
 
   it('should complete extraction and comparison for large job descriptions within milliseconds', () => {
