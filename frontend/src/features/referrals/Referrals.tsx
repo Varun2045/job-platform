@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake, Phone, CheckCircle2 } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake, CheckCircle2 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 type Tab = 'contacts' | 'pipeline' | 'messages' | 'followup' | 'analytics';
