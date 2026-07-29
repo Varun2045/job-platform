@@ -134,6 +134,7 @@ export const App: React.FC = () => {
                   <Route path="/automation/*" element={<AutomationHub tab="monitoring" />} />
                   <Route path="/companies" element={<AutomationHub tab="monitoring" />} />
                   <Route path="/referrals" element={<Referrals />} />
+                  <Route path="/crm" element={<Referrals />} />
                   <Route path="/copilot" element={<CopilotDashboard />} />
                   <Route path="/career-copilot" element={<CopilotDashboard />} />
                   <Route path="/career-assistant" element={<AICareerAssistant />} />
@@ -141,6 +142,8 @@ export const App: React.FC = () => {
                   <Route path="/cover-letter-builder" element={<CoverLetterBuilder />} />
                   <Route path="/offers" element={<OfferComparison />} />
                   <Route path="/offer-comparison" element={<OfferComparison />} />
+                  <Route path="/offer-negotiation" element={<OfferComparison />} />
+                  <Route path="/offer-negotiator" element={<OfferComparison />} />
                   <Route path="/github" element={<GithubAnalyzer />} />
                   <Route path="/github-analyzer" element={<GithubAnalyzer />} />
                   <Route path="/flashcards" element={<FlashcardDashboard />} />
