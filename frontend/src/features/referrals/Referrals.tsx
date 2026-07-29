@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake, ChevronDown } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 import { useToast } from '../../context/ToastContext.js';
 
@@ -647,11 +647,6 @@ const CompanyContacts: React.FC = () => {
                         className="p-4 flex items-center justify-between gap-4 cursor-pointer select-none hover:bg-[#1b2535]/50 transition-colors"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <ChevronDown
-                            className={`w-4 h-4 text-[#94a3b8] shrink-0 transition-transform duration-200 ${
-                              isExpanded ? 'rotate-180 text-indigo-400' : ''
-                            }`}
-                          />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
                               <h4 className="font-bold text-base text-white leading-tight">{contact.name}</h4>
@@ -823,7 +818,6 @@ const CompanyContacts: React.FC = () => {
                             {/* 7. Notes */}
                             {contact.notes && !contact.tags?.includes('LinkedIn Import') && (
                               <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]/60">
-                                <span className="text-[#94a3b8] font-semibold block">Notes</span>
                                 <p className="text-xs text-[#94a3b8] whitespace-pre-wrap leading-relaxed">{contact.notes}</p>
                               </div>
                             )}
