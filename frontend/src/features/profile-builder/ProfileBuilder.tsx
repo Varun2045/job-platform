@@ -42,6 +42,7 @@ export const ProfileBuilder: React.FC = () => {
   const [subdomainStatus, setSubdomainStatus] = useState<{ available: boolean; alternatives: string[] }>({
     available: true,
     alternatives: ['varundamani-portfolio', 'varundamani-dev', 'varundamani01']
+  });
   const [vercelToken, setVercelToken] = useState<string>(() => {
     return localStorage.getItem('vercel_api_token') || '';
   });
