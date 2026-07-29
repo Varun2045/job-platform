@@ -1,4 +1,11 @@
-import { StorageProvider, KeywordHeatmap, KeywordMatchItem, KeywordMissingItem, CategoryBreakdownItem } from '../storage/StorageProvider.js';
+import {
+  StorageProvider,
+  KeywordHeatmap,
+  KeywordMatchItem,
+  KeywordMissingItem,
+  CategoryBreakdownItem,
+  ImpactImprovement,
+} from '../storage/StorageProvider.js';
 import { Logger } from './Logger.js';
 
 export interface TechDefinition {
@@ -27,6 +34,63 @@ const STOP_WORDS = new Set([
   'team', 'required', 'preferred', 'skills', 'description', 'seeking', 'qualifications',
   'duties', 'deliver', 'support', 'help', 'work', 'working', 'join', 'part', 'member',
 ]);
+
+// Technologies strictly excluded from semantic inference
+const STRICT_EXCLUSIONS = new Set([
+  'kubernetes',
+  'terraform',
+  'aws',
+  'azure',
+  'google cloud platform',
+  'kafka',
+  'redis',
+  'ci/cd',
+  'docker',
+]);
+
+// Conservative Semantic Evidence Rules Map
+const SEMANTIC_RULES: { targetCanonical: string; triggers: string[]; inferredFrom: string }[] = [
+  {
+    targetCanonical: 'Problem Solving',
+    triggers: ['benchmarking', 'optimization', 'adaptive algorithms', 'problem-solving', 'analytical', 'algorithmic', 'performance tuning', 'troubleshooting'],
+    inferredFrom: 'optimization & benchmarking experience',
+  },
+  {
+    targetCanonical: 'Communication',
+    triggers: ['publicity head', 'event organization', 'presentations', 'public speaking', 'moderator', 'technical writer', 'content lead'],
+    inferredFrom: 'leadership & event organization experience',
+  },
+  {
+    targetCanonical: 'Leadership',
+    triggers: ['publicity head', 'event organization', 'lead developer', 'head of', 'vice president', 'president', 'organizer', 'team captain'],
+    inferredFrom: 'leadership & organizational roles',
+  },
+  {
+    targetCanonical: 'Backend Development',
+    triggers: ['backend api', 'restful endpoints', 'microservices', 'server-side', 'database modeling'],
+    inferredFrom: 'backend API & server-side experience',
+  },
+  {
+    targetCanonical: 'Agile',
+    triggers: ['sprint planning', 'scrum master', 'standups', 'jira workflows', 'retrospectives'],
+    inferredFrom: 'Scrum & sprint execution experience',
+  },
+  {
+    targetCanonical: 'Scrum',
+    triggers: ['agile methodology', 'sprints', 'standups', 'jira', 'retrospectives'],
+    inferredFrom: 'Agile & sprint workflow experience',
+  },
+  {
+    targetCanonical: 'Teamwork',
+    triggers: ['cross-functional team', 'collaborate', 'collaborated', 'pair programming', 'co-developed'],
+    inferredFrom: 'cross-functional collaboration experience',
+  },
+  {
+    targetCanonical: 'Mentorship',
+    triggers: ['guiding engineers', 'onboarding devs', 'code reviews', 'coaching', 'teaching assistant'],
+    inferredFrom: 'engineering guidance & coaching experience',
+  },
+];
 
 const TECH_DICTIONARY: TechDefinition[] = [
   // --- Programming Languages ---
@@ -219,9 +283,7 @@ export class HeatmapEngine {
     for (const tech of TECH_DICTIONARY) {
       for (const alias of tech.aliases) {
         const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Leading boundary: start of text or non-word char (except #, +, .)
         const leadingBoundary = `(?:^|[^a-zA-Z0-9#+.])`;
-        // Trailing boundary: if alias ends in word char, use (?! [a-zA-Z0-9]); if ends in +, #, or ., use (?! [a-zA-Z0-9+#])
         const lastChar = alias[alias.length - 1];
         const trailingBoundary = /[a-zA-Z0-9]/.test(lastChar)
           ? `(?![a-zA-Z0-9])`
@@ -251,7 +313,6 @@ export class HeatmapEngine {
     for (const word of words) {
       const normalizedKey = word.toLowerCase();
       if (!foundMap.has(normalizedKey)) {
-        // Check if word matches any tech alias or stem
         let matchedTech: TechDefinition | undefined;
         for (const tech of TECH_DICTIONARY) {
           if (tech.aliases.some(a => a.toLowerCase() === normalizedKey)) {
@@ -283,6 +344,35 @@ export class HeatmapEngine {
   }
 
   /**
+   * Helper: Performs evidence-based conservative Semantic Skill Inference.
+   */
+  private inferSemanticMatch(targetCanonical: string, resumeContent: string): { inferred: boolean; inferredFrom?: string } {
+    const canonLower = targetCanonical.toLowerCase();
+    
+    // Strict exclusion check: never infer infrastructure/cloud tools
+    if (STRICT_EXCLUSIONS.has(canonLower)) {
+      return { inferred: false };
+    }
+
+    const lowerResume = resumeContent.toLowerCase();
+
+    for (const rule of SEMANTIC_RULES) {
+      if (rule.targetCanonical.toLowerCase() === canonLower) {
+        for (const trigger of rule.triggers) {
+          if (lowerResume.includes(trigger.toLowerCase())) {
+            return {
+              inferred: true,
+              inferredFrom: rule.inferredFrom,
+            };
+          }
+        }
+      }
+    }
+
+    return { inferred: false };
+  }
+
+  /**
    * Generates enterprise ATS Keyword Match Heatmap comparing Resume against Job Description.
    */
   public generateHeatmap(
@@ -302,8 +392,10 @@ export class HeatmapEngine {
     });
 
     const matchedDetails: KeywordMatchItem[] = [];
+    const semanticDetails: KeywordMatchItem[] = [];
     const missingDetails: KeywordMissingItem[] = [];
     const matchedKeywords: string[] = [];
+    const semanticKeywords: string[] = [];
     const missingKeywords: string[] = [];
 
     // Grouping by Category for Weighted Scoring
@@ -316,7 +408,7 @@ export class HeatmapEngine {
       }
       const catEntry = categoryMap.get(item.category)!;
 
-      // 1. Exact Canonical Match
+      // 1. Exact Canonical Match (🟢 100% Credit)
       if (resumeCanonicalSet.has(canonLower)) {
         const resumeAlias = resumeAliasMap.get(canonLower) || item.canonical;
         const isExactAlias = resumeAlias.toLowerCase() === item.canonical.toLowerCase();
@@ -327,6 +419,7 @@ export class HeatmapEngine {
           matchType: isExactAlias ? 'exact' : 'synonym',
           matchedTerm: resumeAlias,
           matchReason: isExactAlias ? 'Matched exactly' : `Matched using synonym (${resumeAlias})`,
+          creditPct: 100,
         };
         matchedDetails.push(matchItem);
         matchedKeywords.push(canonLower);
@@ -334,7 +427,7 @@ export class HeatmapEngine {
         continue;
       }
 
-      // 2. Fuzzy Similarity Search across Resume Tech Items
+      // 2. Fuzzy Similarity Search across Resume Tech Items (🟢 100% Credit)
       let fuzzyMatchFound = false;
       for (const resItem of resumeTechItems) {
         const sim = this.getSimilarityRatio(canonLower, resItem.canonical.toLowerCase());
@@ -345,6 +438,7 @@ export class HeatmapEngine {
             matchType: 'fuzzy',
             matchedTerm: resItem.canonical,
             matchReason: `Matched using fuzzy similarity (${resItem.canonical})`,
+            creditPct: 100,
           };
           matchedDetails.push(matchItem);
           matchedKeywords.push(canonLower);
@@ -354,28 +448,47 @@ export class HeatmapEngine {
         }
       }
 
-      // 3. Missing Keyword
-      if (!fuzzyMatchFound) {
-        const missItem: KeywordMissingItem = {
+      if (fuzzyMatchFound) continue;
+
+      // 3. Semantic Skill Inference Search (🟡 70% Credit)
+      const semanticResult = this.inferSemanticMatch(item.canonical, resumeContent);
+      if (semanticResult.inferred) {
+        const semItem: KeywordMatchItem = {
           keyword: item.canonical,
           category: item.category,
+          matchType: 'semantic',
+          inferredFrom: semanticResult.inferredFrom,
+          matchReason: `${item.canonical} inferred through ${semanticResult.inferredFrom}`,
+          creditPct: 70,
         };
-        missingDetails.push(missItem);
-        missingKeywords.push(canonLower);
-        catEntry.missing.push(missItem);
+        semanticDetails.push(semItem);
+        semanticKeywords.push(canonLower);
+        catEntry.matched.push(semItem);
+        continue;
       }
+
+      // 4. Missing Keyword (🔴 0% Credit)
+      const missItem: KeywordMissingItem = {
+        keyword: item.canonical,
+        category: item.category,
+      };
+      missingDetails.push(missItem);
+      missingKeywords.push(canonLower);
+      catEntry.missing.push(missItem);
     }
 
-    // Calculate Category Breakdown & Weighted Score
+    // Calculate Category Breakdown & Weighted ATS Score
     const categoryBreakdown: CategoryBreakdownItem[] = [];
     let totalScoreWeightSum = 0;
     let weightedScoreAccumulator = 0;
 
     categoryMap.forEach((val, catName) => {
       const weight = CATEGORY_WEIGHTS[catName] || 0.10;
-      const matchedCount = val.matched.length;
       const totalCount = val.matched.length + val.missing.length;
-      const scorePct = totalCount > 0 ? (matchedCount / totalCount) * 100 : 0;
+      
+      // Calculate weighted credit sum for category (100% for exact/synonym/fuzzy, 70% for semantic)
+      const creditSum = val.matched.reduce((sum, item) => sum + ((item.creditPct ?? 100) / 100), 0);
+      const scorePct = totalCount > 0 ? (creditSum / totalCount) * 100 : 0;
 
       totalScoreWeightSum += weight;
       weightedScoreAccumulator += (scorePct / 100) * weight;
@@ -383,7 +496,7 @@ export class HeatmapEngine {
       categoryBreakdown.push({
         category: catName,
         weightPct: Math.round(weight * 100),
-        matchedCount,
+        matchedCount: val.matched.length,
         totalCount,
         scorePct: Math.round(scorePct),
         matched: val.matched,
@@ -398,40 +511,77 @@ export class HeatmapEngine {
 
     const matchDensityPct = overallAtsScore;
 
+    // Calculate Highest Impact Improvements & Score Gain
+    const highestImpactImprovements: ImpactImprovement[] = [];
+    let totalEstimatedGain = 0;
+
+    if (totalScoreWeightSum > 0 && jobTechItems.length > 0) {
+      for (const miss of missingDetails) {
+        const catWeight = CATEGORY_WEIGHTS[miss.category] || 0.10;
+        const catItems = categoryMap.get(miss.category);
+        const catTotalCount = catItems ? catItems.matched.length + catItems.missing.length : 1;
+        
+        // Single keyword addition gain = (categoryWeight / catTotalCount) * (1 / totalScoreWeightSum) * 100
+        const gain = Math.max(1, Math.round(((catWeight / catTotalCount) / totalScoreWeightSum) * 100));
+        
+        highestImpactImprovements.push({
+          keyword: miss.keyword,
+          category: miss.category,
+          estimatedScoreGain: gain,
+        });
+      }
+    }
+
+    // Rank missing skills descending by estimated score gain
+    highestImpactImprovements.sort((a, b) => b.estimatedScoreGain - a.estimatedScoreGain);
+    totalEstimatedGain = highestImpactImprovements.reduce((sum, item) => sum + item.estimatedScoreGain, 0);
+
     // Generate AI Insights & Recommendations
     const insights: string[] = [];
 
-    insights.push(`Resume matches ${overallAtsScore}% of required ATS keywords.`);
+    insights.push(`Overall ATS Match Score: ${overallAtsScore}%.`);
 
-    if (missingDetails.length > 0) {
-      const topMissing = missingDetails.slice(0, 4).map(m => m.keyword).join(', ');
-      insights.push(`Missing ${topMissing}.`);
-      insights.push(`Adding these technologies (if genuinely possessed) could significantly improve ATS ranking.`);
+    // Semantic Matches Recommendations
+    if (semanticDetails.length > 0) {
+      semanticDetails.forEach((sem) => {
+        insights.push(
+          `${sem.keyword} inferred through ${sem.inferredFrom}. Mention it explicitly in your resume to improve ATS compatibility.`
+        );
+      });
+    }
+
+    // Missing High Impact Improvements
+    if (highestImpactImprovements.length > 0) {
+      const top3 = highestImpactImprovements.slice(0, 3);
+      const topList = top3.map((imp) => `+ ${imp.keyword} (+${imp.estimatedScoreGain}%)`).join(', ');
+      insights.push(`Highest Impact Improvements: ${topList}.`);
+      insights.push(`Adding these high-priority keywords could increase your ATS match score by up to +${totalEstimatedGain}%.`);
     } else {
       insights.push(`Exceptional coverage! Resume covers 100% of detected technical requirements.`);
     }
 
-    // Highlight top category strength
-    const topCategory = categoryBreakdown.sort((a, b) => b.scorePct - a.scorePct)[0];
-    if (topCategory && topCategory.scorePct >= 75) {
-      insights.push(`Strong profile with excellent ${topCategory.category.toLowerCase()} coverage.`);
-    }
+    const timestamp = new Date().toISOString();
 
     Logger.info(
-      `HeatmapEngine: Generated enterprise ATS heatmap for Job [${jobId}] vs Resume [${resumeProfileId}] (Score: ${overallAtsScore}%, Matched: ${matchedKeywords.length}/${jobTechItems.length})`
+      `HeatmapEngine: Generated enterprise ATS heatmap for Job [${jobId}] vs Resume [${resumeProfileId}] (Score: ${overallAtsScore}%, Exact: ${matchedKeywords.length}, Semantic: ${semanticKeywords.length}, Missing: ${missingKeywords.length})`
     );
 
     return {
       jobId,
       resumeProfileId,
       matchedKeywords,
+      semanticKeywords,
       missingKeywords,
       matchDensityPct,
       overallAtsScore,
       categoryBreakdown,
       matchedDetails,
+      semanticDetails,
       missingDetails,
+      highestImpactImprovements,
+      totalEstimatedGain,
       insights,
+      timestamp,
     };
   }
 }

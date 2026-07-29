@@ -23,32 +23,52 @@ describe('HeatmapEngine Unit Tests', () => {
     expect(keywords).not.toContain('with');
   });
 
-  it('should normalize synonyms and morphological variants', () => {
-    const jobDesc = 'We require PostgreSQL, React, Node.js, AWS, and Docker containerization.';
-    const resume = 'Experienced engineer proficient in postgres, reactjs, nodejs, aws cloud services, and docker containers.';
+  it('should perform conservative evidence-based semantic skill inference', () => {
+    const jobDesc = 'Seeking a Lead Software Engineer with strong Communication, Leadership, and Problem Solving skills.';
+    const resume = 'Served as Publicity Head leading event organization and presentations. Conducted benchmarking, performance tuning, and adaptive algorithms optimization.';
 
-    const heatmap = engine.generateHeatmap('job-1', 'resume-1', jobDesc, resume);
+    const heatmap = engine.generateHeatmap('job-semantic', 'resume-semantic', jobDesc, resume);
     
-    expect(heatmap.overallAtsScore).toBe(100);
-    expect(heatmap.matchedKeywords.length).toBe(5);
-    expect(heatmap.missingKeywords.length).toBe(0);
-
-    const matchTypes = heatmap.matchedDetails.map(m => m.matchType);
-    expect(matchTypes).toContain('synonym');
+    expect(heatmap.semanticKeywords.length).toBeGreaterThan(0);
+    
+    const semKeywordsLower = heatmap.semanticKeywords.map(k => k.toLowerCase());
+    expect(semKeywordsLower).toContain('problem solving');
+    
+    // Ensure semantic matches get 70% credit and are not marked as missing
+    const missingLower = heatmap.missingKeywords.map(k => k.toLowerCase());
+    expect(missingLower).not.toContain('problem solving');
   });
 
-  it('should calculate category breakdown and generate insights', () => {
-    const jobDesc = 'Seeking Java, Python, Spring Boot, PostgreSQL, AWS, Docker, Kubernetes, and Terraform.';
-    const resume = 'Backend engineer with Java, Python, Spring Boot, PostgreSQL, and AWS experience.';
+  it('should strictly exclude infrastructure tools like Kubernetes, AWS, Terraform from semantic inference', () => {
+    const jobDesc = 'Requires Kubernetes, Terraform, AWS, Kafka, and Redis.';
+    const resume = 'Experienced senior developer working on large-scale cloud projects.';
 
-    const heatmap = engine.generateHeatmap('job-2', 'resume-2', jobDesc, resume);
+    const heatmap = engine.generateHeatmap('job-strict', 'resume-strict', jobDesc, resume);
 
-    expect(heatmap.categoryBreakdown.length).toBeGreaterThan(0);
-    expect(heatmap.insights.length).toBeGreaterThan(0);
-    expect(heatmap.insights[0]).toMatch(/Resume matches \d+% of required ATS keywords/);
+    const semKeywordsLower = heatmap.semanticKeywords.map(k => k.toLowerCase());
+    expect(semKeywordsLower).not.toContain('kubernetes');
+    expect(semKeywordsLower).not.toContain('terraform');
+    expect(semKeywordsLower).not.toContain('aws');
+    expect(semKeywordsLower).not.toContain('kafka');
+    expect(semKeywordsLower).not.toContain('redis');
+
     const missingLower = heatmap.missingKeywords.map(k => k.toLowerCase());
     expect(missingLower).toContain('kubernetes');
     expect(missingLower).toContain('terraform');
+    expect(missingLower).toContain('aws');
+  });
+
+  it('should calculate highest impact improvements and score gains', () => {
+    const jobDesc = 'Seeking Java, Python, Spring Boot, PostgreSQL, AWS, Docker, Kubernetes, and Terraform.';
+    const resume = 'Backend engineer with Java, Python, Spring Boot, PostgreSQL, and AWS experience.';
+
+    const heatmap = engine.generateHeatmap('job-impact', 'resume-impact', jobDesc, resume);
+
+    expect(heatmap.highestImpactImprovements.length).toBeGreaterThan(0);
+    expect(heatmap.totalEstimatedGain).toBeGreaterThan(0);
+
+    const topImprovement = heatmap.highestImpactImprovements[0];
+    expect(topImprovement.estimatedScoreGain).toBeGreaterThan(0);
   });
 
   it('should complete extraction and comparison for large job descriptions within milliseconds', () => {

@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Sparkles, CheckCircle2, XCircle, BarChart3, AlertCircle, Layers, Lightbulb } from 'lucide-react';
+import {
+  Sparkles, CheckCircle2, XCircle, BarChart3, AlertCircle, Layers, Lightbulb,
+  Download, FileText, FileCode, CheckSquare, Zap, Target, TrendingUp, HelpCircle
+} from 'lucide-react';
 
 export interface KeywordMatchItem {
   keyword: string;
   category: string;
-  matchType: 'exact' | 'synonym' | 'fuzzy';
+  matchType: 'exact' | 'synonym' | 'fuzzy' | 'semantic';
   matchedTerm?: string;
   matchReason?: string;
+  creditPct?: number;
+  inferredFrom?: string;
 }
 
 export interface KeywordMissingItem {
@@ -25,26 +30,41 @@ export interface CategoryBreakdownItem {
   missing: KeywordMissingItem[];
 }
 
+export interface ImpactImprovement {
+  keyword: string;
+  category: string;
+  estimatedScoreGain: number;
+}
+
 export interface EnterpriseHeatmapData {
   jobId: string;
   resumeProfileId: string;
   matchedKeywords: string[];
+  semanticKeywords?: string[];
   missingKeywords: string[];
   matchDensityPct: number;
   overallAtsScore: number;
   categoryBreakdown?: CategoryBreakdownItem[];
   matchedDetails?: KeywordMatchItem[];
+  semanticDetails?: KeywordMatchItem[];
   missingDetails?: KeywordMissingItem[];
+  highestImpactImprovements?: ImpactImprovement[];
+  totalEstimatedGain?: number;
   insights?: string[];
+  timestamp?: string;
 }
 
 export const AtsHeatmapView: React.FC = () => {
   const [jobDescription, setJobDescription] = useState(
-    `Seeking a Senior Software Engineer with strong experience in Java, Python, TypeScript, Spring Boot, FastAPI, Node.js, React, and Next.js. Must be proficient with PostgreSQL, MongoDB Atlas, Redis, AWS cloud services, Docker containerization, Kubernetes, Terraform, and CI/CD pipelines. Familiarity with PyTorch, LangChain, OpenAI, and REST APIs is a plus. Candidates should demonstrate excellent Problem Solving, Communication, and Agile teamwork skills.`,
+    `Seeking a Senior Software Engineer with strong experience in Java, Python, TypeScript, Spring Boot, FastAPI, Node.js, React, and Next.js. Must be proficient with PostgreSQL, MongoDB Atlas, Redis, AWS cloud services, Docker containerization, Kubernetes, Terraform, and CI/CD pipelines. Candidates should demonstrate excellent Problem Solving, Communication, Leadership, and Agile teamwork skills.`,
   );
   const [resumeContent, setResumeContent] = useState(
-    `Experienced Full-Stack Developer skilled in Java, Python, TypeScript, Spring Boot, Express, Nodejs, React, and Next.js. Proven expertise with postgres, mongo, Redis, AWS, docker containers, CI/CD, PyTorch, and RESTful APIs. Strong analytical problem solving and team collaboration skills.`,
+    `Experienced Full-Stack Developer skilled in Java, Python, TypeScript, Spring Boot, Express, Nodejs, React, and Next.js. Proven expertise with postgres, mongo, AWS, docker containers, and RESTful APIs. Served as Publicity Head leading event organization and presentations. Conducted benchmarking, performance tuning, and adaptive algorithms optimization.`,
   );
+
+  // Animated score state
+  const [animatedScore, setAnimatedScore] = useState<number>(0);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const heatmapMutation = useMutation({
     mutationFn: async () => {
@@ -65,27 +85,164 @@ export const AtsHeatmapView: React.FC = () => {
   });
 
   const data = heatmapMutation.data;
-  const overallScore = data ? (data.overallAtsScore ?? data.matchDensityPct) : 0;
+  const targetScore = data ? (data.overallAtsScore ?? data.matchDensityPct) : 0;
 
-  // Determine score color badge & theme
+  // 4. Animate ATS Score from 0 to Target Score in 1 second
+  useEffect(() => {
+    if (!data) {
+      setAnimatedScore(0);
+      return;
+    }
+
+    const duration = 1000; // 1 second
+    const steps = 60;
+    const stepTime = duration / steps;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+      // Ease-out cubic animation
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const val = Math.round(targetScore * easeProgress);
+
+      setAnimatedScore(val);
+
+      if (currentStep >= steps) {
+        setAnimatedScore(targetScore);
+        clearInterval(timer);
+      }
+    }, stepTime);
+
+    return () => clearInterval(timer);
+  }, [data, targetScore]);
+
+  // Determine score theme
   const getScoreTheme = (score: number) => {
     if (score >= 75) return { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', gradient: 'from-emerald-500 to-teal-400', label: 'Strong ATS Match' };
     if (score >= 50) return { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30', gradient: 'from-amber-500 to-yellow-400', label: 'Moderate ATS Match' };
     return { color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/30', gradient: 'from-rose-500 to-red-400', label: 'Needs ATS Improvement' };
   };
 
-  const scoreTheme = getScoreTheme(overallScore);
+  const scoreTheme = getScoreTheme(animatedScore);
+
+  // 2. Export Analysis Report Handlers
+  const handleExportJSON = () => {
+    if (!data) return;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ATS_Report_${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setIsExportOpen(false);
+  };
+
+  const handleExportMarkdown = () => {
+    if (!data) return;
+    let md = `# Enterprise ATS Keyword Match Report\n\n`;
+    md += `**Timestamp:** ${data.timestamp || new Date().toLocaleString()}\n`;
+    md += `**Overall ATS Score:** ${data.overallAtsScore}% (${scoreTheme.label})\n\n`;
+
+    md += `## 🚀 Highest Impact Improvements\n`;
+    if (data.highestImpactImprovements && data.highestImpactImprovements.length > 0) {
+      md += `*Estimated Score Gain: +${data.totalEstimatedGain || 0}%*\n\n`;
+      data.highestImpactImprovements.forEach((imp) => {
+        md += `- **+ ${imp.keyword}** (+${imp.estimatedScoreGain}% ATS gain in ${imp.category})\n`;
+      });
+    } else {
+      md += `No missing high-impact improvements detected.\n`;
+    }
+    md += `\n`;
+
+    md += `## 💡 Recruiter Recommendations & Insights\n`;
+    if (data.insights) {
+      data.insights.forEach((ins) => {
+        md += `- ${ins}\n`;
+      });
+    }
+    md += `\n`;
+
+    md += `## 📊 Technology Category Breakdown\n`;
+    if (data.categoryBreakdown) {
+      data.categoryBreakdown.forEach((cat) => {
+        md += `### ${cat.category} (${cat.scorePct}% Match)\n`;
+        cat.matched.forEach((m) => {
+          if (m.matchType === 'semantic') {
+            md += `- 🟡 ${m.keyword} *(Semantic: inferred through ${m.inferredFrom || 'experience'})*\n`;
+          } else {
+            md += `- 🟢 ${m.keyword} *(${m.matchType === 'exact' ? 'Exact' : 'Synonym/Fuzzy'})*\n`;
+          }
+        });
+        cat.missing.forEach((miss) => {
+          md += `- 🔴 ${miss.keyword} *(Missing)*\n`;
+        });
+        md += `\n`;
+      });
+    }
+
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ATS_Report_${new Date().toISOString().slice(0, 10)}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setIsExportOpen(false);
+  };
+
+  const handleExportPDF = () => {
+    handleExportMarkdown(); // Fallback formatted markdown/text report download
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto min-h-screen text-white">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
-          <Sparkles className="w-8 h-8 text-emerald-400" /> Enterprise ATS Keyword Match Heatmap
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Simulate enterprise ATS ranking engines (Jobscan, Resume Worded, Greenhouse, Lever, Ashby) with intelligent multi-word phrase extraction, synonym normalization, fuzzy matching, and weighted scoring.
-        </p>
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
+            <Sparkles className="w-8 h-8 text-emerald-400" /> Enterprise ATS Keyword Match Heatmap
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Simulate enterprise ATS ranking engines (Jobscan, Resume Worded, Greenhouse, Lever, Ashby) with semantic skill inference, synonym normalization, fuzzy matching, and weighted scoring.
+          </p>
+        </div>
+
+        {/* Export Button (Visible when data present) */}
+        {data && (
+          <div className="relative">
+            <button
+              onClick={() => setIsExportOpen(!isExportOpen)}
+              className="px-4 py-2.5 bg-[#1b2535] hover:bg-slate-700 border border-[#232d3f] text-slate-200 font-bold rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+            >
+              <Download className="w-4 h-4 text-emerald-400" /> Export Analysis Report
+            </button>
+
+            {isExportOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#131a26] border border-[#232d3f] rounded-xl shadow-2xl z-30 p-1.5 space-y-1">
+                <button
+                  onClick={handleExportMarkdown}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-cyan-400" /> Export as Markdown (.md)
+                </button>
+                <button
+                  onClick={handleExportJSON}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <FileCode className="w-4 h-4 text-amber-400" /> Export as JSON (.json)
+                </button>
+                <button
+                  onClick={handleExportPDF}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-[#1b2535] rounded-lg flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-emerald-400" /> Export as Report (.txt)
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Input Text Grid */}
@@ -139,10 +296,28 @@ export const AtsHeatmapView: React.FC = () => {
         </div>
       )}
 
+      {/* 5. Professional Empty State (Before analysis run) */}
+      {!data && !heatmapMutation.isPending && !heatmapMutation.isError && (
+        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-12 shadow-xl text-center space-y-4 max-w-2xl mx-auto my-8">
+          <div className="w-16 h-16 mx-auto bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center">
+            <Target className="w-8 h-8 text-emerald-400" />
+          </div>
+          <h3 className="text-xl font-extrabold text-white">Ready for Enterprise ATS Analysis</h3>
+          <p className="text-slate-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed">
+            Paste a job description and candidate resume above, then click <strong>Run Enterprise ATS Analysis</strong> to generate ATS match score, semantic skill inference, technology breakdowns, and recruiter recommendations.
+          </p>
+          <div className="flex items-center justify-center gap-4 text-xs font-semibold text-slate-400 pt-2">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400"></span> Exact Matching</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400"></span> Semantic Inference</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-400"></span> Gap Analysis</span>
+          </div>
+        </div>
+      )}
+
       {/* Results Panel */}
       {data && (
         <div className="space-y-6">
-          {/* Match Score Meter */}
+          {/* 4. Animated Match Score Meter */}
           <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div>
@@ -151,32 +326,77 @@ export const AtsHeatmapView: React.FC = () => {
                   {scoreTheme.label}
                 </span>
               </div>
-              <span className={`text-3xl font-black ${scoreTheme.color}`}>{overallScore}%</span>
+              <span className={`text-3xl font-black ${scoreTheme.color}`}>{animatedScore}%</span>
             </div>
             <div className="w-full h-4 bg-[#0b0f19] rounded-full overflow-hidden border border-[#232d3f]">
               <div
-                className={`h-full bg-gradient-to-r ${scoreTheme.gradient} transition-all duration-500`}
-                style={{ width: `${overallScore}%` }}
+                className={`h-full bg-gradient-to-r ${scoreTheme.gradient} transition-all duration-1000`}
+                style={{ width: `${animatedScore}%` }}
               />
             </div>
           </div>
 
-          {/* AI Insights & Recommendations */}
-          {data.insights && data.insights.length > 0 && (
-            <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl">
-              <h3 className="font-bold text-sm text-cyan-400 mb-3 flex items-center gap-2">
-                <Lightbulb className="w-5 h-5" /> Enterprise ATS Recommendations & Insights
-              </h3>
-              <div className="space-y-2">
-                {data.insights.map((insight, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 text-xs md:text-sm text-slate-300">
-                    <span className="text-cyan-400 font-bold">•</span>
-                    <span>{insight}</span>
+          {/* 3. Improved Recruiter-Style Recommendations & Highest Impact Improvements */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Highest Impact Improvements */}
+            <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-sm text-emerald-400 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" /> Highest Impact Improvements
+                  </h3>
+                  {data.totalEstimatedGain !== undefined && data.totalEstimatedGain > 0 && (
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+                      +{data.totalEstimatedGain}% Score Gain Potential
+                    </span>
+                  )}
+                </div>
+
+                {data.highestImpactImprovements && data.highestImpactImprovements.length > 0 ? (
+                  <div className="space-y-2.5">
+                    {data.highestImpactImprovements.slice(0, 5).map((imp) => (
+                      <div
+                        key={imp.keyword}
+                        className="bg-[#0b0f19] border border-[#232d3f] rounded-xl p-3 flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-400 font-bold text-xs">+</span>
+                          <span className="font-bold text-xs text-slate-200">{imp.keyword}</span>
+                          <span className="text-[10px] text-slate-500">({imp.category})</span>
+                        </div>
+                        <span className="text-xs font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          +{imp.estimatedScoreGain}% ATS Gain
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  <p className="text-xs text-slate-400">No missing high-impact improvements detected. Excellent score!</p>
+                )}
               </div>
             </div>
-          )}
+
+            {/* Recruiter Recommendations & Semantic Insights */}
+            <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+              <div>
+                <h3 className="font-bold text-sm text-cyan-400 mb-4 flex items-center gap-2">
+                  <Lightbulb className="w-5 h-5" /> Recruiter Insights & Semantic Inference
+                </h3>
+                <div className="space-y-2.5">
+                  {data.insights && data.insights.length > 0 ? (
+                    data.insights.map((insight, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-xs text-slate-300 leading-relaxed bg-[#0b0f19] p-3 rounded-xl border border-[#232d3f]">
+                        <span className="text-cyan-400 font-bold shrink-0">•</span>
+                        <span>{insight}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-slate-400">No additional recommendations required.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Category Breakdown Grid */}
           {data.categoryBreakdown && data.categoryBreakdown.length > 0 && (
@@ -199,31 +419,39 @@ export const AtsHeatmapView: React.FC = () => {
                         style={{ width: `${cat.scorePct}%` }}
                       />
                     </div>
-                    {/* Category Keywords List */}
+
+                    {/* 1. Category Keywords List displaying all 3 confidence states */}
                     <div className="flex flex-wrap gap-1.5 mt-1">
-                      {cat.matched.map((m) => (
-                        <div
-                          key={m.keyword}
-                          title={m.matchReason || (m.matchType === 'exact' ? 'Matched exactly' : `Matched using ${m.matchType}`)}
-                          className={`px-2.5 py-1 rounded-md text-xs font-medium cursor-help flex items-center gap-1 transition-all ${
-                            m.matchType === 'exact'
-                              ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
-                              : 'bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
-                          }`}
-                        >
-                          <span>✓ {m.keyword}</span>
-                          {m.matchType !== 'exact' && (
-                            <span className="text-[10px] opacity-75">({m.matchedTerm || m.matchType})</span>
-                          )}
-                        </div>
-                      ))}
+                      {cat.matched.map((m) => {
+                        const isSemantic = m.matchType === 'semantic';
+                        const isExact = m.matchType === 'exact';
+
+                        return (
+                          <div
+                            key={m.keyword}
+                            title={m.matchReason || (isExact ? 'Exact Match' : isSemantic ? `Inferred from ${m.inferredFrom}` : `Matched using ${m.matchType}`)}
+                            className={`px-2.5 py-1 rounded-md text-xs font-medium cursor-help flex items-center gap-1 transition-all ${
+                              isExact || m.matchType === 'synonym' || m.matchType === 'fuzzy'
+                                ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
+                                : 'bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25'
+                            }`}
+                          >
+                            <span>
+                              {isExact || m.matchType === 'synonym' || m.matchType === 'fuzzy' ? '🟢' : '🟡'} {m.keyword}
+                            </span>
+                            {isSemantic && (
+                              <span className="text-[10px] opacity-80">(Semantic)</span>
+                            )}
+                          </div>
+                        );
+                      })}
                       {cat.missing.map((miss) => (
                         <div
                           key={miss.keyword}
                           title="Missing from resume"
                           className="px-2.5 py-1 bg-rose-500/15 border border-rose-500/30 text-rose-300 rounded-md text-xs font-medium cursor-help flex items-center gap-1 hover:bg-rose-500/25 transition-all"
                         >
-                          <span>✗ {miss.keyword}</span>
+                          <span>🔴 {miss.keyword}</span>
                         </div>
                       ))}
                     </div>
@@ -238,33 +466,23 @@ export const AtsHeatmapView: React.FC = () => {
             {/* Matched Keywords */}
             <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl">
               <h3 className="font-bold text-sm text-emerald-400 mb-4 flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Matched Keywords ({data.matchedKeywords.length})
+                <CheckCircle2 className="w-5 h-5" /> Matched & Inferred Keywords ({(data.matchedKeywords?.length || 0) + (data.semanticKeywords?.length || 0)})
               </h3>
               <div className="flex flex-wrap gap-2">
-                {data.matchedDetails ? (
-                  data.matchedDetails.map((m) => (
-                    <span
-                      key={m.keyword}
-                      title={m.matchReason || 'Matched'}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium cursor-help flex items-center gap-1.5 transition-colors ${
-                        m.matchType === 'exact'
-                          ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20'
-                          : 'bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-                      }`}
-                    >
-                      ✓ {m.keyword} {m.matchType !== 'exact' && <span className="text-[10px] opacity-75">({m.matchedTerm || m.matchType})</span>}
-                    </span>
-                  ))
-                ) : (
-                  data.matchedKeywords.map((kw: string) => (
-                    <span
-                      key={kw}
-                      className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-lg text-xs font-medium"
-                    >
-                      ✓ {kw}
-                    </span>
-                  ))
-                )}
+                {data.matchedDetails && data.matchedDetails.map((m) => (
+                  <span
+                    key={m.keyword}
+                    title={m.matchReason || 'Matched'}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium cursor-help flex items-center gap-1.5 transition-colors ${
+                      m.matchType === 'semantic'
+                        ? 'bg-amber-500/10 border border-amber-500/30 text-amber-300'
+                        : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                    }`}
+                  >
+                    {m.matchType === 'semantic' ? '🟡' : '🟢'} {m.keyword}
+                    {m.matchType === 'semantic' && <span className="text-[10px] opacity-75">(Inferred)</span>}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -281,7 +499,7 @@ export const AtsHeatmapView: React.FC = () => {
                       title="Missing from resume"
                       className="px-3 py-1.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-lg text-xs font-medium cursor-help flex items-center gap-1 hover:bg-rose-500/20 transition-colors"
                     >
-                      ✗ {miss.keyword}
+                      🔴 {miss.keyword}
                     </span>
                   ))
                 ) : (
@@ -290,7 +508,7 @@ export const AtsHeatmapView: React.FC = () => {
                       key={kw}
                       className="px-3 py-1 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-lg text-xs font-medium"
                     >
-                      ✗ {kw}
+                      🔴 {kw}
                     </span>
                   ))
                 )}

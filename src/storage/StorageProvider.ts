@@ -306,14 +306,17 @@ export interface ExportJob {
 export interface KeywordMatchItem {
   keyword: string;
   category: string;
-  matchType: 'exact' | 'synonym' | 'fuzzy';
+  matchType: 'exact' | 'synonym' | 'fuzzy' | 'semantic';
   matchedTerm?: string;
   matchReason?: string;
+  creditPct?: number; // 100 for exact/synonym/fuzzy, 70 for semantic
+  inferredFrom?: string;
 }
 
 export interface KeywordMissingItem {
   keyword: string;
   category: string;
+  weightImpact?: number;
 }
 
 export interface CategoryBreakdownItem {
@@ -326,18 +329,29 @@ export interface CategoryBreakdownItem {
   missing: KeywordMissingItem[];
 }
 
+export interface ImpactImprovement {
+  keyword: string;
+  category: string;
+  estimatedScoreGain: number;
+}
+
 export interface KeywordHeatmap {
   jobId: string;
   resumeProfileId: string;
   matchedKeywords: string[];
+  semanticKeywords: string[];
   missingKeywords: string[];
   matchDensityPct: number;
   // Enterprise ATS Enhanced Fields
   overallAtsScore: number;
   categoryBreakdown: CategoryBreakdownItem[];
   matchedDetails: KeywordMatchItem[];
+  semanticDetails: KeywordMatchItem[];
   missingDetails: KeywordMissingItem[];
+  highestImpactImprovements: ImpactImprovement[];
+  totalEstimatedGain: number;
   insights: string[];
+  timestamp?: string;
 }
 
 export interface RecruiterInteraction {
