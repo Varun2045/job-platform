@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Users, MessageSquare, Clock, BarChart3, Search, Copy, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
+import { Users, MessageSquare, Clock, BarChart3, Search, Plus, Trash2, Tag, Mail, Download, Star, X, Edit, Handshake } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 import { useToast } from '../../context/ToastContext.js';
 
@@ -137,15 +137,6 @@ const CompanyContacts: React.FC = () => {
     
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(cleanEmail)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(gmailUrl, '_blank');
-  };
-
-  const copyTextToClipboard = async (text: string, successMessage: string = '✓ Copied to clipboard.') => {
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast(successMessage);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
   };
 
   const { data: referrals, isLoading, refetch } = useQuery({
@@ -596,9 +587,9 @@ const CompanyContacts: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Major Fields - Each on its own row */}
+                    {/* Major Fields - Each on its own row in order: Email -> Contact Number -> LinkedIn -> Location -> (line) -> Status -> Tags -> Notes */}
                     <div className="space-y-3 pt-2 border-t border-[#232d3f]/60">
-                      {/* Email */}
+                      {/* 1. Email */}
                       {contact.email && (
                         <div className="space-y-1 text-xs">
                           <span className="text-[#94a3b8] font-semibold block">Email</span>
@@ -606,44 +597,28 @@ const CompanyContacts: React.FC = () => {
                             <a href={`mailto:${extractCleanEmail(contact.email)}`} className="text-indigo-400 hover:underline font-mono break-all">
                               {contact.email}
                             </a>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <button
-                                onClick={() => openGmailCompose(contact)}
-                                className="p-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
-                                title="Open in Gmail"
-                              >
-                                <Mail className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => copyTextToClipboard(extractCleanEmail(contact.email!), '✓ Copied to clipboard.')}
-                                className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
-                                title="Copy"
-                              >
-                                <Copy className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Contact Number */}
-                      {contact.phone && (
-                        <div className="space-y-1 text-xs">
-                          <span className="text-[#94a3b8] font-semibold block">Contact Number</span>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-white font-mono">{contact.phone}</span>
                             <button
-                              onClick={() => copyTextToClipboard(contact.phone!, '✓ Copied to clipboard.')}
-                              className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
-                              title="Copy"
+                              onClick={() => openGmailCompose(contact)}
+                              className="p-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                              title="Open in Gmail"
                             >
-                              <Copy className="w-3.5 h-3.5" />
+                              <Mail className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
                       )}
 
-                      {/* LinkedIn */}
+                      {/* 2. Contact Number */}
+                      {contact.phone && (
+                        <div className="space-y-1 text-xs">
+                          <span className="text-[#94a3b8] font-semibold block">Contact Number</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-white font-mono">{contact.phone}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 3. LinkedIn */}
                       <div className="space-y-1 text-xs">
                         <span className="text-[#94a3b8] font-semibold block">LinkedIn</span>
                         {contact.linkedInUrl ? (
@@ -656,24 +631,15 @@ const CompanyContacts: React.FC = () => {
                             >
                               {contact.linkedInUrl}
                             </a>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <a
-                                href={contact.linkedInUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="p-1.5 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/30 text-[#0077b5] rounded-lg transition-colors flex items-center justify-center cursor-pointer"
-                                title="Open LinkedIn Profile"
-                              >
-                                <span className="font-bold text-xs leading-none">in</span>
-                              </a>
-                              <button
-                                onClick={() => copyTextToClipboard(contact.linkedInUrl!, '✓ Copied to clipboard.')}
-                                className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
-                                title="Copy"
-                              >
-                                <Copy className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                            <a
+                              href={contact.linkedInUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/30 text-[#0077b5] rounded-lg transition-colors flex items-center justify-center cursor-pointer shrink-0"
+                              title="Open LinkedIn Profile"
+                            >
+                              <span className="font-bold text-xs leading-none">in</span>
+                            </a>
                           </div>
                         ) : (
                           <a
@@ -688,7 +654,7 @@ const CompanyContacts: React.FC = () => {
                         )}
                       </div>
 
-                      {/* Location */}
+                      {/* 4. Location */}
                       {contact.location && (
                         <div className="space-y-1 text-xs">
                           <span className="text-[#94a3b8] font-semibold block">Location</span>
@@ -696,8 +662,8 @@ const CompanyContacts: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Status */}
-                      <div className="space-y-1 text-xs">
+                      {/* 5. Status - with divider line before it */}
+                      <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]">
                         <span className="text-[#94a3b8] font-semibold block">Status</span>
                         <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
                           contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
@@ -708,7 +674,7 @@ const CompanyContacts: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Tags */}
+                      {/* 6. Tags */}
                       {contact.tags && contact.tags.length > 0 && (
                         <div className="space-y-1 text-xs">
                           <span className="text-[#94a3b8] font-semibold block">Tags</span>
@@ -723,7 +689,7 @@ const CompanyContacts: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Notes */}
+                      {/* 7. Notes */}
                       {contact.notes && !contact.tags?.includes('LinkedIn Import') && (
                         <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]/60">
                           <span className="text-[#94a3b8] font-semibold block">Notes</span>
