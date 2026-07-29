@@ -173,4 +173,6 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'scaleai', name: 'Scale AI', pattern: 'scale.com', careerPage: 'https://scale.com/careers', jobBoardUrl: 'https://scale.com/careers' },
   { id: 'posthog', name: 'PostHog', pattern: 'posthog.com', careerPage: 'https://posthog.com/careers', jobBoardUrl: 'https://posthog.com/careers' },
   { id: 'pwc', name: 'PwC', pattern: 'pwc.com', careerPage: 'https://jobs-ta.pwc.com/global/en/ac-india-job-search', jobBoardUrl: 'https://jobs-ta.pwc.com/global/en/ac-india-job-search' },
+  { id: 'synopsys', name: 'Synopsys', pattern: 'synopsys.com', careerPage: 'https://www.synopsys.com/company/careers.html', jobBoardUrl: 'https://www.synopsys.com/company/careers.html' },
+  { id: 'target', name: 'Target', pattern: 'target.com', careerPage: 'https://jobs.target.com', jobBoardUrl: 'https://jobs.target.com' },
 ];
