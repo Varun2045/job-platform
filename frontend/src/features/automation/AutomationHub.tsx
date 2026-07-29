@@ -985,6 +985,8 @@ const EmailAutomation: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
 
 const CalendarAutomation: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
