@@ -361,7 +361,7 @@ export const OfferComparison: React.FC = () => {
   const comparedOffers = offers.filter(o => comparedOfferIds.includes(o.id));
 
   return (
-    <div className="absolute inset-0 p-6 space-y-4 max-w-7xl mx-auto flex flex-col overflow-hidden">
+    <div className="p-8 space-y-8 max-w-7xl mx-auto">
       <PageHeader
         themeKey="offerComparison"
         title="Offer Negotiator & Matrix"
@@ -369,24 +369,24 @@ export const OfferComparison: React.FC = () => {
         icon={DollarSign}
       />
 
-      {/* Premium Tab Navigation Pills */}
-      <div className="flex border-b border-[#232d3f/60] pb-1 shrink-0">
+      {/* Navigation Pills */}
+      <div className="flex gap-2 border-b border-[#232d3f] pb-4">
         <button
           onClick={() => setActiveTab('stack')}
-          className={`pb-3 px-4 text-xs font-bold border-b-2 transition duration-200 cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
             activeTab === 'stack'
-              ? 'border-indigo-500 text-indigo-400 font-extrabold'
-              : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400'
+              : 'text-[#94a3b8] hover:bg-[#1b2535] hover:text-white'
           }`}
         >
           My Saved Offers
         </button>
         <button
           onClick={() => setActiveTab('comparison')}
-          className={`pb-3 px-4 text-xs font-bold border-b-2 transition duration-200 cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
             activeTab === 'comparison'
-              ? 'border-indigo-500 text-indigo-400 font-extrabold'
-              : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? 'bg-indigo-600/10 border border-indigo-600/30 text-indigo-400'
+              : 'text-[#94a3b8] hover:bg-[#1b2535] hover:text-white'
           }`}
         >
           Side-by-Side Comparison Matrix

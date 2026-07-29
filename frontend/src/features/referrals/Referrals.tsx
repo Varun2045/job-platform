@@ -48,17 +48,61 @@ const getCategoryBorderColor = (category: string): string => {
     case 'Engineering Manager':
       return 'border-emerald-500/50 hover:border-emerald-400';
     case 'Employee':
-      return 'border-green-500/50 hover:border-green-400';
+      return 'border-cyan-500/50 hover:border-cyan-400';
     case 'Talent Acquisition':
       return 'border-orange-500/50 hover:border-orange-400';
     case 'HR':
-      return 'border-pink-500/50 hover:border-pink-400';
+      return 'border-rose-500/50 hover:border-rose-400';
     case 'University Alumni':
-      return 'border-cyan-500/50 hover:border-cyan-400';
+      return 'border-amber-500/50 hover:border-amber-400';
     case 'Referrer':
-      return 'border-amber-400/50 hover:border-amber-300';
+      return 'border-indigo-500/50 hover:border-indigo-400';
     default:
       return 'border-[#232d3f] hover:border-indigo-500/40';
+  }
+};
+
+const getCategoryBadgeStyle = (category: string): string => {
+  switch (category) {
+    case 'Recruiter':
+      return 'bg-blue-500/10 text-blue-400 border border-blue-500/30';
+    case 'Hiring Manager':
+      return 'bg-purple-500/10 text-purple-400 border border-purple-500/30';
+    case 'Engineering Manager':
+      return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+    case 'Employee':
+      return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30';
+    case 'Talent Acquisition':
+      return 'bg-orange-500/10 text-orange-400 border border-orange-500/30';
+    case 'HR':
+      return 'bg-rose-500/10 text-rose-400 border border-rose-500/30';
+    case 'University Alumni':
+      return 'bg-amber-500/10 text-amber-400 border border-amber-500/30';
+    case 'Referrer':
+      return 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30';
+    default:
+      return 'bg-indigo-600/10 text-indigo-400 border border-indigo-600/20';
+  }
+};
+
+const getStatusBadgeStyle = (status: string): string => {
+  switch (status) {
+    case 'Connected':
+    case 'Offer':
+      return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+    case 'Connection Sent':
+    case 'LinkedIn Opened':
+      return 'bg-blue-500/10 text-blue-400 border border-blue-500/30';
+    case 'Referral Requested':
+    case 'Referral Submitted':
+      return 'bg-purple-500/10 text-purple-400 border border-purple-500/30';
+    case 'Applied':
+      return 'bg-amber-500/10 text-amber-400 border border-amber-500/30';
+    case 'Interview':
+      return 'bg-pink-500/10 text-pink-400 border border-pink-500/30';
+    case 'Potential Contact':
+    default:
+      return 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30';
   }
 };
 
@@ -624,14 +668,10 @@ const CompanyContacts: React.FC = () => {
 
                         {/* Badges on far right */}
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="inline-block px-2.5 py-0.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-semibold rounded-full">
+                          <span className={`inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full ${getCategoryBadgeStyle(contact.category)}`}>
                             {contact.category}
                           </span>
-                          <span className={`hidden sm:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                            contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                            contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                            'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                          }`}>
+                          <span className={`hidden sm:inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${getStatusBadgeStyle(contact.connectionStatus)}`}>
                             {contact.connectionStatus}
                           </span>
                         </div>
@@ -684,7 +724,7 @@ const CompanyContacts: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Major Fields - Each on its own row in order: Email -> Contact Number -> LinkedIn -> Location -> (line) -> Status -> Tags -> Notes */}
+                          {/* Major Fields - Each on its own row in order: Email -> Contact Number -> LinkedIn -> Location -> Tags -> Notes */}
                           <div className="space-y-3">
                             {/* 1. Email */}
                             {contact.email && (
@@ -764,18 +804,6 @@ const CompanyContacts: React.FC = () => {
                                 <span className="text-white">{contact.location}</span>
                               </div>
                             )}
-
-                            {/* 5. Status - with divider line before it */}
-                            <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]">
-                              <span className="text-[#94a3b8] font-semibold block">Status</span>
-                              <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                                contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                                'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                              }`}>
-                                {contact.connectionStatus}
-                              </span>
-                            </div>
 
                             {/* 6. Tags */}
                             {contact.tags && contact.tags.length > 0 && (
@@ -979,7 +1007,7 @@ const ReferralPipeline: React.FC = () => {
               <div className="p-4 border-b border-[#232d3f] bg-[#1b2535] rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-white">{stage}</span>
-                  <span className="bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getStatusBadgeStyle(stage)}`}>
                     {groupedByStage[stage]?.length || 0}
                   </span>
                 </div>
@@ -991,10 +1019,17 @@ const ReferralPipeline: React.FC = () => {
                   </div>
                 ) : (
                   groupedByStage[stage]?.map((contact) => (
-                    <div key={contact.id} className="bg-[#1b2535] border border-[#232d3f] rounded-lg p-3 cursor-pointer hover:border-indigo-600/50 transition-colors">
-                      <h4 className="font-bold text-white text-sm">{contact.name}</h4>
-                      <p className="text-xs text-[#94a3b8]">{contact.company}</p>
-                      <p className="text-xs text-[#94a3b8]">{contact.role}</p>
+                    <div key={contact.id} className={`bg-[#1b2535] border-2 rounded-xl p-3.5 space-y-2.5 cursor-pointer transition-all duration-200 ${getCategoryBorderColor(contact.category)}`}>
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-white text-sm leading-snug">{contact.name}</h4>
+                          <p className="text-xs font-semibold text-[#e2e8f0] leading-snug">{contact.company}</p>
+                          <p className="text-xs text-[#94a3b8] leading-snug">{contact.role}</p>
+                        </div>
+                        <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0 ${getCategoryBadgeStyle(contact.category)}`}>
+                          {contact.category}
+                        </span>
+                      </div>
                       <div className="mt-2 flex gap-1">
                         {PIPELINE_STAGES.indexOf(stage) > 0 && (
                           <button
