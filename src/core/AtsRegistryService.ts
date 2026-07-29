@@ -69,7 +69,6 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'GE HealthCare': { careerPage: 'https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite', jobBoardUrl: 'https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite' },
   'HP Inc.': { careerPage: 'https://jobs.hp.com', jobBoardUrl: 'https://hp.wd5.myworkdayjobs.com/ExternalCareerSite' },
   'HPE': { careerPage: 'https://careers.hpe.com', jobBoardUrl: 'https://hpe.wd5.myworkdayjobs.com/Jobsathpe' },
-  'Lenovo': { careerPage: 'https://jobs.lenovo.com/en_US/careers', jobBoardUrl: 'https://jobs.lenovo.com/en_US/careers' },
   'Mastercard': { careerPage: 'https://careers.mastercard.com', jobBoardUrl: 'https://mastercard.wd1.myworkdayjobs.com/CorporateCareers' },
   'NVIDIA': { careerPage: 'https://www.nvidia.com/en-us/about-nvidia/careers', jobBoardUrl: 'https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite' },
   'Oracle': { careerPage: 'https://www.oracle.com/careers', jobBoardUrl: 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch' },
@@ -120,7 +119,7 @@ export class AtsRegistryService {
       averageExtractionMs: 18,
       companies: [
         'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Expedia',
-        'GE Aerospace', 'GE Vernova', 'GE HealthCare', 'HP Inc.', 'HPE', 'Intel', 'Lenovo',
+        'GE Aerospace', 'GE Vernova', 'GE HealthCare', 'HP Inc.', 'HPE', 'Intel',
         'Logitech', 'Mastercard', 'Nike', 'NVIDIA', 'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'PwC',
         'Qualcomm', 'Red Hat', 'Salesforce', 'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
       ],

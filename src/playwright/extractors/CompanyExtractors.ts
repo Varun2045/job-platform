@@ -67,7 +67,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'vmware', name: 'VMware', pattern: 'vmware.com', careerPage: 'https://careers.broadcom.com/jobs', jobBoardUrl: 'https://careers.broadcom.com/jobs' },
   { id: 'sap', name: 'SAP', pattern: 'sap.com', careerPage: 'https://jobs.sap.com', jobBoardUrl: 'https://jobs.sap.com/search' },
   { id: 'elastic', name: 'Elastic', pattern: 'elastic.co', careerPage: 'https://www.elastic.co/about/careers', jobBoardUrl: 'https://jobs.elastic.co/' },
-  { id: 'github', name: 'GitHub', pattern: 'github.com', careerPage: 'https://github.com/about/careers', jobBoardUrl: 'https://www.github.careers/careers-home' },
+  { id: 'github', name: 'GitHub', pattern: 'github.careers', careerPage: 'https://www.github.careers/careers-home', jobBoardUrl: 'https://www.github.careers/careers-home/jobs' },
 
   // Media, FinTech & Consumer Custom Portals
   { id: 'netflix', name: 'Netflix', pattern: 'netflix.com', careerPage: 'https://jobs.netflix.com', jobBoardUrl: 'https://jobs.netflix.com' },
@@ -124,6 +124,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'jpmc', name: 'JPMorgan Chase', pattern: 'jpmc.fa.oraclecloud.com', careerPage: 'https://careers.jpmorganchase.com', jobBoardUrl: 'https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs' },
   { id: 'juspay', name: 'Juspay', pattern: 'juspay.io', careerPage: 'https://juspay.io/careers', jobBoardUrl: 'https://juspay.io/careers' },
   { id: 'loom', name: 'Loom', pattern: 'loom.technology', careerPage: 'https://loom.technology/careers/', jobBoardUrl: 'https://loom.technology/careers/' },
+  { id: 'lenovo', name: 'Lenovo', pattern: 'jobs.lenovo.com', careerPage: 'https://jobs.lenovo.com/en_US/careers', jobBoardUrl: 'https://jobs.lenovo.com/en_US/careers' },
   { id: 'supercell', name: 'Supercell', pattern: 'supercell.com', careerPage: 'https://supercell.com/en/careers/', jobBoardUrl: 'https://supercell.com/en/careers/' },
   { id: 'canva', name: 'Canva', pattern: 'lifeatcanva.com', careerPage: 'https://www.lifeatcanva.com/en/jobs/', jobBoardUrl: 'https://www.lifeatcanva.com/en/jobs/' },
   { id: 'circleci', name: 'CircleCI', pattern: 'circleci.com', careerPage: 'https://circleci.com/careers', jobBoardUrl: 'https://circleci.com/careers/jobs/' },
