@@ -57,7 +57,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'apple', name: 'Apple', pattern: 'apple.com', careerPage: 'https://www.apple.com/careers', jobBoardUrl: 'https://jobs.apple.com/en-in/search?location=india-INDC' },
   { id: 'meta', name: 'Meta', pattern: 'metacareers.com', careerPage: 'https://www.metacareers.com', jobBoardUrl: 'https://www.metacareers.com/jobsearch/' },
   { id: 'figma', name: 'Figma', pattern: 'figma.com', careerPage: 'https://www.figma.com/careers/', jobBoardUrl: 'https://www.figma.com/careers/#job-openings' },
-  { id: 'oracle', name: 'Oracle', pattern: 'oracle.com', careerPage: 'https://www.oracle.com/careers', jobBoardUrl: 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch' },
+
   { id: 'cisco', name: 'Cisco', pattern: 'cisco.com', careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
 
   // Enterprise & Cloud Custom Portals
@@ -92,7 +92,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'ebay', name: 'eBay', pattern: 'ebayinc.com', careerPage: 'https://jobs.ebayinc.com', jobBoardUrl: 'https://jobs.ebayinc.com/us/en/search-results' },
   { id: 'epam', name: 'EPAM', pattern: 'epam.com', careerPage: 'https://careers.epam.com', jobBoardUrl: 'https://careers.epam.com/en/jobs' },
   { id: 'intuit', name: 'Intuit', pattern: 'intuit.com', careerPage: 'https://jobs.intuit.com', jobBoardUrl: 'https://jobs.intuit.com/search-jobs' },
-  { id: 'kpmg', name: 'KPMG', pattern: 'oraclecloud.com', careerPage: 'https://ejgk.fa.em2.oraclecloud.com/careers', jobBoardUrl: 'https://ejgk.fa.em2.oraclecloud.com/careers' },
+
   { id: 'mckinsey', name: 'McKinsey', pattern: 'mckinsey.com', careerPage: 'https://www.mckinsey.com/careers', jobBoardUrl: 'https://www.mckinsey.com/careers/search-jobs' },
   { id: 'morganstanley', name: 'Morgan Stanley', pattern: 'morganstanley.com', careerPage: 'https://www.morganstanley.com/careers/career-opportunities-search/', jobBoardUrl: 'https://www.morganstanley.com/careers/career-opportunities-search/' },
   { id: 'shopify', name: 'Shopify', pattern: 'shopify.com', careerPage: 'https://www.shopify.com/careers', jobBoardUrl: 'https://www.shopify.com/careers' },
@@ -118,10 +118,10 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'equinix', name: 'Equinix', pattern: 'equinix.com', careerPage: 'https://careers.equinix.com', jobBoardUrl: 'https://careers.equinix.com/equinix-is-hiring-in-india' },
   { id: 'ey', name: 'EY', pattern: 'ey.com', careerPage: 'https://careers.ey.com/', jobBoardUrl: 'https://careers.ey.com/' },
   { id: 'goldmansachs', name: 'Goldman Sachs', pattern: 'goldmansachs.com', careerPage: 'https://www.goldmansachs.com/careers', jobBoardUrl: 'https://www.goldmansachs.com/careers' },
-  { id: 'honeywell', name: 'Honeywell', pattern: 'honeywell.com', careerPage: 'https://careers.honeywell.com', jobBoardUrl: 'https://careers.honeywell.com/en/sites/Honeywell' },
+
   { id: 'ibm', name: 'IBM', pattern: 'ibm.com', careerPage: 'https://www.ibm.com/careers', jobBoardUrl: 'https://www.ibm.com/in-en/careers/search' },
   { id: 'ikea', name: 'IKEA', pattern: 'ikea.com', careerPage: 'https://jobs.ikea.com', jobBoardUrl: 'https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2' },
-  { id: 'jpmc', name: 'JPMorgan Chase', pattern: 'jpmc.fa.oraclecloud.com', careerPage: 'https://careers.jpmorganchase.com', jobBoardUrl: 'https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs' },
+
   { id: 'juspay', name: 'Juspay', pattern: 'juspay.io', careerPage: 'https://juspay.io/careers', jobBoardUrl: 'https://juspay.io/careers' },
   { id: 'loom', name: 'Loom', pattern: 'loom.technology', careerPage: 'https://loom.technology/careers/', jobBoardUrl: 'https://loom.technology/careers/' },
   { id: 'lenovo', name: 'Lenovo', pattern: 'jobs.lenovo.com', careerPage: 'https://jobs.lenovo.com/en_US/careers', jobBoardUrl: 'https://jobs.lenovo.com/en_US/careers' },

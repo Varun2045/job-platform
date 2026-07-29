@@ -109,6 +109,13 @@ const TALEO_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string
   'UnitedHealth':     { careerPage: 'https://careers.unitedhealthgroup.com', jobBoardUrl: 'https://careers.unitedhealthgroup.com' },
 };
 
+const ORACLECLOUD_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
+  'Oracle':         { careerPage: 'https://www.oracle.com/careers', jobBoardUrl: 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch' },
+  'KPMG':           { careerPage: 'https://ejgk.fa.em2.oraclecloud.com/careers', jobBoardUrl: 'https://ejgk.fa.em2.oraclecloud.com/careers' },
+  'JPMorgan Chase': { careerPage: 'https://careers.jpmorganchase.com', jobBoardUrl: 'https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs' },
+  'Honeywell':      { careerPage: 'https://careers.honeywell.com', jobBoardUrl: 'https://careers.honeywell.com/en/sites/Honeywell' },
+};
+
 export class AtsRegistryService {
   private customUrlOverrides: Record<string, { careerPage?: string; jobBoardUrl?: string; careerPageNeedsReview?: boolean; jobBoardNeedsReview?: boolean }> = {};
 
@@ -164,6 +171,13 @@ export class AtsRegistryService {
       name: 'Taleo',
       averageExtractionMs: 25,
       companies: ['Boeing', 'Caterpillar', 'FedEx', 'Lockheed Martin', 'UnitedHealth'],
+      companyDetails: [],
+    },
+    {
+      id: 'oraclecloud',
+      name: 'Oracle Cloud',
+      averageExtractionMs: 22,
+      companies: ['Honeywell', 'JPMorgan Chase', 'KPMG', 'Oracle'],
       companyDetails: [],
     },
   ];
@@ -249,6 +263,12 @@ export class AtsRegistryService {
         return { jobBoardUrl: TALEO_KNOWN_URLS[name].jobBoardUrl, jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: `https://${clean}.taleo.net/careersection`, jobBoardNeedsReview: true };
+    }
+    if (platformId === 'oraclecloud') {
+      if (ORACLECLOUD_KNOWN_URLS[name]) {
+        return { jobBoardUrl: ORACLECLOUD_KNOWN_URLS[name].jobBoardUrl, jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
     if (careerPage && (careerPage.includes('#') || careerPage.includes('/jobs'))) {
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
