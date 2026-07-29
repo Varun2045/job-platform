@@ -51,6 +51,7 @@ export interface AtsRegistryOverview {
   totalPlatforms: number;
   totalCompanies: number;
   totalCompanyPlugins: number;
+  totalNativeParsers?: number;
   groups: AtsCategoryGroup[];
 }
 
@@ -405,7 +406,7 @@ export const AtsExplorerView: React.FC = () => {
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">Native ATS Engines</p>
               <p className="text-2xl font-black text-white">
-                {overview.groups.find(g => g.id === 'native-ats' || g.category === 'Native ATS')?.parsers.length || 7} Parsers
+                {overview.totalNativeParsers ?? (overview.groups.find(g => g.id === 'native-ats' || g.category === 'Native ATS')?.parsers.length || 0)} Parsers
               </p>
             </div>
           </div>

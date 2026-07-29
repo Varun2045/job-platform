@@ -52,6 +52,7 @@ export interface AtsRegistryOverview {
   totalPlatforms: number;
   totalCompanies: number;
   totalCompanyPlugins: number;
+  totalNativeParsers: number;
   groups: AtsCategoryGroup[];
 }
 
@@ -469,6 +470,7 @@ export class AtsRegistryService {
       totalPlatforms: nativeGroup.totalParsers + companyPortalsGroup.totalParsers,
       totalCompanies,
       totalCompanyPlugins: SUPPORTED_50_COMPANIES.length,
+      totalNativeParsers: nativeGroup.totalParsers,
       groups,
     };
   }
