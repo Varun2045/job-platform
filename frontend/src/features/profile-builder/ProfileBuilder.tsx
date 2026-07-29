@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Monitor, Download, Palette, RefreshCw, CheckCircle, Trash2, Eye, EyeOff, Edit,
-  PlusCircle, X, Globe, ArrowUp, ArrowDown, Copy, ExternalLink, Check, AlertCircle,
-  BarChart3, Users, FileCode, Archive, Sparkles, Layers
+  PlusCircle, X, Globe, ArrowUp, ArrowDown, Copy, ExternalLink, Check,
+  BarChart3, FileCode, Archive
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
