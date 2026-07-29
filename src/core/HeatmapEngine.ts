@@ -218,10 +218,9 @@ export class HeatmapEngine {
     // 1. Scan Dictionary Multi-word and Single-word Aliases
     for (const tech of TECH_DICTIONARY) {
       for (const alias of tech.aliases) {
-        // Construct boundary safe regex matching
+        // Construct boundary safe regex matching with negative lookahead
         const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Word boundary regex allowing special chars like #, +, .
-        const regex = new RegExp(`(?:^|[^a-z0-9#+.])(${escaped})(?:$|[^a-z0-9#+.])`, 'i');
+        const regex = new RegExp(`(?:^|[^a-zA-Z0-9#+.])(${escaped})(?![a-zA-Z0-9#+.])`, 'i');
         
         if (regex.test(lowerText)) {
           if (!foundMap.has(tech.canonical.toLowerCase())) {
