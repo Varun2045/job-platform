@@ -63,14 +63,13 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Cisco': { careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
 
 
-  'EY': { careerPage: 'https://www.ey.com/en_gl/careers', jobBoardUrl: 'https://eygbl.wd3.myworkdayjobs.com/EY_Careers' },
-  'GE': { careerPage: 'https://jobs.gecareers.com', jobBoardUrl: 'https://ge.wd5.myworkdayjobs.com/GECareers' },
-  'Goldman Sachs': { careerPage: 'https://www.goldmansachs.com/careers', jobBoardUrl: 'https://goldmansachs.wd1.myworkdayjobs.com/GoldmanSachs' },
-  'Honeywell': { careerPage: 'https://careers.honeywell.com', jobBoardUrl: 'https://honeywell.wd1.myworkdayjobs.com/HoneywellCareers' },
-  'IBM': { careerPage: 'https://www.ibm.com/careers', jobBoardUrl: 'https://ibm.wd5.myworkdayjobs.com/IBM_Careers' },
-  'Intel': { careerPage: 'https://www.intel.com/content/www/us/en/jobs/jobs-at-intel.html', jobBoardUrl: 'https://intel.wd1.myworkdayjobs.com/External' },
-  'JPMorgan Chase': { careerPage: 'https://careers.jpmorganchase.com', jobBoardUrl: 'https://jpmc.wd5.myworkdayjobs.com/Careers' },
-  'Lenovo': { careerPage: 'https://jobs.lenovo.com', jobBoardUrl: 'https://lenovo.wd3.myworkdayjobs.com/LenovoCareers' },
+  'Expedia': { careerPage: 'https://careers.expediagroup.com/jobs/', jobBoardUrl: 'https://expedia.wd108.myworkdayjobs.com/en-US/search' },
+  'GE Aerospace': { careerPage: 'https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite', jobBoardUrl: 'https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite' },
+  'GE Vernova': { careerPage: 'https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite', jobBoardUrl: 'https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite' },
+  'GE HealthCare': { careerPage: 'https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite', jobBoardUrl: 'https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite' },
+  'HP Inc.': { careerPage: 'https://jobs.hp.com', jobBoardUrl: 'https://hp.wd5.myworkdayjobs.com/ExternalCareerSite' },
+  'HPE': { careerPage: 'https://careers.hpe.com', jobBoardUrl: 'https://hpe.wd5.myworkdayjobs.com/Jobsathpe' },
+  'Lenovo': { careerPage: 'https://jobs.lenovo.com/en_US/careers', jobBoardUrl: 'https://jobs.lenovo.com/en_US/careers' },
   'Mastercard': { careerPage: 'https://careers.mastercard.com', jobBoardUrl: 'https://mastercard.wd1.myworkdayjobs.com/CorporateCareers' },
   'NVIDIA': { careerPage: 'https://www.nvidia.com/en-us/about-nvidia/careers', jobBoardUrl: 'https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite' },
   'Oracle': { careerPage: 'https://www.oracle.com/careers', jobBoardUrl: 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch' },
@@ -91,7 +90,7 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Expedia': { careerPage: 'https://www.expediagroup.com/careers', jobBoardUrl: 'https://expedia.wd5.myworkdayjobs.com/External' },
   'HP Inc.': { careerPage: 'https://jobs.hp.com', jobBoardUrl: 'https://hp.wd5.myworkdayjobs.com/External' },
   'HPE': { careerPage: 'https://careers.hpe.com', jobBoardUrl: 'https://hpe.wd5.myworkdayjobs.com/External' },
-  'Logitech': { careerPage: 'https://www.logitech.com/en-us/about/careers.html', jobBoardUrl: 'https://logitech.wd1.myworkdayjobs.com/External' },
+  'Logitech': { careerPage: 'https://www.logitech.com/en-us/about/careers.html', jobBoardUrl: 'https://logitech.wd5.myworkdayjobs.com/Logitech' },
   'Nike': { careerPage: 'https://jobs.nike.com', jobBoardUrl: 'https://nike.wd1.myworkdayjobs.com/External' },
   'Okta': { careerPage: 'https://www.okta.com/company/careers', jobBoardUrl: 'https://okta.wd1.myworkdayjobs.com/External' },
   'Red Hat': { careerPage: 'https://www.redhat.com/en/jobs', jobBoardUrl: 'https://redhat.wd5.myworkdayjobs.com/jobs' },
@@ -120,8 +119,8 @@ export class AtsRegistryService {
       name: 'Workday',
       averageExtractionMs: 18,
       companies: [
-        'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'EY', 'Expedia',
-        'GE', 'Goldman Sachs', 'Honeywell', 'HP Inc.', 'HPE', 'IBM', 'Intel', 'JPMorgan Chase', 'Lenovo',
+        'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Expedia',
+        'GE Aerospace', 'GE Vernova', 'GE HealthCare', 'HP Inc.', 'HPE', 'Intel', 'Lenovo',
         'Logitech', 'Mastercard', 'Nike', 'NVIDIA', 'Okta', 'Palo Alto Networks', 'PayPal', 'Pfizer', 'PwC',
         'Qualcomm', 'Red Hat', 'Salesforce', 'Siemens', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
       ],
@@ -133,8 +132,8 @@ export class AtsRegistryService {
       averageExtractionMs: 15,
       companies: [
         'Adyen', 'Airbnb', 'Anthropic', 'Cloudflare', 'Cockroach Labs',
-        'Databricks', 'Datadog', 'Dropbox', 'Figma', 'GitLab',
-        'Grafana Labs', 'Groww', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
+        'Databricks', 'Datadog', 'Figma', 'GitLab',
+        'Grafana Labs', 'Groww', 'Instacart', 'JetBrains', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
         'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio',
         'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
       ],
@@ -144,21 +143,21 @@ export class AtsRegistryService {
       id: 'lever',
       name: 'Lever',
       averageExtractionMs: 16,
-      companies: ['Freshworks', 'JetBrains', 'Meesho', 'Spotify'],
+      companies: ['Meesho', 'Spotify'],
       companyDetails: [],
     },
     {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Cursor', 'ElevenLabs', 'LangChain', 'Linear', 'Loom', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
+      companies: ['Cursor', 'ElevenLabs', 'LangChain', 'Linear', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
       companyDetails: [],
     },
     {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Bosch', 'Equinix', 'IKEA', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
+      companies: ['Bosch', 'Freshworks', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
       companyDetails: [],
     },
     {
@@ -219,6 +218,9 @@ export class AtsRegistryService {
       }
       if (name === 'Anthropic') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/anthropic', jobBoardNeedsReview: false };
+      }
+      if (name === 'JetBrains') {
+        return { jobBoardUrl: 'https://job-boards.eu.greenhouse.io/jetbrains', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }
