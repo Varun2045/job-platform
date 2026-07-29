@@ -79,7 +79,7 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Siemens': { careerPage: 'https://jobs.siemens.com', jobBoardUrl: 'https://siemens.wd3.myworkdayjobs.com/Siemens_Careers' },
   'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://tesla.wd1.myworkdayjobs.com/Tesla_Careers' },
   'Walmart': { careerPage: 'https://careers.walmart.com', jobBoardUrl: 'https://walmart.wd5.myworkdayjobs.com/WalmartExternal' },
-  'CrowdStrike': { careerPage: 'https://www.crowdstrike.com/careers', jobBoardUrl: 'https://crowdstrike.wd5.myworkdayjobs.com/crowdstrike_careers' },
+  'CrowdStrike': { careerPage: 'https://www.crowdstrike.com/careers', jobBoardUrl: 'https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers' },
   'Palo Alto Networks': { careerPage: 'https://www.paloaltonetworks.com/company/careers', jobBoardUrl: 'https://paloaltonetworks.wd1.myworkdayjobs.com/External' },
   'PayPal': { careerPage: 'https://www.paypal.com/us/webapps/mpp/jobs', jobBoardUrl: 'https://paypal.wd1.myworkdayjobs.com/paypal-careers' },
   'Zoom': { careerPage: 'https://careers.zoom.us', jobBoardUrl: 'https://zoom.wd5.myworkdayjobs.com/Zoom' },
@@ -104,7 +104,7 @@ const LEVER_KNOWN_URLS: Record<string, string> = {};
 // Taleo companies have moved to modern portals (taleo.net subdomains are dead)
 const TALEO_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: string }> = {
   'Boeing':           { careerPage: 'https://jobs.boeing.com', jobBoardUrl: 'https://jobs.boeing.com' },
-  'Caterpillar':      { careerPage: 'https://careers.caterpillar.com/en/search-jobs', jobBoardUrl: 'https://careers.caterpillar.com/en/search-jobs' },
+  'Caterpillar':      { careerPage: 'https://careers.caterpillar.com', jobBoardUrl: 'https://careers.caterpillar.com/en/jobs/' },
   'FedEx':            { careerPage: 'https://careers.fedex.com', jobBoardUrl: 'https://careers.fedex.com' },
   'Lockheed Martin':  { careerPage: 'https://www.lockheedmartinjobs.com', jobBoardUrl: 'https://www.lockheedmartinjobs.com' },
   'UnitedHealth':     { careerPage: 'https://careers.unitedhealthgroup.com', jobBoardUrl: 'https://careers.unitedhealthgroup.com' },
@@ -131,8 +131,8 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Adyen', 'Airbnb', 'Anthropic', 'Canonical', 'Cloudflare', 'Cockroach Labs', 'Cohesity', 'Confluent',
-        'DataStax', 'Databricks', 'Datadog', 'dbt Labs', 'Docker', 'Dropbox', 'Figma', 'GitLab',
+        'Adyen', 'Airbnb', 'Anthropic', 'Canonical', 'Cloudflare', 'Cockroach Labs',
+        'DataStax', 'Databricks', 'Datadog', 'Dropbox', 'Figma', 'GitLab',
         'Grafana Labs', 'Groww', 'Instacart', 'Juspay', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
         'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio',
         'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
@@ -150,14 +150,14 @@ export class AtsRegistryService {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Canva', 'Cursor', 'Discord', 'ElevenLabs', 'LangChain', 'Linear', 'Loom', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
+      companies: ['Cursor', 'ElevenLabs', 'LangChain', 'Linear', 'Loom', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'PlanetScale', 'PostHog', 'Ramp', 'Rippling', 'Scale AI', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
       companyDetails: [],
     },
     {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Bosch', 'CircleCI', 'DoorDash', 'Equinix', 'IKEA', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
+      companies: ['Bosch', 'Equinix', 'IKEA', 'Miro', 'Pinterest', 'Square', 'Ubisoft', 'Visa'],
       companyDetails: [],
     },
     {
@@ -184,8 +184,6 @@ export class AtsRegistryService {
     // Specific overrides for companies whose ATS slug differs from their clean name
     const ASHBY_SLUG_OVERRIDES: Record<string, string> = {
       'Scale AI': 'scaleai',
-      'Canva': 'canva',        // Canva uses SmartRecruiters but listed in Ashby for fallback
-      'Discord': 'discord',
       'ElevenLabs': 'elevenlabs',
       'LangChain': 'langchain',
       'Loom': 'loom',
@@ -206,8 +204,6 @@ export class AtsRegistryService {
 
     const SMARTRECRUITERS_SLUG_OVERRIDES: Record<string, string> = {
       'Bosch': 'BoschGroup',
-      'CircleCI': 'CircleCI',
-      'DoorDash': 'DoorDash',
       'Miro': 'RealtimeBoard',
       'Pinterest': 'Pinterest',
     };
