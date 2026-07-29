@@ -426,7 +426,7 @@ export const ResumeManager: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200 shadow-lg">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">📄 Resume Profiles</span>
+            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">RESUME PROFILES</span>
             <div className="p-2 rounded-xl bg-indigo-500/10">
               <FileText className="w-5 h-5 text-indigo-400" />
             </div>
@@ -438,7 +438,7 @@ export const ResumeManager: React.FC = () => {
 
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200 shadow-lg">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">⭐ Default Resume</span>
+            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">DEFAULT RESUME</span>
             <div className="p-2 rounded-xl bg-amber-500/10">
               <Star className="w-5 h-5 text-amber-400" />
             </div>
@@ -450,7 +450,7 @@ export const ResumeManager: React.FC = () => {
 
         <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200 shadow-lg">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">💾 Storage Used</span>
+            <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">STORAGE USED</span>
             <div className="p-2 rounded-xl bg-cyan-500/10">
               <HardDrive className="w-5 h-5 text-cyan-400" />
             </div>
@@ -619,7 +619,7 @@ export const ResumeManager: React.FC = () => {
                             {/* 5. Default Badge */}
                             {isDefault && (
                               <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold flex items-center gap-1">
-                                ⭐ Default
+                                Default
                               </span>
                             )}
                           </div>
@@ -710,7 +710,7 @@ export const ResumeManager: React.FC = () => {
                   {previewName} Profile Preview
                   {defaultResume === previewName && (
                     <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-bold">
-                      ⭐ Default
+                      Default
                     </span>
                   )}
                 </h3>
