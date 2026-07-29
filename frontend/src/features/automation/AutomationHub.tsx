@@ -59,28 +59,55 @@ const JobMonitoring: React.FC = () => {
   const [logs, setLogs] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'success' | 'error'>('all');
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
+  const [secondsAgo, setSecondsAgo] = useState(0);
 
-  const { data: monitoringData, refetch } = useQuery({
+  const { data: monitoringData, refetch, dataUpdatedAt } = useQuery({
     queryKey: ['monitoring'],
     queryFn: async () => {
       const res = await fetch('/api/monitoring');
       if (!res.ok) throw new Error('Failed to load monitoring data');
       return res.json();
-    }
+    },
+    refetchInterval: 30000, // Auto refresh every 30 seconds
   });
+
+  useEffect(() => {
+    if (dataUpdatedAt) {
+      setLastRefreshedAt(new Date(dataUpdatedAt));
+    }
+  }, [dataUpdatedAt]);
+
+  // Timer tick for refresh timestamp "Last Updated: X seconds ago"
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const diffSec = Math.floor((Date.now() - lastRefreshedAt.getTime()) / 1000);
+      setSecondsAgo(Math.max(0, diffSec));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lastRefreshedAt]);
 
   const data = monitoringData || {
     lastRun: '2 hours ago',
     nextRun: 'In 58 minutes',
-    totalCompanies: 42,
-    healthyScrapers: 38,
-    failedScrapers: 2,
-    retryQueue: 3,
+    totalCompanies: 1,
+    healthyScrapers: 1,
+    failedScrapers: 0,
+    retryQueue: 0,
     avgDuration: '2.3s',
-    jobsToday: 127,
+    jobsToday: 0,
     apiHealth: 'Healthy',
-    dbHealth: 'Healthy'
+    apiLastChecked: '12 sec ago',
+    dbHealth: 'Healthy',
+    dbLatencyMs: 18,
+    scrapersList: [
+      { name: 'Google', status: 'Healthy', lastRun: '46 hrs ago', jobsFound: 0 }
+    ]
   };
+
+  const scrapersList = data.scrapersList || [
+    { name: 'Google', status: 'Healthy', lastRun: '46 hrs ago', jobsFound: 0 }
+  ];
 
   const handleRunNow = async () => {
     setIsRunning(true);
@@ -143,7 +170,7 @@ const JobMonitoring: React.FC = () => {
   };
 
   const handleDownloadLogs = () => {
-    const filteredLogs = logs.filter((log: any) => {
+    const filtered = logs.filter((log: any) => {
       const matchesSearch = !searchTerm || 
         log.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.status?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -153,7 +180,7 @@ const JobMonitoring: React.FC = () => {
       return matchesSearch && matchesFilter;
     });
 
-    const blob = new Blob([JSON.stringify(filteredLogs, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(filtered, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -164,145 +191,228 @@ const JobMonitoring: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const filteredLogs = logs.filter((log: any) => {
-    const matchesSearch = !searchTerm || 
-      log.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.status?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = statusFilter === 'all' || 
-      (statusFilter === 'success' && log.status === 'success') ||
-      (statusFilter === 'error' && log.status === 'error');
-    return matchesSearch && matchesFilter;
-  });
-
   return (
     <div className="space-y-6">
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <button 
-          onClick={handleRunNow}
-          disabled={isRunning || isPaused}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors"
-        >
-          <Play className="w-4 h-4" /> {isRunning ? 'Running...' : 'Run Now'}
-        </button>
-        <button 
-          onClick={handlePause}
-          disabled={isPaused || isRunning}
-          className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors"
-        >
-          <Pause className="w-4 h-4" /> Pause
-        </button>
-        <button 
-          onClick={handleResume}
-          disabled={!isPaused || isRunning}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" /> Resume
-        </button>
-        <button 
-          onClick={handleViewLogs}
-          className="flex items-center gap-2 px-4 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-sm font-semibold text-white transition-colors"
-        >
-          <FileText className="w-4 h-4" /> View Logs
-        </button>
+      {/* Top Header Controls & Refresh Timestamp */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <button 
+            onClick={handleRunNow}
+            disabled={isRunning || isPaused}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors cursor-pointer"
+          >
+            <Play className="w-4 h-4" /> {isRunning ? 'Running...' : 'Run Now'}
+          </button>
+          <button 
+            onClick={handlePause}
+            disabled={isPaused || isRunning}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors cursor-pointer"
+          >
+            <Pause className="w-4 h-4" /> Pause
+          </button>
+          <button 
+            onClick={handleResume}
+            disabled={!isPaused || isRunning}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-colors cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" /> Resume
+          </button>
+          <button 
+            onClick={handleViewLogs}
+            className="flex items-center gap-2 px-4 py-2 bg-[#232d3f] hover:bg-[#1f2937] rounded-lg text-sm font-semibold text-white transition-colors cursor-pointer"
+          >
+            <FileText className="w-4 h-4" /> View Logs
+          </button>
+        </div>
+
+        {/* 5. Refresh Timestamp */}
+        <div className="flex items-center gap-2 text-xs text-slate-400 bg-[#131a26] border border-[#232d3f] px-3 py-1.5 rounded-xl font-medium">
+          <Clock className="w-3.5 h-3.5 text-indigo-400 animate-spin-slow" />
+          <span>
+            {secondsAgo < 5 ? 'Updated just now' : `Last Updated: ${secondsAgo} seconds ago`}
+          </span>
+        </div>
       </div>
 
-      {/* Key Metrics */}
+      {/* 1 & 2. Statistic Cards with Subtle Accent Borders & Progress Values */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+        {/* Last Run -> Blue */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-blue-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
-            <Clock className="w-5 h-5 text-indigo-400" />
+            <Clock className="w-5 h-5 text-blue-400" />
             <span className="text-sm font-bold text-white">Last Run</span>
           </div>
-          <p className="text-xs text-[#94a3b8]">{data.lastRun}</p>
+          <p className="text-xs text-slate-300 font-medium">{data.lastRun}</p>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Next Run -> Purple */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-purple-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
-            <Clock className="w-5 h-5 text-emerald-400" />
+            <Clock className="w-5 h-5 text-purple-400" />
             <span className="text-sm font-bold text-white">Next Run</span>
           </div>
-          <p className="text-xs text-[#94a3b8]">{data.nextRun}</p>
+          <p className="text-xs text-slate-300 font-medium">{data.nextRun}</p>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Total Companies -> Cyan */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-cyan-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
             <Activity className="w-5 h-5 text-cyan-400" />
             <span className="text-sm font-bold text-white">Total Companies</span>
           </div>
-          <p className="text-lg font-bold text-white">{data.totalCompanies}</p>
+          <p className="text-lg font-extrabold text-white">{data.totalCompanies}</p>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Healthy -> Green (Progress Style: 1 / 1 Scrapers) */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-emerald-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="w-5 h-5 text-emerald-400" />
             <span className="text-sm font-bold text-white">Healthy</span>
           </div>
-          <p className="text-lg font-bold text-white">{data.healthyScrapers}</p>
+          <p className="text-lg font-extrabold text-emerald-300">
+            {data.healthyScrapers} / {data.totalCompanies} Scrapers
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+        {/* Failed -> Red (Progress Style: 0 / 1) */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-rose-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
-            <XCircle className="w-5 h-5 text-red-400" />
+            <XCircle className="w-5 h-5 text-rose-400" />
             <span className="text-sm font-bold text-white">Failed</span>
           </div>
-          <p className="text-lg font-bold text-white">{data.failedScrapers}</p>
+          <p className="text-lg font-extrabold text-rose-300">
+            {data.failedScrapers} / {data.totalCompanies}
+          </p>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Retry Queue -> Orange / Yellow (0 Pending) */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-amber-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
             <RotateCcw className="w-5 h-5 text-amber-400" />
             <span className="text-sm font-bold text-white">Retry Queue</span>
           </div>
-          <p className="text-lg font-bold text-white">{data.retryQueue}</p>
+          <p className="text-lg font-extrabold text-amber-300">
+            {data.retryQueue} Pending
+          </p>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Jobs Today -> Emerald */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-teal-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
-            <TrendingUp className="w-5 h-5 text-purple-400" />
+            <TrendingUp className="w-5 h-5 text-teal-400" />
             <span className="text-sm font-bold text-white">Jobs Today</span>
           </div>
-          <p className="text-lg font-bold text-white">{data.jobsToday}</p>
+          <p className="text-lg font-extrabold text-teal-300">{data.jobsToday}</p>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
+
+        {/* Avg Duration -> Indigo */}
+        <div className="bg-[#1b2535] border border-[#232d3f] border-l-4 border-l-indigo-500 rounded-xl p-4 transition hover:border-[#334155]">
           <div className="flex items-center gap-3 mb-2">
             <Activity className="w-5 h-5 text-indigo-400" />
             <span className="text-sm font-bold text-white">Avg Duration</span>
           </div>
-          <p className="text-lg font-bold text-white">{data.avgDuration}</p>
+          <p className="text-lg font-extrabold text-indigo-300">{data.avgDuration}</p>
         </div>
       </div>
 
-      {/* Health Status */}
+      {/* 3. Improved Operational API & Database Health Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Server className="w-5 h-5 text-cyan-400" />
-              <span className="text-sm font-bold text-white">API Health</span>
+        {/* API Health */}
+        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-3">
+            <Server className="w-5 h-5 text-cyan-400" />
+            <div>
+              <span className="text-sm font-bold text-white block">API Health</span>
+              <span className="text-[11px] text-slate-400">
+                Last checked: {data.apiLastChecked || `${secondsAgo} sec ago`}
+              </span>
             </div>
-            <span className={`text-xs font-bold px-2 py-1 rounded ${
-              data.apiHealth === 'Healthy' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-            }`}>
-              {data.apiHealth}
-            </span>
           </div>
+          <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+            data.apiHealth === 'Healthy'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+          }`}>
+            {data.apiHealth}
+          </span>
         </div>
-        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Database className="w-5 h-5 text-purple-400" />
-              <span className="text-sm font-bold text-white">Database Health</span>
+
+        {/* Database Health */}
+        <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-4 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-3">
+            <Database className="w-5 h-5 text-purple-400" />
+            <div>
+              <span className="text-sm font-bold text-white block">Database Health</span>
+              <span className="text-[11px] text-slate-400 font-mono">
+                Latency: {data.dbLatencyMs || 18} ms
+              </span>
             </div>
-            <span className={`text-xs font-bold px-2 py-1 rounded ${
-              data.dbHealth === 'Healthy' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
-            }`}>
-              {data.dbHealth}
-            </span>
           </div>
+          <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+            data.dbHealth === 'Healthy'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+          }`}>
+            {data.dbHealth}
+          </span>
         </div>
       </div>
 
-      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Scraper Status Details</h3>
-        <p className="text-sm text-[#94a3b8]">All scrapers running normally. {data.totalCompanies} companies monitored with {data.jobsToday} jobs found today.</p>
+      {/* 4. Compact Responsive Scraper Status Details Table */}
+      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6 shadow-xl space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-white">Scraper Status Details</h3>
+          <span className="text-xs text-slate-400 font-semibold">
+            {scrapersList.length} monitored {scrapersList.length === 1 ? 'scraper' : 'scrapers'}
+          </span>
+        </div>
+
+        {scrapersList.length > 0 ? (
+          <div className="overflow-x-auto rounded-xl border border-[#232d3f] bg-[#131a26]">
+            <table className="w-full text-xs text-left text-slate-300">
+              <thead className="bg-[#0b0f19] text-slate-400 font-bold uppercase tracking-wider border-b border-[#232d3f]">
+                <tr>
+                  <th className="py-3 px-4">Scraper</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Last Run</th>
+                  <th className="py-3 px-4 text-right">Jobs Found</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#232d3f]/60 font-medium">
+                {scrapersList.map((scraper: any, idx: number) => {
+                  const isHealthy = scraper.status === 'Healthy';
+                  const isFailed = scraper.status === 'Failed';
+                  return (
+                    <tr key={idx} className="hover:bg-[#1b2535]/60 transition-colors">
+                      <td className="py-3 px-4 font-bold text-white">{scraper.name}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                          isHealthy
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : isFailed
+                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                            : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isHealthy ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                          {scraper.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-400">{scraper.lastRun}</td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-200">{scraper.jobsFound}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="p-8 text-center text-xs text-slate-400 bg-[#131a26] rounded-xl border border-[#232d3f]">
+            No scrapers configured yet. Add target companies in Company Manager to begin automated monitoring.
+          </div>
+        )}
       </div>
 
       {/* Logs Modal */}
@@ -320,7 +430,6 @@ const JobMonitoring: React.FC = () => {
             </div>
             
             <div className="p-6 space-y-4">
-              {/* Search and Filter */}
               <div className="flex gap-3">
                 <input
                   type="text"
@@ -346,7 +455,6 @@ const JobMonitoring: React.FC = () => {
                 </button>
               </div>
 
-              {/* Logs Table */}
               <div className="overflow-y-auto max-h-96 border border-[#232d3f] rounded-xl bg-[#1b2535]">
                 <table className="w-full text-xs text-[#94a3b8] text-left">
                   <thead className="bg-[#131a26] text-white font-bold uppercase border-b border-[#232d3f] sticky top-0">
@@ -361,39 +469,29 @@ const JobMonitoring: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#232d3f]">
-                    {filteredLogs.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="p-8 text-center text-[#6b7280]">No logs found</td>
+                    {filteredLogs.map((log: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-[#131a26]">
+                        <td className="p-3 font-mono">{log.timestamp}</td>
+                        <td className="p-3 font-semibold text-white">{log.company}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            log.status === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                          }`}>
+                            {log.status}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono">{log.jobsFound}</td>
+                        <td className="p-3 font-mono">{log.duration}</td>
+                        <td className="p-3 font-mono text-red-400">{log.errors || 0}</td>
+                        <td className="p-3 font-mono">{log.retries || 0}</td>
                       </tr>
-                    ) : (
-                      filteredLogs.map((log: any, idx: number) => (
-                        <tr key={idx} className="hover:bg-[#1f2a3f] transition duration-150">
-                          <td className="p-3 whitespace-nowrap font-mono text-[10px]">
-                            {new Date(log.timestamp).toLocaleString()}
-                          </td>
-                          <td className="p-3 font-semibold text-white">{log.company}</td>
-                          <td className="p-3">
-                            <span className={`px-2 py-0.5 rounded-full font-bold text-[9px] ${
-                              log.status === 'success' ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/20' :
-                              'bg-red-600/20 text-red-400 border border-red-500/20'
-                            }`}>
-                              {log.status}
-                            </span>
-                          </td>
-                          <td className="p-3 font-semibold text-white">{log.jobsFound || 0}</td>
-                          <td className="p-3 font-mono text-[10px]">{log.duration || '--'}</td>
-                          <td className="p-3 text-red-400">{log.errors || 0}</td>
-                          <td className="p-3 text-amber-400">{log.retries || 0}</td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };
