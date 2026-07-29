@@ -42,6 +42,8 @@ export const ProfileBuilder: React.FC = () => {
   const [subdomainStatus, setSubdomainStatus] = useState<{ available: boolean; alternatives: string[] }>({
     available: true,
     alternatives: ['varundamani-portfolio', 'varundamani-dev', 'varundamani01']
+  const [vercelToken, setVercelToken] = useState<string>(() => {
+    return localStorage.getItem('vercel_api_token') || '';
   });
   const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false);
 
@@ -188,6 +190,7 @@ export const ProfileBuilder: React.FC = () => {
         body: JSON.stringify({
           html: currentHtml,
           subdomain: cleanSubdomain,
+          vercelToken: vercelToken || undefined,
         })
       });
 
@@ -536,6 +539,24 @@ export const ProfileBuilder: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Optional Vercel API Token */}
+            <div className="pt-2 border-t border-[#232d3f]/60 space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase flex items-center justify-between">
+                <span>Vercel API Token (Optional)</span>
+                <span className="text-[9px] text-indigo-400 font-normal">For direct cloud deploys</span>
+              </label>
+              <input
+                type="password"
+                value={vercelToken}
+                onChange={(e) => {
+                  setVercelToken(e.target.value);
+                  localStorage.setItem('vercel_api_token', e.target.value);
+                }}
+                placeholder="Paste Vercel Token (e.g. vercel_tok_...)"
+                className="w-full bg-[#131a26] border border-[#232d3f] rounded-xl py-1.5 px-3 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-indigo-600"
+              />
+            </div>
 
             {/* Portfolio Analytics Display */}
             {isDeployed && (

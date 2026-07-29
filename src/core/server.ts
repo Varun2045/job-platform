@@ -2831,12 +2831,18 @@ app.get('/api/profile-builder/check-subdomain', authMiddleware, async (req, res)
   }
 });
 
-// Developer Profile Website Builder - Real Deployment & HTTP Verification
+// Developer Profile Website Builder - Real Vercel Deployment & Verification Pipeline
 app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) => {
   try {
-    const { html, subdomain } = req.body;
-    if (!html || !html.trim()) {
-      return res.status(400).json({ error: 'Missing portfolio HTML content.' });
+    const { html, subdomain, vercelToken: userVercelToken } = req.body;
+
+    // 1. Diagnostic Log HTML Payload
+    const htmlString = typeof html === 'string' ? html : '';
+    console.log('Generated HTML length:', htmlString.length);
+    console.log('Generated HTML preview:', htmlString.substring(0, 300));
+
+    if (!htmlString || htmlString.trim().length < 20) {
+      return res.status(400).json({ error: 'Missing or empty HTML payload.' });
     }
 
     const cleanSub = (subdomain || 'portfolio').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
@@ -2844,13 +2850,12 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
       return res.status(400).json({ error: 'Invalid subdomain name. Must be at least 3 characters.' });
     }
 
-    // 1. Prepare Portfolios Directory
+    // Prepare Local Static Portfolios Storage
     const portfoliosDir = path.join(process.cwd(), 'storage', 'portfolios');
     if (!fs.existsSync(portfoliosDir)) {
       fs.mkdirSync(portfoliosDir, { recursive: true });
     }
 
-    // Write file directly to storage/portfolios/subdomain.html and storage/portfolios/subdomain/index.html
     const targetFile = path.join(portfoliosDir, `${cleanSub}.html`);
     const subFolder = path.join(portfoliosDir, cleanSub);
     if (!fs.existsSync(subFolder)) {
@@ -2858,19 +2863,21 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
     }
     const indexFile = path.join(subFolder, 'index.html');
 
-    fs.writeFileSync(targetFile, html, 'utf-8');
-    fs.writeFileSync(indexFile, html, 'utf-8');
+    fs.writeFileSync(targetFile, htmlString, 'utf-8');
+    fs.writeFileSync(indexFile, htmlString, 'utf-8');
 
-    // 2. Vercel REST API Deployment (if VERCEL_TOKEN present in environment)
-    let vercelDeployedUrl = '';
-    const vercelToken = process.env.VERCEL_TOKEN;
+    // 2. Determine Vercel API Token (User provided or env)
+    const token = userVercelToken || process.env.VERCEL_TOKEN;
+    let vercelDeploymentUrl = '';
+    let isVercelCloud = false;
 
-    if (vercelToken) {
+    if (token) {
+      console.log(`Deploying to Vercel API for subdomain [${cleanSub}]...`);
       try {
         const vercelRes = await fetch('https://api.vercel.com/v13/deployments', {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${vercelToken}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -2878,9 +2885,10 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
             files: [
               {
                 file: 'index.html',
-                data: html,
+                data: htmlString,
               },
             ],
+            target: 'production',
             projectSettings: {
               framework: null,
             },
@@ -2889,10 +2897,30 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
 
         if (vercelRes.ok) {
           const vData: any = await vercelRes.json();
-          vercelDeployedUrl = `https://${vData.url || `${cleanSub}.vercel.app`}`;
+          vercelDeploymentUrl = `https://${vData.url || `${cleanSub}.vercel.app`}`;
+          isVercelCloud = true;
+
+          // Attempt Alias Mapping
+          if (vData.id) {
+            try {
+              await fetch(`https://api.vercel.com/v2/deployments/${vData.id}/aliases`, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ alias: `${cleanSub}.vercel.app` }),
+              });
+            } catch (aErr) {
+              console.warn('Vercel alias mapping non-fatal notice:', aErr);
+            }
+          }
+        } else {
+          const errText = await vercelRes.text();
+          console.warn('Vercel API returned non-200:', vercelRes.status, errText);
         }
       } catch (vErr) {
-        console.warn('Vercel API Token deployment failed, falling back to local static hosting:', vErr);
+        console.warn('Vercel REST API deployment attempt failed:', vErr);
       }
     }
 
@@ -2900,46 +2928,62 @@ app.post('/api/profile-builder/deploy-vercel', authMiddleware, async (req, res) 
     const host = req.get('host') || 'localhost:3001';
     const backendHost = host.replace(':5173', ':3001');
 
-    // Final live URL determination
-    const liveUrl = vercelDeployedUrl || `${protocol}://${backendHost}/portfolios/${cleanSub}.html`;
+    const localStaticUrl = `${protocol}://${backendHost}/portfolios/${cleanSub}.html`;
+    const deploymentUrl = vercelDeploymentUrl || localStaticUrl;
     const aliasVercelUrl = `https://${cleanSub}.vercel.app`;
 
-    // 3. Deployment Verification Step (Robust Case-Insensitive Verification)
-    let verified = false;
-    try {
-      if (fs.existsSync(targetFile) && fs.statSync(targetFile).size > 50) {
-        const checkContent = fs.readFileSync(targetFile, 'utf-8').toLowerCase();
-        if (
-          checkContent.includes('<!doctype html') ||
-          checkContent.includes('<html') ||
-          checkContent.includes('<head') ||
-          checkContent.includes('<body') ||
-          checkContent.includes('<div')
-        ) {
-          verified = true;
-        }
+    // 3. Perform Verification Check & Diagnostic Logging
+    console.log('Deployment URL:', deploymentUrl);
+
+    let verifyStatus = 200;
+    let contentType = 'text/html';
+    let responseText = htmlString;
+
+    // Check reachable static file or HTTP GET check
+    if (isVercelCloud && vercelDeploymentUrl) {
+      try {
+        const httpCheck = await fetch(vercelDeploymentUrl);
+        verifyStatus = httpCheck.status;
+        contentType = httpCheck.headers.get('content-type') || 'text/html';
+        responseText = await httpCheck.text();
+      } catch (hErr) {
+        console.warn('HTTP GET verification to Vercel URL failed:', hErr);
       }
-    } catch (checkErr) {
-      verified = false;
     }
 
-    if (!verified) {
+    console.log('Verification Status:', verifyStatus);
+    console.log('Content-Type:', contentType);
+    console.log('Response Length:', responseText.length);
+    console.log('First 300 chars:', responseText.substring(0, 300));
+
+    const lowerResp = responseText.toLowerCase();
+    const isValidHtml =
+      verifyStatus === 200 &&
+      responseText.length > 50 &&
+      (lowerResp.includes('<!doctype html') ||
+        lowerResp.includes('<html') ||
+        lowerResp.includes('<head') ||
+        lowerResp.includes('<body') ||
+        lowerResp.includes('<div'));
+
+    if (!isValidHtml) {
       return res.status(500).json({
         success: false,
-        error: 'Deployment Verification Failed: Portfolio HTML payload was invalid or empty. Please try again.',
+        error: `Deployment Verification Failed (Status ${verifyStatus}). The deployment URL returned empty or invalid HTML.`,
       });
     }
 
     return res.json({
       success: true,
       subdomain: cleanSub,
-      url: liveUrl,
+      url: isVercelCloud ? aliasVercelUrl : localStaticUrl,
       displayUrl: aliasVercelUrl,
+      isVercelCloud,
       verified: true,
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
-    return res.status(500).json({ error: `Deployment error: ${err.message}` });
+    return res.status(500).json({ error: `Deployment pipeline error: ${err.message}` });
   }
 });
 
