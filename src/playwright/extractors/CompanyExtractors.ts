@@ -55,7 +55,8 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'microsoft', name: 'Microsoft', pattern: 'microsoft.com', careerPage: 'https://careers.microsoft.com', jobBoardUrl: 'https://careers.microsoft.com/v2/global/en/home.html' },
   { id: 'amazon', name: 'Amazon', pattern: 'amazon.', careerPage: 'https://www.amazon.jobs', jobBoardUrl: 'https://amazon.jobs/en/search' },
   { id: 'apple', name: 'Apple', pattern: 'apple.com', careerPage: 'https://www.apple.com/careers', jobBoardUrl: 'https://jobs.apple.com/en-in/search?location=india-INDC' },
-  { id: 'meta', name: 'Meta', pattern: 'metacareers.com', careerPage: 'https://www.metacareers.com', jobBoardUrl: 'https://www.metacareers.com/jobs' },
+  { id: 'meta', name: 'Meta', pattern: 'metacareers.com', careerPage: 'https://www.metacareers.com', jobBoardUrl: 'https://www.metacareers.com/jobsearch/' },
+  { id: 'figma', name: 'Figma', pattern: 'figma.com', careerPage: 'https://www.figma.com/careers/', jobBoardUrl: 'https://www.figma.com/careers/#job-openings' },
   { id: 'oracle', name: 'Oracle', pattern: 'oracle.com', careerPage: 'https://www.oracle.com/careers', jobBoardUrl: 'https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch' },
   { id: 'cisco', name: 'Cisco', pattern: 'cisco.com', careerPage: 'https://jobs.cisco.com', jobBoardUrl: 'https://jobs.cisco.com/jobs/SearchJobs' },
 

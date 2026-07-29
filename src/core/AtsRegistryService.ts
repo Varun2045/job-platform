@@ -132,7 +132,7 @@ export class AtsRegistryService {
       averageExtractionMs: 15,
       companies: [
         'Adyen', 'Airbnb', 'Anthropic', 'Cloudflare', 'Cockroach Labs',
-        'Databricks', 'Datadog', 'Figma', 'GitLab',
+        'Databricks', 'Datadog', 'GitLab',
         'Grafana Labs', 'Groww', 'Instacart', 'JetBrains', 'Klaviyo', 'MongoDB', 'Palantir', 'PhonePe', 'Razorpay',
         'Reddit', 'Retool', 'Robinhood', 'Roblox', 'Rubrik', 'Sentry', 'ShareChat', 'Twitch', 'Twilio',
         'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
