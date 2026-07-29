@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Sparkles, CheckCircle2, XCircle, BarChart3, AlertCircle, Layers, Lightbulb,
-  Download, FileText, FileCode, CheckSquare, Zap, Target, TrendingUp, HelpCircle
+  Download, FileText, FileCode, Target, TrendingUp
 } from 'lucide-react';
 
 export interface KeywordMatchItem {
