@@ -111,7 +111,7 @@ export const Referrals: React.FC = () => {
 };
 
 const CompanyContacts: React.FC = () => {
-  const { showToast } = useToast();
+  const { showToast, confirmAction } = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingContact, setEditingContact] = useState<ReferralContact | null>(null);
@@ -139,7 +139,7 @@ const CompanyContacts: React.FC = () => {
     window.open(gmailUrl, '_blank');
   };
 
-  const copyTextToClipboard = async (text: string, successMessage: string) => {
+  const copyTextToClipboard = async (text: string, successMessage: string = '✓ Copied to clipboard.') => {
     try {
       await navigator.clipboard.writeText(text);
       showToast(successMessage);
@@ -273,8 +273,6 @@ const CompanyContacts: React.FC = () => {
     return `https://www.google.com/search?q=${query}`;
   };
 
-
-
   const handleCSVExport = () => {
     if (!referrals || referrals.length === 0) {
       showToast('⚠ No contacts to export.', 'warning');
@@ -388,18 +386,12 @@ const CompanyContacts: React.FC = () => {
             {editingContact ? 'Edit Contact' : 'Add New Contact'}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Row 1: Name | Profession (Dropdown) */}
             <input
               type="text"
               placeholder="Name *"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
-            />
-            <input
-              type="text"
-              placeholder="Role"
-              value={formData.role}
-              onChange={e => setFormData({ ...formData, role: e.target.value })}
               className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
             />
             <select
@@ -411,18 +403,13 @@ const CompanyContacts: React.FC = () => {
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+
+            {/* Row 2: Company Name | Email */}
             <input
               type="text"
               placeholder="Company *"
               value={formData.company}
               onChange={e => setFormData({ ...formData, company: e.target.value })}
-              className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
-            />
-            <input
-              type="text"
-              placeholder="LinkedIn URL"
-              value={formData.linkedInUrl}
-              onChange={e => setFormData({ ...formData, linkedInUrl: e.target.value })}
               className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
             />
             <input
@@ -432,6 +419,15 @@ const CompanyContacts: React.FC = () => {
               onChange={e => setFormData({ ...formData, email: e.target.value })}
               className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
             />
+
+            {/* Row 3: Job Role | Contact Number (optional) */}
+            <input
+              type="text"
+              placeholder="Job Role"
+              value={formData.role}
+              onChange={e => setFormData({ ...formData, role: e.target.value })}
+              className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+            />
             <input
               type="tel"
               placeholder="Contact Number (optional)"
@@ -439,6 +435,8 @@ const CompanyContacts: React.FC = () => {
               onChange={e => setFormData({ ...formData, phone: e.target.value })}
               className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
             />
+
+            {/* Row 4: Location | LinkedIn URL */}
             <input
               type="text"
               placeholder="Location"
@@ -448,10 +446,19 @@ const CompanyContacts: React.FC = () => {
             />
             <input
               type="text"
+              placeholder="LinkedIn URL"
+              value={formData.linkedInUrl}
+              onChange={e => setFormData({ ...formData, linkedInUrl: e.target.value })}
+              className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+            />
+
+            {/* Row 5: Tags | Pipeline Status (if editing) */}
+            <input
+              type="text"
               placeholder="Tags (comma-separated)"
               value={formData.tags}
               onChange={e => setFormData({ ...formData, tags: e.target.value })}
-              className="px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
+              className={`px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280] ${editingContact ? '' : 'md:col-span-2'}`}
             />
             {editingContact && (
               <select
@@ -465,6 +472,8 @@ const CompanyContacts: React.FC = () => {
               </select>
             )}
           </div>
+
+          {/* Row 6: Notes */}
           <textarea
             placeholder="Notes"
             rows={3}
@@ -472,6 +481,7 @@ const CompanyContacts: React.FC = () => {
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
             className="w-full px-4 py-2 bg-[#131a26] border border-[#232d3f] rounded-lg text-white placeholder-[#6b7280]"
           />
+
           <div className="flex gap-2">
             <button
               onClick={() => {
@@ -529,46 +539,55 @@ const CompanyContacts: React.FC = () => {
                 {contacts.map(contact => (
                   <div
                     key={contact.id}
-                    className={`bg-[#131a26] border-2 rounded-xl p-4 transition-all duration-200 ${getCategoryBorderColor(contact.category)}`}
+                    className={`bg-[#131a26] border-2 rounded-xl p-5 space-y-4 transition-all duration-200 ${getCategoryBorderColor(contact.category)}`}
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-bold text-white">{contact.name}</h4>
+                    {/* Header: Name, Company, Job Role each on its own line | Top-Right: Edit/Delete + Profession Badge directly below */}
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-lg text-white leading-tight">{contact.name}</h4>
                           {contact.tags?.includes('LinkedIn Import') && (
                             <span className="px-2 py-0.5 bg-[#0077b5]/10 border border-[#0077b5]/20 text-[#0077b5] text-xs font-semibold rounded-full">
                               LinkedIn
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-[#94a3b8]">{contact.company} - {contact.role}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="inline-block px-2 py-0.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-semibold rounded-full">
-                            {contact.category}
-                          </span>
-                        </div>
+                        <p className="text-sm font-semibold text-[#e2e8f0] leading-snug">{contact.company}</p>
+                        <p className="text-xs text-[#94a3b8] leading-snug">{contact.role}</p>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleStartEdit(contact)}
-                          className="text-[#94a3b8] hover:text-white transition-colors cursor-pointer"
-                          title="Edit Contact"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteMutation.mutate(contact.id)}
-                          className="text-red-400 hover:text-red-500 transition-colors cursor-pointer"
-                          title="Delete Contact"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleStartEdit(contact)}
+                            className="text-[#94a3b8] hover:text-white transition-colors cursor-pointer p-1 rounded hover:bg-[#1b2535]"
+                            title="Edit Contact"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              confirmAction({
+                                title: 'Delete Contact',
+                                message: `Are you sure you want to delete ${contact.name}? This action cannot be undone.`,
+                                onConfirm: () => deleteMutation.mutate(contact.id)
+                              });
+                            }}
+                            className="text-red-400 hover:text-red-500 transition-colors cursor-pointer p-1 rounded hover:bg-[#1b2535]"
+                            title="Delete Contact"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <span className="inline-block px-2.5 py-0.5 bg-indigo-600/10 border border-indigo-600/20 text-indigo-400 text-xs font-semibold rounded-full">
+                          {contact.category}
+                        </span>
                       </div>
                     </div>
 
-                    {/* Confidence Score and Recommendation */}
+                    {/* Recommendation note if LinkedIn import */}
                     {contact.tags?.includes('LinkedIn Import') && contact.notes && (
-                      <div className="mb-3 p-3 bg-[#1b2535] rounded-lg">
+                      <div className="p-3 bg-[#1b2535] rounded-lg">
                         <div className="flex items-center gap-2 mb-1">
                           <Star className="w-4 h-4 text-amber-400" />
                           <span className="text-xs font-semibold text-white">Recommendation</span>
@@ -577,125 +596,141 @@ const CompanyContacts: React.FC = () => {
                       </div>
                     )}
 
-                    {/* 2. Dedicated LinkedIn Profile Field */}
-                    <div className="mb-2 text-xs">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[#94a3b8]">LinkedIn:</span>
+                    {/* Major Fields - Each on its own row */}
+                    <div className="space-y-3 pt-2 border-t border-[#232d3f]/60">
+                      {/* Email */}
+                      {contact.email && (
+                        <div className="space-y-1 text-xs">
+                          <span className="text-[#94a3b8] font-semibold block">Email</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <a href={`mailto:${extractCleanEmail(contact.email)}`} className="text-indigo-400 hover:underline font-mono break-all">
+                              {contact.email}
+                            </a>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                onClick={() => openGmailCompose(contact)}
+                                className="p-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+                                title="Open in Gmail"
+                              >
+                                <Mail className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => copyTextToClipboard(extractCleanEmail(contact.email!), '✓ Copied to clipboard.')}
+                                className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+                                title="Copy"
+                              >
+                                <Copy className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Contact Number */}
+                      {contact.phone && (
+                        <div className="space-y-1 text-xs">
+                          <span className="text-[#94a3b8] font-semibold block">Contact Number</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-white font-mono">{contact.phone}</span>
+                            <button
+                              onClick={() => copyTextToClipboard(contact.phone!, '✓ Copied to clipboard.')}
+                              className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+                              title="Copy"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* LinkedIn */}
+                      <div className="space-y-1 text-xs">
+                        <span className="text-[#94a3b8] font-semibold block">LinkedIn</span>
                         {contact.linkedInUrl ? (
-                          <>
-                            <span className="text-cyan-400 truncate max-w-[200px] font-mono">{contact.linkedInUrl}</span>
+                          <div className="flex items-center gap-2 flex-wrap">
                             <a
                               href={contact.linkedInUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1 bg-[#0077b5]/20 border border-[#0077b5]/40 text-[#0077b5] hover:bg-[#0077b5] hover:text-white rounded transition-colors flex items-center justify-center cursor-pointer"
-                              title="Open LinkedIn Profile"
+                              className="text-cyan-400 hover:underline font-mono break-all leading-relaxed"
                             >
-                              <span className="font-bold text-xs px-0.5">in</span>
+                              {contact.linkedInUrl}
                             </a>
-                            <button
-                              onClick={() => copyTextToClipboard(contact.linkedInUrl!, '✓ LinkedIn URL copied.')}
-                              className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] hover:bg-[#1f2937] text-slate-300 rounded text-[11px] font-semibold transition-colors cursor-pointer border border-[#232d3f]"
-                              title="Copy LinkedIn URL"
-                            >
-                              <Copy className="w-3 h-3 text-cyan-400" />
-                              Copy
-                            </button>
-                          </>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <a
+                                href={contact.linkedInUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/30 text-[#0077b5] rounded-lg transition-colors flex items-center justify-center cursor-pointer"
+                                title="Open LinkedIn Profile"
+                              >
+                                <span className="font-bold text-xs leading-none">in</span>
+                              </a>
+                              <button
+                                onClick={() => copyTextToClipboard(contact.linkedInUrl!, '✓ Copied to clipboard.')}
+                                className="p-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+                                title="Copy"
+                              >
+                                <Copy className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
                         ) : (
                           <a
                             href={generateLinkedInSearchUrl(contact.name, contact.company)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-2.5 py-1 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0077b5] hover:bg-[#006097] rounded-lg text-xs font-semibold text-white transition-colors"
                           >
                             <Search className="w-3.5 h-3.5" />
                             LinkedIn Search
                           </a>
                         )}
                       </div>
-                    </div>
 
-                    {/* 3. Contact Email & Copy Email Button */}
-                    {contact.email && (
-                      <div className="flex items-center gap-2 mb-2 text-xs flex-wrap">
-                        <span className="text-[#94a3b8]">Email:</span>
-                        <a href={`mailto:${extractCleanEmail(contact.email)}`} className="text-indigo-400 hover:underline font-mono">
-                          {contact.email}
-                        </a>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => openGmailCompose(contact)}
-                            className="flex items-center gap-1 px-2 py-0.5 bg-[#ea4335]/10 border border-[#ea4335]/20 text-[#ea4335] text-xs font-semibold rounded-full hover:bg-[#ea4335]/20 transition-colors cursor-pointer"
-                            title="Open in Gmail"
-                          >
-                            <Mail className="w-3 h-3" />
-                            Gmail
-                          </button>
-                          <button
-                            onClick={() => copyTextToClipboard(extractCleanEmail(contact.email!), '✓ Email copied to clipboard.')}
-                            className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] hover:bg-[#1f2937] text-slate-300 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-[#232d3f]"
-                            title="Copy Email Address"
-                          >
-                            <Copy className="w-3 h-3 text-cyan-400" />
-                            Copy Email
-                          </button>
+                      {/* Location */}
+                      {contact.location && (
+                        <div className="space-y-1 text-xs">
+                          <span className="text-[#94a3b8] font-semibold block">Location</span>
+                          <span className="text-white">{contact.location}</span>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* 1. Optional Contact Number Field */}
-                    {contact.phone && (
-                      <div className="flex items-center gap-2 mb-2 text-xs flex-wrap">
-                        <span className="text-[#94a3b8]">Contact Number:</span>
-                        <span className="text-white font-mono">{contact.phone}</span>
-                        <button
-                          onClick={() => copyTextToClipboard(contact.phone!, '✓ Contact number copied.')}
-                          className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] hover:bg-[#1f2937] text-slate-300 rounded text-[11px] font-semibold transition-colors cursor-pointer border border-[#232d3f]"
-                          title="Copy Contact Number"
-                        >
-                          <Copy className="w-3 h-3 text-cyan-400" />
-                          Copy
-                        </button>
+                      {/* Status */}
+                      <div className="space-y-1 text-xs">
+                        <span className="text-[#94a3b8] font-semibold block">Status</span>
+                        <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                          contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                          contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                          'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                        }`}>
+                          {contact.connectionStatus}
+                        </span>
                       </div>
-                    )}
 
-                    {contact.location && (
-                      <div className="flex items-center gap-2 mb-2 text-xs">
-                        <span className="text-[#94a3b8]">Location:</span>
-                        <span className="text-white">{contact.location}</span>
-                      </div>
-                    )}
+                      {/* Tags */}
+                      {contact.tags && contact.tags.length > 0 && (
+                        <div className="space-y-1 text-xs">
+                          <span className="text-[#94a3b8] font-semibold block">Tags</span>
+                          <div className="flex flex-wrap gap-1">
+                            {contact.tags.map(tag => (
+                              <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] text-[#94a3b8] text-xs rounded-full border border-[#232d3f]">
+                                <Tag className="w-3 h-3" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-                    {/* Tags */}
-                    {contact.tags && contact.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {contact.tags.map(tag => (
-                          <span key={tag} className="flex items-center gap-1 px-2 py-0.5 bg-[#232d3f] text-[#94a3b8] text-xs rounded-full">
-                            <Tag className="w-3 h-3" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Status */}
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#232d3f]">
-                      <span className="text-xs text-[#94a3b8]">Status:</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        contact.connectionStatus === 'Connected' ? 'bg-emerald-500/10 text-emerald-400' :
-                        contact.connectionStatus === 'Connection Sent' ? 'bg-amber-500/10 text-amber-400' :
-                        'bg-indigo-500/10 text-indigo-400'
-                      }`}>
-                        {contact.connectionStatus}
-                      </span>
+                      {/* Notes */}
+                      {contact.notes && !contact.tags?.includes('LinkedIn Import') && (
+                        <div className="space-y-1 text-xs pt-2 border-t border-[#232d3f]/60">
+                          <span className="text-[#94a3b8] font-semibold block">Notes</span>
+                          <p className="text-xs text-[#94a3b8] whitespace-pre-wrap leading-relaxed">{contact.notes}</p>
+                        </div>
+                      )}
                     </div>
-
-                    {contact.notes && (
-                      <div className="mt-2 pt-2 border-t border-[#232d3f]">
-                        <p className="text-xs text-[#94a3b8] whitespace-pre-wrap">{contact.notes}</p>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -1708,6 +1743,7 @@ const AIMessageGenerator: React.FC = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedMessage);
     setIsCopied(true);
+    showToast('✓ Copied to clipboard.');
     setTimeout(() => {
       setIsCopied(false);
     }, 2500);
@@ -1716,6 +1752,7 @@ const AIMessageGenerator: React.FC = () => {
   const copySubjectToClipboard = () => {
     navigator.clipboard.writeText(generatedSubject);
     setIsSubjectCopied(true);
+    showToast('✓ Copied to clipboard.');
     setTimeout(() => {
       setIsSubjectCopied(false);
     }, 2500);
