@@ -156,7 +156,7 @@ export class AtsRegistryService {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Bosch', 'Freshworks', 'Square', 'Ubisoft', 'Visa'],
+      companies: ['Bosch', 'Freshworks', 'Ubisoft', 'Visa'],
       companyDetails: [],
     },
     {
