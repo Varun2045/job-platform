@@ -30,6 +30,13 @@ type ReferralContact = {
 const CATEGORIES = ['Recruiter', 'Hiring Manager', 'Engineering Manager', 'University Alumni', 'Employee', 'Talent Acquisition', 'HR'] as const;
 const PIPELINE_STAGES = ['Potential Contact', 'LinkedIn Opened', 'Connection Sent', 'Connected', 'Referral Requested', 'Referral Submitted', 'Applied', 'Interview', 'Offer'] as const;
 
+const extractCleanEmail = (rawEmailStr?: string): string => {
+  if (!rawEmailStr) return '';
+  const match = rawEmailStr.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  if (match) return match[1].trim();
+  return rawEmailStr.replace(/^[^(<]*[((<]/, '').replace(/[>)]*$/, '').trim();
+};
+
 export const Referrals: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('contacts');
 
@@ -94,13 +101,6 @@ const CompanyContacts: React.FC = () => {
     tags: '',
     connectionStatus: 'Potential Contact' as ReferralContact['connectionStatus']
   });
-
-  const extractCleanEmail = (rawEmailStr?: string): string => {
-    if (!rawEmailStr) return '';
-    const match = rawEmailStr.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-    if (match) return match[1].trim();
-    return rawEmailStr.replace(/^[^(<]*[((<]/, '').replace(/[>)]*$/, '').trim();
-  };
 
   const openGmailCompose = (contact: ReferralContact) => {
     const cleanEmail = extractCleanEmail(contact.email || '');
