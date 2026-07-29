@@ -118,7 +118,7 @@ export const App: React.FC = () => {
               />
 
               {/* Main Workspace Area */}
-              <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#0b0f19] text-white">
+              <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#0b0f19] text-white min-w-0">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/explorer" element={<JobExplorer />} />

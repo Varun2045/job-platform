@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, isOpen = false, onCl
         style={{
           width: isCollapsed ? '80px' : 'clamp(240px, 18vw, 280px)',
         }}
-        className={`fixed md:sticky top-0 left-0 h-screen bg-[#0b0f19] border-r border-[#232d3f] flex flex-col justify-between p-4 z-50 transition-all duration-300 ${
+        className={`fixed md:sticky top-0 left-0 h-screen bg-[#0b0f19] border-r border-[#232d3f] flex flex-col justify-between p-4 z-40 shrink-0 transition-all duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
