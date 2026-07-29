@@ -6,6 +6,93 @@ import { PageHeader } from '../../components/PageHeader.js';
 export const CopilotDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'brief' | 'gap'>('brief');
 
+  // Skill Gap Roadmap Progress persistence state
+  const [roadmapProgress, setRoadmapProgress] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('skill_gap_roadmap_progress');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleProgressChange = (taskId: string, newProgress: number) => {
+    const updated = { ...roadmapProgress, [taskId]: newProgress };
+    setRoadmapProgress(updated);
+    try {
+      localStorage.setItem('skill_gap_roadmap_progress', JSON.stringify(updated));
+    } catch (err) {
+      console.error('Failed to save roadmap progress:', err);
+    }
+  };
+
+  const getDifficultyBadge = (difficulty: string) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'beginner':
+        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      case 'intermediate':
+        return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+      case 'advanced':
+      default:
+        return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+    }
+  };
+
+  const defaultRoadmapTasks = [
+    {
+      id: 'task-typescript',
+      title: 'Learn TypeScript Fundamentals',
+      description: 'Master static typing, interfaces, generics, type guards, and strict compiler configurations for production web applications.',
+      estimatedHours: 8,
+      estimatedTime: '6–8 hours',
+      difficulty: 'Beginner',
+      resources: [
+        { name: 'Documentation', url: 'https://www.typescriptlang.org/docs/' },
+        { name: 'Tutorial', url: 'https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html' },
+        { name: 'Practice', url: 'https://www.typescriptlang.org/play' }
+      ]
+    },
+    {
+      id: 'task-docker',
+      title: 'Learn Docker Fundamentals',
+      description: 'Containerize backend APIs and frontend applications using multi-stage Dockerfiles, Docker Compose networks, and registry publishing.',
+      estimatedHours: 6,
+      estimatedTime: '4–6 hours',
+      difficulty: 'Intermediate',
+      resources: [
+        { name: 'Documentation', url: 'https://docs.docker.com/get-started/' },
+        { name: 'Tutorial', url: 'https://docker-curriculum.com/' },
+        { name: 'Practice', url: 'https://labs.play-with-docker.com/' }
+      ]
+    },
+    {
+      id: 'task-kubernetes',
+      title: 'Learn Kubernetes Orchestration',
+      description: 'Deploy, auto-scale, and manage container workloads using Pods, StatefulSets, Ingress Controllers, and Helm chart configurations.',
+      estimatedHours: 12,
+      estimatedTime: '10–12 hours',
+      difficulty: 'Advanced',
+      resources: [
+        { name: 'Documentation', url: 'https://kubernetes.io/docs/home/' },
+        { name: 'Tutorial', url: 'https://kubernetes.io/docs/tutorials/' },
+        { name: 'Practice', url: 'https://killercoda.com/playgrounds' }
+      ]
+    },
+    {
+      id: 'task-postgresql',
+      title: 'Learn PostgreSQL Performance Tuning',
+      description: 'Optimize complex relational database queries using B-tree/GIN indexes, EXPLAIN ANALYZE execution plans, and PgBouncer connection pooling.',
+      estimatedHours: 7,
+      estimatedTime: '5–7 hours',
+      difficulty: 'Intermediate',
+      resources: [
+        { name: 'Documentation', url: 'https://www.postgresql.org/docs/' },
+        { name: 'Tutorial', url: 'https://postgresqltutorial.com/' },
+        { name: 'Practice', url: 'https://pgtunes.leopard.in.ua/' }
+      ]
+    }
+  ];
+
   // Queries
   const { data: brief, isLoading: isBriefLoading } = useQuery({
     queryKey: ['copilot-brief'],
@@ -312,22 +399,143 @@ export const CopilotDashboard: React.FC = () => {
 
                 {/* Learning Roadmap */}
                 <div className="space-y-4 md:col-span-2">
-                  <h3 className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider">Learning Roadmap</h3>
-                  <div className="space-y-3">
-                    {gap?.roadmapTasks?.map((t: any) => (
-                      <div key={t.id} className="p-4 bg-[#1b2535] border border-[#232d3f] rounded-xl flex gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-[#6b7280] shrink-0" />
-                        <div className="flex-1">
-                          <span className="text-xs font-bold text-white block">{t.title}</span>
-                          <p className="text-[10px] text-[#94a3b8] mt-1">{t.description}</p>
-                          <div className="flex items-center gap-4 mt-2">
-                            <span className="text-[9px] text-indigo-400 font-semibold">Effort: {t.estimatedHours} study hours</span>
-                            <span className="text-[9px] text-cyan-400 font-semibold">Est. Completion: {t.estimatedWeeks} weeks</span>
+                  {(() => {
+                    const rawTasks = gap?.roadmapTasks && gap.roadmapTasks.length > 0 ? gap.roadmapTasks : defaultRoadmapTasks;
+                    const tasks = rawTasks.map((t: any) => ({
+                      ...t,
+                      estimatedTime: t.estimatedTime || (t.estimatedHours ? `${Math.max(1, Math.round(t.estimatedHours * 0.7))}–${t.estimatedHours} hours` : '6–8 hours'),
+                      difficulty: t.difficulty || (t.estimatedHours > 10 ? 'Advanced' : t.estimatedHours > 5 ? 'Intermediate' : 'Beginner'),
+                      resources: t.resources || [
+                        { name: 'Documentation', url: 'https://developer.mozilla.org/' },
+                        { name: 'Tutorial', url: 'https://freecodecamp.org/' },
+                        { name: 'Practice', url: 'https://leetcode.com/' }
+                      ]
+                    }));
+
+                    const completedTasks = tasks.filter((t: any) => (roadmapProgress[t.id] ?? (t.completed ? 100 : 0)) === 100).length;
+                    const overallPercentage = Math.round((completedTasks / tasks.length) * 100);
+
+                    return (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-[#94a3b8] uppercase tracking-wider flex items-center gap-2">
+                            <Target className="w-4 h-4 text-indigo-400" /> Learning Roadmap
+                          </h3>
+                          <div className="flex items-center gap-3 text-xs font-semibold">
+                            <span className="text-[#94a3b8]">Roadmap Completion:</span>
+                            <span className="text-emerald-400 font-mono font-bold">{completedTasks} / {tasks.length} ({overallPercentage}%)</span>
                           </div>
                         </div>
+
+                        <div className="space-y-4">
+                          {tasks.map((t: any) => {
+                            const currentProgress = roadmapProgress[t.id] ?? (t.completed ? 100 : 0);
+                            const isComplete = currentProgress === 100;
+
+                            return (
+                              <div
+                                key={t.id}
+                                className={`p-5 bg-[#1b2535] border rounded-xl space-y-4 transition-all duration-200 ${
+                                  isComplete
+                                    ? 'border-emerald-500/40 bg-emerald-950/10 shadow-[0_0_15px_rgba(16,185,129,0.05)]'
+                                    : 'border-[#232d3f] hover:border-indigo-600/30'
+                                }`}
+                              >
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex items-start gap-3">
+                                    {isComplete ? (
+                                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                                    ) : (
+                                      <div className="w-5 h-5 rounded-full border-2 border-slate-600 shrink-0 mt-0.5" />
+                                    )}
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-2.5 flex-wrap">
+                                        <span className={`text-sm font-bold ${isComplete ? 'text-emerald-300 line-through opacity-90' : 'text-white'}`}>
+                                          {t.title}
+                                        </span>
+                                        {isComplete && (
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                                            ✓ Completed
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-[#94a3b8] leading-relaxed">{t.description}</p>
+                                    </div>
+                                  </div>
+
+                                  {/* Mark Complete Action Button */}
+                                  <button
+                                    onClick={() => handleProgressChange(t.id, isComplete ? 0 : 100)}
+                                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+                                      isComplete
+                                        ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 hover:bg-rose-500/20 hover:border-rose-500/30 hover:text-rose-300'
+                                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md'
+                                    }`}
+                                  >
+                                    {isComplete ? 'Completed ✓' : 'Mark Complete'}
+                                  </button>
+                                </div>
+
+                                {/* 1. Estimated Time & Difficulty */}
+                                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#232d3f]/60 text-xs">
+                                  <div className="flex items-center gap-4 flex-wrap">
+                                    <div className="flex items-center gap-1.5 text-slate-300 font-medium">
+                                      <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                                      <span className="text-[#94a3b8]">Estimated Time:</span>
+                                      <strong className="text-white font-mono">{t.estimatedTime}</strong>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[#94a3b8]">Difficulty:</span>
+                                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getDifficultyBadge(t.difficulty)}`}>
+                                        {t.difficulty}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Resources Links */}
+                                  <div className="flex items-center gap-2">
+                                    {t.resources.map((res: any, idx: number) => (
+                                      <a
+                                        key={idx}
+                                        href={res.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-[10px] font-semibold px-2 py-1 rounded bg-[#131a26] border border-[#232d3f] text-cyan-400 hover:text-cyan-300 hover:border-cyan-500/40 transition-colors flex items-center gap-1"
+                                      >
+                                        <BookOpen className="w-2.5 h-2.5" />
+                                        {res.name}
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* 2. Visual Progress Bar & Percentage */}
+                                <div className="space-y-1.5 pt-1">
+                                  <div className="flex justify-between items-center text-[11px] font-semibold">
+                                    <span className="text-[#94a3b8]">Progress</span>
+                                    <span className={`font-mono font-bold ${isComplete ? 'text-emerald-400' : 'text-indigo-400'}`}>
+                                      {currentProgress}%
+                                    </span>
+                                  </div>
+                                  <div className="w-full bg-[#0d131f] border border-[#232d3f] h-2 rounded-full overflow-hidden p-0.5">
+                                    <div
+                                      className={`h-full rounded-full transition-all duration-500 ${
+                                        isComplete
+                                          ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]'
+                                          : 'bg-gradient-to-r from-indigo-500 to-cyan-400'
+                                      }`}
+                                      style={{ width: `${currentProgress}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    )) || <p className="text-xs text-[#6b7280]">No roadmap tasks available.</p>}
-                  </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Suggested Courses */}
