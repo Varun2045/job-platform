@@ -79,7 +79,8 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Siemens': { careerPage: 'https://jobs.siemens.com', jobBoardUrl: 'https://siemens.wd3.myworkdayjobs.com/Siemens_Careers' },
   'Slack': { careerPage: 'https://salesforce.wd12.myworkdayjobs.com/Slack', jobBoardUrl: 'https://salesforce.wd12.myworkdayjobs.com/Slack' },
   'Splunk': { careerPage: 'https://www.splunk.com/en_us/careers.html', jobBoardUrl: 'https://splunk.wd1.myworkdayjobs.com/External' },
-  'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://tesla.wd1.myworkdayjobs.com/Tesla_Careers' },
+  'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://www.tesla.com/careers' },
+  'Visa': { careerPage: 'https://careers.visa.com', jobBoardUrl: 'https://visa.wd5.myworkdayjobs.com/Visa' },
   'Walmart': { careerPage: 'https://careers.walmart.com', jobBoardUrl: 'https://walmart.wd5.myworkdayjobs.com/WalmartExternal' },
   'CrowdStrike': { careerPage: 'https://www.crowdstrike.com/careers', jobBoardUrl: 'https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers' },
   'Zoom': { careerPage: 'https://careers.zoom.us', jobBoardUrl: 'https://zoom.wd5.myworkdayjobs.com/Zoom' },
@@ -121,7 +122,7 @@ export class AtsRegistryService {
         'Adobe', 'Autodesk', 'BlackRock', 'Broadcom', 'BrowserStack', 'CrowdStrike', 'Expedia',
         'GE Aerospace', 'GE Vernova', 'GE HealthCare', 'HP Inc.', 'HPE', 'Intel',
         'Logitech', 'Mastercard', 'Motorola Solutions', 'NVIDIA', 'Pfizer',
-        'Red Hat', 'Salesforce', 'Samsung', 'Siemens', 'Slack', 'Splunk', 'Tesla', 'Walmart', 'Zoom', 'Zscaler',
+        'Red Hat', 'Salesforce', 'Samsung', 'Siemens', 'Slack', 'Splunk', 'Visa', 'Zoom',
       ],
       companyDetails: [],
     },
@@ -133,8 +134,7 @@ export class AtsRegistryService {
         'Adyen', 'Airbnb', 'Anthropic', 'Cloudflare', 'Cockroach Labs',
         'Databricks', 'Datadog', 'GitLab',
         'Grafana Labs', 'Groww', 'Instacart', 'JetBrains', 'Klaviyo', 'PhonePe', 'PlanetScale', 'Postman', 'Pure Storage', 'Razorpay',
-        'Reddit', 'SmartBear', 'Sumo Logic', 'Twitch', 'Twilio',
-        'Unacademy', 'Unity', 'Whatfix', 'Wiz', 'YubiKey', 'Zapier', 'Zepto',
+        'Reddit', 'SmartBear', 'Sumo Logic', 'Together AI', 'Twitch', 'Twilio', 'Vercel', 'YubiKey',
       ],
       companyDetails: [],
     },
@@ -149,21 +149,21 @@ export class AtsRegistryService {
       id: 'ashby',
       name: 'Ashby',
       averageExtractionMs: 14,
-      companies: ['Cursor', 'ElevenLabs', 'LangChain', 'Linear', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'Ramp', 'Sentry', 'Snowflake', 'Supabase', 'Temporal', 'Together AI', 'Vercel', 'Weights & Biases'],
+      companies: ['Cursor', 'ElevenLabs', 'LangChain', 'Linear', 'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Pinecone', 'Ramp', 'Sentry', 'Snowflake', 'Supabase', 'Temporal'],
       companyDetails: [],
     },
     {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Bosch', 'Freshworks', 'Ubisoft', 'Visa'],
+      companies: ['Bosch', 'Freshworks', 'Ubisoft'],
       companyDetails: [],
     },
     {
       id: 'taleo',
       name: 'Taleo',
       averageExtractionMs: 25,
-      companies: ['Boeing', 'Caterpillar', 'FedEx', 'Lockheed Martin', 'UnitedHealth'],
+      companies: ['Boeing', 'Caterpillar', 'FedEx', 'Lockheed Martin'],
       companyDetails: [],
     },
     {
@@ -210,8 +210,8 @@ export class AtsRegistryService {
 
     const SMARTRECRUITERS_SLUG_OVERRIDES: Record<string, string> = {
       'Bosch': 'BoschGroup',
-      'Miro': 'RealtimeBoard',
-      'Pinterest': 'Pinterest',
+      'Freshworks': 'freshworks',
+      'Ubisoft': 'ubisoft2',
     };
 
     // Known platform domain patterns
@@ -227,6 +227,18 @@ export class AtsRegistryService {
       }
       if (name === 'JetBrains') {
         return { jobBoardUrl: 'https://job-boards.eu.greenhouse.io/jetbrains', jobBoardNeedsReview: false };
+      }
+      if (name === 'YubiKey' || name === 'Yubico') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/yubico', jobBoardNeedsReview: false };
+      }
+      if (name === 'Together AI') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/togetherai', jobBoardNeedsReview: false };
+      }
+      if (name === 'Vercel') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/vercel', jobBoardNeedsReview: false };
+      }
+      if (name === 'Twilio') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/twilio', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }
