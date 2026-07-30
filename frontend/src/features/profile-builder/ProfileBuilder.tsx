@@ -552,8 +552,8 @@ export const ProfileBuilder: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Two-Column Layout (45% / 55% Desktop Split) */}
-      <div className="flex-1 flex flex-col lg:flex-row items-start gap-6 relative">
+      {/* Main Two-Column Layout (45% / 55% Desktop Split, Equal Height Stretch) */}
+      <div className="flex-1 flex flex-col lg:flex-row items-stretch gap-6 relative">
         {/* Left Settings Sidebar - Collapsible Accordion Sections (45% Width) */}
         <div className="w-full lg:w-[45%] bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 flex flex-col shadow-lg shrink-0">
           
@@ -1278,8 +1278,8 @@ export const ProfileBuilder: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Iframe Viewport - Live Preview Panel (55% Width, Sticky on Desktop) */}
-        <div className="w-full lg:w-[55%] lg:sticky lg:top-6 bg-[#0b0f19] border border-[#232d3f] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative h-[calc(100vh-140px)] min-h-[550px] shrink-0">
+        {/* Right Iframe Viewport - Live Preview Panel (55% Width, Matches Left Panel Height) */}
+        <div className="w-full lg:w-[55%] bg-[#0b0f19] border border-[#232d3f] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative min-h-[500px] shrink-0">
           {/* Header Toolbar with Zoom, Fit Width, and Full Screen */}
           <div className="bg-[#131a26] border-b border-[#232d3f] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-[#94a3b8] font-bold select-none shrink-0">
             <div className="flex items-center gap-2">
