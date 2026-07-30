@@ -310,12 +310,13 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap sm:flex-nowrap gap-3">
                         <button
                           onClick={() => exportMutation.mutate()}
-                          className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition duration-200 cursor-pointer"
+                          className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 whitespace-nowrap rounded-xl transition duration-200 cursor-pointer shadow-md"
                         >
-                          <Download className="w-4 h-4" /> Export Configuration
+                          <Download className="w-4 h-4 shrink-0" />
+                          <span>Export Configuration</span>
                         </button>
                         <button
                           onClick={() => {
@@ -334,9 +335,10 @@ export const AdminPanel: React.FC = () => {
                             };
                             input.click();
                           }}
-                          className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 rounded-xl transition duration-200 cursor-pointer"
+                          className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-5 whitespace-nowrap rounded-xl transition duration-200 cursor-pointer shadow-md"
                         >
-                          <Upload className="w-4 h-4" /> Import Configuration
+                          <Upload className="w-4 h-4 shrink-0" />
+                          <span>Import Configuration</span>
                         </button>
                       </div>
 
