@@ -149,7 +149,8 @@ export const JobExplorer: React.FC = () => {
 
   const toggleDeptCategoryOpen = (catName: string) => {
     setOpenDeptCategories(prev => {
-      const next = { ...prev, [catName]: !prev[catName] };
+      const isCurrentlyOpen = prev[catName];
+      const next: Record<string, boolean> = isCurrentlyOpen ? {} : { [catName]: true };
       try {
         localStorage.setItem('job_explorer_open_dept_cats_v1', JSON.stringify(next));
       } catch {}
@@ -161,10 +162,10 @@ export const JobExplorer: React.FC = () => {
     setExpandedDeptCategories(prev => ({ ...prev, [catName]: !prev[catName] }));
   };
 
-  // Accordion Sections for Faceted Filters
+  // Accordion Sections for Faceted Filters (Single-Expanded Accordion)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     department: true,
-    experience: true,
+    experience: false,
     employment: false,
     remote: false,
     tags: false,
@@ -177,7 +178,17 @@ export const JobExplorer: React.FC = () => {
   });
 
   const toggleSection = (section: string) => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setOpenSections(prev => {
+      const isCurrentlyOpen = prev[section];
+      if (!isCurrentlyOpen) {
+        const singleOpen: Record<string, boolean> = {};
+        Object.keys(prev).forEach(key => {
+          singleOpen[key] = key === section;
+        });
+        return singleOpen;
+      }
+      return { ...prev, [section]: false };
+    });
   };
 
   const searchInputRef = useRef<HTMLInputElement>(null);
