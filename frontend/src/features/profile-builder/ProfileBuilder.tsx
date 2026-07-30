@@ -27,10 +27,14 @@ export const ProfileBuilder: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light' | 'indigo' | 'emerald' | 'rose' | 'amber' | 'custom'>('dark');
   const [customColor, setCustomColor] = useState('#3b82f6');
 
-  // Single Expanded Accordion Panel State
-  const [activeAccordion, setActiveAccordion] = useState<string>('deployment');
+  // Single Expanded Accordion Panel State with Persistence
+  const [activeAccordion, setActiveAccordion] = useState<string>(() => {
+    return localStorage.getItem('portfolio_active_accordion') || 'vercel_url';
+  });
   const toggleAccordion = (key: string) => {
-    setActiveAccordion(prev => prev === key ? '' : key);
+    const next = activeAccordion === key ? '' : key;
+    setActiveAccordion(next);
+    localStorage.setItem('portfolio_active_accordion', next);
   };
 
   // Preview Zoom & Full Screen State
@@ -553,11 +557,11 @@ export const ProfileBuilder: React.FC = () => {
         {/* Left Settings Sidebar - Collapsible Accordion Sections (45% Width) */}
         <div className="w-full lg:w-[45%] bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 flex flex-col overflow-y-auto max-h-full shadow-lg shrink-0">
           
-          {/* ACCORDION 1: DEPLOYMENT */}
+          {/* ACCORDION 1: VERCEL PORTFOLIO URL */}
           <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
             <button
               type="button"
-              onClick={() => toggleAccordion('deployment')}
+              onClick={() => toggleAccordion('vercel_url')}
               className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
             >
               <div className="flex items-center gap-2.5">
@@ -565,8 +569,8 @@ export const ProfileBuilder: React.FC = () => {
                   <Globe className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Deployment</h4>
-                  <p className="text-[10px] text-slate-400 font-medium">Vercel Domain & Cloud Settings</p>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Vercel Portfolio URL</h4>
+                  <p className="text-[10px] text-slate-400 font-medium">Subdomain & Cloud Deployment Settings</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -579,15 +583,15 @@ export const ProfileBuilder: React.FC = () => {
                     Taken
                   </span>
                 )}
-                {activeAccordion === 'deployment' ? (
-                  <ChevronUp className="w-4 h-4 text-indigo-400 transition-transform duration-200" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-slate-400 transition-transform duration-200" />
-                )}
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    activeAccordion === 'vercel_url' ? 'rotate-180 text-indigo-400' : 'text-slate-400'
+                  }`}
+                />
               </div>
             </button>
 
-            {activeAccordion === 'deployment' && (
+            {activeAccordion === 'vercel_url' && (
               <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-3 animate-in fade-in duration-150">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-300">Subdomain Name</span>
@@ -646,7 +650,248 @@ export const ProfileBuilder: React.FC = () => {
             )}
           </div>
 
-          {/* ACCORDION 2: PORTFOLIO SECTIONS */}
+          {/* ACCORDION 2: PORTFOLIO ANALYTICS */}
+          <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('analytics')}
+              className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg">
+                  <BarChart3 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Portfolio Analytics</h4>
+                  <p className="text-[10px] text-slate-400 font-medium">Views, Visitors & Traffic Metrics</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">
+                  {analytics.views} Views
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    activeAccordion === 'analytics' ? 'rotate-180 text-emerald-400' : 'text-slate-400'
+                  }`}
+                />
+              </div>
+            </button>
+
+            {activeAccordion === 'analytics' && (
+              <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-3 animate-in fade-in duration-150">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
+                    <BarChart3 className="w-3.5 h-3.5 text-cyan-400" /> Performance Stats
+                  </span>
+                  <a
+                    href={deployedUrl || displayVercelUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
+                  >
+                    View Live <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center font-mono">
+                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Views</span>
+                    <span className="text-base font-black text-white">{isDeployed ? analytics.views : 0}</span>
+                  </div>
+                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Visitors</span>
+                    <span className="text-base font-black text-cyan-300">{isDeployed ? analytics.visitors : 0}</span>
+                  </div>
+                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
+                    <span className="text-[10px] text-slate-400 block uppercase font-bold font-sans">Downloads</span>
+                    <span className="text-base font-black text-emerald-300">{isDeployed ? analytics.downloads : 0}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ACCORDION 3: THEME & LAYOUT */}
+          <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('theme')}
+              className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-lg">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Theme & Layout</h4>
+                  <p className="text-[10px] text-slate-400 font-medium">Visual Themes & Custom Accent Color</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded font-bold capitalize">
+                  {theme}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    activeAccordion === 'theme' ? 'rotate-180 text-cyan-400' : 'text-slate-400'
+                  }`}
+                />
+              </div>
+            </button>
+
+            {activeAccordion === 'theme' && (
+              <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-4 animate-in fade-in duration-150">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#94a3b8] uppercase">Visual Theme</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'dark', label: 'Slate Dark', color: 'bg-slate-800' },
+                      { id: 'light', label: 'Slate Light', color: 'bg-slate-100' },
+                      { id: 'indigo', label: 'Indigo Dev', color: 'bg-indigo-600' },
+                      { id: 'emerald', label: 'Emerald Eco', color: 'bg-emerald-600' },
+                      { id: 'rose', label: 'Rose Gold', color: 'bg-rose-500' },
+                      { id: 'amber', label: 'Amber Warm', color: 'bg-amber-500' },
+                      { id: 'custom', label: 'Custom Accent', color: 'bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500' }
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setTheme(t.id as any)}
+                        className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition text-[10px] font-bold cursor-pointer ${
+                          theme === t.id
+                            ? 'border-indigo-600 bg-indigo-500/5 text-white'
+                            : 'border-[#232d3f] text-[#94a3b8] hover:text-white'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded ${t.color}`}></div>
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
+                  <label className="text-xs font-bold text-[#94a3b8] uppercase flex justify-between">
+                    <span>Custom Accent Color</span>
+                    <span className="font-mono text-indigo-400">{customColor}</span>
+                  </label>
+                  <div className="flex gap-3 items-center bg-[#131a26] p-3 rounded-xl border border-[#232d3f]">
+                    <input
+                      type="color"
+                      value={customColor}
+                      onChange={(e) => {
+                        setCustomColor(e.target.value);
+                        setTheme('custom');
+                      }}
+                      className="w-9 h-9 rounded-xl bg-transparent border border-[#232d3f] cursor-pointer p-0.5"
+                    />
+                    <span className="text-[10px] text-[#94a3b8] leading-tight">Drag to pick a custom color accent for buttons & icons.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ACCORDION 4: TARGET PROFILE */}
+          <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('target_profile')}
+              className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg">
+                  <Monitor className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Target Profile</h4>
+                  <p className="text-[10px] text-slate-400 font-medium">Role Targets & Custom Profiles</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded font-bold capitalize">
+                  {profile}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    activeAccordion === 'target_profile' ? 'rotate-180 text-amber-400' : 'text-slate-400'
+                  }`}
+                />
+              </div>
+            </button>
+
+            {activeAccordion === 'target_profile' && (
+              <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-4 animate-in fade-in duration-150">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#94a3b8] uppercase">Target Role Profile</label>
+                  <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                    {profileList.map(p => {
+                      const isDefault = ['backend', 'frontend', 'fullstack', 'ai-ml', 'devops'].includes(p.id);
+                      return (
+                        <div key={p.id} className="relative group">
+                          <button
+                            onClick={() => setProfile(p.id)}
+                            className={`w-full py-2 pl-3 pr-8 rounded-xl border text-xs font-bold transition cursor-pointer text-left truncate ${
+                              profile === p.id
+                                ? 'border-indigo-600 bg-indigo-500/5 text-white'
+                                : 'border-[#232d3f] text-[#94a3b8] hover:text-white'
+                            }`}
+                          >
+                            {p.label}
+                          </button>
+                          {!isDefault && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const newList = profileList.filter(item => item.id !== p.id);
+                                setProfileList(newList);
+                                if (profile === p.id) setProfile('backend');
+                              }}
+                              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-red-400 hover:text-red-500 hover:bg-[#232d3f]/40 rounded transition cursor-pointer"
+                              title="Delete Custom Profile"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
+                  <label className="text-xs font-bold text-[#94a3b8] uppercase">Add Custom Profile</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. AI/ML Architect"
+                      value={customProfileName}
+                      onChange={(e) => setCustomProfileName(e.target.value)}
+                      className="flex-1 bg-[#131a26] border border-[#232d3f] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
+                    />
+                    <button
+                      onClick={() => {
+                        if (!customProfileName.trim()) return;
+                        const id = customProfileName.trim().toLowerCase().replace(/\s+/g, '-');
+                        if (profileList.some(p => p.id === id)) {
+                          showToast('⚠ Profile already exists!', 'warning');
+                          return;
+                        }
+                        const newProfile = { id, label: customProfileName.trim() };
+                        setProfileList([...profileList, newProfile]);
+                        setProfile(id);
+                        setCustomProfileName('');
+                      }}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ACCORDION 5: PORTFOLIO SECTIONS */}
           <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
             <button
               type="button"
@@ -666,11 +911,11 @@ export const ProfileBuilder: React.FC = () => {
                 <span className="text-[10px] text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded font-bold">
                   {sections.length} Sections
                 </span>
-                {activeAccordion === 'sections' ? (
-                  <ChevronUp className="w-4 h-4 text-purple-400 transition-transform duration-200" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-slate-400 transition-transform duration-200" />
-                )}
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    activeAccordion === 'sections' ? 'rotate-180 text-purple-400' : 'text-slate-400'
+                  }`}
+                />
               </div>
             </button>
 
@@ -831,153 +1076,6 @@ export const ProfileBuilder: React.FC = () => {
                 >
                   <PlusCircle className="w-4 h-4" /> Add Custom Section
                 </button>
-              </div>
-            )}
-          </div>
-
-          {/* ACCORDION 3: THEME & LAYOUT */}
-          <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
-            <button
-              type="button"
-              onClick={() => toggleAccordion('theme')}
-              className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-lg">
-                  <Palette className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Theme & Layout</h4>
-                  <p className="text-[10px] text-slate-400 font-medium">Color Themes & Role Profiles</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded font-bold capitalize">
-                  {theme}
-                </span>
-                {activeAccordion === 'theme' ? (
-                  <ChevronUp className="w-4 h-4 text-cyan-400 transition-transform duration-200" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-slate-400 transition-transform duration-200" />
-                )}
-              </div>
-            </button>
-
-            {activeAccordion === 'theme' && (
-              <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-4 animate-in fade-in duration-150">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-[#94a3b8] uppercase">Visual Theme</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: 'dark', label: 'Slate Dark', color: 'bg-slate-800' },
-                      { id: 'light', label: 'Slate Light', color: 'bg-slate-100' },
-                      { id: 'indigo', label: 'Indigo Dev', color: 'bg-indigo-600' },
-                      { id: 'emerald', label: 'Emerald Eco', color: 'bg-emerald-600' },
-                      { id: 'rose', label: 'Rose Gold', color: 'bg-rose-500' },
-                      { id: 'amber', label: 'Amber Warm', color: 'bg-amber-500' },
-                      { id: 'custom', label: 'Custom Accent', color: 'bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500' }
-                    ].map(t => (
-                      <button
-                        key={t.id}
-                        onClick={() => setTheme(t.id as any)}
-                        className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition text-[10px] font-bold cursor-pointer ${
-                          theme === t.id
-                            ? 'border-indigo-600 bg-indigo-500/5 text-white'
-                            : 'border-[#232d3f] text-[#94a3b8] hover:text-white'
-                        }`}
-                      >
-                        <div className={`w-5 h-5 rounded ${t.color}`}></div>
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
-                  <label className="text-xs font-bold text-[#94a3b8] uppercase flex justify-between">
-                    <span>Custom Accent Color</span>
-                    <span className="font-mono text-indigo-400">{customColor}</span>
-                  </label>
-                  <div className="flex gap-3 items-center bg-[#131a26] p-3 rounded-xl border border-[#232d3f]">
-                    <input
-                      type="color"
-                      value={customColor}
-                      onChange={(e) => {
-                        setCustomColor(e.target.value);
-                        setTheme('custom');
-                      }}
-                      className="w-9 h-9 rounded-xl bg-transparent border border-[#232d3f] cursor-pointer p-0.5"
-                    />
-                    <span className="text-[10px] text-[#94a3b8] leading-tight">Drag to pick a custom color accent for buttons & icons.</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
-                  <label className="text-xs font-bold text-[#94a3b8] uppercase">Target Role Profile</label>
-                  <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
-                    {profileList.map(p => {
-                      const isDefault = ['backend', 'frontend', 'fullstack', 'ai-ml', 'devops'].includes(p.id);
-                      return (
-                        <div key={p.id} className="relative group">
-                          <button
-                            onClick={() => setProfile(p.id)}
-                            className={`w-full py-2 pl-3 pr-8 rounded-xl border text-xs font-bold transition cursor-pointer text-left truncate ${
-                              profile === p.id
-                                ? 'border-indigo-600 bg-indigo-500/5 text-white'
-                                : 'border-[#232d3f] text-[#94a3b8] hover:text-white'
-                            }`}
-                          >
-                            {p.label}
-                          </button>
-                          {!isDefault && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const newList = profileList.filter(item => item.id !== p.id);
-                                setProfileList(newList);
-                                if (profile === p.id) setProfile('backend');
-                              }}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-red-400 hover:text-red-500 hover:bg-[#232d3f]/40 rounded transition cursor-pointer"
-                              title="Delete Custom Profile"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
-                  <label className="text-xs font-bold text-[#94a3b8] uppercase">Add Custom Profile</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. AI/ML Architect"
-                      value={customProfileName}
-                      onChange={(e) => setCustomProfileName(e.target.value)}
-                      className="flex-1 bg-[#131a26] border border-[#232d3f] rounded-xl py-1.5 px-3 text-xs text-white placeholder-[#6b7280] focus:outline-none focus:border-indigo-600"
-                    />
-                    <button
-                      onClick={() => {
-                        if (!customProfileName.trim()) return;
-                        const id = customProfileName.trim().toLowerCase().replace(/\s+/g, '-');
-                        if (profileList.some(p => p.id === id)) {
-                          showToast('⚠ Profile already exists!', 'warning');
-                          return;
-                        }
-                        const newProfile = { id, label: customProfileName.trim() };
-                        setProfileList([...profileList, newProfile]);
-                        setProfile(id);
-                        setCustomProfileName('');
-                      }}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md"
-                    >
-                      Add
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
           </div>
