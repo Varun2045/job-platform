@@ -392,7 +392,7 @@ export const ProfileBuilder: React.FC = () => {
   ));
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto h-full flex flex-col overflow-hidden relative text-white">
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto min-h-screen flex flex-col relative text-white">
       {/* Top-Right Success Toast Notification */}
       {toast && (
         <div className="fixed top-6 right-6 z-50 w-80 md:w-96 bg-[#131a26] border border-emerald-500/40 rounded-2xl p-4 shadow-2xl space-y-3 animate-bounce-in backdrop-blur-xl">
@@ -553,9 +553,9 @@ export const ProfileBuilder: React.FC = () => {
       </div>
 
       {/* Main Two-Column Layout (45% / 55% Desktop Split) */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row items-start gap-6 relative">
         {/* Left Settings Sidebar - Collapsible Accordion Sections (45% Width) */}
-        <div className="w-full lg:w-[45%] bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 flex flex-col overflow-y-auto max-h-full shadow-lg shrink-0">
+        <div className="w-full lg:w-[45%] bg-[#131a26] border border-[#232d3f] rounded-2xl p-5 space-y-3 flex flex-col shadow-lg shrink-0">
           
           {/* ACCORDION 1: VERCEL PORTFOLIO URL */}
           <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
@@ -745,8 +745,8 @@ export const ProfileBuilder: React.FC = () => {
                   <label className="text-xs font-bold text-[#94a3b8] uppercase">Visual Theme</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'dark', label: 'Slate Dark', color: 'bg-slate-800' },
-                      { id: 'light', label: 'Slate Light', color: 'bg-slate-100' },
+                      { id: 'dark', label: 'Slate Dark', color: 'bg-[#1e293b] border border-slate-500/60 shadow-inner' },
+                      { id: 'light', label: 'Slate Light', color: 'bg-slate-100 border border-slate-300' },
                       { id: 'indigo', label: 'Indigo Dev', color: 'bg-indigo-600' },
                       { id: 'emerald', label: 'Emerald Eco', color: 'bg-emerald-600' },
                       { id: 'rose', label: 'Rose Gold', color: 'bg-rose-500' },
@@ -769,24 +769,26 @@ export const ProfileBuilder: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
-                  <label className="text-xs font-bold text-[#94a3b8] uppercase flex justify-between">
-                    <span>Custom Accent Color</span>
-                    <span className="font-mono text-indigo-400">{customColor}</span>
-                  </label>
-                  <div className="flex gap-3 items-center bg-[#131a26] p-3 rounded-xl border border-[#232d3f]">
-                    <input
-                      type="color"
-                      value={customColor}
-                      onChange={(e) => {
-                        setCustomColor(e.target.value);
-                        setTheme('custom');
-                      }}
-                      className="w-9 h-9 rounded-xl bg-transparent border border-[#232d3f] cursor-pointer p-0.5"
-                    />
-                    <span className="text-[10px] text-[#94a3b8] leading-tight">Drag to pick a custom color accent for buttons & icons.</span>
+                {theme === 'custom' && (
+                  <div className="space-y-2 pt-2 border-t border-[#232d3f]/40 animate-in fade-in duration-150">
+                    <label className="text-xs font-bold text-[#94a3b8] uppercase flex justify-between">
+                      <span>Custom Accent Color</span>
+                      <span className="font-mono text-indigo-400">{customColor}</span>
+                    </label>
+                    <div className="flex gap-3 items-center bg-[#131a26] p-3 rounded-xl border border-[#232d3f]">
+                      <input
+                        type="color"
+                        value={customColor}
+                        onChange={(e) => {
+                          setCustomColor(e.target.value);
+                          setTheme('custom');
+                        }}
+                        className="w-9 h-9 rounded-xl bg-transparent border border-[#232d3f] cursor-pointer p-0.5"
+                      />
+                      <span className="text-[10px] text-[#94a3b8] leading-tight">Drag to pick a custom color accent for buttons & icons.</span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -1276,8 +1278,8 @@ export const ProfileBuilder: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Iframe Viewport - Live Preview Panel (55% Width) */}
-        <div className="w-full lg:w-[55%] bg-[#0b0f19] border border-[#232d3f] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative min-h-[500px]">
+        {/* Right Iframe Viewport - Live Preview Panel (55% Width, Sticky on Desktop) */}
+        <div className="w-full lg:w-[55%] lg:sticky lg:top-6 bg-[#0b0f19] border border-[#232d3f] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative h-[calc(100vh-140px)] min-h-[550px] shrink-0">
           {/* Header Toolbar with Zoom, Fit Width, and Full Screen */}
           <div className="bg-[#131a26] border-b border-[#232d3f] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-[#94a3b8] font-bold select-none shrink-0">
             <div className="flex items-center gap-2">
