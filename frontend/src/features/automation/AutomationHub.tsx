@@ -1098,6 +1098,28 @@ const CalendarAutomation: React.FC = () => {
     setShowEventModal(true);
   };
 
+  const openCreateEventForDate = (date: Date) => {
+    setEditingEvent(null);
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hoursNum = d.getHours() || 9;
+    const hour = String(hoursNum).padStart(2, '0');
+    const nextHour = String(Math.min(23, hoursNum + 1)).padStart(2, '0');
+    const startIso = `${year}-${month}-${day}T${hour}:00`;
+    const endIso = `${year}-${month}-${day}T${nextHour}:00`;
+    setNewEvent({
+      title: '',
+      start: startIso,
+      end: endIso,
+      type: 'interview',
+      company: '',
+      description: ''
+    });
+    setShowEventModal(true);
+  };
+
   const editEvent = (event: any) => {
     setEditingEvent(event);
     setNewEvent({
@@ -1239,10 +1261,11 @@ const CalendarAutomation: React.FC = () => {
               key={idx}
               className={`min-h-24 p-2 rounded-lg border ${
                 isCurrentMonth
-                  ? 'bg-[#1b2535] border-[#232d3f] hover:border-indigo-600/30'
+                  ? 'bg-[#1b2535] border-[#232d3f] hover:border-indigo-500/40 hover:bg-[#202b3d]'
                   : 'bg-[#131a26] border-transparent opacity-50'
-              } cursor-pointer transition-colors relative group`}
-              onClick={() => { if (isCurrentMonth) { setNewEvent({ ...newEvent, start: new Date(date).toISOString().slice(0, 16), end: new Date(date).toISOString().slice(0, 16) }); setShowEventModal(true); }}}
+              } cursor-pointer transition-all relative group`}
+              onClick={() => { if (isCurrentMonth) openCreateEventForDate(date); }}
+              title={isCurrentMonth ? "Click empty cell area to add an event on this date" : ""}
             >
               <span className={`text-xs font-semibold ${isCurrentMonth ? 'text-white' : 'text-[#6b7280]'}`}>
                 {date.getDate()}
@@ -1251,8 +1274,9 @@ const CalendarAutomation: React.FC = () => {
                 {dayEvents.slice(0, 2).map((event) => (
                   <div
                     key={event.id}
-                    className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)} relative group/pill`}
+                    className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)} relative group/pill cursor-pointer`}
                     onClick={(e) => { e.stopPropagation(); editEvent(event); }}
+                    title="Click event to edit"
                   >
                     {event.title}
 
@@ -1325,13 +1349,22 @@ const CalendarAutomation: React.FC = () => {
                 })
                 .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
+              const slotDate = new Date(date);
+              slotDate.setHours(hour + 8, 0, 0, 0);
+
               return (
-                <div key={date.toISOString()} className="min-h-12 p-1 bg-[#1b2535] border border-[#232d3f] rounded space-y-1">
+                <div
+                  key={date.toISOString()}
+                  className="min-h-12 p-1 bg-[#1b2535] hover:bg-[#202b3d] hover:border-indigo-500/40 border border-[#232d3f] rounded space-y-1 cursor-pointer transition-colors"
+                  onClick={() => openCreateEventForDate(slotDate)}
+                  title="Click empty slot area to add event"
+                >
                   {hourEvents.map(event => (
                     <div
                       key={event.id}
-                      className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)} relative group/pill`}
-                      onClick={() => editEvent(event)}
+                      className={`text-[9px] px-1.5 py-0.5 rounded truncate ${getEventColor(event.type)} relative group/pill cursor-pointer`}
+                      onClick={(e) => { e.stopPropagation(); editEvent(event); }}
+                      title="Click event to edit"
                     >
                       {event.title}
 
@@ -1374,15 +1407,23 @@ const CalendarAutomation: React.FC = () => {
             })
             .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
+          const slotDate = new Date(currentDate);
+          slotDate.setHours(hour, 0, 0, 0);
+
           return (
             <div key={hour} className="flex gap-2">
               <div className="w-16 text-xs text-[#94a3b8] py-2 text-right pr-2">{`${hour}:00`}</div>
-              <div className="flex-1 min-h-12 p-2 bg-[#1b2535] border border-[#232d3f] rounded space-y-2">
+              <div
+                className="flex-1 min-h-12 p-2 bg-[#1b2535] hover:bg-[#202b3d] hover:border-indigo-500/40 border border-[#232d3f] rounded space-y-2 cursor-pointer transition-colors"
+                onClick={() => openCreateEventForDate(slotDate)}
+                title="Click empty slot area to add event"
+              >
                 {hourEvents.map(event => (
                   <div
                     key={event.id}
-                    className={`p-2 rounded-lg ${getEventColor(event.type)} relative group/pill flex justify-between items-center`}
-                    onClick={() => editEvent(event)}
+                    className={`p-2 rounded-lg ${getEventColor(event.type)} relative group/pill flex justify-between items-center cursor-pointer`}
+                    onClick={(e) => { e.stopPropagation(); editEvent(event); }}
+                    title="Click event to edit"
                   >
                     <div>
                       <span className="text-xs font-semibold block">{event.title}</span>
