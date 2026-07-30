@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   Monitor, Download, Palette, RefreshCw, CheckCircle, Trash2, Eye, EyeOff, Edit,
   PlusCircle, X, Globe, ArrowUp, ArrowDown, Copy, ExternalLink, Check, AlertCircle,
-  BarChart3, FileCode, Archive, ChevronDown, ChevronUp, Maximize2, ZoomIn, ZoomOut, Share2
+  FileCode, Archive, ChevronDown, ChevronUp, Maximize2, Share2
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 import { useToast } from '../../context/ToastContext.js';
@@ -108,9 +108,7 @@ export const ProfileBuilder: React.FC = () => {
     available: true,
     alternatives: ['varundamani-portfolio', 'varundamani-dev', 'varundamani01']
   });
-  const [vercelToken, setVercelToken] = useState<string>(() => {
-    return localStorage.getItem('vercel_api_token') || '';
-  });
+  const vercelToken = localStorage.getItem('vercel_api_token') || '';
   const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false);
 
   // Real Deployment Progress Steps
@@ -141,7 +139,7 @@ export const ProfileBuilder: React.FC = () => {
   const [editContent, setEditContent] = useState('');
 
   // Deployment & Analytics State
-  const [isDeployed, setIsDeployed] = useState<boolean>(() => {
+  const [_isDeployed, setIsDeployed] = useState<boolean>(() => {
     return localStorage.getItem('portfolio_is_deployed') === 'true';
   });
   const [deployedUrl, setDeployedUrl] = useState<string | null>(() => {
@@ -385,11 +383,6 @@ export const ProfileBuilder: React.FC = () => {
   };
 
   const visibleSectionsCount = sections.filter(s => s.visible).length;
-  const profileCompletionPct = Math.min(100, Math.round(
-    ((visibleSectionsCount / Math.max(1, sections.length)) * 60) +
-    (cleanSubdomain ? 20 : 0) +
-    (isDeployed ? 20 : 10)
-  ));
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto min-h-screen flex flex-col relative text-white">
@@ -511,47 +504,6 @@ export const ProfileBuilder: React.FC = () => {
         </div>
       )}
 
-      {/* Profile Analytics Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Card 1: Profile Completion */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 shadow-lg hover:border-[#334155] transition flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">PROFILE COMPLETION</span>
-          <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-white">{profileCompletionPct}%</span>
-            <span className="text-xs text-emerald-400 font-semibold">{visibleSectionsCount} sections active</span>
-          </div>
-        </div>
-
-        {/* Card 2: Portfolio Sections */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 shadow-lg hover:border-[#334155] transition flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">PORTFOLIO SECTIONS</span>
-          <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-white">{sections.length}</span>
-            <span className="text-xs text-slate-400 font-semibold">{visibleSectionsCount} visible</span>
-          </div>
-        </div>
-
-        {/* Card 3: Deployment Status */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 shadow-lg hover:border-[#334155] transition flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">DEPLOYMENT STATUS</span>
-          <div className="mt-2 flex items-center justify-between">
-            <span className={`text-xl font-extrabold ${isDeployed ? 'text-emerald-400' : 'text-slate-400'}`}>
-              {isDeployed ? 'Live' : 'Not Deployed'}
-            </span>
-            <span className={`w-2.5 h-2.5 rounded-full ${isDeployed ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`} />
-          </div>
-        </div>
-
-        {/* Card 4: Portfolio Views */}
-        <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 shadow-lg hover:border-[#334155] transition flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">PORTFOLIO VIEWS</span>
-          <div className="mt-2 flex items-baseline justify-between">
-            <span className="text-2xl font-black text-white">{isDeployed ? analytics.views : 0}</span>
-            {isDeployed && <span className="text-xs text-cyan-400 font-semibold">{analytics.visitors} unique</span>}
-          </div>
-        </div>
-      </div>
-
       {/* Main Two-Column Layout (45% / 55% Desktop Split, Equal Height Stretch) */}
       <div className="flex-1 flex flex-col lg:flex-row items-stretch gap-6 relative">
         {/* Left Settings Sidebar - Collapsible Accordion Sections (45% Width) */}
@@ -629,84 +581,6 @@ export const ProfileBuilder: React.FC = () => {
                     </div>
                   </div>
                 )}
-
-                <div className="pt-2 border-t border-[#232d3f]/60 space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase flex items-center justify-between">
-                    <span>Vercel API Token (Optional)</span>
-                    <span className="text-[9px] text-indigo-400 font-normal">For direct cloud deploys</span>
-                  </label>
-                  <input
-                    type="password"
-                    value={vercelToken}
-                    onChange={(e) => {
-                      setVercelToken(e.target.value);
-                      localStorage.setItem('vercel_api_token', e.target.value);
-                    }}
-                    placeholder="Paste Vercel Token (e.g. vercel_tok_...)"
-                    className="w-full bg-[#131a26] border border-[#232d3f] rounded-xl py-1.5 px-3 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-indigo-600"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ACCORDION 2: PORTFOLIO ANALYTICS */}
-          <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
-            <button
-              type="button"
-              onClick={() => toggleAccordion('analytics')}
-              className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg">
-                  <BarChart3 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Portfolio Analytics</h4>
-                  <p className="text-[10px] text-slate-400 font-medium">Views, Visitors & Traffic Metrics</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">
-                  {analytics.views} Views
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    activeAccordion === 'analytics' ? 'rotate-180 text-emerald-400' : 'text-slate-400'
-                  }`}
-                />
-              </div>
-            </button>
-
-            {activeAccordion === 'analytics' && (
-              <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                    <BarChart3 className="w-3.5 h-3.5 text-cyan-400" /> Performance Stats
-                  </span>
-                  <a
-                    href={deployedUrl || displayVercelUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
-                  >
-                    View Live <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center font-mono">
-                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Views</span>
-                    <span className="text-base font-black text-white">{isDeployed ? analytics.views : 0}</span>
-                  </div>
-                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Visitors</span>
-                    <span className="text-base font-black text-cyan-300">{isDeployed ? analytics.visitors : 0}</span>
-                  </div>
-                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold font-sans">Downloads</span>
-                    <span className="text-base font-black text-emerald-300">{isDeployed ? analytics.downloads : 0}</span>
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -862,7 +736,7 @@ export const ProfileBuilder: React.FC = () => {
 
                 <div className="space-y-2 pt-2 border-t border-[#232d3f]/40">
                   <label className="text-xs font-bold text-[#94a3b8] uppercase">Add Custom Profile</label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3.5">
                     <input
                       type="text"
                       placeholder="e.g. AI/ML Architect"
@@ -883,7 +757,7 @@ export const ProfileBuilder: React.FC = () => {
                         setProfile(id);
                         setCustomProfileName('');
                       }}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md shrink-0"
                     >
                       Add
                     </button>
@@ -1152,67 +1026,6 @@ export const ProfileBuilder: React.FC = () => {
             )}
           </div>
 
-          {/* ACCORDION 5: PORTFOLIO ANALYTICS */}
-          <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
-            <button
-              type="button"
-              onClick={() => toggleAccordion('analytics')}
-              className="w-full p-4 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-[#232d3f]/50 transition-colors select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg">
-                  <BarChart3 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Portfolio Analytics</h4>
-                  <p className="text-[10px] text-slate-400 font-medium">Views, Visitors & Traffic Metrics</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">
-                  {analytics.views} Views
-                </span>
-                {activeAccordion === 'analytics' ? (
-                  <ChevronUp className="w-4 h-4 text-emerald-400 transition-transform duration-200" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-slate-400 transition-transform duration-200" />
-                )}
-              </div>
-            </button>
-
-            {activeAccordion === 'analytics' && (
-              <div className="p-4 pt-2 border-t border-[#232d3f]/60 space-y-3 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                    <BarChart3 className="w-3.5 h-3.5 text-cyan-400" /> Performance Stats
-                  </span>
-                  <a
-                    href={deployedUrl || displayVercelUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] text-indigo-400 hover:underline flex items-center gap-1"
-                  >
-                    View Live <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Views</span>
-                    <span className="text-base font-black text-white">{isDeployed ? analytics.views : 0}</span>
-                  </div>
-                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Visitors</span>
-                    <span className="text-base font-black text-cyan-300">{isDeployed ? analytics.visitors : 0}</span>
-                  </div>
-                  <div className="bg-[#131a26] p-2.5 rounded-xl border border-[#232d3f]">
-                    <span className="text-[10px] text-slate-400 block uppercase font-bold">Downloads</span>
-                    <span className="text-base font-black text-emerald-300">{isDeployed ? analytics.downloads : 0}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* ACCORDION 6: EXPORT SETTINGS */}
           <div className="bg-[#1b2535] border border-[#232d3f] rounded-2xl overflow-hidden transition-all duration-200 shadow-sm">
             <button
@@ -1269,19 +1082,12 @@ export const ProfileBuilder: React.FC = () => {
               </div>
             )}
           </div>
-
-          <div className="mt-auto border-t border-[#232d3f] pt-4 space-y-2 text-xs text-[#94a3b8]">
-            <div className="flex items-center gap-2 text-emerald-400">
-              <CheckCircle className="w-4 h-4" /> Ready for deployment
-            </div>
-            <p className="leading-relaxed">This single HTML file contains embedded CSS layouts and responsive grid configurations, making it instantly deployable to Github Pages or Netlify.</p>
-          </div>
         </div>
 
         {/* Right Iframe Viewport - Live Preview Panel (55% Width, Matches Left Panel Height) */}
         <div className="w-full lg:w-[55%] bg-[#0b0f19] border border-[#232d3f] rounded-2xl overflow-hidden flex flex-col shadow-2xl relative min-h-[500px] shrink-0">
           {/* Header Toolbar with Zoom, Fit Width, and Full Screen */}
-          <div className="bg-[#131a26] border-b border-[#232d3f] px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-[#94a3b8] font-bold select-none shrink-0">
+          <div className="bg-[#131a26] border-b border-[#232d3f] px-4 py-2.5 flex items-center justify-between gap-3 text-xs text-[#94a3b8] font-bold select-none shrink-0">
             <div className="flex items-center gap-2">
               <Monitor className="w-4 h-4 text-indigo-400" />
               <span className="text-white">Live Viewport Preview</span>
@@ -1293,7 +1099,7 @@ export const ProfileBuilder: React.FC = () => {
             </div>
 
             {/* Zoom Controls & Fit Width & Full Screen */}
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center gap-2 flex-1 justify-end">
               {/* Fit Width Button */}
               <button
                 type="button"
@@ -1308,60 +1114,29 @@ export const ProfileBuilder: React.FC = () => {
                 Fit Width
               </button>
 
-              <div className="h-4 w-px bg-[#232d3f] mx-0.5" />
-
-              {/* Zoom Out Button */}
+              {/* 100% Zoom Button */}
               <button
                 type="button"
                 onClick={() => {
                   setIsFitWidth(false);
-                  setZoomLevel(prev => Math.max(50, prev - 10));
+                  setZoomLevel(100);
                 }}
-                className="p-1.5 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
-                title="Zoom Out (-10%)"
+                className={`px-2.5 py-1 rounded-lg border text-[11px] font-bold transition cursor-pointer ${
+                  !isFitWidth && zoomLevel === 100
+                    ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300'
+                    : 'bg-[#1b2535] border-[#232d3f] text-slate-400 hover:text-white hover:bg-[#232d3f]'
+                }`}
               >
-                <ZoomOut className="w-3.5 h-3.5" />
+                100%
               </button>
 
-              {/* Preset Zoom Level Buttons */}
-              {[75, 100, 125, 150].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => {
-                    setIsFitWidth(false);
-                    setZoomLevel(preset);
-                  }}
-                  className={`px-2 py-1 rounded-lg border text-[11px] font-bold transition cursor-pointer ${
-                    !isFitWidth && zoomLevel === preset
-                      ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300'
-                      : 'bg-[#1b2535] border-[#232d3f] text-slate-400 hover:text-white hover:bg-[#232d3f]'
-                  }`}
-                >
-                  {preset}%
-                </button>
-              ))}
+              <div className="h-4 w-px bg-[#232d3f] mx-1" />
 
-              {/* Zoom In Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsFitWidth(false);
-                  setZoomLevel(prev => Math.min(200, prev + 10));
-                }}
-                className="p-1.5 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
-                title="Zoom In (+10%)"
-              >
-                <ZoomIn className="w-3.5 h-3.5" />
-              </button>
-
-              <div className="h-4 w-px bg-[#232d3f] mx-0.5" />
-
-              {/* Full Screen Toggle Button */}
+              {/* Full Screen Toggle Button (Pushed to far right) */}
               <button
                 type="button"
                 onClick={() => setIsFullScreen(true)}
-                className="flex items-center gap-1 px-2.5 py-1 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-slate-200 hover:text-white rounded-lg text-[11px] font-bold transition cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-slate-200 hover:text-white rounded-lg text-[11px] font-bold transition cursor-pointer ml-auto"
                 title="Open Full Screen Preview"
               >
                 <Maximize2 className="w-3.5 h-3.5 text-indigo-400" />
@@ -1421,40 +1196,15 @@ export const ProfileBuilder: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setIsFitWidth(false);
-                  setZoomLevel(prev => Math.max(50, prev - 10));
+                  setZoomLevel(100);
                 }}
-                className="p-1.5 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
+                className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition cursor-pointer ${
+                  !isFitWidth && zoomLevel === 100
+                    ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300'
+                    : 'bg-[#1b2535] border-[#232d3f] text-slate-400 hover:text-white'
+                }`}
               >
-                <ZoomOut className="w-4 h-4" />
-              </button>
-
-              {[75, 100, 125, 150].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => {
-                    setIsFitWidth(false);
-                    setZoomLevel(preset);
-                  }}
-                  className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition cursor-pointer ${
-                    !isFitWidth && zoomLevel === preset
-                      ? 'bg-indigo-600/20 border-indigo-500/50 text-indigo-300'
-                      : 'bg-[#1b2535] border-[#232d3f] text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {preset}%
-                </button>
-              ))}
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsFitWidth(false);
-                  setZoomLevel(prev => Math.min(200, prev + 10));
-                }}
-                className="p-1.5 bg-[#1b2535] hover:bg-[#232d3f] border border-[#232d3f] text-slate-300 hover:text-white rounded-lg transition cursor-pointer"
-              >
-                <ZoomIn className="w-4 h-4" />
+                100%
               </button>
 
               <div className="h-4 w-px bg-[#232d3f] mx-1" />
