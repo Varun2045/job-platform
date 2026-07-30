@@ -667,19 +667,12 @@ const EmailAutomation: React.FC = () => {
             ? 'bg-[#131a26] border-emerald-500/40 text-emerald-400'
             : 'bg-[#131a26] border-rose-500/40 text-rose-400'
         }`}>
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
-                toast.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-              }`}>
-                {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-              </div>
-              <div>
-                <h4 className="text-xs font-bold">{toast.title}</h4>
-                <p className="text-xs text-slate-300 mt-0.5 font-medium">{toast.desc}</p>
-              </div>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h4 className="text-xs font-bold">{toast.title}</h4>
+              <p className="text-xs text-slate-300 mt-0.5 font-medium">{toast.desc}</p>
             </div>
-            <button onClick={() => setToast(null)} className="text-slate-500 hover:text-white text-xs">✕</button>
+            <button onClick={() => setToast(null)} className="text-slate-500 hover:text-white text-xs cursor-pointer p-0.5">✕</button>
           </div>
         </div>
       )}
@@ -1500,11 +1493,6 @@ const CalendarAutomation: React.FC = () => {
             ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40'
             : 'bg-rose-950/90 text-rose-300 border-rose-500/40'
         }`}>
-          {toast.type === 'success' ? (
-            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-          ) : (
-            <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
-          )}
           <span>{toast.message}</span>
         </div>
       )}

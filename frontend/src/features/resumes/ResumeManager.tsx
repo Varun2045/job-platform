@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   FileText, Trash2, Eye, Download, Edit3, Star, Search, UploadCloud,
-  CheckCircle2, AlertCircle, Info, X, HardDrive, Clock
+  X, HardDrive, Clock
 } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
@@ -91,7 +91,11 @@ export const ResumeManager: React.FC = () => {
 
   const addToast = (type: 'success' | 'error' | 'info', message: string) => {
     const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, type, message }]);
+    const cleanMessage = message.replace(/^[✓✕ℹ⚠]\s*/, '').trim();
+    const isDelete = /delete|deleted|remove|removed|cleared/i.test(cleanMessage);
+    const finalType = isDelete ? 'error' : type;
+
+    setToasts((prev) => [...prev, { id, type: finalType, message: cleanMessage }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3500);
@@ -257,7 +261,7 @@ export const ResumeManager: React.FC = () => {
         setDefaultResume(nextDefault);
         localStorage.setItem('defaultResumeProfile', nextDefault);
       }
-      addToast('info', `Resume "${resumeName}" deleted`);
+      addToast('error', `Resume "${resumeName}" deleted`);
     },
     onError: (err: any) => {
       addToast('error', err.message || 'Failed to delete resume');
@@ -418,19 +422,14 @@ export const ResumeManager: React.FC = () => {
           <div
             key={toast.id}
             className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl border shadow-2xl transition-all duration-300 animate-slide-in ${
-              toast.type === 'success'
-                ? 'bg-[#131a26] border-emerald-500/40 text-emerald-300'
-                : toast.type === 'error'
-                ? 'bg-[#131a26] border-rose-500/40 text-rose-300'
-                : 'bg-[#131a26] border-cyan-500/40 text-cyan-300'
+              toast.type === 'error'
+                ? 'bg-rose-950/90 border-rose-500/40 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
+                : toast.type === 'success'
+                ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                : 'bg-cyan-950/90 border-cyan-500/40 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.15)]'
             }`}
           >
-            <div className="flex items-center gap-2.5">
-              {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-              {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
-              {toast.type === 'info' && <Info className="w-4 h-4 text-cyan-400 shrink-0" />}
-              <span className="text-xs font-semibold">{toast.message}</span>
-            </div>
+            <span className="text-xs font-semibold">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
               className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors cursor-pointer"

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -31,7 +31,11 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
-    setToasts(prev => [...prev, { id, message, type }]);
+    const cleanMessage = message.replace(/^[✓✕ℹ⚠]\s*/, '').trim();
+    const isDelete = /delete|deleted|remove|removed|cleared/i.test(cleanMessage);
+    const finalType = isDelete ? 'error' : type;
+
+    setToasts(prev => [...prev, { id, message: cleanMessage, type: finalType }]);
 
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
@@ -67,17 +71,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
         {toasts.map(toast => {
           let bgStyle = 'bg-emerald-950/90 border-emerald-500/40 text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.15)]';
-          let icon = <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />;
 
           if (toast.type === 'error') {
             bgStyle = 'bg-rose-950/90 border-rose-500/40 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.15)]';
-            icon = <XCircle className="w-4 h-4 text-rose-400 shrink-0" />;
           } else if (toast.type === 'warning') {
             bgStyle = 'bg-amber-950/90 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]';
-            icon = <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />;
           } else if (toast.type === 'info') {
             bgStyle = 'bg-cyan-950/90 border-cyan-500/40 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.15)]';
-            icon = <Info className="w-4 h-4 text-cyan-400 shrink-0" />;
           }
 
           return (
@@ -85,10 +85,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               key={toast.id}
               className={`pointer-events-auto flex items-center justify-between gap-3 border px-4 py-3 rounded-xl shadow-2xl backdrop-blur-md transition-all text-xs font-semibold animate-in fade-in slide-in-from-top-3 duration-200 ${bgStyle}`}
             >
-              <div className="flex items-start gap-2.5">
-                <span className="mt-0.5">{icon}</span>
-                <span className="leading-relaxed">{toast.message}</span>
-              </div>
+              <span className="leading-relaxed">{toast.message}</span>
               <button
                 type="button"
                 onClick={() => removeToast(toast.id)}
