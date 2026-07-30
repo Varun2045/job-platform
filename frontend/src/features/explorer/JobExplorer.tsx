@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, Briefcase, Globe, ExternalLink, X, Sparkles, 
-  FileText, CheckSquare, Bookmark, Filter, RefreshCw,
-  ChevronDown, ChevronUp, ChevronRight
+  FileText, CheckSquare, Bookmark, Filter, RefreshCw
 } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
@@ -526,7 +525,7 @@ export const JobExplorer: React.FC = () => {
 
     return (
       <div className="space-y-4">
-        {/* 1. DEPARTMENT */}
+        {/* 1. DEPARTMENT & CATEGORIES */}
         <div>
           <button
             onClick={() => toggleSection('department')}
@@ -535,7 +534,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
               Department {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
             </span>
-            {openSections.department ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.department && (
@@ -555,7 +553,6 @@ export const JobExplorer: React.FC = () => {
                       className="w-full flex items-center justify-between text-left cursor-pointer group/cat px-1 py-0.5"
                     >
                       <span className="text-[10px] font-extrabold text-[#94a3b8] group-hover/cat:text-white uppercase tracking-wider flex items-center gap-1.5">
-                        {isOpen ? <ChevronDown className="w-3 h-3 text-indigo-400" /> : <ChevronRight className="w-3 h-3 text-[#64748b]" />}
                         {groupName}
                       </span>
                       <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
@@ -615,7 +612,6 @@ export const JobExplorer: React.FC = () => {
                       className="w-full flex items-center justify-between text-left cursor-pointer group/cat px-1 py-0.5"
                     >
                       <span className="text-[10px] font-extrabold text-[#94a3b8] group-hover/cat:text-white uppercase tracking-wider flex items-center gap-1.5">
-                        {isOpen ? <ChevronDown className="w-3 h-3 text-indigo-400" /> : <ChevronRight className="w-3 h-3 text-[#64748b]" />}
                         Other Categories
                       </span>
                       <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
@@ -668,7 +664,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
               Experience {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
             </span>
-            {openSections.experience ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.experience && (
@@ -707,7 +702,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
               Work Mode {remote.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{remote.length}</span>}
             </span>
-            {openSections.remote ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.remote && (
@@ -745,7 +739,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
               Location {location.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{location.length}</span>}
             </span>
-            {openSections.location ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.location && (
@@ -784,7 +777,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
               Employment Type {employmentType.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{employmentType.length}</span>}
             </span>
-            {openSections.employment ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.employment && (
@@ -848,7 +840,6 @@ export const JobExplorer: React.FC = () => {
             <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
               Posting Date {dateRange && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
             </span>
-            {openSections.datePosted ? <ChevronUp className="w-3.5 h-3.5 text-[#64748b]" /> : <ChevronDown className="w-3.5 h-3.5 text-[#64748b]" />}
           </button>
           
           {openSections.datePosted && (
