@@ -104,13 +104,13 @@ export class SupabaseStorage implements StorageProvider {
         throw error;
       }
 
-      if (count === 0) {
-        Logger.info('Database has 0 companies. Seeding from local config/companies.json...');
-        const seedPath = path.join(process.cwd(), 'config', 'companies.json');
-        if (fs.existsSync(seedPath)) {
-          const raw = fs.readFileSync(seedPath, 'utf-8');
-          const seedConfigs = JSON.parse(raw) as CompanyConfig[];
+      const seedPath = path.join(process.cwd(), 'config', 'companies.json');
+      if (fs.existsSync(seedPath)) {
+        const raw = fs.readFileSync(seedPath, 'utf-8');
+        const seedConfigs = JSON.parse(raw) as CompanyConfig[];
 
+        if (!count || count < seedConfigs.length) {
+          Logger.info(`Syncing/seeding ${seedConfigs.length} companies from config/companies.json into database...`);
           const dbRows = seedConfigs.map((c) => ({
             id: c.id,
             name: c.name,
@@ -128,15 +128,15 @@ export class SupabaseStorage implements StorageProvider {
             preferred_scraper: c.preferred_scraper ?? null,
           }));
 
-          const { error: insertError } = await this.client.from('job_monitor_companies').insert(dbRows);
+          const { error: upsertError } = await this.client
+            .from('job_monitor_companies')
+            .upsert(dbRows, { onConflict: 'id', ignoreDuplicates: true });
 
-          if (insertError) {
-            Logger.error('Failed to seed companies in database', insertError);
+          if (upsertError) {
+            Logger.error('Failed to sync/seed companies in database', upsertError);
           } else {
-            Logger.info(`Successfully seeded ${dbRows.length} companies into database.`);
+            Logger.info(`Successfully synced ${dbRows.length} companies into database.`);
           }
-        } else {
-          Logger.warn('No seed file found at config/companies.json to populate database.');
         }
       }
     } catch (e: any) {
