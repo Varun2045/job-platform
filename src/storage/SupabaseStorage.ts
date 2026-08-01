@@ -108,34 +108,49 @@ export class SupabaseStorage implements StorageProvider {
       if (fs.existsSync(seedPath)) {
         const raw = fs.readFileSync(seedPath, 'utf-8');
         const seedConfigs = JSON.parse(raw) as CompanyConfig[];
+        const validIds = new Set(seedConfigs.map((c) => c.id));
 
-        if (!count || count < seedConfigs.length) {
-          Logger.info(`Syncing/seeding ${seedConfigs.length} companies from config/companies.json into database...`);
-          const dbRows = seedConfigs.map((c) => ({
-            id: c.id,
-            name: c.name,
-            enabled: c.enabled,
-            priority: c.priority,
-            interval_minutes: c.interval_minutes,
-            api_endpoint: c.api_endpoint || null,
-            detected_ats: c.detected_ats || null,
-            resume_profiles: c.resume_profiles || [],
-            consecutive_failures: c.consecutive_failures || 0,
-            max_jobs_to_fetch: c.max_jobs_to_fetch ?? null,
-            max_pages: c.max_pages ?? null,
-            scrape_timeout: c.scrape_timeout ?? null,
-            retry_count: c.retry_count ?? null,
-            preferred_scraper: c.preferred_scraper ?? null,
-          }));
+        Logger.info(`Syncing ${seedConfigs.length} companies from config/companies.json into database...`);
+        const dbRows = seedConfigs.map((c) => ({
+          id: c.id,
+          name: c.name,
+          enabled: c.enabled,
+          priority: c.priority,
+          interval_minutes: c.interval_minutes,
+          api_endpoint: c.api_endpoint || null,
+          detected_ats: c.detected_ats || null,
+          resume_profiles: c.resume_profiles || [],
+          consecutive_failures: c.consecutive_failures || 0,
+          max_jobs_to_fetch: c.max_jobs_to_fetch ?? null,
+          max_pages: c.max_pages ?? null,
+          scrape_timeout: c.scrape_timeout ?? null,
+          retry_count: c.retry_count ?? null,
+          preferred_scraper: c.preferred_scraper ?? null,
+        }));
 
-          const { error: upsertError } = await this.client
-            .from('job_monitor_companies')
-            .upsert(dbRows, { onConflict: 'id', ignoreDuplicates: true });
+        const { error: upsertError } = await this.client
+          .from('job_monitor_companies')
+          .upsert(dbRows, { onConflict: 'id' });
 
-          if (upsertError) {
-            Logger.error('Failed to sync/seed companies in database', upsertError);
-          } else {
-            Logger.info(`Successfully synced ${dbRows.length} companies into database.`);
+        if (upsertError) {
+          Logger.error('Failed to sync companies in database', upsertError);
+        } else {
+          Logger.info(`Successfully synced ${dbRows.length} companies into database.`);
+        }
+
+        // Clean up any obsolete entries not present in config/companies.json
+        const { data: allDbCompanies } = await this.client
+          .from('job_monitor_companies')
+          .select('id');
+
+        if (allDbCompanies) {
+          const obsoleteIds = allDbCompanies
+            .map((c) => c.id)
+            .filter((id) => !validIds.has(id));
+
+          if (obsoleteIds.length > 0) {
+            Logger.info(`Pruning ${obsoleteIds.length} obsolete company entries from database: ${obsoleteIds.join(', ')}`);
+            await this.client.from('job_monitor_companies').delete().in('id', obsoleteIds);
           }
         }
       }
