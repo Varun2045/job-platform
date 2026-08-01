@@ -91,14 +91,24 @@ export const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Parse Supabase OAuth Hash Params: #access_token=...
+    // 1. Parse OAuth Query Params: ?token=...&email=...
+    const urlParams = new URLSearchParams(window.location.search);
+    const jwt = urlParams.get('token');
+    const userEmail = urlParams.get('email');
+    if (jwt) {
+      handleLogin(jwt, userEmail || 'oauth-user@careeros.studio');
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
+    }
+
+    // 2. Parse OAuth Hash Params: #access_token=...
     const hash = window.location.hash;
     if (hash && hash.includes('access_token=')) {
-      const params = new URLSearchParams(hash.substring(1)); // remove '#'
-      const jwt = params.get('access_token');
-      if (jwt) {
-        handleLogin(jwt, 'oauth-user@jobmonitor.com');
-        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      const params = new URLSearchParams(hash.substring(1));
+      const hashJwt = params.get('access_token');
+      if (hashJwt) {
+        handleLogin(hashJwt, 'oauth-user@careeros.studio');
+        window.history.replaceState(null, '', window.location.pathname);
       }
     }
   }, []);
