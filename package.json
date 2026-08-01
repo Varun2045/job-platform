@@ -28,7 +28,7 @@
     "reclassify-jobs": "node dist/cli/reclassifyJobs.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
+    "@supabase/supabase-js": "^2.111.0",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
