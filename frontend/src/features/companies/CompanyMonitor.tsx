@@ -313,17 +313,23 @@ export const CompanyMonitor: React.FC = () => {
         <div className={`${selectedComp ? 'lg:col-span-2' : 'lg:col-span-3'} grid-fluid-cards gap-6`}>
 
           {list.map((c: any) => {
+            const failures = c.consecutive_failures ?? 0;
+            const hasRecentError = c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape));
             const status = c.enabled === false
               ? 'disabled'
-              : ((c.consecutive_failures ?? 0) > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape))))
-                ? 'degraded'
-                : 'healthy';
+              : failures >= 3
+                ? 'failed'
+                : (failures > 0 || hasRecentError)
+                  ? 'degraded'
+                  : 'healthy';
 
             const statusBadgeColor = status === 'healthy'
               ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
               : status === 'degraded'
                 ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
-                : 'bg-red-500/10 border border-red-500/20 text-red-400';
+                : status === 'failed'
+                  ? 'bg-red-500/10 border border-red-500/20 text-red-400'
+                  : 'bg-slate-500/10 border border-slate-500/20 text-slate-400';
 
             const isEditing = editingId === c.id;
 

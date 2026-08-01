@@ -30,6 +30,15 @@ export const Dashboard: React.FC = () => {
     }
   });
 
+  const { data: recentJobsData } = useQuery({
+    queryKey: ['recent-jobs-timeline'],
+    queryFn: async () => {
+      const res = await fetch('/api/v1/jobs/search?pageSize=10&sort=newest');
+      if (!res.ok) return { jobs: [] };
+      return res.json();
+    }
+  });
+
   if (isLoading) {
     return (
       <div className="p-4 md:p-8 space-y-6 animate-pulse">
@@ -48,13 +57,14 @@ export const Dashboard: React.FC = () => {
   }
 
   const { stats } = data;
+  const todayJobsList = (recentJobsData?.jobs || []).map((j: any) => j.job || j);
 
   const quickActions = [
     { name: 'Search Jobs', icon: Search, path: '/explorer', color: 'bg-indigo-600 hover:bg-indigo-700' },
-    { name: 'AI Career Assistant', icon: MessageSquare, path: '/career-assistant', color: 'bg-purple-600 hover:bg-purple-700' },
-    { name: 'Generate Cover Letter', icon: Mail, path: '/cover-letter-builder', color: 'bg-emerald-600 hover:bg-emerald-700' },
+    { name: 'AI Assistant', icon: MessageSquare, path: '/career-assistant', color: 'bg-purple-600 hover:bg-purple-700' },
+    { name: 'Cover Letter', icon: Mail, path: '/cover-letter-builder', color: 'bg-emerald-600 hover:bg-emerald-700' },
     { name: 'Find Referrals', icon: Handshake, path: '/referrals', color: 'bg-amber-600 hover:bg-amber-700' },
-    { name: 'Start Manual Scrape', icon: Play, path: '/companies', color: 'bg-red-600 hover:bg-red-700' },
+    { name: 'Start Scrape Run', icon: Play, path: '/companies', color: 'bg-red-600 hover:bg-red-700' },
   ];
 
   const cardItems = [
@@ -88,22 +98,20 @@ export const Dashboard: React.FC = () => {
     <div className="p-4 md:p-8 space-y-6 md:space-y-8 max-w-7xl mx-auto">
       <PageHeader
         themeKey="dashboard"
-        title="Dashboard"
-        description="Your job search overview and quick actions"
+        title="Dashboard & Job Intelligence"
+        description="Monitor scraper fleet health, automated scrapers, today's job postings, and referral pipelines."
         icon={Home}
       />
 
-      <div className="grid-fluid-stats gap-4">
-        {cardItems.map((item) => (
-          <div key={item.label} className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-4 flex flex-col justify-between hover:border-indigo-600/50 transition duration-200">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider">{item.label}</span>
-              <div className={`p-2 rounded-xl ${item.bg}`}>
-                <item.icon className={`w-5 h-5 ${item.color}`} />
-              </div>
+      <div className="grid-fluid-stats gap-4 md:gap-6">
+        {cardItems.map((item, idx) => (
+          <div key={idx} className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 flex items-center justify-between shadow-xl hover:border-indigo-600/40 transition-all duration-200">
+            <div>
+              <div className="text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">{item.label}</div>
+              <div className="text-2xl font-black text-white mt-1">{item.value}</div>
             </div>
-            <div className="mt-4">
-              <span className="text-3xl font-extrabold text-white">{item.value}</span>
+            <div className={`p-3.5 rounded-xl ${item.bg} ${item.color}`}>
+              <item.icon className="w-6 h-6" />
             </div>
           </div>
         ))}
@@ -134,33 +142,115 @@ export const Dashboard: React.FC = () => {
       <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6">
         <h3 className="text-lg font-bold text-white mb-4">Scraper Fleet Status</h3>
         <div className="grid-fluid-cards gap-6">
-          <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-[#232d3f]">
+          <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-emerald-500/20 bg-emerald-500/5">
             <CheckCircle2 className="w-6 h-6 text-emerald-400" />
             <div>
               <div className="text-sm font-semibold text-white">Healthy Scrapers</div>
-              <div className="text-lg font-bold text-[#94a3b8]">{stats.companiesHealthy || 0} companies</div>
+              <div className="text-lg font-bold text-emerald-400">{stats.companiesHealthy || 0} companies</div>
             </div>
           </div>
-          <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-[#232d3f]">
+          <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-amber-500/20 bg-amber-500/5">
             <AlertTriangle className="w-6 h-6 text-amber-400" />
             <div>
               <div className="text-sm font-semibold text-white">Degraded Scrapers</div>
-              <div className="text-lg font-bold text-[#94a3b8]">{stats.companiesDegraded || 0} companies</div>
+              <div className="text-lg font-bold text-amber-400">{stats.companiesDegraded || 0} companies</div>
             </div>
           </div>
-          <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-[#232d3f]">
+          <div className="flex items-center gap-4 p-4 bg-[#1b2535] rounded-xl border border-red-500/20 bg-red-500/5">
             <XCircle className="w-6 h-6 text-red-400" />
             <div>
-              <div className="text-sm font-semibold text-white">Disabled Scrapers</div>
-              <div className="text-lg font-bold text-[#94a3b8]">{stats.companiesDisabled || 0} companies</div>
+              <div className="text-sm font-semibold text-white">Disabled / Failed Scrapers</div>
+              <div className="text-lg font-bold text-red-400">{stats.companiesDisabled || 0} companies</div>
             </div>
           </div>
         </div>
         <div className="mt-4 p-4 bg-[#1b2535] rounded-xl border border-[#232d3f] flex items-center gap-3">
           <ShieldAlert className={`w-5 h-5 ${scraperStatusColor}`} />
-          <span className="text-sm text-[#94a3b8]">Overall Status: </span>
+          <span className="text-sm text-[#94a3b8]">Overall Fleet Health: </span>
           <span className={`text-sm font-bold ${scraperStatusColor} capitalize`}>{scraperStatus}</span>
         </div>
+      </div>
+
+      {/* ⚡ TODAY'S LIVE JOB POSTING TIMELINE */}
+      <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#232d3f] pb-4">
+          <div>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-emerald-400" /> Today's Live Job Posting Timeline
+            </h3>
+            <p className="text-xs text-[#94a3b8] mt-0.5">
+              Live chronological feed of new job opportunities scraped today.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/explorer?dateRange=1d')}
+            className="text-xs font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 rounded-xl transition cursor-pointer"
+          >
+            Explore All Today's Jobs →
+          </button>
+        </div>
+
+        {todayJobsList.length > 0 ? (
+          <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-500/20">
+            {todayJobsList.slice(0, 5).map((job: any, idx: number) => {
+              const postedDateStr = (() => {
+                const val = job.datePosted || job.firstSeen || job.created_at;
+                if (!val) return 'Today';
+                if (typeof val === 'string' && (val.includes('ago') || val.includes('Today') || val.includes('Just now'))) return val;
+                const d = new Date(val);
+                if (isNaN(d.getTime())) return 'Today';
+                const now = new Date();
+                const diffHours = (now.getTime() - d.getTime()) / (1000 * 3600);
+                if (diffHours < 1) return 'Just now';
+                if (diffHours < 24) return `${Math.floor(diffHours)} hrs ago (Today)`;
+                return d.toLocaleDateString();
+              })();
+
+              const applyUrl = job.applyUrl || job.jobUrl || job.postingUrl || job.url;
+
+              return (
+                <div key={idx} className="relative bg-[#1b2535]/80 border border-[#232d3f] hover:border-emerald-500/40 rounded-xl p-4 transition-all duration-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="absolute -left-[21px] top-5 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-[#131a26]" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-extrabold text-indigo-400 uppercase tracking-wider">{job.company}</span>
+                      <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        ⏱️ {postedDateStr}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-white mt-1">{job.title}</h4>
+                    <p className="text-xs text-[#94a3b8] mt-0.5">
+                      📍 {job.location || 'Remote / India'} {job.employmentType ? `• ${job.employmentType}` : ''}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => navigate(`/explorer?q=${encodeURIComponent(job.company)}`)}
+                      className="px-3 py-1.5 bg-[#131a26] hover:bg-[#1f2b3e] border border-[#232d3f] rounded-lg text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer"
+                    >
+                      View in Explorer
+                    </button>
+                    {applyUrl && (
+                      <a
+                        href={applyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-sm"
+                      >
+                        Apply Now
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 text-center text-xs text-[#94a3b8] bg-[#1b2535]/40 rounded-xl border border-[#232d3f]">
+            Scrapers are monitoring for new jobs today. Click "Start Scrape Run" above to crawl job boards immediately.
+          </div>
+        )}
       </div>
 
       {/* Referral Widgets */}

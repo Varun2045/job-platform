@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, ChevronUp, Search } from 'lucide-react';
+import { ChevronDown, ChevronRight, Layers, Cpu, Zap, Globe, Sparkles, X, Clock, ExternalLink, CheckCircle2, AlertTriangle, XCircle, ChevronUp, Search } from 'lucide-react';
 import { PageHeader } from '../../components/PageHeader.js';
 
 export type CompanyHealthType = 'Healthy' | 'Warning' | 'Failing';
@@ -567,13 +567,40 @@ export const AtsExplorerView: React.FC = () => {
               </div>
 
               {/* Health Indicator Banner */}
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-3 mb-6">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                <div>
-                  <p className="text-xs font-bold text-emerald-400">Parser Status: Healthy</p>
-                  <p className="text-[11px] text-emerald-300/80">Extraction pipeline functioning normally.</p>
-                </div>
-              </div>
+              {(() => {
+                const h = (selectedCompany.health || 'Healthy').toLowerCase();
+                const isDegraded = h === 'degraded';
+                const isFailed = h === 'failed' || h === 'failing' || h === 'unhealthy';
+                return (
+                  <div className={`p-3 border rounded-xl flex items-center gap-3 mb-6 ${
+                    isDegraded
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      : isFailed
+                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  }`}>
+                    {isDegraded ? (
+                      <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                    ) : isFailed ? (
+                      <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                    ) : (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    )}
+                    <div>
+                      <p className="text-xs font-bold capitalize">
+                        Parser Status: {isDegraded ? 'Degraded' : isFailed ? 'Failed' : 'Healthy'}
+                      </p>
+                      <p className="text-[11px] opacity-80">
+                        {isDegraded
+                          ? 'Extraction degraded due to minor DOM changes.'
+                          : isFailed
+                          ? 'Scraper parser error. Live extraction failed.'
+                          : 'Extraction pipeline functioning normally.'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Metadata Details */}
               <div className="space-y-4 text-xs">

@@ -395,8 +395,10 @@ const JobMonitoring: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-[#232d3f]/60 font-medium">
                 {scrapersList.map((scraper: any, idx: number) => {
-                  const isHealthy = scraper.status === 'Healthy';
-                  const isFailed = scraper.status === 'Failed';
+                  const statusNormalized = (scraper.status || '').toLowerCase();
+                  const isHealthy = statusNormalized === 'healthy';
+                  const isDegraded = statusNormalized === 'degraded';
+                  const isFailed = statusNormalized === 'failed' || statusNormalized === 'failing' || statusNormalized === 'unhealthy';
                   return (
                     <tr key={idx} className="hover:bg-[#1b2535]/60 transition-colors">
                       <td className="py-3 px-4 font-bold text-white">{scraper.name}</td>
@@ -404,11 +406,21 @@ const JobMonitoring: React.FC = () => {
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                           isHealthy
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : isDegraded
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             : isFailed
                             ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${isHealthy ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            isHealthy
+                              ? 'bg-emerald-400'
+                              : isDegraded
+                              ? 'bg-amber-400'
+                              : isFailed
+                              ? 'bg-rose-400'
+                              : 'bg-slate-400'
+                          }`} />
                           {scraper.status}
                         </span>
                       </td>
