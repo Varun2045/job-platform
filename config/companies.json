@@ -5,6 +5,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.accenture.com/in-en/careers/jobsearch",
     "detected_ats": "accenture",
     "resume_profiles": []
   },
@@ -14,6 +15,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://adobe.wd5.myworkdayjobs.com/external_experienced",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -23,6 +25,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/adyen",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -32,6 +35,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/airbnb",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -41,6 +45,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.akamai.com/en/sites/CX_1/jobs",
     "detected_ats": "akamai",
     "resume_profiles": []
   },
@@ -50,6 +55,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://amazon.jobs/en/search",
     "detected_ats": "amazon",
     "resume_profiles": []
   },
@@ -59,6 +65,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.amd.com/careers-home/jobs",
     "detected_ats": "amd",
     "resume_profiles": []
   },
@@ -68,6 +75,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/anthropic",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -77,6 +85,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.apple.com/en-in/search?location=india-INDC",
     "detected_ats": "apple",
     "resume_profiles": []
   },
@@ -86,6 +95,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.arm.com/search-jobs",
     "detected_ats": "arm",
     "resume_profiles": []
   },
@@ -95,6 +105,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://asana.com/jobs/all",
     "detected_ats": "asana",
     "resume_profiles": []
   },
@@ -104,6 +115,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.atlassian.com/company/careers/all-jobs",
     "detected_ats": "atlassian",
     "resume_profiles": []
   },
@@ -113,6 +125,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://autodesk.wd1.myworkdayjobs.com/Ext",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -122,6 +135,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.bain.com/careers/find-a-role/",
     "detected_ats": "bain&company",
     "resume_profiles": []
   },
@@ -131,6 +145,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.bankofamerica.com/en-us/job-search",
     "detected_ats": "bankofamerica",
     "resume_profiles": []
   },
@@ -140,6 +155,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.bcg.com/global/en/",
     "detected_ats": "bcg",
     "resume_profiles": []
   },
@@ -149,6 +165,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -158,6 +175,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://block.xyz/careers/jobs",
     "detected_ats": "block",
     "resume_profiles": []
   },
@@ -167,6 +185,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.bloomberg.com/company/careers/",
     "detected_ats": "bloomberg",
     "resume_profiles": []
   },
@@ -176,6 +195,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.boeing.com/",
     "detected_ats": "taleo",
     "resume_profiles": []
   },
@@ -185,6 +205,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.booking.com",
     "detected_ats": "booking.com",
     "resume_profiles": []
   },
@@ -194,6 +215,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.smartrecruiters.com/BoschGroup",
     "detected_ats": "smartrecruiters",
     "resume_profiles": []
   },
@@ -203,6 +225,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.brex.com/careers",
     "detected_ats": "brex",
     "resume_profiles": []
   },
@@ -212,6 +235,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://broadcom.wd1.myworkdayjobs.com/External_Career",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -221,6 +245,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://browserstack.wd3.myworkdayjobs.com/External",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -230,6 +255,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://joinbytedance.com/search",
     "detected_ats": "bytedance",
     "resume_profiles": []
   },
@@ -239,6 +265,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://canonical.com/careers/all",
     "detected_ats": "canonical",
     "resume_profiles": []
   },
@@ -248,6 +275,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.lifeatcanva.com/en/jobs/",
     "detected_ats": "canva",
     "resume_profiles": []
   },
@@ -257,6 +285,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.capgemini.com/careers",
     "detected_ats": "capgemini",
     "resume_profiles": []
   },
@@ -266,6 +295,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.caterpillar.com/en/jobs/",
     "detected_ats": "taleo",
     "resume_profiles": []
   },
@@ -275,6 +305,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://circleci.com/careers/jobs/",
     "detected_ats": "circleci",
     "resume_profiles": []
   },
@@ -284,6 +315,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.cisco.com/jobs/SearchJobs",
     "detected_ats": "cisco",
     "resume_profiles": []
   },
@@ -293,6 +325,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/cloudflare",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -302,6 +335,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/cockroachlabs",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -311,6 +345,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.cohesity.com/careers/open-positions/",
     "detected_ats": "cohesity",
     "resume_profiles": []
   },
@@ -320,6 +355,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.coinbase.com/careers/positions",
     "detected_ats": "coinbase",
     "resume_profiles": []
   },
@@ -329,6 +365,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.confluent.io/jobs",
     "detected_ats": "confluent",
     "resume_profiles": []
   },
@@ -338,6 +375,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -347,6 +385,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/cursor",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -356,6 +395,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://dbx.darwinbox.in/ms/candidatev2/main/careers/allJobs",
     "detected_ats": "darwinbox",
     "resume_profiles": []
   },
@@ -365,6 +405,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/databricks",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -374,6 +415,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/datadog",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -383,6 +425,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.datastax.com/company/careers",
     "detected_ats": "datastax",
     "resume_profiles": []
   },
@@ -392,6 +435,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.getdbt.com/about-us/careers#roles",
     "detected_ats": "dbtlabs",
     "resume_profiles": []
   },
@@ -401,6 +445,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.dell.com/",
     "detected_ats": "dell",
     "resume_profiles": []
   },
@@ -410,6 +455,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.deloitte.com",
     "detected_ats": "deloitte",
     "resume_profiles": []
   },
@@ -419,6 +465,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://discord.com/careers#all-jobs",
     "detected_ats": "discord",
     "resume_profiles": []
   },
@@ -428,6 +475,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.docker.com/career-openings/",
     "detected_ats": "docker",
     "resume_profiles": []
   },
@@ -437,6 +485,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careersatdoordash.com/job-search/",
     "detected_ats": "doordash",
     "resume_profiles": []
   },
@@ -446,6 +495,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://dreamsports.group/careers#jobs",
     "detected_ats": "dream11",
     "resume_profiles": []
   },
@@ -455,6 +505,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.dropbox.jobs/en/jobs/",
     "detected_ats": "dropbox",
     "resume_profiles": []
   },
@@ -464,6 +515,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ea.com/en_US/careers",
     "detected_ats": "ea",
     "resume_profiles": []
   },
@@ -473,6 +525,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ebayinc.com/us/en/search-results",
     "detected_ats": "ebay",
     "resume_profiles": []
   },
@@ -482,6 +535,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.elastic.co/",
     "detected_ats": "elastic",
     "resume_profiles": []
   },
@@ -491,6 +545,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/elevenlabs",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -500,6 +555,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.epam.com/en/jobs",
     "detected_ats": "epam",
     "resume_profiles": []
   },
@@ -509,6 +565,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.epicgames.com/site/careers/jobs",
     "detected_ats": "epicgames",
     "resume_profiles": []
   },
@@ -518,6 +575,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.equinix.com/equinix-is-hiring-in-india",
     "detected_ats": "equinix",
     "resume_profiles": []
   },
@@ -527,6 +585,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ericsson.com",
     "detected_ats": "ericsson",
     "resume_profiles": []
   },
@@ -536,6 +595,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://expedia.wd108.myworkdayjobs.com/en-US/search",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -545,6 +605,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.ey.com/",
     "detected_ats": "ey",
     "resume_profiles": []
   },
@@ -554,6 +615,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.fedex.com",
     "detected_ats": "taleo",
     "resume_profiles": []
   },
@@ -563,6 +625,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.figma.com/careers/#job-openings",
     "detected_ats": "figma",
     "resume_profiles": []
   },
@@ -572,6 +635,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f",
     "detected_ats": "flipkart",
     "resume_profiles": []
   },
@@ -581,6 +645,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.smartrecruiters.com/freshworks",
     "detected_ats": "smartrecruiters",
     "resume_profiles": []
   },
@@ -590,6 +655,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.gartner.com",
     "detected_ats": "gartner",
     "resume_profiles": []
   },
@@ -599,6 +665,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -608,6 +675,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -617,6 +685,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -626,6 +695,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.github.careers/careers-home/jobs",
     "detected_ats": "github",
     "resume_profiles": []
   },
@@ -635,6 +705,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/gitlab",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -644,6 +715,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.goldmansachs.com/careers",
     "detected_ats": "goldmansachs",
     "resume_profiles": []
   },
@@ -653,6 +725,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.google.com/jobs/results",
     "detected_ats": "google",
     "resume_profiles": []
   },
@@ -662,6 +735,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/grafanalabs",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -671,6 +745,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/groww",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -680,6 +755,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.honeywell.com/en/sites/Honeywell",
     "detected_ats": "oraclecloud",
     "resume_profiles": []
   },
@@ -689,6 +765,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://hp.wd5.myworkdayjobs.com/ExternalCareerSite",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -698,6 +775,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://hpe.wd5.myworkdayjobs.com/Jobsathpe",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -707,6 +785,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.hsbc.com/careers",
     "detected_ats": "hsbc",
     "resume_profiles": []
   },
@@ -716,6 +795,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://apply.workable.com/huggingface/?lng=en",
     "detected_ats": "huggingface",
     "resume_profiles": []
   },
@@ -725,6 +805,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.ibm.com/in-en/careers/search",
     "detected_ats": "ibm",
     "resume_profiles": []
   },
@@ -734,6 +815,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2",
     "detected_ats": "ikea",
     "resume_profiles": []
   },
@@ -743,6 +825,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.indeed.com",
     "detected_ats": "indeed",
     "resume_profiles": []
   },
@@ -752,6 +835,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/instacart",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -761,6 +845,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://intel.wd1.myworkdayjobs.com/External",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -770,6 +855,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.intuit.com/search-jobs",
     "detected_ats": "intuit",
     "resume_profiles": []
   },
@@ -779,6 +865,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.eu.greenhouse.io/jetbrains",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -788,6 +875,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs",
     "detected_ats": "oraclecloud",
     "resume_profiles": []
   },
@@ -797,6 +885,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://juspay.io/careers",
     "detected_ats": "juspay",
     "resume_profiles": []
   },
@@ -806,6 +895,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/klaviyo",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -815,6 +905,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://ejgk.fa.em2.oraclecloud.com/careers",
     "detected_ats": "oraclecloud",
     "resume_profiles": []
   },
@@ -824,6 +915,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/langchain",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -833,6 +925,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lenovo.com/en_US/careers",
     "detected_ats": "lenovo",
     "resume_profiles": []
   },
@@ -842,6 +935,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/linear",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -851,6 +945,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.linkedin.com/",
     "detected_ats": "linkedin",
     "resume_profiles": []
   },
@@ -860,6 +955,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.lockheedmartinjobs.com",
     "detected_ats": "taleo",
     "resume_profiles": []
   },
@@ -869,6 +965,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://logitech.wd5.myworkdayjobs.com/Logitech",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -878,6 +975,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://loom.technology/careers/",
     "detected_ats": "loom",
     "resume_profiles": []
   },
@@ -887,6 +985,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://mastercard.wd1.myworkdayjobs.com/CorporateCareers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -896,6 +995,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.mckinsey.com/careers/search-jobs",
     "detected_ats": "mckinsey",
     "resume_profiles": []
   },
@@ -905,6 +1005,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/meesho",
     "detected_ats": "lever",
     "resume_profiles": []
   },
@@ -914,6 +1015,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.metacareers.com/jobsearch/",
     "detected_ats": "meta",
     "resume_profiles": []
   },
@@ -923,6 +1025,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://apply.careers.microsoft.com/careers?domain=microsoft.com",
     "detected_ats": "microsoft",
     "resume_profiles": []
   },
@@ -932,6 +1035,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/mindtickle",
     "detected_ats": "lever",
     "resume_profiles": []
   },
@@ -941,6 +1045,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://miro.com/careers/open-positions/",
     "detected_ats": "miro",
     "resume_profiles": []
   },
@@ -950,6 +1055,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/modal",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -959,6 +1065,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.mongodb.com/company/careers/see-jobs#positions",
     "detected_ats": "mongodb",
     "resume_profiles": []
   },
@@ -968,6 +1075,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.morganstanley.com/careers/career-opportunities-search/",
     "detected_ats": "morganstanley",
     "resume_profiles": []
   },
@@ -977,6 +1085,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://motorolasolutions.wd5.myworkdayjobs.com/Careers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -986,6 +1095,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.moveworks.com/us/en/company/careers#open-roles",
     "detected_ats": "moveworks",
     "resume_profiles": []
   },
@@ -995,6 +1105,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs",
     "detected_ats": "mygate",
     "resume_profiles": []
   },
@@ -1004,6 +1115,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.myntra.com/",
     "detected_ats": "myntra",
     "resume_profiles": []
   },
@@ -1013,6 +1125,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.nagarro.com/en/careers",
     "detected_ats": "nagarro",
     "resume_profiles": []
   },
@@ -1022,6 +1135,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6",
     "detected_ats": "navi",
     "resume_profiles": []
   },
@@ -1031,6 +1145,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/neon",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1040,6 +1155,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://explore.jobs.netflix.net/careers",
     "detected_ats": "netflix",
     "resume_profiles": []
   },
@@ -1049,6 +1165,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://nielseniq.com/global/en/jobs/india/",
     "detected_ats": "nielseniq",
     "resume_profiles": []
   },
@@ -1058,6 +1175,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.nike.com/jobs",
     "detected_ats": "nike",
     "resume_profiles": []
   },
@@ -1067,6 +1185,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.jobvite.com/ninjaone/jobs",
     "detected_ats": "ninjaone",
     "resume_profiles": []
   },
@@ -1076,6 +1195,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.nokia.com/en/sites/CX_1",
     "detected_ats": "nokia",
     "resume_profiles": []
   },
@@ -1085,6 +1205,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/notion",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1094,6 +1215,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.nutanix.com/en/jobs/",
     "detected_ats": "nutanix",
     "resume_profiles": []
   },
@@ -1103,6 +1225,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1112,6 +1235,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.okta.com/company/careers/job-listing/",
     "detected_ats": "okta",
     "resume_profiles": []
   },
@@ -1121,6 +1245,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://olacareers.turbohire.co/careerpage/e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212",
     "detected_ats": "ola",
     "resume_profiles": []
   },
@@ -1130,6 +1255,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/openai",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1139,6 +1265,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.oracle.com/en/sites/jobsearch/jobs?location=India",
     "detected_ats": "oraclecloud",
     "resume_profiles": []
   },
@@ -1148,6 +1275,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/palantir",
     "detected_ats": "lever",
     "resume_profiles": []
   },
@@ -1157,6 +1285,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.paloaltonetworks.com/en",
     "detected_ats": "paloaltonetworks",
     "resume_profiles": []
   },
@@ -1166,6 +1295,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://paypal.eightfold.ai/careers",
     "detected_ats": "paypal",
     "resume_profiles": []
   },
@@ -1175,6 +1305,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/paytm",
     "detected_ats": "lever",
     "resume_profiles": []
   },
@@ -1184,6 +1315,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/perplexity",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1193,6 +1325,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://pfizer.wd1.myworkdayjobs.com/PfizerCareers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1202,6 +1335,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/phonepe",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1211,6 +1345,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/pinecone",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1220,6 +1355,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/pinterest",
     "detected_ats": "pinterest",
     "resume_profiles": []
   },
@@ -1229,6 +1365,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://plaid.com/careers/",
     "detected_ats": "plaid",
     "resume_profiles": []
   },
@@ -1238,6 +1375,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/planetscale",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1247,6 +1385,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://posthog.com/careers",
     "detected_ats": "posthog",
     "resume_profiles": []
   },
@@ -1256,6 +1395,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/postman",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1265,6 +1405,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/purestorage",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1274,6 +1415,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs-ta.pwc.com/global/en/ac-india-job-search",
     "detected_ats": "pwc",
     "resume_profiles": []
   },
@@ -1283,6 +1425,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.qualcomm.com/careers",
     "detected_ats": "qualcomm",
     "resume_profiles": []
   },
@@ -1292,6 +1435,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://questdb.com/careers/",
     "detected_ats": "questdb",
     "resume_profiles": []
   },
@@ -1301,6 +1445,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/ramp",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1310,6 +1455,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1319,6 +1465,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://redhat.wd5.myworkdayjobs.com/Jobs",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1328,6 +1475,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/reddit",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1337,6 +1485,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://retool.com/careers#open-positions",
     "detected_ats": "retool",
     "resume_profiles": []
   },
@@ -1346,6 +1495,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.riotgames.com/en/work-with-us/jobs",
     "detected_ats": "riotgames",
     "resume_profiles": []
   },
@@ -1355,6 +1505,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.rippling.com/careers/open-roles",
     "detected_ats": "rippling",
     "resume_profiles": []
   },
@@ -1364,6 +1515,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.rivian.com/careers-home/",
     "detected_ats": "rivian",
     "resume_profiles": []
   },
@@ -1373,6 +1525,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.robinhood.com/",
     "detected_ats": "robinhood",
     "resume_profiles": []
   },
@@ -1382,6 +1535,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.roblox.com/jobs",
     "detected_ats": "roblox",
     "resume_profiles": []
   },
@@ -1391,6 +1545,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.rubrik.com/company/careers#positions",
     "detected_ats": "rubrik",
     "resume_profiles": []
   },
@@ -1400,6 +1555,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://salesforce.wd12.myworkdayjobs.com/External_Career_Site",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1409,6 +1565,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "http://sec.wd3.myworkdayjobs.com/Samsung_Careers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1418,6 +1575,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.sap.com/",
     "detected_ats": "sap",
     "resume_profiles": []
   },
@@ -1427,6 +1585,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://scale.com/careers",
     "detected_ats": "scaleai",
     "resume_profiles": []
   },
@@ -1436,6 +1595,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/sentry",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1445,6 +1605,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.servicenow.com/",
     "detected_ats": "servicenow",
     "resume_profiles": []
   },
@@ -1454,6 +1615,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://sharechat.com/careers",
     "detected_ats": "sharechat",
     "resume_profiles": []
   },
@@ -1463,6 +1625,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.shopee.sg/",
     "detected_ats": "shopee",
     "resume_profiles": []
   },
@@ -1472,6 +1635,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://shopify.com/careers",
     "detected_ats": "shopify",
     "resume_profiles": []
   },
@@ -1481,6 +1645,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://siemens.wd3.myworkdayjobs.com/Siemens_Careers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1490,6 +1655,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://salesforce.wd12.myworkdayjobs.com/Slack",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1499,6 +1665,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/smartbear",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1508,6 +1675,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/snowflake",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1517,6 +1685,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://snowplow.careers.hibob.com/",
     "detected_ats": "snowplow",
     "resume_profiles": []
   },
@@ -1526,6 +1695,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.sony.com/en_us/SCA/careers/overview.html",
     "detected_ats": "sony",
     "resume_profiles": []
   },
@@ -1535,6 +1705,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://splunk.wd1.myworkdayjobs.com/External",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1544,6 +1715,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/spotify",
     "detected_ats": "lever",
     "resume_profiles": []
   },
@@ -1553,6 +1725,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://stripe.com/jobs/search",
     "detected_ats": "stripe",
     "resume_profiles": []
   },
@@ -1562,6 +1735,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/sumologic",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1571,6 +1745,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/supabase",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1580,6 +1755,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://supercell.com/en/careers/",
     "detected_ats": "supercell",
     "resume_profiles": []
   },
@@ -1589,6 +1765,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.swiggy.com",
     "detected_ats": "swiggy",
     "resume_profiles": []
   },
@@ -1598,6 +1775,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.synopsys.com/company/careers.html",
     "detected_ats": "synopsys",
     "resume_profiles": []
   },
@@ -1607,6 +1785,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.target.com",
     "detected_ats": "target",
     "resume_profiles": []
   },
@@ -1616,6 +1795,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/temporal",
     "detected_ats": "ashby",
     "resume_profiles": []
   },
@@ -1625,6 +1805,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.tesla.com/careers",
     "detected_ats": "tesla",
     "resume_profiles": []
   },
@@ -1634,6 +1815,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/togetherai",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1643,6 +1825,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/twilio",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1652,6 +1835,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://job-boards.greenhouse.io/twitch",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1661,6 +1845,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.uber.com/en/jobs/",
     "detected_ats": "uber",
     "resume_profiles": []
   },
@@ -1670,6 +1855,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.smartrecruiters.com/ubisoft",
     "detected_ats": "smartrecruiters",
     "resume_profiles": []
   },
@@ -1679,6 +1865,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs",
     "detected_ats": "unacademy",
     "resume_profiles": []
   },
@@ -1688,6 +1875,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.unitedhealthgroup.com/search-jobs",
     "detected_ats": "unitedhealth",
     "resume_profiles": []
   },
@@ -1697,6 +1885,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://unity.com/careers/positions",
     "detected_ats": "unity",
     "resume_profiles": []
   },
@@ -1706,6 +1895,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/vercel",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1715,6 +1905,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://visa.wd1.myworkdayjobs.com/Careers",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1724,6 +1915,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.broadcom.com/company/careers",
     "detected_ats": "vmware",
     "resume_profiles": []
   },
@@ -1733,6 +1925,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://careers.walmart.com/us/en/home",
     "detected_ats": "walmart",
     "resume_profiles": []
   },
@@ -1742,6 +1935,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.wayfair.com/careers/jobs",
     "detected_ats": "wayfair",
     "resume_profiles": []
   },
@@ -1751,6 +1945,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.coreweave.com/careers/weights-biases",
     "detected_ats": "weights&biases",
     "resume_profiles": []
   },
@@ -1760,6 +1955,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://whatfix.com/careers",
     "detected_ats": "whatfix",
     "resume_profiles": []
   },
@@ -1769,6 +1965,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://wise.jobs/",
     "detected_ats": "wise",
     "resume_profiles": []
   },
@@ -1778,6 +1975,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.wiz.io/careers",
     "detected_ats": "wiz",
     "resume_profiles": []
   },
@@ -1787,6 +1985,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/yubikey",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -1796,6 +1995,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://zapier.com/jobs#job-openings",
     "detected_ats": "zapier",
     "resume_profiles": []
   },
@@ -1805,6 +2005,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://zepto.talentrecruit.com/career-page",
     "detected_ats": "zepto",
     "resume_profiles": []
   },
@@ -1814,6 +2015,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.zoho.com/careers/",
     "detected_ats": "zoho",
     "resume_profiles": []
   },
@@ -1823,6 +2025,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.eternal.com/careers/",
     "detected_ats": "zomato(eternal)",
     "resume_profiles": []
   },
@@ -1832,6 +2035,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://zoom.wd5.myworkdayjobs.com/Zoom",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -1841,6 +2045,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://jobs.zs.com/jobs",
     "detected_ats": "zsassociates",
     "resume_profiles": []
   },
@@ -1850,6 +2055,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
+    "api_endpoint": "https://www.zscaler.com/careers",
     "detected_ats": "zscaler",
     "resume_profiles": []
   }
