@@ -118,7 +118,9 @@ if (isProduction && !isFileStorageMode && process.env.IS_LOCAL !== 'true') {
   validateEnv('SUPABASE_URL', true);
   validateEnv('SUPABASE_SERVICE_KEY', true);
   if (process.env.RESEND_API_KEY) {
-    validateEnv('NOTIFICATION_EMAIL_SENDER', true);
+    if (!process.env.NOTIFICATION_EMAIL_SENDER && !process.env.EMAIL_FROM) {
+      validateEnv('NOTIFICATION_EMAIL_SENDER', true);
+    }
     validateEnv('NOTIFICATION_EMAIL_RECIPIENT', true);
   }
 }
@@ -127,7 +129,7 @@ export const config: Config = {
   supabaseUrl: process.env.SUPABASE_URL ?? '',
   supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY ?? '',
   resendApiKey: process.env.RESEND_API_KEY ?? '',
-  senderEmail: process.env.NOTIFICATION_EMAIL_SENDER ?? 'alerts@yourdomain.com',
+  senderEmail: process.env.NOTIFICATION_EMAIL_SENDER || process.env.EMAIL_FROM || 'alerts@yourdomain.com',
   recipientEmail: process.env.NOTIFICATION_EMAIL_RECIPIENT ?? '',
   matchThreshold: Number(process.env.MATCH_THRESHOLD ?? 70),
   weights: loadedWeights,

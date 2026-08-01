@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "npm --prefix frontend install --include=dev && tsc && npm --prefix frontend run build",
+    "heroku-postbuild": "npm run build",
     "start": "node dist/core/server.js",
     "server": "node dist/core/server.js",
     "prod:start": "npm run build && npm start",
@@ -32,6 +33,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.20.3",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/ws": "^8.18.1",
     "cheerio": "^1.0.0-rc.12",
@@ -43,6 +45,7 @@
     "helmet": "^8.2.0",
     "mammoth": "^1.12.0",
     "pdf-parse": "^2.4.5",
+    "pg": "^8.22.0",
     "playwright": "^1.44.1",
     "resend": "^3.2.0",
     "swagger-ui-express": "^5.0.1",

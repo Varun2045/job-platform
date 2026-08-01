@@ -109,8 +109,22 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
   next();
 });
 
+// Prevent access to hidden files/directories (.env, .git, etc.)
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.path.startsWith('/.') || req.path.includes('/.')) {
+    return res.status(404).send('Not Found');
+  }
+  next();
+});
+
 // CORS whitelist config
-const corsWhitelist = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'];
+const corsWhitelist = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'https://careeros.studio',
+  'https://www.careeros.studio',
+];
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -121,7 +135,8 @@ app.use(
         origin.startsWith('http://127.0.0.1:') ||
         origin.endsWith('.vercel.app') ||
         origin.endsWith('.herokuapp.com') ||
-        origin.endsWith('.hf.space')
+        origin.endsWith('.hf.space') ||
+        origin.endsWith('careeros.studio')
       ) {
         callback(null, true);
       } else {
@@ -4322,16 +4337,47 @@ app.use('/portfolios', express.static(portfoliosDir));
 // Serve frontend build output
 const frontendDist = path.join(process.cwd(), 'frontend', 'dist');
 if (fs.existsSync(frontendDist)) {
-  app.use(express.static(frontendDist, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.html')) {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      }
+  app.use(
+    express.static(frontendDist, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    }),
+  );
+
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // Do not serve SPA index.html for API requests
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'API endpoint not found' });
     }
-  }));
-  app.get('/{*splat}', (req, res) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.sendFile(path.join(frontendDist, 'index.html'));
+
+    // Do not serve SPA index.html for missing static assets or files with extensions
+    if (req.path.startsWith('/assets/') || path.extname(req.path)) {
+      if (req.path.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+        return res.status(404).send('/* Asset not found */');
+      }
+      if (req.path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+        return res.status(404).send('/* Asset not found */');
+      }
+      return res.status(404).send('Asset not found');
+    }
+
+    const indexPath = path.join(frontendDist, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      return res.sendFile(indexPath);
+    }
+    next();
   });
 }
 

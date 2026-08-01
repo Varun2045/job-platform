@@ -50,16 +50,25 @@ const queryClient = new QueryClient();
 
 // Override window.fetch at the module level to ensure it is active immediately on mount
 const originalFetch = window.fetch;
-window.fetch = async (input, init) => {
+window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const jwt = localStorage.getItem('token');
-  const authHeader = jwt ? { Authorization: `Bearer ${jwt}` } : {};
-  const updatedInit = {
+  const authHeader: Record<string, string> = jwt ? { Authorization: `Bearer ${jwt}` } : {};
+
+  const existingHeaders = init?.headers
+    ? init.headers instanceof Headers
+      ? Object.fromEntries(init.headers.entries())
+      : Array.isArray(init.headers)
+      ? Object.fromEntries(init.headers)
+      : init.headers
+    : {};
+
+  const updatedInit: RequestInit = {
     ...init,
     headers: {
-      ...(init?.headers || {}),
-      ...authHeader
-    }
-  } as RequestInit;
+      ...existingHeaders,
+      ...authHeader,
+    },
+  };
   return originalFetch(input, updatedInit);
 };
 
@@ -98,9 +107,11 @@ export const App: React.FC = () => {
 
   if (!token) {
     return (
-      <ToastProvider>
-        <Login onLogin={handleLogin} />
-      </ToastProvider>
+      <ErrorBoundary>
+        <ToastProvider>
+          <Login onLogin={handleLogin} />
+        </ToastProvider>
+      </ErrorBoundary>
     );
   }
 
