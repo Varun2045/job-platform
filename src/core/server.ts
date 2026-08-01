@@ -2212,8 +2212,8 @@ app.post('/api/monitoring/run', authMiddleware, async (req, res) => {
     if (isScrapersPaused) {
       return res.status(400).json({ error: 'Scrapers are currently paused. Resume scheduling to run.' });
     }
-    // Run the orchestrator in the background immediately
-    runOrchestrator().catch((err) => {
+    // Run the orchestrator in the background immediately with forceAll override
+    runOrchestrator({ forceAll: true }).catch((err) => {
       Logger.error('Background runOrchestrator failed', err);
     });
     return res.json({ success: true, message: 'Scrapers run triggered successfully' });
