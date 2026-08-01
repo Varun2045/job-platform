@@ -426,11 +426,18 @@ async function handleGoogleAuthCallback(req: express.Request, res: express.Respo
   try {
     const { code, state } = req.query;
     let clientOrigin = `${req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http'}://${req.get('host')}`;
+    let isCalendarConnection = false;
+    let calendarUserId: string | null = null;
+
     if (state) {
+      const stateStr = String(state);
       try {
-        const decoded = JSON.parse(Buffer.from(state as string, 'base64').toString('utf-8'));
+        const decoded = JSON.parse(Buffer.from(stateStr, 'base64').toString('utf-8'));
         if (decoded.origin) clientOrigin = decoded.origin;
-      } catch {}
+      } catch {
+        isCalendarConnection = true;
+        calendarUserId = stateStr;
+      }
     }
 
     if (!code) {
@@ -465,21 +472,54 @@ async function handleGoogleAuthCallback(req: express.Request, res: express.Respo
     }
 
     const tokenData = await tokenRes.json();
-    const accessToken = tokenData.access_token;
 
-    const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!userRes.ok) {
-      throw new Error('Failed to fetch Google user profile');
+    // A. Handle Google Calendar Connection Flow
+    if (isCalendarConnection && calendarUserId && tokenData.refresh_token) {
+      let settings = await storage.getExtendedSettings(calendarUserId);
+      if (!settings) {
+        settings = {
+          preferredCompanies: [],
+          preferredTechnologies: [],
+          preferredCities: [],
+          remotePreference: 'all',
+          notificationFrequency: 'daily',
+          digestFormat: 'markdown',
+        };
+      }
+      settings.google_refresh_token = tokenData.refresh_token;
+      await storage.saveExtendedSettings(settings, calendarUserId);
+      await AuditLogger.log(calendarUserId, 'Settings Change', { linkedGoogleCalendar: true }, req.ip || '127.0.0.1');
+      return res.redirect(`${clientOrigin}/automation`);
     }
 
-    const googleUser = await userRes.json();
-    const email = googleUser.email;
-    const name = googleUser.name || email.split('@')[0];
-    const userId = `google_${googleUser.id || Date.now()}`;
+    // B. Handle User Login Flow
+    let email = 'google-user@careeros.studio';
+    let name = 'Google User';
 
+    if (tokenData.id_token) {
+      try {
+        const payload = jwt.decode(tokenData.id_token) as any;
+        if (payload && payload.email) {
+          email = payload.email;
+          name = payload.name || email.split('@')[0];
+        }
+      } catch {}
+    }
+
+    if (tokenData.access_token) {
+      try {
+        const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        });
+        if (userRes.ok) {
+          const googleUser = await userRes.json();
+          if (googleUser.email) email = googleUser.email;
+          if (googleUser.name) name = googleUser.name;
+        }
+      } catch {}
+    }
+
+    const userId = `google_${email.replace(/[^a-zA-Z0-9]/g, '_')}`;
     await storage.saveProfile(userId, { name, role: 'Admin' });
     await AuditLogger.log(userId, 'Login', { provider: 'google', email }, req.ip || '127.0.0.1');
 
@@ -2207,7 +2247,7 @@ app.get('/api/monitoring', authMiddleware, async (req, res) => {
   }
 });
 
-app.post('/api/monitoring/run', authMiddleware, async (req, res) => {
+const handleMonitoringRun = async (req: express.Request, res: express.Response) => {
   try {
     if (isScrapersPaused) {
       return res.status(400).json({ error: 'Scrapers are currently paused. Resume scheduling to run.' });
@@ -2220,7 +2260,10 @@ app.post('/api/monitoring/run', authMiddleware, async (req, res) => {
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
-});
+};
+
+app.post('/api/monitoring/run', authMiddleware, handleMonitoringRun);
+app.post('/api/monitoring/trigger', authMiddleware, handleMonitoringRun);
 
 app.post('/api/monitoring/cron-trigger', async (req, res) => {
   try {
