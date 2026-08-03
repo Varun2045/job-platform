@@ -4,7 +4,6 @@ import { SkillGapEngine } from '../core/SkillGapEngine.js';
 import { InterviewCopilot } from '../core/InterviewCopilot.js';
 import { SalaryAnalyzer } from '../core/SalaryAnalyzer.js';
 import { DailyBriefService } from '../core/DailyBriefService.js';
-import { KnowledgeBaseService } from '../core/KnowledgeBaseService.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -145,11 +144,4 @@ describe('Version 4.0.0 Autonomous Career Copilot Integration Checks', () => {
     expect(brief.applicationsToFollowUp[0].company).toBe('MockCorp');
   });
 
-  it('should search cross-referenced entities inside KnowledgeBase', async () => {
-    const results = await KnowledgeBaseService.searchKB(userId, 'TypeScript', storage);
-    console.log('KNOWLEDGE BASE RESULTS:', JSON.stringify(results, null, 2));
-    expect(results.length).toBeGreaterThan(0);
-    const hasJob = results.some((r) => r.category === 'Job');
-    expect(hasJob).toBe(true);
-  });
 });

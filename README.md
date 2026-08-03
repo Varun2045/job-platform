@@ -45,7 +45,7 @@
 - **Backend**: Node.js, Express, TypeScript, REST APIs
 - **Database / Persistence**: PostgreSQL (Supabase) & Local JSON File Storage
 - **Browser Extension**: Chrome Extension Manifest V3 (Service Workers, Content Scripts)
-- **DevOps & Deployment**: Heroku (`Procfile`), Docker, Jest, ESLint
+- **DevOps & Deployment**: Heroku (`Procfile`), Jest, ESLint
 
 ---
 

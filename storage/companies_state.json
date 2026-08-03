@@ -4,7 +4,7 @@
     "name": "MockCorp",
     "enabled": true,
     "url": "https://mockcorp.com",
-    "last_successful_scrape": "2026-08-03T17:33:16.003Z",
+    "last_successful_scrape": "2026-08-03T20:24:28.927Z",
     "total_failures": 0,
     "total_scrapes": 1
   }

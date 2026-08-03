@@ -124,34 +124,24 @@ export class EmailNotificationProvider implements NotificationProvider {
   }
 
   private buildHtml(digest: JobDigest, jobs: typeof digest.jobs): string {
-    // 1. Group jobs by company name
-    const grouped: Record<string, typeof jobs> = {};
-    for (const job of jobs) {
-      if (!grouped[job.companyName]) {
-        grouped[job.companyName] = [];
-      }
-      grouped[job.companyName].push(job);
-    }
+    // Sort jobs by datePosted (most recent first)
+    const sortedJobs = [...jobs].sort((a, b) => {
+      const dateA = a.datePosted ? new Date(a.datePosted).getTime() : 0;
+      const dateB = b.datePosted ? new Date(b.datePosted).getTime() : 0;
+      return dateB - dateA;
+    });
 
-    // 2. Determine company names ordered by appearance
-    const companyNames: string[] = [];
-    for (const job of jobs) {
-      if (!companyNames.includes(job.companyName)) {
-        companyNames.push(job.companyName);
-      }
-    }
-
-    const jobListingsHtml = companyNames
-      .map((companyName) => {
-        const companyJobs = grouped[companyName];
-        const companyJobsHtml = companyJobs
-          .map((job) => {
-            return `
+    const jobListingsHtml = sortedJobs
+      .map((job, idx) => {
+        return `
           <div style="background-color: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
             <div style="margin-bottom: 12px;">
               <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #0f172a; font-family: 'Inter', sans-serif;">
                 ${job.title}
               </h3>
+              <p style="font-size: 14px; font-weight: 600; color: #4f46e5; margin: 0;">
+                🏢 ${job.companyName}
+              </p>
             </div>
 
             <div style="margin-bottom: 16px;">
@@ -177,7 +167,7 @@ export class EmailNotificationProvider implements NotificationProvider {
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 14px; margin-top: 14px;">
               <span style="font-size: 12px; color: #94a3b8; font-weight: 500;">
-                ID: ${job.jobId} • Posted: ${job.datePosted || 'Recently'}
+                📅 ${job.datePosted || 'Recently'} • ID: ${job.jobId}
               </span>
               <a href="${job.applyUrl}" target="_blank" style="background-color: #4f46e5; color: #ffffff; font-weight: 600; font-size: 13px; text-decoration: none; padding: 8px 16px; border-radius: 8px; display: inline-block; font-family: 'Inter', sans-serif;">
                 Apply Job →
@@ -185,17 +175,6 @@ export class EmailNotificationProvider implements NotificationProvider {
             </div>
           </div>
         `;
-          })
-          .join('');
-
-        return `
-        <div style="margin-bottom: 30px;">
-          <h2 style="font-size: 20px; font-weight: 800; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 15px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em;">
-            ${companyName}
-          </h2>
-          ${companyJobsHtml}
-        </div>
-      `;
       })
       .join('');
 
@@ -220,7 +199,7 @@ export class EmailNotificationProvider implements NotificationProvider {
                       Recent Graduate & Entry Level Job Digest
                     </h1>
                     <p style="color: #c7d2fe; font-size: 14px; margin: 0; font-weight: 500;">
-                      ${jobs.length} new position${jobs.length > 1 ? 's' : ''} detected on ${new Date(digest.runTimestamp).toLocaleDateString()}
+                      ${sortedJobs.length} new position${sortedJobs.length > 1 ? 's' : ''} detected on ${new Date(digest.runTimestamp).toLocaleDateString()}
                     </p>
                   </td>
                 </tr>
@@ -228,7 +207,7 @@ export class EmailNotificationProvider implements NotificationProvider {
                 <!-- Summary Bar -->
                 <tr>
                   <td style="background-color: #4338ca; padding: 12px 24px; text-align: center; color: #ffffff; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">
-                    Target: Entry Level / New Grad (0–2 Yrs Exp) • India & Remote Only
+                    Target: Entry Level / New Grad (0–2 Yrs Exp) • India & Remote Only • Sorted by Most Recent
                   </td>
                 </tr>
 
@@ -260,43 +239,28 @@ export class EmailNotificationProvider implements NotificationProvider {
   }
 
   private buildPlainText(digest: JobDigest, jobs: typeof digest.jobs): string {
-    const header = `=== RECENT GRADUATE & ENTRY LEVEL JOB DIGEST ===\nRun Timestamp: ${new Date(digest.runTimestamp).toLocaleString()}\nTarget: Entry Level / New Grad (0–2 Yrs Exp) • India & Remote Only\nTotal Matches: ${jobs.length}\n\n`;
+    // Sort jobs by datePosted (most recent first)
+    const sortedJobs = [...jobs].sort((a, b) => {
+      const dateA = a.datePosted ? new Date(a.datePosted).getTime() : 0;
+      const dateB = b.datePosted ? new Date(b.datePosted).getTime() : 0;
+      return dateB - dateA;
+    });
 
-    // Group jobs by company name
-    const grouped: Record<string, typeof jobs> = {};
-    for (const job of jobs) {
-      if (!grouped[job.companyName]) {
-        grouped[job.companyName] = [];
-      }
-      grouped[job.companyName].push(job);
-    }
+    const header = `=== RECENT GRADUATE & ENTRY LEVEL JOB DIGEST ===\nRun Timestamp: ${new Date(digest.runTimestamp).toLocaleString()}\nTarget: Entry Level / New Grad (0–2 Yrs Exp) • India & Remote Only\nSorted by: Most Recent First\nTotal Matches: ${sortedJobs.length}\n\n`;
 
-    const companyNames: string[] = [];
-    for (const job of jobs) {
-      if (!companyNames.includes(job.companyName)) {
-        companyNames.push(job.companyName);
-      }
-    }
-
-    const body = companyNames
-      .map((companyName) => {
-        const companyJobs = grouped[companyName];
-        const jobsStr = companyJobs
-          .map((job, idx) => {
-            return `  ${idx + 1}. ${job.title}
-     Location: ${job.location}
-     Experience: ${job.experience || 'Recent Graduate / Entry Level'}
-     Type: ${job.employmentType || 'Full-time'}
-     Remote: ${job.isRemote ? 'Yes' : 'No'}
-     Posted: ${job.datePosted || 'Recently'}
-     Apply Link: ${job.applyUrl}
-     Job ID: ${job.jobId}`;
-          })
-          .join('\n\n');
-
-        return `[${companyName.toUpperCase()}]\n${'-'.repeat(companyName.length + 2)}\n${jobsStr}`;
+    const body = sortedJobs
+      .map((job, idx) => {
+        return `${idx + 1}. ${job.title}
+   Company: ${job.companyName}
+   Location: ${job.location}
+   Experience: ${job.experience || 'Recent Graduate / Entry Level'}
+   Type: ${job.employmentType || 'Full-time'}
+   Remote: ${job.isRemote ? 'Yes' : 'No'}
+   Posted: ${job.datePosted || 'Recently'}
+   Apply Link: ${job.applyUrl}
+   Job ID: ${job.jobId}`;
       })
-      .join('\n\n=============================================\n\n');
+      .join('\n\n---------------------------------------------\n\n');
 
     const footer = `\n\nJob Monitor Platform - Serverless Automation Pipeline`;
 

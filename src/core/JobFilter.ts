@@ -16,6 +16,7 @@ export interface FilterConfig {
   newGrad: boolean;
   fullTime: boolean;
   contract: boolean;
+  targetRoleKeywords?: string[];
 }
 
 export class JobFilter {
@@ -176,6 +177,18 @@ export class JobFilter {
     if (filters.experienceMaxYears !== undefined && filters.experienceMaxYears !== null) {
       const yrs = this.parseExperienceYears(job);
       if (yrs !== null && yrs > filters.experienceMaxYears) return false;
+    }
+
+    // 5. Target Role Keywords Check (SDE, AI Engineer, Analyst, etc.)
+    if (filters.targetRoleKeywords && filters.targetRoleKeywords.length > 0) {
+      const matchesRole = filters.targetRoleKeywords.some((keyword) => {
+        const kwLower = keyword.toLowerCase();
+        // Match against title (primary) and description (secondary for context)
+        return titleLower.includes(kwLower) || descLower.includes(kwLower);
+      });
+      if (!matchesRole) {
+        return false;
+      }
     }
 
     return true;

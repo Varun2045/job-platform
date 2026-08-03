@@ -92,14 +92,14 @@ describe('EmailNotificationProvider Unit Tests', () => {
     expect(sendArgs.to).toBe('recipient@test.com');
     expect(sendArgs.subject).toContain('NEW GRAD & ENTRY LEVEL JOBS ALERT');
 
-    // Verify HTML content grouping
+    // Verify HTML content includes company names
     const html = sendArgs.html;
     expect(html).toContain('Google');
     expect(html).toContain('Microsoft');
 
-    // Verify plain text version formatting
+    // Verify plain text version formatting (flat list with Company: field)
     const text = sendArgs.text;
-    expect(text).toContain('GOOGLE');
-    expect(text).toContain('MICROSOFT');
+    expect(text).toContain('Company: Google');
+    expect(text).toContain('Company: Microsoft');
   });
 });

@@ -308,7 +308,7 @@ export async function runOrchestrator(
                 }
               }
 
-              // G. Score new enriched jobs against company's target resume profiles
+              // G. Filter out non-tech roles and keep all remaining new jobs
               const verifiedNewJobs: Job[] = [];
               for (const enrichedJob of enrichedNewJobs) {
                 const excludeKeywords = [
@@ -338,81 +338,27 @@ export async function runOrchestrator(
                 });
 
                 if (shouldExclude) {
-                  Logger.info(`[${company.name}] Skipping matching for blacklisted role: ${enrichedJob.title}`);
+                  Logger.info(`[${company.name}] Skipping blacklisted role: ${enrichedJob.title}`);
                   continue;
                 }
 
-                let highestScore = 0;
-                const profiles = company.resume_profiles.length > 0 ? company.resume_profiles : ['backend'];
-                for (const profile of profiles) {
-                  try {
-                    let score = await storage.getCachedScore(enrichedJob.jobHash, profile, ResumeMatcher.VERSION);
-                    if (score === null) {
-                      score = ResumeMatcher.match(enrichedJob, profile);
-                      if (!options.dryRun) {
-                        await storage.saveCachedScore(enrichedJob.jobHash, profile, score, ResumeMatcher.VERSION);
-                      }
-                    }
-                    if (score > highestScore) {
-                      highestScore = score;
-                    }
-                  } catch (matchErr) {
-                    Logger.error(`Resume matching failed for profile: ${profile}`, matchErr as any);
-                  }
-                }
-
-                const isEarlyCareerRole = /intern|internship|co-op|coop|graduate|new grad|recent grad|entry level|entry-level|fresher|junior|early career|associate|sde i\b|sde1\b|swe i\b|swe1\b|trainee|apprentice/i.test(
-                  `${enrichedJob.title} ${enrichedJob.experienceLevel || ''} ${enrichedJob.description}`
+                allMatchesToNotify.push({ job: enrichedJob, score: 100 });
+                verifiedNewJobs.push(enrichedJob);
+                Logger.info(
+                  `[${company.name}] New job found: [${enrichedJob.title}]`,
                 );
-
-                if (isEarlyCareerRole || highestScore >= config.matchThreshold || config.matchThreshold === 0) {
-                  // Attach Match Explanation
-                  enrichedJob.explanation = ResumeMatcher.explain(enrichedJob, profiles[0]);
-                  allMatchesToNotify.push({ job: enrichedJob, score: Math.max(highestScore, 85) });
-                  verifiedNewJobs.push(enrichedJob);
-                  Logger.info(
-                    `[${company.name}] Job matched threshold! [${enrichedJob.title}] Score: ${Math.max(highestScore, 85)}%`,
-                  );
-                }
               }
 
-              // G.2 Score modified/updated jobs
+              // G.2 Keep all modified/updated jobs
               const enrichedUpdatedJobs: Job[] = [];
               for (const mod of delta.modified) {
                 const enrichedJob = mod.current;
-                let highestScore = 0;
-                const profiles = company.resume_profiles.length > 0 ? company.resume_profiles : ['backend'];
-                for (const profile of profiles) {
-                  try {
-                    let score = await storage.getCachedScore(enrichedJob.jobHash, profile, ResumeMatcher.VERSION);
-                    if (score === null) {
-                      score = ResumeMatcher.match(enrichedJob, profile);
-                      if (!options.dryRun) {
-                        await storage.saveCachedScore(enrichedJob.jobHash, profile, score, ResumeMatcher.VERSION);
-                      }
-                    }
-                    if (score > highestScore) {
-                      highestScore = score;
-                    }
-                  } catch (matchErr) {
-                    Logger.error(`Resume matching failed for profile: ${profile}`, matchErr as any);
-                  }
-                }
-
-                const isEarlyCareerRole = /intern|internship|co-op|coop|graduate|new grad|recent grad|entry level|entry-level|fresher|junior|early career|associate|sde i\b|sde1\b|swe i\b|swe1\b|trainee|apprentice/i.test(
-                  `${enrichedJob.title} ${enrichedJob.experienceLevel || ''} ${enrichedJob.description}`
+                (enrichedJob as any).changes = mod.changes;
+                allUpdatedMatchesToNotify.push({ job: enrichedJob, score: 100 });
+                enrichedUpdatedJobs.push(enrichedJob);
+                Logger.info(
+                  `[${company.name}] Updated job found: [${enrichedJob.title}]`,
                 );
-
-                if (isEarlyCareerRole || highestScore >= config.matchThreshold || config.matchThreshold === 0) {
-                  // Attach Match Explanation and changes list
-                  enrichedJob.explanation = ResumeMatcher.explain(enrichedJob, profiles[0]);
-                  (enrichedJob as any).changes = mod.changes;
-                  allUpdatedMatchesToNotify.push({ job: enrichedJob, score: Math.max(highestScore, 85) });
-                  enrichedUpdatedJobs.push(enrichedJob);
-                  Logger.info(
-                    `[${company.name}] Updated job matched threshold! [${enrichedJob.title}] Score: ${Math.max(highestScore, 85)}%`,
-                  );
-                }
               }
 
               // H. Save updated company state
