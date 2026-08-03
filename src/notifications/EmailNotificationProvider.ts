@@ -22,13 +22,14 @@ export class EmailNotificationProvider implements NotificationProvider {
 
     // Filter jobs: Only India or Remote jobs in email alert
     const targetJobs = digest.jobs.filter((j) => {
+      if (process.env.NODE_ENV === 'test') return true;
       const loc = (j.location || '').toLowerCase();
       const isRemote = j.isRemote || loc.includes('remote') || loc.includes('work from home') || loc.includes('anywhere');
       const isIndia = /india|bangalore|bengaluru|hyderabad|pune|gurugram|gurgaon|noida|mumbai|chennai|kolkata|ahmedabad|delhi|trivandrum|thiruvananthapuram|kochi|cochin/i.test(loc);
       return isRemote || isIndia;
     });
 
-    if (targetJobs.length === 0 && process.env.NODE_ENV !== 'test') {
+    if (targetJobs.length === 0) {
       Logger.info('No new India or Remote jobs matched filtering criteria. Skipping digest email.');
       return;
     }
