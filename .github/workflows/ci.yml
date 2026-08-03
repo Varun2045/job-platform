@@ -25,17 +25,20 @@ jobs:
       - name: Install Frontend Dependencies
         run: npm --prefix frontend install --include=dev
 
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium
+
       - name: ESLint Code Quality Check
         run: npm run lint
 
       - name: Backend TypeScript Check
         run: npx tsc --noEmit
 
-      - name: Frontend TypeScript Check
-        run: npx tsc --noEmit -p frontend/tsconfig.app.json
+      - name: Frontend Build & Type Check
+        run: npm --prefix frontend run build
 
       - name: Run Test Suite
         run: npm test
 
-      - name: Production Build
+      - name: Full Application Production Build
         run: npm run build
