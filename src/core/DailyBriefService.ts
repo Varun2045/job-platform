@@ -2,6 +2,7 @@ import { StorageProvider } from '../storage/StorageProvider.js';
 import { Logger } from './Logger.js';
 import { CareerAgent } from './CareerAgent.js';
 import { SkillGapEngine } from './SkillGapEngine.js';
+import { ResumeMatcher } from './ResumeMatcher.js';
 
 export interface DailyBrief {
   userId: string;
@@ -38,13 +39,26 @@ export class DailyBriefService {
         }
       }).length;
 
-      // 2. Fetch best opportunities (simulated query scores)
-      const bestOpportunities = allJobs.slice(0, 3).map((j) => ({
-        title: j.title,
-        company: j.company,
-        score: 85 + Math.round(Math.random() * 10), // mock matching score
-        url: j.url,
-      }));
+      // 2. Fetch best opportunities using deterministic ResumeMatcher scoring
+      const profiles = (await storage.getResumeProfiles?.(userId)) || [];
+      const primaryProfile = (profiles[0] as any)?.name || 'default';
+
+      const scoredOpportunities = allJobs.map((j) => {
+        let score = 80;
+        try {
+          score = ResumeMatcher.match(j, primaryProfile);
+        } catch {
+          score = 80;
+        }
+        return {
+          title: j.title,
+          company: j.company,
+          score,
+          url: j.url,
+        };
+      });
+
+      const bestOpportunities = scoredOpportunities.sort((a, b) => b.score - a.score).slice(0, 3);
 
       // 3. Applications requiring follow-up
       const applicationsToFollowUp: any[] = [];
@@ -71,10 +85,10 @@ export class DailyBriefService {
         }));
 
       // 5. Learning recommendations
-      const learningRecommendations = gaps.roadmapTasks.slice(0, 2).map((t) => t.title);
+      const learningRecommendations = gaps.roadmapTasks.slice(0, 2).map((t: any) => t.title);
 
       // 6. Career insights
-      const careerInsights = recs.slice(0, 2).map((r) => r.description);
+      const careerInsights = recs.slice(0, 2).map((r: any) => r.description);
 
       const brief: DailyBrief = {
         userId,
