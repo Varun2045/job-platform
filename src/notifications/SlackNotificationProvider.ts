@@ -36,6 +36,11 @@ export class SlackNotificationProvider implements NotificationProvider {
     }
   }
 
+  private escapeSlack(str: string): string {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   /**
    * Builds the formatted Slack Block Kit JSON message payload.
    */
@@ -60,11 +65,15 @@ export class SlackNotificationProvider implements NotificationProvider {
     ];
 
     for (const job of digest.jobs.slice(0, 10)) {
+      const title = this.escapeSlack(job.title);
+      const company = this.escapeSlack(job.companyName);
+      const location = this.escapeSlack(job.location);
+
       blocks.push({
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*<${job.applyUrl}|${job.title}>* at *${job.companyName}*\n📍 Location: ${job.location} | 🎯 Match Score: *${job.matchScore}%*`,
+          text: `*<${job.applyUrl}|${title}>* at *${company}*\n📍 Location: ${location} | 🎯 Match Score: *${job.matchScore}%*`,
         },
       });
     }

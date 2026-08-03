@@ -30,17 +30,27 @@ export class TelegramNotificationProvider implements NotificationProvider {
     return /^-?[0-9]{5,}$/.test(chatId.trim());
   }
 
+  private escapeHtml(str: string): string {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   /**
    * Builds formatted Telegram Bot API text message.
    */
   public buildTelegramMessage(digest: JobDigest): string {
-    let message = `🚀 *Job Alert Digest*\n\n`;
-    message += `📊 *Jobs Found:* ${digest.totalJobsFound} | *New:* ${digest.totalNewJobs}\n\n`;
+    let message = `🚀 <b>Job Alert Digest</b>\n\n`;
+    message += `📊 <b>Jobs Found:</b> ${digest.totalJobsFound} | <b>New:</b> ${digest.totalNewJobs}\n\n`;
 
     for (const job of digest.jobs.slice(0, 10)) {
-      message += `• *${job.title}* at *${job.companyName}*\n`;
-      message += `  📍 ${job.location} | Match: *${job.matchScore}%*\n`;
-      message += `  🔗 [Apply Now](${job.applyUrl})\n\n`;
+      const title = this.escapeHtml(job.title);
+      const company = this.escapeHtml(job.companyName);
+      const location = this.escapeHtml(job.location);
+      const url = this.escapeHtml(job.applyUrl);
+
+      message += `• <b>${title}</b> at <b>${company}</b>\n`;
+      message += `  📍 ${location} | Match: <b>${job.matchScore}%</b>\n`;
+      message += `  🔗 <a href="${url}">Apply Now</a>\n\n`;
     }
 
     return message;
@@ -70,7 +80,7 @@ export class TelegramNotificationProvider implements NotificationProvider {
     const payload = {
       chat_id: this.chatId,
       text,
-      parse_mode: 'Markdown',
+      parse_mode: 'HTML',
       disable_web_page_preview: false,
     };
 
