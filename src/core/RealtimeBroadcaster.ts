@@ -21,15 +21,27 @@ export class RealtimeBroadcaster {
       Logger.info(`[REALTIME BROADCAST] Channel=${channelName} Event=${eventName} Payload=${JSON.stringify(payload)}`);
       if (this.client) {
         const channel = this.client.channel(channelName);
-        await channel.subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.send({
-              type: 'broadcast',
-              event: eventName,
-              payload,
-            });
+        await new Promise<void>((resolve) => {
+          const timeout = setTimeout(async () => {
             await channel.unsubscribe();
-          }
+            resolve();
+          }, 5000);
+
+          channel.subscribe(async (status) => {
+            clearTimeout(timeout);
+            try {
+              if (status === 'SUBSCRIBED') {
+                await channel.send({
+                  type: 'broadcast',
+                  event: eventName,
+                  payload,
+                });
+              }
+            } finally {
+              await channel.unsubscribe();
+              resolve();
+            }
+          });
         });
       }
     } catch (e: any) {

@@ -26,7 +26,7 @@ RUN npm run build
 FROM mcr.microsoft.com/playwright:v1.44.1-jammy AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=7860
+ENV PORT=3001
 
 # Copy built outputs and dependencies from builder
 COPY package*.json tsconfig.json ./
@@ -40,5 +40,5 @@ COPY resumes ./resumes
 # Create storage and logs folders
 RUN mkdir -p storage logs && chmod -R 755 storage logs
 
-EXPOSE 7860
+EXPOSE 3001
 CMD ["node", "dist/core/server.js"]
