@@ -673,7 +673,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
           }
         }).length,
         newJobs: allJobs.length,
-        matches: allJobs.filter((j) => {
+        matches: allJobs.filter((_j) => {
           return false;
         }).length,
         applications: applications.length,

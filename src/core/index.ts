@@ -9,7 +9,6 @@ import { TaskQueue } from './Queue.js';
 import { ScraperRegistry } from '../companies/ScraperRegistry.js';
 import { JobNormalizer } from './JobNormalizer.js';
 import { ComparisonEngine } from './ComparisonEngine.js';
-import { ResumeMatcher } from './ResumeMatcher.js';
 import { EmailNotificationProvider } from '../notifications/EmailNotificationProvider.js';
 import { MetricsExporter, GlobalMetrics } from './MetricsExporter.js';
 import { DashboardGenerator } from './DashboardGenerator.js';

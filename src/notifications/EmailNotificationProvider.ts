@@ -249,8 +249,8 @@ export class EmailNotificationProvider implements NotificationProvider {
     const header = `=== RECENT GRADUATE & ENTRY LEVEL JOB DIGEST ===\nRun Timestamp: ${new Date(digest.runTimestamp).toLocaleString()}\nTarget: Entry Level / New Grad (0–2 Yrs Exp) • India & Remote Only\nSorted by: Most Recent First\nTotal Matches: ${sortedJobs.length}\n\n`;
 
     const body = sortedJobs
-      .map((job, idx) => {
-        return `${idx + 1}. ${job.title}
+      .map((job, _idx) => {
+        return `${_idx + 1}. ${job.title}
    Company: ${job.companyName}
    Location: ${job.location}
    Experience: ${job.experience || 'Recent Graduate / Entry Level'}
