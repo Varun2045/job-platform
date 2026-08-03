@@ -134,7 +134,7 @@ async function main() {
       console.log(`\nFound ${jobs.length} stored jobs for ${companyConfig.name}. Running score evaluation:`);
       console.log('-'.repeat(70));
 
-      const profiles = companyConfig.resume_profiles.length > 0 ? companyConfig.resume_profiles : ['backend'];
+      const profiles = companyConfig.resume_profiles.length > 0 ? companyConfig.resume_profiles : [];
 
       jobs.forEach((job) => {
         console.log(`\nJob: ${job.title} | Location: ${job.location}`);
@@ -220,8 +220,8 @@ async function main() {
       for (const comp of companies) {
         const jobs = await storage.getCompanyJobs(comp.id);
         const scored = jobs.map((j) => {
-          const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : ['backend'];
-          const bestScore = Math.max(...profiles.map((p) => ResumeMatcher.match(j, p)));
+          const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : [];
+          const bestScore = profiles.length > 0 ? Math.max(...profiles.map((p) => ResumeMatcher.match(j, p))) : 0;
           return { job: j, score: bestScore };
         });
         allScoredJobs.push(...scored);

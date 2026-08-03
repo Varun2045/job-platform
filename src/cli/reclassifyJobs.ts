@@ -41,7 +41,7 @@ async function run() {
       enabled: true,
       priority: 5,
       interval_minutes: 60,
-      resume_profiles: ['backend'],
+      resume_profiles: [],
       avg_response_time_ms: 100,
       total_scrapes: 1,
       total_failures: 0,

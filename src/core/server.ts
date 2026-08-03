@@ -674,9 +674,7 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
         }).length,
         newJobs: allJobs.length,
         matches: allJobs.filter((j) => {
-          const profiles = ['backend'];
-          const matchScore = ResumeMatcher.match(j, profiles[0]);
-          return matchScore >= config.matchThreshold;
+          return false;
         }).length,
         applications: applications.length,
         interviews: applications.filter((a) => a.status === 'Interview').length,
@@ -804,10 +802,10 @@ app.get('/api/v1/jobs/facets', authMiddleware, async (req, res) => {
         const compKey = (j.company || '').toLowerCase();
         if (disabledIds.has(compKey)) continue;
 
-        const comp = enabledCompsMap.get(compKey) || { resume_profiles: ['backend'], priority: 2 };
+        const comp = enabledCompsMap.get(compKey) || { resume_profiles: [], priority: 2 };
         const rawProfiles = comp.resume_profiles || [];
-        const profiles = rawProfiles.length > 0 ? rawProfiles : ['backend'];
-        const bestScore = Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p)));
+        const profiles = rawProfiles.length > 0 ? rawProfiles : [];
+        const bestScore = profiles.length > 0 ? Math.max(...profiles.map((p: string) => ResumeMatcher.match(j, p))) : 0;
         const recommendation = RecommendationEngine.calculateOpportunityScore(j, bestScore, comp, settings);
 
         allActiveScoredJobs.push({
