@@ -132,7 +132,7 @@ export class EmailNotificationProvider implements NotificationProvider {
     });
 
     const jobListingsHtml = sortedJobs
-      .map((job, idx) => {
+      .map((job, _idx) => {
         return `
           <div style="background-color: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
             <div style="margin-bottom: 12px;">
