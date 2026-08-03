@@ -662,16 +662,17 @@ export function createApiV1Router(storage: StorageProvider): Router {
       const healthMap: Record<string, 'Healthy' | 'Warning' | 'Failing'> = {};
       for (const c of companies) {
         const failures = c.consecutive_failures ?? 0;
+        const isDegraded = failures > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)));
         let h: 'Healthy' | 'Warning' | 'Failing' = 'Healthy';
-        if (!c.enabled || failures >= 3) {
+        if (c.enabled === false || failures >= 3) {
           h = 'Failing';
-        } else if (failures > 0) {
+        } else if (isDegraded) {
           h = 'Warning';
         }
         healthMap[c.name.toLowerCase()] = h;
         healthMap[c.id.toLowerCase()] = h;
       }
-      const overview = atsRegistryService.getRegistryOverview(healthMap);
+      const overview = atsRegistryService.getRegistryOverview(healthMap, companies);
       return sendSuccess(res, overview);
     } catch (err: any) {
       Logger.error('API Error GET /ats/registry', err);

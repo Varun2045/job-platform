@@ -404,7 +404,10 @@ export class AtsRegistryService {
     return { success: true, data: foundItem };
   }
 
-  public getRegistryOverview(healthMap?: Record<string, CompanyHealthType>): AtsRegistryOverview {
+  public getRegistryOverview(
+    healthMap?: Record<string, CompanyHealthType>,
+    dbCompanies?: Array<any>,
+  ): AtsRegistryOverview {
     // Re-run migration to ensure full consistency
     this.migrateRegistryUrls();
 
@@ -433,8 +436,13 @@ export class AtsRegistryService {
       })),
     };
 
-    // 2. Company Career Portals Category Group (50 Playwright Extractor Plugins)
+    // Track existing companies already in native ATS engines
+    const existingCompanyNames = new Set<string>();
+    nativeGroup.parsers.forEach((p) => p.companies.forEach((name) => existingCompanyNames.add(name.toLowerCase())));
+
+    // 2. Company Career Portals Category Group (Playwright Extractor Plugins + Registered Database Companies)
     const companyPluginParsers: AtsSubParserInfo[] = SUPPORTED_50_COMPANIES.map((c: any) => {
+      existingCompanyNames.add(c.name.toLowerCase());
       const override = this.customUrlOverrides[c.name];
       const careerPage = override?.careerPage || c.careerPage || `https://${c.pattern}/careers`;
       const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `https://${c.pattern}/careers#all-jobs`;
@@ -462,6 +470,41 @@ export class AtsRegistryService {
       };
     });
 
+    // Dynamically include all remaining companies from the database
+    if (dbCompanies && Array.isArray(dbCompanies)) {
+      for (const c of dbCompanies) {
+        const nameLower = c.name.toLowerCase();
+        if (!existingCompanyNames.has(nameLower)) {
+          existingCompanyNames.add(nameLower);
+          const override = this.customUrlOverrides[c.name];
+          const careerPage = override?.careerPage || c.careerPage || c.url || `https://${nameLower.replace(/\s+/g, '')}.com/careers`;
+          const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `${careerPage}#jobs`;
+          const compHealth = getHealth(c.name);
+
+          companyPluginParsers.push({
+            id: `plugin-${c.id || nameLower.replace(/\s+/g, '-')}`,
+            name: `${c.name} Careers`,
+            pattern: nameLower.replace(/\s+/g, ''),
+            averageExtractionMs: 350,
+            companies: [c.name],
+            companyDetails: [
+              {
+                name: c.name,
+                health: compHealth,
+                lastScraped: c.last_successful_scrape ? 'Recently' : 'Pending',
+                lastVerified: 'Today',
+                careerPage,
+                jobBoardUrl,
+                careerPageNeedsReview: override?.careerPageNeedsReview ?? false,
+                jobBoardNeedsReview: override?.jobBoardNeedsReview ?? false,
+                recentErrors: [],
+              },
+            ],
+          });
+        }
+      }
+    }
+
     const companyPortalsGroup: AtsCategoryGroup = {
       id: 'company-portals',
       category: 'Company Career Portals',
@@ -480,7 +523,7 @@ export class AtsRegistryService {
       totalCategories: groups.length,
       totalPlatforms: nativeGroup.totalParsers + companyPortalsGroup.totalParsers,
       totalCompanies,
-      totalCompanyPlugins: SUPPORTED_50_COMPANIES.length,
+      totalCompanyPlugins: companyPluginParsers.length,
       totalNativeParsers: nativeGroup.totalParsers,
       groups,
     };
