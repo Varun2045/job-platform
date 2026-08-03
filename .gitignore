@@ -17,6 +17,7 @@ logs/
 storage/*.json
 !storage/companies_state.json
 !storage/feature_flags.json
+storage/backups/
 
 # Generated reports, metrics, & screenshots
 storage/*.csv

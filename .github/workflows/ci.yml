@@ -18,10 +18,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
 
-      - name: Install Dependencies
+      - name: Install Root Dependencies
         run: npm ci
+
+      - name: Install Frontend Dependencies
+        run: npm --prefix frontend install --include=dev
 
       - name: ESLint Code Quality Check
         run: npm run lint
