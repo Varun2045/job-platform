@@ -30,18 +30,20 @@ export class DuplicateDetector {
     if (job1.url === job2.url) return true;
 
     // 1. Title Similarity (Threshold: 0.75)
-    const titleSim = this.computeJaccard(job1.title, job2.title);
+    const title1 = job1.title || '';
+    const title2 = job2.title || '';
+    const titleSim = this.computeJaccard(title1, title2);
     if (titleSim < 0.75) return false;
 
     // 2. Location Similarity
-    const loc1 = job1.location.toLowerCase();
-    const loc2 = job2.location.toLowerCase();
+    const loc1 = (job1.location || '').toLowerCase();
+    const loc2 = (job2.location || '').toLowerCase();
     const locContains = loc1.includes(loc2) || loc2.includes(loc1);
-    const locSim = this.computeJaccard(job1.location, job2.location);
+    const locSim = this.computeJaccard(job1.location || '', job2.location || '');
     if (!locContains && locSim < 0.5) return false;
 
     // 3. Description Similarity (Threshold: 0.8)
-    const descSim = this.computeJaccard(job1.description, job2.description);
+    const descSim = this.computeJaccard(job1.description || '', job2.description || '');
     if (descSim < 0.8) return false;
 
     return true;

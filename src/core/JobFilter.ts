@@ -45,9 +45,9 @@ export class JobFilter {
 
     // 1. Workplace Type Check
     if (filters.workplaceTypes && filters.workplaceTypes.length > 0) {
-      const locationLower = job.location.toLowerCase();
-      const descLower = job.description.toLowerCase();
-      const titleLower = job.title.toLowerCase();
+      const locationLower = (job.location || '').toLowerCase();
+      const descLower = (job.description || '').toLowerCase();
+      const titleLower = (job.title || '').toLowerCase();
 
       let jobWorkplace = 'onsite';
       if (
@@ -68,7 +68,7 @@ export class JobFilter {
     }
 
     // 2. City, State, Country Check
-    const locationLower = job.location.toLowerCase();
+    const locationLower = (job.location || '').toLowerCase();
     const countryLower = job.country ? job.country.toLowerCase() : '';
 
     if (filters.cities && filters.cities.length > 0) {
@@ -89,8 +89,8 @@ export class JobFilter {
     }
 
     // 3. Employment Category check
-    const titleLower = job.title.toLowerCase();
-    const descLower = job.description.toLowerCase();
+    const titleLower = (job.title || '').toLowerCase();
+    const descLower = (job.description || '').toLowerCase();
     const typeLower = (job.employmentType || '').toLowerCase();
 
     const isInternship =

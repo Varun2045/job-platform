@@ -25,11 +25,11 @@ export class CsvExporter {
       this.escape(j.company),
       this.escape(j.title),
       this.escape(j.location),
-      j.score.toString(),
-      j.status,
+      (j.score ?? 0).toString(),
+      this.escape(j.status),
       this.escape(j.url),
-      j.datePosted,
-      j.dateFound,
+      this.escape(j.datePosted),
+      this.escape(j.dateFound),
     ]);
 
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
