@@ -35,8 +35,12 @@ export class CalendarService {
    * Generates a compliant RFC-5545 ICS calendar event string.
    */
   public static generateICS(options: CalendarEventOptions): string {
-    const formatICSDate = (date: Date): string => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const formatICSDate = (date: Date | string | number): string => {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) {
+        return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      }
+      return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
 
     const uid = options.id || Math.random().toString(36).substring(2, 15);
