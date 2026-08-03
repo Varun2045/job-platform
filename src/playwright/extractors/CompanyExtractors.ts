@@ -50,6 +50,118 @@ export class GenericCompanyExtractor implements CompanyExtractor {
 
 // Dedicated Company Portal Extractor Definitions (Companies using custom portals rather than Native ATS)
 export const SUPPORTED_50_COMPANIES = [
+  { id: 'goodspace-ai', name: 'GoodSpace AI', pattern: 'goodspace.ai', careerPage: 'https://goodspace.ai/careers', jobBoardUrl: 'https://goodspace.ai/careers' },
+
+  { id: 'optum', name: 'Optum', pattern: 'optum.com', careerPage: 'https://optum.com/careers', jobBoardUrl: 'https://optum.com/careers' },
+
+  { id: 'adda247', name: 'Adda247', pattern: 'adda247.com', careerPage: 'https://adda247.com/careers', jobBoardUrl: 'https://adda247.com/careers' },
+
+  { id: 'nxtwave', name: 'NxtWave', pattern: 'nxtwave.tech', careerPage: 'https://nxtwave.tech/careers', jobBoardUrl: 'https://nxtwave.tech/careers' },
+
+  { id: 'testbook', name: 'Testbook', pattern: 'testbook.com', careerPage: 'https://testbook.com/careers', jobBoardUrl: 'https://testbook.com/careers' },
+
+  { id: 'classplus', name: 'Classplus', pattern: 'classplus.co', careerPage: 'https://classplus.co/careers', jobBoardUrl: 'https://classplus.co/careers' },
+
+  { id: 'square-yards', name: 'Square Yards', pattern: 'squareyards.com', careerPage: 'https://squareyards.com/careers', jobBoardUrl: 'https://squareyards.com/careers' },
+
+  { id: 'stanza-living', name: 'Stanza Living', pattern: 'stanzaliving.com', careerPage: 'https://stanzaliving.com/careers', jobBoardUrl: 'https://stanzaliving.com/careers' },
+
+  { id: 'nobroker', name: 'NoBroker', pattern: 'nobroker.in', careerPage: 'https://nobroker.in/careers', jobBoardUrl: 'https://nobroker.in/careers' },
+
+  { id: 'nazara-technologies', name: 'Nazara Technologies', pattern: 'nazara.com', careerPage: 'https://nazara.com/careers', jobBoardUrl: 'https://nazara.com/careers' },
+
+  { id: 'winzo', name: 'WinZo', pattern: 'winzogames.com', careerPage: 'https://winzogames.com/careers', jobBoardUrl: 'https://winzogames.com/careers' },
+
+  { id: 'mpl', name: 'MPL', pattern: 'mpl.live', careerPage: 'https://mpl.live/careers', jobBoardUrl: 'https://mpl.live/careers' },
+
+  { id: 'jai-kisan', name: 'Jai Kisan', pattern: 'jaikisan.co', careerPage: 'https://jaikisan.co/careers', jobBoardUrl: 'https://jaikisan.co/careers' },
+
+  { id: 'waycool', name: 'Waycool', pattern: 'waycool.in', careerPage: 'https://waycool.in/careers', jobBoardUrl: 'https://waycool.in/careers' },
+
+  { id: 'dehaat', name: 'DeHaat', pattern: 'dehaat.com', careerPage: 'https://dehaat.com/careers', jobBoardUrl: 'https://dehaat.com/careers' },
+
+  { id: 'ninjacart', name: 'Ninjacart', pattern: 'ninjacart.com', careerPage: 'https://ninjacart.com/careers', jobBoardUrl: 'https://ninjacart.com/careers' },
+
+  { id: 'bewakoof', name: 'Bewakoof', pattern: 'bewakoof.com', careerPage: 'https://bewakoof.com/careers', jobBoardUrl: 'https://bewakoof.com/careers' },
+
+  { id: 'mensa-brands', name: 'Mensa Brands', pattern: 'mensabrands.com', careerPage: 'https://mensabrands.com/careers', jobBoardUrl: 'https://mensabrands.com/careers' },
+
+  { id: 'sugar-cosmetics', name: 'Sugar Cosmetics', pattern: 'sugarcosmetics.com', careerPage: 'https://sugarcosmetics.com/careers', jobBoardUrl: 'https://sugarcosmetics.com/careers' },
+
+  { id: 'purplle', name: 'Purplle', pattern: 'purplle.com', careerPage: 'https://purplle.com/careers', jobBoardUrl: 'https://purplle.com/careers' },
+
+  { id: 'country-delight', name: 'Country Delight', pattern: 'countrydelight.in', careerPage: 'https://countrydelight.in/careers', jobBoardUrl: 'https://countrydelight.in/careers' },
+
+  { id: 'licious', name: 'Licious', pattern: 'licious.in', careerPage: 'https://licious.in/careers', jobBoardUrl: 'https://licious.in/careers' },
+
+  { id: 'increff', name: 'Increff', pattern: 'increff.com', careerPage: 'https://increff.com/careers', jobBoardUrl: 'https://increff.com/careers' },
+
+  { id: 'locus', name: 'Locus', pattern: 'locus.sh', careerPage: 'https://locus.sh/careers', jobBoardUrl: 'https://locus.sh/careers' },
+
+  { id: 'porter', name: 'Porter', pattern: 'porter.in', careerPage: 'https://porter.in/careers', jobBoardUrl: 'https://porter.in/careers' },
+
+  { id: 'elasticrun', name: 'Elasticrun', pattern: 'elasticrun.com', careerPage: 'https://elasticrun.com/careers', jobBoardUrl: 'https://elasticrun.com/careers' },
+
+  { id: 'shadowfax', name: 'Shadowfax', pattern: 'shadowfax.in', careerPage: 'https://shadowfax.in/careers', jobBoardUrl: 'https://shadowfax.in/careers' },
+
+  { id: 'shiprocket', name: 'Shiprocket', pattern: 'shiprocket.in', careerPage: 'https://shiprocket.in/careers', jobBoardUrl: 'https://shiprocket.in/careers' },
+
+  { id: 'eka-care', name: 'Eka Care', pattern: 'eka.care', careerPage: 'https://eka.care/careers', jobBoardUrl: 'https://eka.care/careers' },
+
+  { id: 'healthplix', name: 'Healthplix', pattern: 'healthplix.com', careerPage: 'https://healthplix.com/careers', jobBoardUrl: 'https://healthplix.com/careers' },
+
+  { id: 'medibuddy', name: 'MediBuddy', pattern: 'medibuddy.in', careerPage: 'https://medibuddy.in/careers', jobBoardUrl: 'https://medibuddy.in/careers' },
+
+  { id: 'pristyn-care', name: 'Pristyn Care', pattern: 'pristyncare.com', careerPage: 'https://pristyncare.com/careers', jobBoardUrl: 'https://pristyncare.com/careers' },
+
+  { id: 'innovaccer', name: 'Innovaccer', pattern: 'innovaccer.com', careerPage: 'https://innovaccer.com/careers', jobBoardUrl: 'https://innovaccer.com/careers' },
+
+  { id: 'khatabook', name: 'Khatabook', pattern: 'khatabook.com', careerPage: 'https://khatabook.com/careers', jobBoardUrl: 'https://khatabook.com/careers' },
+
+  { id: 'hyperverge', name: 'HyperVerge', pattern: 'hyperverge.co', careerPage: 'https://hyperverge.co/careers', jobBoardUrl: 'https://hyperverge.co/careers' },
+
+  { id: 'rupeek', name: 'Rupeek', pattern: 'rupeek.com', careerPage: 'https://rupeek.com/careers', jobBoardUrl: 'https://rupeek.com/careers' },
+
+  { id: 'kreditbee', name: 'KreditBee', pattern: 'kreditbee.in', careerPage: 'https://kreditbee.in/careers', jobBoardUrl: 'https://kreditbee.in/careers' },
+
+  { id: 'axio', name: 'Axio', pattern: 'axio.in', careerPage: 'https://axio.in/careers', jobBoardUrl: 'https://axio.in/careers' },
+
+  { id: 'fibe', name: 'Fibe', pattern: 'fibe.in', careerPage: 'https://fibe.in/careers', jobBoardUrl: 'https://fibe.in/careers' },
+
+  { id: 'jupiter', name: 'Jupiter', pattern: 'jupiter.money', careerPage: 'https://jupiter.money/careers', jobBoardUrl: 'https://jupiter.money/careers' },
+
+  { id: 'fi-money', name: 'Fi Money', pattern: 'fi.money', careerPage: 'https://fi.money/careers', jobBoardUrl: 'https://fi.money/careers' },
+
+  { id: 'cashfree-payments', name: 'Cashfree Payments', pattern: 'cashfree.com', careerPage: 'https://cashfree.com/careers', jobBoardUrl: 'https://cashfree.com/careers' },
+
+  { id: 'signzy', name: 'Signzy', pattern: 'signzy.com', careerPage: 'https://signzy.com/careers', jobBoardUrl: 'https://signzy.com/careers' },
+
+  { id: 'perfios', name: 'Perfios', pattern: 'perfios.com', careerPage: 'https://perfios.com/careers', jobBoardUrl: 'https://perfios.com/careers' },
+
+  { id: 'yellow-ai', name: 'Yellow.ai', pattern: 'yellow.ai', careerPage: 'https://yellow.ai/careers', jobBoardUrl: 'https://yellow.ai/careers' },
+
+  { id: 'uniphore', name: 'Uniphore', pattern: 'uniphore.com', careerPage: 'https://uniphore.com/careers', jobBoardUrl: 'https://uniphore.com/careers' },
+
+  { id: 'keka', name: 'Keka', pattern: 'keka.com', careerPage: 'https://keka.com/careers', jobBoardUrl: 'https://keka.com/careers' },
+
+  { id: 'rocketlane', name: 'Rocketlane', pattern: 'rocketlane.com', careerPage: 'https://rocketlane.com/careers', jobBoardUrl: 'https://rocketlane.com/careers' },
+
+  { id: 'exotel', name: 'Exotel', pattern: 'exotel.com', careerPage: 'https://exotel.com/careers', jobBoardUrl: 'https://exotel.com/careers' },
+
+  { id: 'leadsquared', name: 'Leadsquared', pattern: 'leadsquared.com', careerPage: 'https://leadsquared.com/careers', jobBoardUrl: 'https://leadsquared.com/careers' },
+
+  { id: 'webengage', name: 'WebEngage', pattern: 'webengage.com', careerPage: 'https://webengage.com/careers', jobBoardUrl: 'https://webengage.com/careers' },
+
+  { id: 'clevertap', name: 'CleverTap', pattern: 'clevertap.com', careerPage: 'https://clevertap.com/careers', jobBoardUrl: 'https://clevertap.com/careers' },
+
+  { id: 'chargebee', name: 'Chargebee', pattern: 'chargebee.com', careerPage: 'https://chargebee.com/careers', jobBoardUrl: 'https://chargebee.com/careers' },
+
+  { id: 'decentro', name: 'Decentro', pattern: 'decentro.tech', careerPage: 'https://decentro.tech/careers', jobBoardUrl: 'https://decentro.tech/careers' },
+
+  { id: 'setu', name: 'Setu', pattern: 'setu.co', careerPage: 'https://setu.co/careers', jobBoardUrl: 'https://setu.co/careers' },
+
+  { id: 'hasura', name: 'Hasura', pattern: 'hasura.io', careerPage: 'https://hasura.io/careers', jobBoardUrl: 'https://hasura.io/careers' },
+
   // Big Tech & Custom Portals
   { id: 'google', name: 'Google', pattern: 'google.com', careerPage: 'https://careers.google.com', jobBoardUrl: 'https://careers.google.com/jobs/results' },
   { id: 'microsoft', name: 'Microsoft', pattern: 'careers.microsoft.com', careerPage: 'https://apply.careers.microsoft.com/careers?domain=microsoft.com', jobBoardUrl: 'https://apply.careers.microsoft.com/careers?domain=microsoft.com' },
@@ -69,8 +181,10 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'elastic', name: 'Elastic', pattern: 'elastic.co', careerPage: 'https://www.elastic.co/about/careers', jobBoardUrl: 'https://jobs.elastic.co/' },
   { id: 'github', name: 'GitHub', pattern: 'github.careers', careerPage: 'https://www.github.careers/careers-home', jobBoardUrl: 'https://www.github.careers/careers-home/jobs' },
 
-  // Media, FinTech & Consumer Custom Portals
-  { id: 'netflix', name: 'Netflix', pattern: 'netflix.net', careerPage: 'https://explore.jobs.netflix.net/careers', jobBoardUrl: 'https://explore.jobs.netflix.net/careers' },
+  { id: 'openai', name: 'OpenAI', pattern: 'openai.com', careerPage: 'https://openai.com/careers', jobBoardUrl: 'https://openai.com/careers' },
+  { id: 'snowflake', name: 'Snowflake', pattern: 'snowflake.com', careerPage: 'https://www.snowflake.com/careers', jobBoardUrl: 'https://www.snowflake.com/careers' },
+  { id: 'crowdstrike', name: 'CrowdStrike', pattern: 'crowdstrike.', careerPage: 'https://www.crowdstrike.com/careers', jobBoardUrl: 'https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers' },
+  { id: 'netflix', name: 'Netflix', pattern: 'netflix.', careerPage: 'https://explore.jobs.netflix.net/careers', jobBoardUrl: 'https://explore.jobs.netflix.net/careers' },
   { id: 'coinbase', name: 'Coinbase', pattern: 'coinbase.com', careerPage: 'https://www.coinbase.com/careers', jobBoardUrl: 'https://www.coinbase.com/careers/positions' },
   { id: 'linkedin', name: 'LinkedIn', pattern: 'linkedin.com', careerPage: 'https://careers.linkedin.com/', jobBoardUrl: 'https://careers.linkedin.com/' },
   { id: 'flipkart', name: 'Flipkart', pattern: 'flipkart.turbohire.co', careerPage: 'https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f', jobBoardUrl: 'https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f' },

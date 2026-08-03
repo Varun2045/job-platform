@@ -2058,5 +2058,565 @@
     "api_endpoint": "https://www.zscaler.com/careers",
     "detected_ats": "zscaler",
     "resume_profiles": []
+  },
+  {
+    "id": "hasura",
+    "name": "Hasura",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/hasura",
+    "detected_ats": "greenhouse",
+    "resume_profiles": []
+  },
+  {
+    "id": "setu",
+    "name": "Setu",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://setu.co/careers",
+    "detected_ats": "setu",
+    "resume_profiles": []
+  },
+  {
+    "id": "decentro",
+    "name": "Decentro",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://decentro.tech/careers",
+    "detected_ats": "decentro",
+    "resume_profiles": []
+  },
+  {
+    "id": "chargebee",
+    "name": "Chargebee",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.chargebee.com/careers/",
+    "detected_ats": "chargebee",
+    "resume_profiles": []
+  },
+  {
+    "id": "clevertap",
+    "name": "CleverTap",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/clevertap",
+    "detected_ats": "greenhouse",
+    "resume_profiles": []
+  },
+  {
+    "id": "webengage",
+    "name": "WebEngage",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://webengage.com/careers/",
+    "detected_ats": "webengage",
+    "resume_profiles": []
+  },
+  {
+    "id": "leadsquared",
+    "name": "Leadsquared",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.leadsquared.com/careers/",
+    "detected_ats": "leadsquared",
+    "resume_profiles": []
+  },
+  {
+    "id": "exotel",
+    "name": "Exotel",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://exotel.com/careers/",
+    "detected_ats": "exotel",
+    "resume_profiles": []
+  },
+  {
+    "id": "rocketlane",
+    "name": "Rocketlane",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/rocketlane",
+    "detected_ats": "ashby",
+    "resume_profiles": []
+  },
+  {
+    "id": "keka",
+    "name": "Keka",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.keka.com/careers",
+    "detected_ats": "keka",
+    "resume_profiles": []
+  },
+  {
+    "id": "uniphore",
+    "name": "Uniphore",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/uniphore",
+    "detected_ats": "greenhouse",
+    "resume_profiles": []
+  },
+  {
+    "id": "yellow-ai",
+    "name": "Yellow.ai",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://yellow.ai/careers/",
+    "detected_ats": "yellowai",
+    "resume_profiles": []
+  },
+  {
+    "id": "perfios",
+    "name": "Perfios",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.perfios.com/careers",
+    "detected_ats": "perfios",
+    "resume_profiles": []
+  },
+  {
+    "id": "signzy",
+    "name": "Signzy",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.signzy.com/careers/",
+    "detected_ats": "signzy",
+    "resume_profiles": []
+  },
+  {
+    "id": "cashfree-payments",
+    "name": "Cashfree Payments",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/cashfree",
+    "detected_ats": "greenhouse",
+    "resume_profiles": []
+  },
+  {
+    "id": "fi-money",
+    "name": "Fi Money",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://fi.money/careers",
+    "detected_ats": "fimoney",
+    "resume_profiles": []
+  },
+  {
+    "id": "jupiter",
+    "name": "Jupiter",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://jupiter.money/careers/",
+    "detected_ats": "jupiter",
+    "resume_profiles": []
+  },
+  {
+    "id": "fibe",
+    "name": "Fibe",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.fibe.in/careers/",
+    "detected_ats": "fibe",
+    "resume_profiles": []
+  },
+  {
+    "id": "axio",
+    "name": "Axio",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://axio.in/careers/",
+    "detected_ats": "axio",
+    "resume_profiles": []
+  },
+  {
+    "id": "kreditbee",
+    "name": "KreditBee",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.kreditbee.in/careers",
+    "detected_ats": "kreditbee",
+    "resume_profiles": []
+  },
+  {
+    "id": "rupeek",
+    "name": "Rupeek",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://rupeek.com/careers",
+    "detected_ats": "rupeek",
+    "resume_profiles": []
+  },
+  {
+    "id": "hyperverge",
+    "name": "HyperVerge",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/hyperverge",
+    "detected_ats": "lever",
+    "resume_profiles": []
+  },
+  {
+    "id": "khatabook",
+    "name": "Khatabook",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://khatabook.turbohire.co/careerpage/alljobs",
+    "detected_ats": "turbohire",
+    "resume_profiles": []
+  },
+  {
+    "id": "innovaccer",
+    "name": "Innovaccer",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://boards.greenhouse.io/innovaccer",
+    "detected_ats": "greenhouse",
+    "resume_profiles": []
+  },
+  {
+    "id": "pristyn-care",
+    "name": "Pristyn Care",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.pristyncare.com/careers/",
+    "detected_ats": "pristyncare",
+    "resume_profiles": []
+  },
+  {
+    "id": "medibuddy",
+    "name": "MediBuddy",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.medibuddy.in/careers",
+    "detected_ats": "medibuddy",
+    "resume_profiles": []
+  },
+  {
+    "id": "healthplix",
+    "name": "Healthplix",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://healthplix.com/careers/",
+    "detected_ats": "healthplix",
+    "resume_profiles": []
+  },
+  {
+    "id": "eka-care",
+    "name": "Eka Care",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.eka.care/careers",
+    "detected_ats": "ekacare",
+    "resume_profiles": []
+  },
+  {
+    "id": "shiprocket",
+    "name": "Shiprocket",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.shiprocket.in/careers/",
+    "detected_ats": "shiprocket",
+    "resume_profiles": []
+  },
+  {
+    "id": "shadowfax",
+    "name": "Shadowfax",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.shadowfax.in/careers",
+    "detected_ats": "shadowfax",
+    "resume_profiles": []
+  },
+  {
+    "id": "elasticrun",
+    "name": "Elasticrun",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.elasticrun.com/careers",
+    "detected_ats": "elasticrun",
+    "resume_profiles": []
+  },
+  {
+    "id": "porter",
+    "name": "Porter",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://porter.in/careers",
+    "detected_ats": "porter",
+    "resume_profiles": []
+  },
+  {
+    "id": "locus",
+    "name": "Locus",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://locus.sh/careers/",
+    "detected_ats": "locus",
+    "resume_profiles": []
+  },
+  {
+    "id": "increff",
+    "name": "Increff",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.increff.com/careers",
+    "detected_ats": "increff",
+    "resume_profiles": []
+  },
+  {
+    "id": "licious",
+    "name": "Licious",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.licious.in/careers",
+    "detected_ats": "licious",
+    "resume_profiles": []
+  },
+  {
+    "id": "country-delight",
+    "name": "Country Delight",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://countrydelight.in/careers",
+    "detected_ats": "countrydelight",
+    "resume_profiles": []
+  },
+  {
+    "id": "purplle",
+    "name": "Purplle",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.purplle.com/careers",
+    "detected_ats": "purplle",
+    "resume_profiles": []
+  },
+  {
+    "id": "sugar-cosmetics",
+    "name": "Sugar Cosmetics",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://sugarcosmetics.com/pages/careers",
+    "detected_ats": "sugarcosmetics",
+    "resume_profiles": []
+  },
+  {
+    "id": "mensa-brands",
+    "name": "Mensa Brands",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://mensabrands.com/careers/",
+    "detected_ats": "mensabrands",
+    "resume_profiles": []
+  },
+  {
+    "id": "bewakoof",
+    "name": "Bewakoof",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.bewakoof.com/careers",
+    "detected_ats": "bewakoof",
+    "resume_profiles": []
+  },
+  {
+    "id": "ninjacart",
+    "name": "Ninjacart",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://ninjacart.com/careers/",
+    "detected_ats": "ninjacart",
+    "resume_profiles": []
+  },
+  {
+    "id": "dehaat",
+    "name": "DeHaat",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://agrevolution.in/careers",
+    "detected_ats": "dehaat",
+    "resume_profiles": []
+  },
+  {
+    "id": "waycool",
+    "name": "Waycool",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.waycool.in/careers/",
+    "detected_ats": "waycool",
+    "resume_profiles": []
+  },
+  {
+    "id": "jai-kisan",
+    "name": "Jai Kisan",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://jaikisan.co/careers",
+    "detected_ats": "jaikisan",
+    "resume_profiles": []
+  },
+  {
+    "id": "mpl",
+    "name": "MPL",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://jobs.lever.co/mpl",
+    "detected_ats": "lever",
+    "resume_profiles": []
+  },
+  {
+    "id": "winzo",
+    "name": "WinZo",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.winzogames.com/careers",
+    "detected_ats": "winzo",
+    "resume_profiles": []
+  },
+  {
+    "id": "nazara-technologies",
+    "name": "Nazara Technologies",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.nazara.com/careers/",
+    "detected_ats": "nazara",
+    "resume_profiles": []
+  },
+  {
+    "id": "nobroker",
+    "name": "NoBroker",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.nobroker.in/careers",
+    "detected_ats": "nobroker",
+    "resume_profiles": []
+  },
+  {
+    "id": "stanza-living",
+    "name": "Stanza Living",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.stanzaliving.com/careers",
+    "detected_ats": "stanzaliving",
+    "resume_profiles": []
+  },
+  {
+    "id": "square-yards",
+    "name": "Square Yards",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.squareyards.com/careers",
+    "detected_ats": "squareyards",
+    "resume_profiles": []
+  },
+  {
+    "id": "classplus",
+    "name": "Classplus",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://jobs.ashbyhq.com/classplus",
+    "detected_ats": "ashby",
+    "resume_profiles": []
+  },
+  {
+    "id": "testbook",
+    "name": "Testbook",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://testbook.com/careers",
+    "detected_ats": "testbook",
+    "resume_profiles": []
+  },
+  {
+    "id": "nxtwave",
+    "name": "NxtWave",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://nxtwave.darwinbox.in/ms/candidatev2/main/careers/allJobs",
+    "detected_ats": "darwinbox",
+    "resume_profiles": []
+  },
+  {
+    "id": "adda247",
+    "name": "Adda247",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://www.adda247.com/careers",
+    "detected_ats": "adda247",
+    "resume_profiles": []
+  },
+  {
+    "id": "optum",
+    "name": "Optum",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://optum.wd5.myworkdayjobs.com/OptumCareers",
+    "detected_ats": "workday",
+    "resume_profiles": []
+  },
+  {
+    "id": "goodspace-ai",
+    "name": "GoodSpace AI",
+    "enabled": true,
+    "priority": 1,
+    "interval_minutes": 60,
+    "api_endpoint": "https://goodspace.ai/careers",
+    "detected_ats": "goodspace",
+    "resume_profiles": []
   }
 ]

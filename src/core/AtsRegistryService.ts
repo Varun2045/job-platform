@@ -404,9 +404,15 @@ export class AtsRegistryService {
     return { success: true, data: foundItem };
   }
 
-  public getRegistryOverview(): AtsRegistryOverview {
+  public getRegistryOverview(healthMap?: Record<string, CompanyHealthType>): AtsRegistryOverview {
     // Re-run migration to ensure full consistency
     this.migrateRegistryUrls();
+
+    const getHealth = (compName: string): CompanyHealthType => {
+      if (!healthMap) return 'Healthy';
+      const key = compName.toLowerCase();
+      return healthMap[key] || 'Healthy';
+    };
 
     // 1. Native ATS Category Group
     const nativeGroup: AtsCategoryGroup = {
@@ -420,6 +426,10 @@ export class AtsRegistryService {
       parsers: this.nativeAtsPlatforms.map((p) => ({
         ...p,
         companies: [...p.companies].sort((a, b) => a.localeCompare(b)),
+        companyDetails: p.companyDetails.map((detail) => ({
+          ...detail,
+          health: getHealth(detail.name),
+        })),
       })),
     };
 
@@ -428,6 +438,7 @@ export class AtsRegistryService {
       const override = this.customUrlOverrides[c.name];
       const careerPage = override?.careerPage || c.careerPage || `https://${c.pattern}/careers`;
       const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `https://${c.pattern}/careers#all-jobs`;
+      const compHealth = getHealth(c.name);
 
       return {
         id: `plugin-${c.id}`,
@@ -438,7 +449,7 @@ export class AtsRegistryService {
         companyDetails: [
           {
             name: c.name,
-            health: 'Healthy' as CompanyHealthType,
+            health: compHealth,
             lastScraped: 'Today',
             lastVerified: 'Today',
             careerPage,

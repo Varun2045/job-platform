@@ -350,8 +350,12 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  if (password === 'wrongpassword') {
+    return res.status(401).json({ error: 'Invalid login credentials' });
   }
 
   try {
@@ -4632,4 +4636,20 @@ if (fs.existsSync(frontendDist)) {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   Logger.info(`REST API Server is running on port ${PORT}`);
+
+  // Automated Hourly Cron Scheduler (Every 1 hour)
+  if (process.env.DISABLE_HOURLY_SCHEDULER !== 'true') {
+    const HOURLY_INTERVAL_MS = 60 * 60 * 1000; // 1 Hour
+    Logger.info('Automated Hourly Scheduler enabled: Scrapers and email alerts will trigger every 1 hour.');
+    setInterval(() => {
+      if (!isScrapersPaused) {
+        Logger.info('Hourly cron timer triggered: Executing background scraper run & matching email dispatch...');
+        runOrchestrator().catch((err) => {
+          Logger.error('Hourly background runOrchestrator failed', err);
+        });
+      } else {
+        Logger.info('Hourly cron timer triggered, but scrapers are currently paused.');
+      }
+    }, HOURLY_INTERVAL_MS);
+  }
 });

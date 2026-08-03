@@ -9,7 +9,7 @@ describe('AtsRegistryService Unit Tests', () => {
 
     expect(overview.totalCategories).toBe(2);
     expect(overview.totalCompanies).toBeGreaterThan(0);
-    expect(overview.totalCompanyPlugins).toBe(50);
+    expect(overview.totalCompanyPlugins).toBeGreaterThanOrEqual(50);
     expect(Array.isArray(overview.groups)).toBe(true);
     expect(overview.groups.length).toBe(2);
   });

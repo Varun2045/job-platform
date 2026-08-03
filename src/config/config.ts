@@ -113,8 +113,8 @@ const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 const isProduction = isGitHubActions || process.env.NODE_ENV === 'production';
 const isFileStorageMode = process.env.STORAGE_MODE === 'file' || !hasSupabase;
 
-// In production, only require Supabase keys if STORAGE_MODE is explicitly set to supabase or keys are provided
-if (isProduction && !isFileStorageMode && process.env.IS_LOCAL !== 'true') {
+// In production, require Supabase keys if STORAGE_MODE is explicitly set to supabase
+if (isProduction && process.env.STORAGE_MODE === 'supabase' && process.env.IS_LOCAL !== 'true') {
   validateEnv('SUPABASE_URL', true);
   validateEnv('SUPABASE_SERVICE_KEY', true);
   if (process.env.RESEND_API_KEY) {

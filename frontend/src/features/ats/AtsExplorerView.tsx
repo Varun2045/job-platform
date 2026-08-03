@@ -94,6 +94,27 @@ const ExplorerSection: React.FC<{
   });
   allCompanies.sort((a, b) => a.name.localeCompare(b.name));
 
+  const getHealthStyle = (cName: string, companyDetails?: CompanyDetailItem[]) => {
+    const detail = companyDetails?.find((d) => d.name.toLowerCase() === cName.toLowerCase());
+    const h = (detail?.health || 'Healthy').toLowerCase();
+    if (h === 'failing' || h === 'failed' || h === 'unhealthy') {
+      return {
+        border: 'border-rose-500/40 hover:border-rose-400',
+        dot: 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]',
+      };
+    }
+    if (h === 'warning' || h === 'degraded') {
+      return {
+        border: 'border-amber-500/40 hover:border-amber-400',
+        dot: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]',
+      };
+    }
+    return {
+      border: 'border-emerald-500/40 hover:border-emerald-400',
+      dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]',
+    };
+  };
+
   return (
     <div className="bg-[#131a26] border border-[#232d3f] rounded-xl overflow-hidden shadow-lg">
       {/* Category Header Bar */}
@@ -163,16 +184,19 @@ const ExplorerSection: React.FC<{
                   {isOpen && (
                     <div className="p-4 border-t border-[#232d3f]/60 bg-[#090d16]/70">
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
-                        {sortedComps.map((cName) => (
-                          <button
-                            key={`${parser.id}-${cName}`}
-                            onClick={() => onSelectCompany(cName, parser.name, group.category, parser.averageExtractionMs, parser.pattern)}
-                            className="px-3 py-2 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
-                          >
-                            <span className="truncate">{cName}</span>
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
-                          </button>
-                        ))}
+                        {sortedComps.map((cName) => {
+                          const style = getHealthStyle(cName, parser.companyDetails);
+                          return (
+                            <button
+                              key={`${parser.id}-${cName}`}
+                              onClick={() => onSelectCompany(cName, parser.name, group.category, parser.averageExtractionMs, parser.pattern)}
+                              className={`px-3 py-2 bg-[#131a26] border ${style.border} rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm`}
+                            >
+                              <span className="truncate">{cName}</span>
+                              <span className={`w-2 h-2 rounded-full ${style.dot} shrink-0 ml-1 group-hover:scale-125 transition-transform`} />
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -181,16 +205,20 @@ const ExplorerSection: React.FC<{
             })
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {allCompanies.map((item) => (
-                <button
-                  key={`${item.platformName}-${item.name}`}
-                  onClick={() => onSelectCompany(item.name, item.platformName, group.category, item.extractionMs, item.pattern)}
-                  className="px-3.5 py-2.5 bg-[#131a26] border border-emerald-500/40 hover:border-emerald-400 rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm"
-                >
-                  <span className="truncate">{item.name}</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 ml-1 group-hover:scale-125 transition-transform" />
-                </button>
-              ))}
+              {allCompanies.map((item) => {
+                const subParser = group.parsers.find((p) => p.name === item.platformName || p.id === `plugin-${item.name.toLowerCase()}`);
+                const style = getHealthStyle(item.name, subParser?.companyDetails);
+                return (
+                  <button
+                    key={`${item.platformName}-${item.name}`}
+                    onClick={() => onSelectCompany(item.name, item.platformName, group.category, item.extractionMs, item.pattern)}
+                    className={`px-3.5 py-2.5 bg-[#131a26] border ${style.border} rounded-lg text-xs font-semibold text-slate-200 hover:text-white transition text-left cursor-pointer flex items-center justify-between group shadow-sm`}
+                  >
+                    <span className="truncate">{item.name}</span>
+                    <span className={`w-2 h-2 rounded-full ${style.dot} shrink-0 ml-1 group-hover:scale-125 transition-transform`} />
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -286,6 +314,8 @@ export const AtsExplorerView: React.FC = () => {
     let careerPageNeedsReview = false;
     let jobBoardNeedsReview = false;
 
+    let foundHealth: CompanyHealthType = 'Healthy';
+
     // Search overview for rich companyDetails
     if (overview) {
       for (const group of overview.groups) {
@@ -296,6 +326,7 @@ export const AtsExplorerView: React.FC = () => {
             if (detail.jobBoardUrl) jobBoardUrl = detail.jobBoardUrl;
             careerPageNeedsReview = detail.careerPageNeedsReview ?? false;
             jobBoardNeedsReview = detail.jobBoardNeedsReview ?? false;
+            if (detail.health) foundHealth = detail.health;
             break;
           }
         }
@@ -308,7 +339,7 @@ export const AtsExplorerView: React.FC = () => {
       category,
       parserType: category === 'Native ATS' ? 'Native ATS Parser' : 'Dedicated Company Plugin',
       averageExtractionMs,
-      health: 'Healthy',
+      health: foundHealth,
       lastScraped: '10 minutes ago',
       lastVerified: category === 'Native ATS' ? '2 hours ago' : 'Today',
       careerPage,

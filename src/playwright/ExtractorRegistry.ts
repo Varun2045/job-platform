@@ -15,8 +15,10 @@ export class ExtractorRegistry {
   }
 
   public register(extractor: CompanyExtractor): void {
-    this.extractors.push(extractor);
-    Logger.info(`ExtractorRegistry: Registered company extractor [${extractor.name}]`);
+    if (!this.extractors.some((e) => e.id === extractor.id || e.name === extractor.name)) {
+      this.extractors.push(extractor);
+      Logger.info(`ExtractorRegistry: Registered company extractor [${extractor.name}]`);
+    }
   }
 
   public findExtractor(url: string): CompanyExtractor | undefined {

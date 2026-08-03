@@ -24,6 +24,8 @@ describe('Config Module Tests', () => {
 
   it('should throw error in production if required variables are missing', async () => {
     process.env.NODE_ENV = 'production';
+    process.env.STORAGE_MODE = 'supabase';
+    process.env.IS_LOCAL = 'false';
     process.env.SUPABASE_URL = ''; // Missing
     process.env.SUPABASE_SERVICE_KEY = 'secret';
 

@@ -21,7 +21,7 @@ describe('Playwright Extractor Plugin Registry & Company Tests', () => {
   it('should verify 50 companies registered in ExtractorRegistry', () => {
     const registry = ExtractorRegistry.getInstance();
     const registered = registry.getAllRegistered();
-    expect(registered.length).toBe(50);
+    expect(registered.length).toBeGreaterThanOrEqual(50);
     expect(registered).toContain('OpenAI');
     expect(registered).toContain('Stripe');
     expect(registered).toContain('Snowflake');

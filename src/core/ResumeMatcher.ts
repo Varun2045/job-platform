@@ -356,20 +356,21 @@ export class ResumeMatcher {
 
     // 3. Experience Match (15%)
     let experienceScore = 100;
-    // Junior candidate target matches
     const isJuniorJob =
-      /junior|early career|entry level|graduate|new grad|intern|associate|sde i\b/i.test(titleLower) ||
-      /graduate|intern|new grad/i.test(job.description.toLowerCase());
+      /junior|early career|entry level|entry-level|graduate|new grad|intern|internship|trainee|apprentice|associate|sde i\b|sde1\b/i.test(titleLower) ||
+      /graduate|intern|new grad|early career|entry level|0-1 year|0-2 year/i.test(job.description.toLowerCase());
 
-    const isSeniorJob = /senior|sr\.|lead|principal|staff|manager|director|vp/i.test(titleLower);
+    const isSeniorJob = /senior|sr\.|lead|principal|staff|manager|director|vp|head of|architect|chief/i.test(titleLower);
 
     if (isJuniorJob) {
       experienceScore = 100;
+      titleScore = Math.min(100, titleScore + 15); // Boost title score for junior target keywords
     } else if (isSeniorJob) {
-      experienceScore = 30; // heavy penalty for senior/lead positions
+      experienceScore = 0; // 0 score for senior/lead positions to prevent them from passing match threshold
+      titleScore = 0; // zero out title score for senior jobs
     } else {
-      // General Software Engineer (mid-level SDE, SDE II)
-      experienceScore = 80;
+      // General Software Engineer (mid-level SDE II, generic postings)
+      experienceScore = 30; // Low score for generic mid-level positions
     }
 
     // 4. Location Match (10%)

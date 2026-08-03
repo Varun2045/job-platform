@@ -76,8 +76,18 @@ export const Dashboard: React.FC = () => {
     { label: 'Scraper Health', value: stats.companiesHealthy || 0, icon: CheckCircle2, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
   ];
 
-  const scraperStatus = stats.companiesHealthy > 0 ? 'healthy' : stats.companiesDegraded > 0 ? 'degraded' : 'unhealthy';
-  const scraperStatusColor = scraperStatus === 'healthy' ? 'text-emerald-400' : scraperStatus === 'degraded' ? 'text-amber-400' : 'text-red-400';
+  const scraperStatus =
+    (stats.companiesDisabled || 0) > 0
+      ? 'failing'
+      : (stats.companiesDegraded || 0) > 0
+      ? 'degraded'
+      : 'healthy';
+  const scraperStatusColor =
+    scraperStatus === 'healthy'
+      ? 'text-emerald-400'
+      : scraperStatus === 'degraded'
+      ? 'text-amber-400'
+      : 'text-red-400';
 
   const handleManualScrape = async () => {
     try {
