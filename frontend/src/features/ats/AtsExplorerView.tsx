@@ -99,14 +99,16 @@ const ExplorerSection: React.FC<{
     const h = (detail?.health || 'Healthy').toLowerCase();
     if (h === 'failing' || h === 'failed' || h === 'unhealthy') {
       return {
-        border: 'border-rose-500/40 hover:border-rose-400',
-        dot: 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]',
+        dot: 'bg-rose-500 shadow-rose-500/50',
+        text: 'text-rose-400 font-semibold',
+        border: 'border-rose-500/30 hover:border-rose-500/60',
       };
     }
     if (h === 'warning' || h === 'degraded') {
       return {
-        border: 'border-amber-500/40 hover:border-amber-400',
-        dot: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]',
+        dot: 'bg-amber-400 shadow-amber-400/50 animate-pulse',
+        text: 'text-amber-400 font-semibold',
+        border: 'border-amber-500/30 hover:border-amber-500/60',
       };
     }
     return {
