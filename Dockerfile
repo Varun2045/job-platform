@@ -19,11 +19,7 @@ COPY src ./src
 COPY config ./config
 COPY frontend ./frontend
 
-# Compile TypeScript backend
-RUN npm run build
-
-# Compile Vite frontend
-WORKDIR /app/frontend
+# Compile backend and frontend
 RUN npm run build
 
 # Stage 2: Runtime image with Playwright and Chromium pre-installed
@@ -41,8 +37,8 @@ COPY --from=builder /app/config ./config
 COPY --from=builder /app/frontend/dist ./frontend/dist
 COPY resumes ./resumes
 
-# Create storage and logs folders and ensure write permissions for non-root user 1000 (Hugging Face default)
-RUN mkdir -p storage logs && chmod -R 777 storage logs
+# Create storage and logs folders
+RUN mkdir -p storage logs && chmod -R 755 storage logs
 
 EXPOSE 7860
 CMD ["node", "dist/core/server.js"]

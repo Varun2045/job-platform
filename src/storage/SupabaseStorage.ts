@@ -104,8 +104,9 @@ export class SupabaseStorage implements StorageProvider {
         throw error;
       }
 
-      const seedPath = path.join(process.cwd(), 'config', 'companies.json');
-      if (fs.existsSync(seedPath)) {
+      if (count === 0 || count === null) {
+        const seedPath = path.join(process.cwd(), 'config', 'companies.json');
+        if (fs.existsSync(seedPath)) {
         const raw = fs.readFileSync(seedPath, 'utf-8');
         const seedConfigs = JSON.parse(raw) as CompanyConfig[];
         const validIds = new Set(seedConfigs.map((c) => c.id));
@@ -154,6 +155,7 @@ export class SupabaseStorage implements StorageProvider {
           }
         }
       }
+    }
     } catch (e: any) {
       Logger.error('Supabase initialization & seeding failed', e);
       throw e;

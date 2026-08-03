@@ -18,7 +18,7 @@
     "health": "node dist/cli/admin.js health",
     "stats": "node dist/cli/admin.js stats",
     "resume-score": "node dist/cli/admin.js resume-score",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --forceExit",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.ts\"",
