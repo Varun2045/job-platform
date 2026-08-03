@@ -1105,7 +1105,7 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
     const j = allJobs.find((x) => x.jobHash === hash);
     if (j) {
       foundJob = j;
-      matchedComp = companies.find((c) => c.id === j.company);
+      matchedComp = companies.find((c) => c.id.toLowerCase() === (j.company || '').toLowerCase() || c.name.toLowerCase() === (j.company || '').toLowerCase());
     }
 
     if (!foundJob) {

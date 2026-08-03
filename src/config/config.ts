@@ -131,7 +131,7 @@ export const config: Config = {
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   senderEmail: process.env.NOTIFICATION_EMAIL_SENDER || process.env.EMAIL_FROM || 'alerts@yourdomain.com',
   recipientEmail: process.env.NOTIFICATION_EMAIL_RECIPIENT ?? '',
-  matchThreshold: Number(process.env.MATCH_THRESHOLD ?? 70),
+  matchThreshold: Number(process.env.MATCH_THRESHOLD ?? 0),
   weights: loadedWeights,
   features: {
     resumeMatching: process.env.FEATURE_RESUME_MATCHING !== 'false',

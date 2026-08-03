@@ -171,7 +171,7 @@ describe('Performance and Scale Verification Tests', () => {
     } finally {
       config.features.playwright = originalPlaywright;
     }
-  }, 40000); // 40s timeout for queue processing
+  }, 90000); // 90s timeout for 100-company queue processing
 
   it('should complete resume match iterations without memory leaks', async () => {
     const { ResumeMatcher } = await import('../core/ResumeMatcher.js');

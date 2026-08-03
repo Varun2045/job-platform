@@ -1638,8 +1638,8 @@ const AIMessageGenerator: React.FC = () => {
                 let currentProject: ResumeProject | null = null;
                 for (const line of lines) {
                   let matchedName = '';
-                  const mBullet = line.match(/^\s*[-•*]\s*([A-Z][a-zA-Z0-9\s\-–—]{2,50}?)(?:\s*[—\-–\(\:]|$)/);
-                  const mLatex = line.match(/^\s*\\item\s*(?:\\textbf\{)?([A-Z][a-zA-Z0-9\s\-–—]{2,50}?)(?:\}|\s*[—\-–\(\:]|$)/);
+                  const mBullet = line.match(/^\s*[-•*]\s*([A-Z][a-zA-Z0-9\s\-–—]{2,50}?)(?:\s*[—\-–(:]|$)/);
+                  const mLatex = line.match(/^\s*\\item\s*(?:\\textbf\{)?([A-Z][a-zA-Z0-9\s\-–—]{2,50}?)(?:\}|\s*[—\-–(:]|$)/);
                   
                   if (mBullet) {
                     matchedName = mBullet[1].trim();

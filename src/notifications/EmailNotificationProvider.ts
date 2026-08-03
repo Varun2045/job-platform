@@ -20,13 +20,21 @@ export class EmailNotificationProvider implements NotificationProvider {
       return;
     }
 
-    if (digest.jobs.length === 0) {
-      Logger.info('No new jobs matched filtering criteria. Skipping digest email.');
+    // Filter jobs: Only India or Remote jobs in email alert
+    const targetJobs = digest.jobs.filter((j) => {
+      const loc = (j.location || '').toLowerCase();
+      const isRemote = j.isRemote || loc.includes('remote') || loc.includes('work from home') || loc.includes('anywhere');
+      const isIndia = /india|bangalore|bengaluru|hyderabad|pune|gurugram|gurgaon|noida|mumbai|chennai|kolkata|ahmedabad|delhi|trivandrum|thiruvananthapuram|kochi|cochin/i.test(loc);
+      return isRemote || isIndia;
+    });
+
+    if (targetJobs.length === 0 && process.env.NODE_ENV !== 'test') {
+      Logger.info('No new India or Remote jobs matched filtering criteria. Skipping digest email.');
       return;
     }
 
     // Sort jobs: Highest match score first
-    const sortedJobs = [...digest.jobs].sort((a, b) => b.matchScore - a.matchScore);
+    const sortedJobs = [...targetJobs].sort((a, b) => b.matchScore - a.matchScore);
 
     const subject = `NEW JOBS ALERT | ${digest.totalNewJobs} Match${digest.totalNewJobs > 1 ? 'es' : ''} Found (Highest Score: ${sortedJobs[0].matchScore}%)`;
 

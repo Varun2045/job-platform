@@ -1,14 +1,15 @@
 {
-  "minMatchScore": 70,
-  "experienceMinYears": null,
-  "experienceMaxYears": null,
+  "minMatchScore": 0,
+  "experienceMinYears": 0,
+  "experienceMaxYears": 2,
   "workplaceTypes": [],
   "cities": [],
   "states": [],
-  "countries": [],
+  "countries": ["India"],
   "employmentTypes": [],
   "internship": true,
   "newGrad": true,
-  "fullTime": true,
-  "contract": true
+  "fullTime": false,
+  "contract": false
 }
+

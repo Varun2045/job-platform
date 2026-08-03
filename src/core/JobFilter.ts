@@ -43,11 +43,53 @@ export class JobFilter {
   public static matches(job: Job): boolean {
     const filters = this.getFilters();
 
+    // 0. Senior & Non-Tech Role Rejection (if targeting entry level / max 2 years)
+    const titleLower = (job.title || '').toLowerCase();
+    const descLower = (job.description || '').toLowerCase();
+    const isTargetingEntryLevel = (filters.experienceMaxYears !== undefined && filters.experienceMaxYears !== null && filters.experienceMaxYears <= 2) || filters.newGrad;
+
+    const NON_TECH_PATTERNS = [
+      /\bcounsel\b/i,
+      /\bhr\b/i,
+      /\bhuman resources\b/i,
+      /\brecruiter\b/i,
+      /\blegal\b/i,
+      /\btransportation\b/i,
+      /\bnurse\b/i,
+      /\baccountant\b/i,
+      /\bsales associate\b/i,
+      /\bstore associate\b/i,
+      /\bjanitor\b/i,
+      /\bdriver\b/i,
+    ];
+    if (NON_TECH_PATTERNS.some((pat) => pat.test(titleLower))) {
+      return false;
+    }
+
+    if (isTargetingEntryLevel) {
+      const SENIOR_PATTERNS = [
+        /\bsenior\b/i,
+        /\bsr\.?\b/i,
+        /\bstaff\b/i,
+        /\bprincipal\b/i,
+        /\blead\b/i,
+        /\barchitect\b/i,
+        /\bdirector\b/i,
+        /\bmanager\b/i,
+        /\bhead\b/i,
+        /\bvp\b/i,
+        /\bexecutive\b/i,
+      ];
+
+      const isSeniorTitle = SENIOR_PATTERNS.some((pat) => pat.test(titleLower));
+      if (isSeniorTitle) {
+        return false;
+      }
+    }
+
     // 1. Workplace Type Check
     if (filters.workplaceTypes && filters.workplaceTypes.length > 0) {
       const locationLower = (job.location || '').toLowerCase();
-      const descLower = (job.description || '').toLowerCase();
-      const titleLower = (job.title || '').toLowerCase();
 
       let jobWorkplace = 'onsite';
       if (
@@ -70,6 +112,14 @@ export class JobFilter {
     // 2. City, State, Country Check
     const locationLower = (job.location || '').toLowerCase();
     const countryLower = job.country ? job.country.toLowerCase() : '';
+    const isRemote = job.isRemote || locationLower.includes('remote') || descLower.includes('remote') || titleLower.includes('remote');
+
+    const FOREIGN_LOCATIONS = [
+      'united states', 'usa', 'uk', 'united kingdom', 'london', 'beijing', 'china',
+      'brazil', 'são paulo', 'sao paulo', 'germany', 'munich', 'berlin', 'tokyo', 'japan',
+      'france', 'paris', 'canada', 'toronto', 'vancouver', 'australia', 'sydney', 'singapore'
+    ];
+    const isExplicitForeignLocation = FOREIGN_LOCATIONS.some((loc) => locationLower.includes(loc));
 
     if (filters.cities && filters.cities.length > 0) {
       const matchesCity = filters.cities.some((c) => locationLower.includes(c.toLowerCase()));
@@ -83,14 +133,12 @@ export class JobFilter {
 
     if (filters.countries && filters.countries.length > 0) {
       const matchesCountry = filters.countries.some(
-        (c) => locationLower.includes(c.toLowerCase()) || countryLower.includes(c.toLowerCase()),
+        (c) => (locationLower.includes(c.toLowerCase()) || countryLower.includes(c.toLowerCase())) && !isExplicitForeignLocation,
       );
-      if (!matchesCountry) return false;
+      if (!matchesCountry && !isRemote) return false;
     }
 
     // 3. Employment Category check
-    const titleLower = (job.title || '').toLowerCase();
-    const descLower = (job.description || '').toLowerCase();
     const typeLower = (job.employmentType || '').toLowerCase();
 
     const isInternship =
@@ -103,7 +151,9 @@ export class JobFilter {
       titleLower.includes('graduate') ||
       titleLower.includes('early career') ||
       titleLower.includes('entry level') ||
-      titleLower.includes('university grad');
+      titleLower.includes('university grad') ||
+      titleLower.includes('junior') ||
+      titleLower.includes('associate');
     const isContract =
       typeLower.includes('contract') ||
       typeLower.includes('temp') ||
