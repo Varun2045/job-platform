@@ -45,6 +45,11 @@ export function createApiV1Router(storage: StorageProvider): Router {
     });
   };
 
+  const DEFAULT_GUEST_USER_ID = 'guest-user-00000000-0000-0000-0000-000000000000';
+  const getUserId = (req: Request): string => {
+    return (req as any).user?.id || DEFAULT_GUEST_USER_ID;
+  };
+
   // ==========================================
   // APPLICATIONS & KANBAN
   // ==========================================
@@ -54,7 +59,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
     try {
       const id = req.params.id as string;
       const { targetStatus, targetStageOrder } = req.body;
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
 
       if (!targetStatus || typeof targetStatus !== 'string') {
         return sendError(res, 'Target status string is required', 'INVALID_INPUT', 400);
@@ -73,7 +78,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
     try {
       const id = req.params.id as string;
       const { targetStageOrder } = req.body;
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
 
       if (typeof targetStageOrder !== 'number') {
         return sendError(res, 'targetStageOrder number is required', 'INVALID_INPUT', 400);
@@ -90,7 +95,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // GET /api/v1/applications/board
   router.get('/applications/board', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const board = await kanbanService.getBoard(userId);
       return sendSuccess(res, board);
     } catch (err: any) {
@@ -122,7 +127,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // POST /api/v1/offers/compare
   router.post('/offers/compare', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const comparison = await offerAnalyzer.compareOffers(userId);
       return sendSuccess(res, comparison);
     } catch (err: any) {
@@ -153,7 +158,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // GET /api/v1/followups
   router.get('/followups', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const followups = await storage.getFollowUps(userId);
       return sendSuccess(res, followups);
     } catch (err: any) {
@@ -165,7 +170,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // POST /api/v1/followups
   router.post('/followups', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const followUp: FollowUp = {
         id: req.body.id || `followup-${Date.now()}`,
         applicationId: req.body.applicationId,
@@ -190,7 +195,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   router.put('/followups/:id', async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
 
       const followUp: FollowUp = {
         id,
@@ -212,7 +217,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   router.delete('/followups/:id', async (req: Request, res: Response) => {
     try {
       const id = req.params.id as string;
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       await storage.deleteFollowUp(userId, id);
       return sendSuccess(res, { deleted: true, id });
     } catch (err: any) {
@@ -405,7 +410,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
         return sendError(res, 'companyName, jobTitle, and jobUrl are required fields', 'INVALID_INPUT', 400);
       }
 
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const savedJob = await storage.saveExtensionJob({
         id: `ext-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         userId,
@@ -432,7 +437,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // GET /api/v1/extension/jobs
   router.get('/extension/jobs', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const jobs = await storage.getExtensionJobs(userId);
       return sendSuccess(res, jobs);
     } catch (err: any) {
@@ -499,7 +504,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   router.post('/digest/send', async (req: Request, res: Response) => {
     try {
       const { channels, slackWebhookUrl, telegramBotToken, telegramChatId } = req.body;
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
 
       const result = await digestEngine.dispatchDigest(userId, channels || ['email'], {
         slackWebhookUrl,
@@ -543,7 +548,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // GET /api/v1/insights
   router.get('/insights', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const insights = await insightsEngine.generateInsights(userId);
       return sendSuccess(res, insights);
     } catch (err: any) {
@@ -559,7 +564,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   // GET /api/v1/inbox
   router.get('/inbox', async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const jobs = await inboxService.getInboxJobs(userId);
       return sendSuccess(res, jobs);
     } catch (err: any) {
@@ -572,7 +577,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   router.post('/inbox/:id/promote', async (req: Request, res: Response) => {
     try {
       const inboxJobId = req.params.id as string;
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
 
       const app = await inboxService.promoteToApplication(inboxJobId, userId);
       return sendSuccess(res, app, 201);
@@ -590,7 +595,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
         return sendError(res, 'ids must be a non-empty array', 'INVALID_INPUT', 400);
       }
 
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
       const promotedApps = [];
       for (const id of ids) {
         try {
@@ -616,7 +621,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
   router.get('/search', async (req: Request, res: Response) => {
     try {
       const query = String(req.query.q || '');
-      const userId = (req as any).user?.id || 'guest-user-00000000-0000-0000-0000-000000000000';
+      const userId = getUserId(req);
 
       const results = await searchEngine.search(query, userId);
       return sendSuccess(res, results);

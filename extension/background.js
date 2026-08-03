@@ -5,7 +5,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const serverUrl = data.serverUrl || 'http://localhost:3000';
       const apiToken = data.apiToken || '';
 
-      fetch(`${serverUrl}/api/v1/extension/save-job`, {
+      let targetEndpoint;
+      try {
+        const parsed = new URL(serverUrl);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          throw new Error('Invalid protocol');
+        }
+        targetEndpoint = `${parsed.origin}/api/v1/extension/save-job`;
+      } catch (e) {
+        sendResponse({ success: false, error: 'Invalid server URL configured in extension settings.' });
+        return;
+      }
+
+      fetch(targetEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

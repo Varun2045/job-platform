@@ -166,9 +166,9 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-// Sanitize inputs to prevent script/tag injections
+// Sanitize inputs to prevent script tag injections
 const sanitizeString = (str: string): string => {
-  return str.replace(/<[^>]*>/g, '').trim();
+  return str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').trim();
 };
 
 const sanitizeObject = (obj: any): any => {
