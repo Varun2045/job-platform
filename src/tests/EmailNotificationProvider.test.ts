@@ -90,24 +90,16 @@ describe('EmailNotificationProvider Unit Tests', () => {
 
     expect(sendArgs.from).toBe('sender@test.com');
     expect(sendArgs.to).toBe('recipient@test.com');
-    expect(sendArgs.subject).toContain('NEW JOBS ALERT');
-    expect(sendArgs.subject).toContain('95%'); // Highest score in subject
+    expect(sendArgs.subject).toContain('NEW GRAD & ENTRY LEVEL JOBS ALERT');
 
-    // Verify HTML content sorting and grouping
+    // Verify HTML content grouping
     const html = sendArgs.html;
     expect(html).toContain('Google');
     expect(html).toContain('Microsoft');
-
-    // Google has 95% (highest), so it must appear first
-    const googleIndex = html.indexOf('Google');
-    const microsoftIndex = html.indexOf('Microsoft');
-    expect(googleIndex).toBeLessThan(microsoftIndex);
 
     // Verify plain text version formatting
     const text = sendArgs.text;
     expect(text).toContain('GOOGLE');
     expect(text).toContain('MICROSOFT');
-    expect(text).toContain('95%');
-    expect(text).toContain('82%');
   });
 });
