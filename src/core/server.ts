@@ -915,19 +915,37 @@ app.get('/api/v1/jobs/search', authMiddleware, async (req, res) => {
       allScoredJobs.sort((a, b) => b.opportunityScore - a.opportunityScore);
     }
 
-    // Cursor Pagination
-    const ps = Math.min(100, Math.max(1, Number(pageSize || 25)));
-    const offset = SearchEngine.decodeCursor(cursor as string);
+    // Page & Cursor Pagination
+    const ps = Math.min(100, Math.max(1, Number(pageSize || 30)));
+    let offset = 0;
+    if (req.query.page) {
+      const pageNum = Math.max(1, Number(req.query.page));
+      offset = (pageNum - 1) * ps;
+    } else if (cursor) {
+      offset = SearchEngine.decodeCursor(cursor as string);
+    }
+
     const end = offset + ps;
     const paginatedJobs = allScoredJobs.slice(offset, end);
-    const hasMore = end < allScoredJobs.length;
+    const totalResults = allScoredJobs.length;
+    const totalPages = Math.ceil(totalResults / ps) || 1;
+    const currentPage = Math.floor(offset / ps) + 1;
+    const hasMore = end < totalResults;
+    const hasPrev = currentPage > 1;
     const nextCursor = hasMore ? SearchEngine.encodeCursor(end) : null;
+    const prevCursor = hasPrev ? SearchEngine.encodeCursor(Math.max(0, offset - ps)) : null;
 
     const response = {
       jobs: paginatedJobs,
       pagination: {
-        nextCursor,
+        page: currentPage,
+        totalPages,
+        pageSize: ps,
+        totalResults,
         hasMore,
+        hasPrev,
+        nextCursor,
+        prevCursor,
       },
       appliedFilters: criteria,
       sort: {
@@ -936,7 +954,7 @@ app.get('/api/v1/jobs/search', authMiddleware, async (req, res) => {
       },
       execution: {
         searchTimeMs: Date.now() - startTime,
-        totalResults: allScoredJobs.length,
+        totalResults,
       },
     };
 

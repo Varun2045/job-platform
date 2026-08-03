@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, Briefcase, Globe, ExternalLink, X, Sparkles, 
-  FileText, CheckSquare, Bookmark, Filter, RefreshCw
+  FileText, CheckSquare, Bookmark, Filter,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
@@ -101,9 +102,10 @@ export const JobExplorer: React.FC = () => {
     (searchParams.get('sort') as any) || getSavedFilter('sortBy', 'newest')
   );
 
-  // Infinite Scroll & Cursor Pagination state
-  const [accumulatedJobs, setAccumulatedJobs] = useState<any[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
+  // Page-based Pagination State (Requirement: 30 jobs per page with Next/Prev navigation)
+  const [page, setPage] = useState<number>(Number(searchParams.get('page')) || 1);
+  const jobFeedTopRef = useRef<HTMLDivElement>(null);
+
   const [bookmarkedJobs, setBookmarkedJobs] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('bookmarked_jobs');
@@ -121,7 +123,8 @@ export const JobExplorer: React.FC = () => {
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
-  // Department Sub-Category Collapsible States (Requirement 6)
+
+  // Department Sub-Category Collapsible States
   const [openDeptCategories, setOpenDeptCategories] = useState<Record<string, boolean>>(() => {
     try {
       const saved = localStorage.getItem('job_explorer_open_dept_cats_v1');
@@ -226,6 +229,21 @@ export const JobExplorer: React.FC = () => {
     return dateLimit.toISOString();
   };
 
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [
+    debouncedQuery,
+    location,
+    remote,
+    experience,
+    department,
+    company,
+    employmentType,
+    dateRange,
+    sortBy,
+  ]);
+
   // Sync state to URL parameters
   useEffect(() => {
     const params: Record<string, string> = {};
@@ -241,10 +259,9 @@ export const JobExplorer: React.FC = () => {
       params.dateLimit = calculateDateLimit(dateRange);
     }
     if (sortBy !== 'newest') params.sort = sortBy;
+    if (page > 1) params.page = String(page);
 
     setSearchParams(params, { replace: true });
-    setCursor(null);
-    setAccumulatedJobs([]);
   }, [
     debouncedQuery,
     location,
@@ -255,6 +272,7 @@ export const JobExplorer: React.FC = () => {
     employmentType,
     dateRange,
     sortBy,
+    page,
   ]);
 
   // Query Facets Schema dynamically
@@ -288,7 +306,7 @@ export const JobExplorer: React.FC = () => {
     },
   });
 
-  // Query Jobs API using dedicated Search Endpoint
+  // Query Jobs API using dedicated Search Endpoint (30 jobs per page)
   const { data: apiResponse, isLoading: isJobsLoading, isFetching } = useQuery({
     queryKey: [
       'jobs-search',
@@ -301,7 +319,7 @@ export const JobExplorer: React.FC = () => {
       employmentType,
       dateRange,
       sortBy,
-      cursor,
+      page,
     ],
     queryFn: async () => {
       const params = new URLSearchParams({
@@ -315,29 +333,14 @@ export const JobExplorer: React.FC = () => {
         dateRange,
         dateLimit: calculateDateLimit(dateRange),
         sort: sortBy,
-        pageSize: '25',
-        ...(cursor ? { cursor } : {})
+        pageSize: '30',
+        page: String(page),
       });
       const res = await fetch(`/api/v1/jobs/search?${params}`);
       if (!res.ok) throw new Error('Failed to search jobs feed');
       return res.json();
     }
   });
-
-  // Accumulate jobs for smooth infinite scroll
-  useEffect(() => {
-    if (apiResponse && apiResponse.jobs) {
-      if (!cursor) {
-        setAccumulatedJobs(apiResponse.jobs);
-      } else {
-        setAccumulatedJobs(prev => {
-          const existingHashes = new Set(prev.map(j => j.job.jobHash));
-          const newUnique = apiResponse.jobs.filter((j: any) => !existingHashes.has(j.job.jobHash));
-          return [...prev, ...newUnique];
-        });
-      }
-    }
-  }, [apiResponse, cursor]);
 
   // Fetch Selected Job Detail
   const { data: detailData } = useQuery({
@@ -893,46 +896,17 @@ export const JobExplorer: React.FC = () => {
     return true;
   };
 
+  const pageJobs = useMemo(() => apiResponse?.jobs || [], [apiResponse]);
+
   const visibleJobs = useMemo(() => {
-    const base = accumulatedJobs.filter(j => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
-    const query = debouncedQuery.toLowerCase().trim();
-    if (!query) return base;
+    return pageJobs.filter((j: any) => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
+  }, [pageJobs, hiddenJobs]);
 
-    const tokens = query.split(/\s+/).filter(Boolean);
-
-    return base.filter(({ job }: any) => {
-      const skillsText = Array.isArray(job.skills) ? job.skills.join(' ') : (job.skills || '');
-      const tagsText = Array.isArray(job.tags) ? job.tags.join(' ') : (job.tags || '');
-      const techText = Array.isArray(job.techStack) ? job.techStack.join(' ') : (job.techStack || '');
-      const remoteText = (job.isRemote === true || String(job.isRemote).toLowerCase() === 'remote' || job.workMode?.toLowerCase().includes('remote')) ? 'remote' : '';
-
-      const searchableText = [
-        job.title,
-        job.company,
-        job.location,
-        job.description,
-        job.snippet,
-        job.employmentType,
-        job.jobType,
-        job.experienceLevel,
-        job.experience,
-        job.salary,
-        job.salaryRange,
-        job.department,
-        job.workMode,
-        remoteText,
-        skillsText,
-        tagsText,
-        techText,
-      ].filter(Boolean).join(' ').toLowerCase();
-
-      return tokens.every(token => searchableText.includes(token));
-    });
-  }, [accumulatedJobs, hiddenJobs, debouncedQuery]);
-
-  const hasMore = apiResponse?.pagination?.hasMore;
-  const nextCursorToken = apiResponse?.pagination?.nextCursor;
-  const totalCount = apiResponse?.pagination?.total ?? visibleJobs.length;
+  const totalCount = apiResponse?.pagination?.totalResults || apiResponse?.execution?.totalResults || visibleJobs.length;
+  const totalPages = apiResponse?.pagination?.totalPages || Math.ceil(totalCount / 30) || 1;
+  const currentPage = apiResponse?.pagination?.page || page;
+  const hasNextPage = apiResponse?.pagination?.hasMore || currentPage < totalPages;
+  const hasPrevPage = apiResponse?.pagination?.hasPrev || currentPage > 1;
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen text-white font-sans bg-[#090d16]">
@@ -1059,20 +1033,20 @@ export const JobExplorer: React.FC = () => {
               <div className="h-6 bg-[#1f2937] rounded animate-pulse" />
               <div className="h-10 bg-[#1f2937] rounded animate-pulse" />
               <div className="h-6 bg-[#1f2937] rounded animate-pulse" />
-              <div className="h-20 bg-[#1f2937] rounded animate-pulse" />
             </div>
           ) : (
             renderSidebarContents()
           )}
         </div>
 
-        {/* CENTRAL INFINITE SCROLL JOB FEED */}
-        <div className="lg:col-span-5 space-y-4">
+        {/* CENTRAL JOB FEED */}
+        <div ref={jobFeedTopRef} className="lg:col-span-5 space-y-4">
           
           {/* Feed Toolbar with Sort & Results Counter */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111827] border border-[#243147] rounded-2xl p-4 shadow-sm">
             <span className="text-xs font-bold text-[#94a3b8]">
               Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount.toLocaleString()}</span> Jobs
+              {totalPages > 1 && <span className="ml-1 text-[11px] text-[#64748b]">(Page {currentPage} of {totalPages})</span>}
             </span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-[#64748b]">Sort:</span>
@@ -1150,15 +1124,16 @@ export const JobExplorer: React.FC = () => {
                       <div className="text-sm font-bold text-white leading-snug mt-0.5">
                         <HighlightText text={job.title} highlight={debouncedQuery} />
                       </div>
-                      <div className="text-xs text-[#94a3b8] font-medium mt-1">
-                        Experience: <HighlightText text={job.experienceLevel || job.experience || '2–5 Years'} highlight={debouncedQuery} />
-                      </div>
-                      <div className="text-xs text-[#64748b]">
-                        Location: <HighlightText text={job.location || 'Remote / India'} highlight={debouncedQuery} /> • Posted: {postedDateStr}
+                      <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-[#94a3b8]">
+                        <span>{job.location || 'Location Not Specified'}</span>
+                        <span>•</span>
+                        <span>{job.experienceLevel || job.experience || 'Experience Not Specified'}</span>
+                        <span>•</span>
+                        <span className="text-emerald-400 font-semibold">{postedDateStr}</span>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-[#243147]/60 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#243147]/50">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1201,16 +1176,70 @@ export const JobExplorer: React.FC = () => {
                 );
               })}
 
-              {/* CURSOR INFINITE SCROLL LOAD MORE */}
-              {hasMore && (
-                <div className="text-center pt-4">
-                  <button
-                    disabled={isFetching}
-                    onClick={() => setCursor(nextCursorToken)}
-                    className="bg-[#111827] hover:bg-[#162135] border border-[#243147] text-indigo-400 font-bold text-xs px-6 py-3 rounded-2xl transition duration-200 w-full flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                  >
-                    {isFetching ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Load More Jobs'}
-                  </button>
+              {/* PAGE-BASED PAGINATION CONTROLS */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-2 border-t border-[#243147]/60 mt-4">
+                  <div className="text-xs text-[#94a3b8] font-medium">
+                    Showing <span className="text-white font-bold">{Math.min((currentPage - 1) * 30 + 1, totalCount)}–{Math.min(currentPage * 30, totalCount)}</span> of <span className="text-indigo-400 font-bold">{totalCount.toLocaleString()}</span> Jobs
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {/* Previous Page Button */}
+                    <button
+                      disabled={!hasPrevPage || isFetching}
+                      onClick={() => {
+                        setPage(prev => Math.max(1, prev - 1));
+                        jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-1 bg-[#111827] hover:bg-[#192438] disabled:opacity-40 disabled:cursor-not-allowed border border-[#243147] text-white text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> Prev
+                    </button>
+
+                    {/* Page numbers */}
+                    {(() => {
+                      const pages = [];
+                      const maxPagesToShow = 5;
+                      let startPage = Math.max(1, currentPage - 2);
+                      let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                      if (endPage - startPage < maxPagesToShow - 1) {
+                        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                      }
+
+                      for (let p = startPage; p <= endPage; p++) {
+                        pages.push(
+                          <button
+                            key={p}
+                            disabled={isFetching}
+                            onClick={() => {
+                              setPage(p);
+                              jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className={`w-8 h-8 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer ${
+                              p === currentPage
+                                ? 'bg-indigo-600 text-white shadow-md'
+                                : 'bg-[#111827] hover:bg-[#192438] border border-[#243147] text-[#94a3b8] hover:text-white'
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        );
+                      }
+                      return pages;
+                    })()}
+
+                    {/* Next Page Button */}
+                    <button
+                      disabled={!hasNextPage || isFetching}
+                      onClick={() => {
+                        setPage(prev => Math.min(totalPages, prev + 1));
+                        jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="flex items-center gap-1 bg-[#111827] hover:bg-[#192438] disabled:opacity-40 disabled:cursor-not-allowed border border-[#243147] text-white text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
+                    >
+                      Next <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1218,10 +1247,9 @@ export const JobExplorer: React.FC = () => {
 
         </div>
 
-        {/* SLIDE-OVER RIGHT DETAILS PANEL */}
         <div className="hidden lg:block lg:col-span-4 bg-[#111827] border border-[#243147] rounded-2xl p-6 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar space-y-6 shadow-lg">
           {(() => {
-            const selectedJobItem = visibleJobs.find(j => j.job.jobHash === selectedJobHash)?.job || detailData?.job;
+            const selectedJobItem = visibleJobs.find((j: any) => j.job.jobHash === selectedJobHash)?.job || detailData?.job;
             const isBookmarked = selectedJobHash ? bookmarkedJobs.has(selectedJobHash) : false;
 
             if (!selectedJobItem) {
