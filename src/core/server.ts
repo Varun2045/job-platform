@@ -647,8 +647,10 @@ app.get('/api/dashboard', authMiddleware, async (req, res) => {
 
     const allJobs = await storage.getAllJobs();
 
-    const disabledComps = companies.filter((c) => c.enabled === false);
-    const activeComps = companies.filter((c) => c.enabled !== false);
+    const disabledComps = companies.filter(
+      (c) => c.enabled === false || (c.consecutive_failures ?? 0) >= 3 || (c as any).circuit_breaker_tripped === true,
+    );
+    const activeComps = companies.filter((c) => !disabledComps.includes(c));
     const degradedComps = activeComps.filter(
       (c) =>
         (c.consecutive_failures ?? 0) > 0 ||

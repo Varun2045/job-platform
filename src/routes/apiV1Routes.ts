@@ -662,9 +662,10 @@ export function createApiV1Router(storage: StorageProvider): Router {
       const healthMap: Record<string, 'Healthy' | 'Warning' | 'Failing'> = {};
       for (const c of companies) {
         const failures = c.consecutive_failures ?? 0;
-        const isDegraded = failures > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape)));
+        const isFailing = c.enabled === false || failures >= 3 || (c as any).circuit_breaker_tripped === true;
+        const isDegraded = !isFailing && (failures > 0 || (c.last_failed_scrape && (!c.last_successful_scrape || new Date(c.last_failed_scrape) > new Date(c.last_successful_scrape))));
         let h: 'Healthy' | 'Warning' | 'Failing' = 'Healthy';
-        if (c.enabled === false || failures >= 3) {
+        if (isFailing) {
           h = 'Failing';
         } else if (isDegraded) {
           h = 'Warning';
