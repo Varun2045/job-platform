@@ -7,6 +7,16 @@ import { plugin as metaPlugin } from './plugins/MetaPlugin.js';
 import { plugin as workdayPlugin } from './plugins/WorkdayPlugin.js';
 import { plugin as greenhousePlugin } from './plugins/GreenhousePlugin.js';
 import { plugin as leverPlugin } from './plugins/LeverPlugin.js';
+import { plugin as ashbyPlugin } from './plugins/AshbyPlugin.js';
+import { plugin as taleoPlugin } from './plugins/TaleoPlugin.js';
+import { plugin as smartrecruitersPlugin } from './plugins/SmartRecruitersPlugin.js';
+import { plugin as workablePlugin } from './plugins/WorkablePlugin.js';
+import { plugin as oracleCloudPlugin } from './plugins/OracleCloudPlugin.js';
+import { plugin as phenomPlugin } from './plugins/PhenomPlugin.js';
+import { plugin as eightfoldPlugin } from './plugins/EightfoldPlugin.js';
+import { plugin as avaturePlugin } from './plugins/AvaturePlugin.js';
+import { plugin as darwinboxPlugin } from './plugins/DarwinboxPlugin.js';
+import { plugin as bambooHRPlugin } from './plugins/BambooHRPlugin.js';
 import { Logger } from '../core/Logger.js';
 
 export class ScraperRegistry {
@@ -19,6 +29,16 @@ export class ScraperRegistry {
     workdayPlugin,
     greenhousePlugin,
     leverPlugin,
+    ashbyPlugin,
+    taleoPlugin,
+    smartrecruitersPlugin,
+    workablePlugin,
+    oracleCloudPlugin,
+    phenomPlugin,
+    eightfoldPlugin,
+    avaturePlugin,
+    darwinboxPlugin,
+    bambooHRPlugin,
   ];
 
   /**

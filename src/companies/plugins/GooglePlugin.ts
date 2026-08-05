@@ -39,15 +39,17 @@ export class GooglePlugin implements ScraperPlugin {
       const html = $(el).html() ?? '';
       if (html.includes("key: 'ds:1'") || html.includes('key:"ds:1"')) {
         try {
-          const AF_initDataCallback = (obj: any) => {
-            if (obj.key === 'ds:1' && Array.isArray(obj.data) && Array.isArray(obj.data[0])) {
-              jobsList = obj.data[0];
+          // Safe parsing: Extract JSON data using regex instead of executing JavaScript
+          const dataMatch = html.match(/AF_initDataCallback\(({[\s\S]*?)\)/);
+          if (dataMatch) {
+            const jsonStr = dataMatch[1];
+            const dataObj = JSON.parse(jsonStr);
+            if (dataObj.key === 'ds:1' && Array.isArray(dataObj.data) && Array.isArray(dataObj.data[0])) {
+              jobsList = dataObj.data[0];
             }
-          };
-          const fn = new Function('AF_initDataCallback', html);
-          fn(AF_initDataCallback);
-        } catch {
-          // ignore
+          }
+        } catch (parseError) {
+          Logger.warn(`Failed to parse Google Careers job data: ${parseError}`);
         }
       }
     });

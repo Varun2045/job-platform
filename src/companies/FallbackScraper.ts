@@ -6,11 +6,36 @@ import * as cheerio from 'cheerio';
 export class FallbackScraper {
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
     let url = company.api_endpoint || company.last_scraper_used || `https://www.${company.id}.com/careers`;
+    
+    // Handle common ATS URL patterns
     if (company.detected_ats === 'greenhouse' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
       url = `https://boards.greenhouse.io/${company.api_endpoint}`;
     } else if (company.detected_ats === 'lever' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
       url = `https://jobs.lever.co/${company.api_endpoint}`;
+    } else if (company.detected_ats === 'ashby' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://jobs.ashbyhq.com/${company.api_endpoint}`;
+    } else if (company.detected_ats === 'workday' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://workday.wd5.myworkdayjobs.com/${company.api_endpoint}`;
+    } else if (company.detected_ats === 'workable' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://apply.workable.com/${company.api_endpoint}`;
+    } else if (company.detected_ats === 'bamboohr' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://${company.api_endpoint}.bamboohr.com/careers`;
+    } else if (company.detected_ats === 'oraclecloud' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://fa.${company.api_endpoint}.oraclecloud.com`;
+    } else if (company.detected_ats === 'phenom' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://jobs.phenom.com/${company.api_endpoint}`;
+    } else if (company.detected_ats === 'eightfold' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://${company.api_endpoint}.eightfold.ai`;
+    } else if (company.detected_ats === 'avature' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://${company.api_endpoint}.avature.net`;
+    } else if (company.detected_ats === 'darwinbox' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://${company.api_endpoint}.darwinbox.in`;
+    } else if (company.detected_ats === 'taleo' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://taleo.net/${company.api_endpoint}`;
+    } else if (company.detected_ats === 'smartrecruiters' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+      url = `https://careers.smartrecruiters.com/${company.api_endpoint}`;
     }
+    
     Logger.debug(`Fallback Cheerio HTML scraping for ${company.name} at URL: ${url}`);
 
     const response = await httpClient.get<string>(url);
