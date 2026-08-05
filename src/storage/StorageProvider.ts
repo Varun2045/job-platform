@@ -65,6 +65,27 @@ export interface StorageProvider {
   getAllJobs(): Promise<Job[]>;
 
   /**
+   * Retrieves jobs with database-level filtering for better performance
+   * @param companyIds Optional array of company IDs to filter by
+   */
+  getFilteredJobs(companyIds?: string[]): Promise<Job[]>;
+
+  /**
+   * Retrieves jobs with pagination support
+   * @param page Page number (0-indexed)
+   * @param limit Number of companies to fetch per page
+   */
+  getJobsPaginated(page?: number, limit?: number): Promise<Job[]>;
+
+  /**
+   * Retrieves jobs with both filtering and pagination
+   * @param companyIds Optional array of company IDs to filter by
+   * @param page Page number (0-indexed)
+   * @param limit Number of companies to fetch per page
+   */
+  getFilteredJobsPaginated(companyIds?: string[], page?: number, limit?: number): Promise<Job[]>;
+
+  /**
    * Overwrites the stored job listings for a company.
    */
   saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void>;

@@ -308,6 +308,64 @@ export class AsyncFileStorage implements StorageProvider {
     return allJobs;
   }
 
+  /**
+   * Get jobs with database-level filtering for better performance
+   */
+  public async getFilteredJobs(companyIds?: string[]): Promise<Job[]> {
+    const companies = await this.getAllCompanies();
+    const filteredCompanies = companyIds 
+      ? companies.filter(c => companyIds.includes(c.id))
+      : companies;
+    
+    const allJobs: Job[] = [];
+    for (const company of filteredCompanies) {
+      const jobs = await this.getCompanyJobs(company.id);
+      allJobs.push(...jobs);
+    }
+
+    return allJobs;
+  }
+
+  /**
+   * Get jobs with pagination support
+   */
+  public async getJobsPaginated(page: number = 0, limit: number = 50): Promise<Job[]> {
+    const companies = await this.getAllCompanies();
+    const paginatedCompanies = companies.slice(page * limit, (page + 1) * limit);
+    
+    const allJobs: Job[] = [];
+    for (const company of paginatedCompanies) {
+      const jobs = await this.getCompanyJobs(company.id);
+      allJobs.push(...jobs);
+    }
+
+    return allJobs;
+  }
+
+  /**
+   * Get jobs with both filtering and pagination
+   */
+  public async getFilteredJobsPaginated(
+    companyIds?: string[],
+    page: number = 0,
+    limit: number = 50
+  ): Promise<Job[]> {
+    const companies = await this.getAllCompanies();
+    const filteredCompanies = companyIds 
+      ? companies.filter(c => companyIds.includes(c.id))
+      : companies;
+    
+    const paginatedCompanies = filteredCompanies.slice(page * limit, (page + 1) * limit);
+    
+    const allJobs: Job[] = [];
+    for (const company of paginatedCompanies) {
+      const jobs = await this.getCompanyJobs(company.id);
+      allJobs.push(...jobs);
+    }
+
+    return allJobs;
+  }
+
   public async saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void> {
     const jobsPath = path.join(this.storageDir, `jobs_${companyId}.json`);
     await AsyncFileStorage.writeAtomic(jobsPath, jobs);

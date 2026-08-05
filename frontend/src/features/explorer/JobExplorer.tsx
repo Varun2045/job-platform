@@ -208,11 +208,11 @@ export const JobExplorer: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // 200ms Debounce search input for snappy response
+  // 500ms Debounce search input for improved performance
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-    }, 200);
+    }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
@@ -275,41 +275,10 @@ export const JobExplorer: React.FC = () => {
     page,
   ]);
 
-  // Query Facets Schema dynamically
-  const { data: facetsData, isLoading: isFacetsLoading } = useQuery({
+  // Combined Query for Facets and Jobs (Single API call for better performance)
+  const { data: combinedData, isLoading: isCombinedLoading, isFetching } = useQuery({
     queryKey: [
-      'facets',
-      debouncedQuery,
-      location,
-      remote,
-      experience,
-      department,
-      company,
-      employmentType,
-      dateRange,
-    ],
-    queryFn: async () => {
-      const params = new URLSearchParams({
-        q: debouncedQuery,
-        location: expandLocationAliases(location).join(','),
-        remote: remote.join(','),
-        experience: experience.join(','),
-        department: department.join(','),
-        company: company.join(','),
-        employmentType: employmentType.join(','),
-        dateRange,
-        dateLimit: calculateDateLimit(dateRange),
-      });
-      const res = await fetch(`/api/v1/jobs/facets?${params}`);
-      if (!res.ok) throw new Error('Failed to fetch facets');
-      return res.json();
-    },
-  });
-
-  // Query Jobs API using dedicated Search Endpoint (30 jobs per page)
-  const { data: apiResponse, isLoading: isJobsLoading, isFetching } = useQuery({
-    queryKey: [
-      'jobs-search',
+      'jobs-combined',
       debouncedQuery,
       location,
       remote,
@@ -336,11 +305,21 @@ export const JobExplorer: React.FC = () => {
         pageSize: '30',
         page: String(page),
       });
-      const res = await fetch(`/api/v1/jobs/search?${params}`);
-      if (!res.ok) throw new Error('Failed to search jobs feed');
+      const res = await fetch(`/api/v1/jobs/combined?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch combined jobs data');
       return res.json();
     }
   });
+
+  // Extract data from combined response
+  const facetsData = combinedData?.facets;
+  const apiResponse = combinedData ? { 
+    jobs: combinedData.jobs, 
+    pagination: combinedData.pagination,
+    execution: combinedData.execution 
+  } : null;
+  const isFacetsLoading = isCombinedLoading;
+  const isJobsLoading = isCombinedLoading;
 
   // Fetch Selected Job Detail
   const { data: detailData } = useQuery({

@@ -764,7 +764,7 @@ let scoredJobsCache: {
   allActiveScoredJobs: any[];
   timestamp: number;
 } | null = null;
-const JOBS_CACHE_TTL_MS = 30000;
+const JOBS_CACHE_TTL_MS = 10 * 60 * 1000; // Increased to 10 minutes for better performance
 
 // Helper to parse search criteria for versioned endpoints
 function parseSearchCriteria(query: { [key: string]: unknown }): SearchCriteria {
@@ -826,10 +826,23 @@ function parseSearchCriteria(query: { [key: string]: unknown }): SearchCriteria 
   };
 }
 
-// Memory caching maps for facets and search results
+// Enhanced memory caching maps for facets and search results
 const facetsCacheMap = new Map<string, { data: unknown; timestamp: number }>();
 const searchCacheMap = new Map<string, { data: unknown; timestamp: number }>();
-const VERSIONED_CACHE_TTL_MS = 30 * 1000; // 30 seconds
+const VERSIONED_CACHE_TTL_MS = 5 * 60 * 1000; // Increased to 5 minutes for better performance
+
+// Cache size limit to prevent memory bloat
+const MAX_CACHE_SIZE = 1000;
+
+// Enhanced cache helper with size management
+const setCacheWithLimit = (cache: Map<string, { data: unknown; timestamp: number }>, key: string, data: unknown) => {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    // Remove oldest entry when cache is full
+    const oldestKey = Array.from(cache.keys())[0];
+    cache.delete(oldestKey);
+  }
+  cache.set(key, { data, timestamp: Date.now() });
+};
 
 // GET /api/v1/jobs/facets (Dedicated, Dynamic, Versioned Facets API)
 app.get('/api/v1/jobs/facets', authMiddleware, async (req, res) => {
@@ -847,11 +860,14 @@ app.get('/api/v1/jobs/facets', authMiddleware, async (req, res) => {
     if (scoredJobsCache && now - scoredJobsCache.timestamp < JOBS_CACHE_TTL_MS) {
       allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
     } else {
+      // Use filtered job fetching when company filter is present
+      const companyIds = criteria.company ? criteria.company.split(',').map(c => c.trim()) : undefined;
+      
       const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
         storage.getExtendedSettings(),
         storage.getEnabledCompanies(),
         storage.getAllCompanies(),
-        storage.getAllJobs(),
+        companyIds ? storage.getFilteredJobs(companyIds) : storage.getAllJobs(),
       ]);
 
       const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
@@ -888,7 +904,7 @@ app.get('/api/v1/jobs/facets', authMiddleware, async (req, res) => {
     }
 
     const facetsData = SearchEngine.calculateCascadingFacets(allActiveScoredJobs, criteria);
-    facetsCacheMap.set(cacheKey, { data: facetsData, timestamp: Date.now() });
+    setCacheWithLimit(facetsCacheMap, cacheKey, facetsData);
 
     return sendSuccess(res, facetsData);
   } catch (err: unknown) {
@@ -919,11 +935,14 @@ app.get('/api/v1/jobs/search', authMiddleware, async (req, res) => {
       allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
       allJobs = scoredJobsCache.jobs;
     } else {
+      // Use filtered job fetching when company filter is present
+      const companyIds = criteria.company ? criteria.company.split(',').map(c => c.trim()) : undefined;
+      
       const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
         storage.getExtendedSettings(),
         storage.getEnabledCompanies(),
         storage.getAllCompanies(),
-        storage.getAllJobs(),
+        companyIds ? storage.getFilteredJobs(companyIds) : storage.getAllJobs(),
       ]);
 
       allJobs = rawAllJobs;
@@ -1022,11 +1041,129 @@ app.get('/api/v1/jobs/search', authMiddleware, async (req, res) => {
       },
     };
 
-    searchCacheMap.set(cacheKey, { data: response, timestamp: Date.now() });
+    setCacheWithLimit(searchCacheMap, cacheKey, response);
     return sendSuccess(res, response);
   } catch (err: unknown) {
     const error = err as Error;
     Logger.error('Error in /api/v1/jobs/search', err as Error);
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+// GET /api/v1/jobs/combined (Combined facets and search for improved performance)
+app.get('/api/v1/jobs/combined', authMiddleware, async (req, res) => {
+  const startTime = Date.now();
+  try {
+    const criteria = parseSearchCriteria(req.query);
+    const { sort = 'newest', cursor, pageSize = '25' } = req.query;
+    const cacheKey = JSON.stringify({ criteria, sort, cursor, pageSize, combined: true });
+
+    const cached = searchCacheMap.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < VERSIONED_CACHE_TTL_MS) {
+      return sendSuccess(res, cached.data);
+    }
+
+    // Fetch facets and search in parallel for better performance
+    const now = Date.now();
+    let allActiveScoredJobs: any[] = [];
+    let allJobs: any[] = [];
+
+    if (scoredJobsCache && now - scoredJobsCache.timestamp < JOBS_CACHE_TTL_MS) {
+      allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
+      allJobs = scoredJobsCache.jobs;
+    } else {
+      // Use filtered job fetching when company filter is present
+      const companyIds = criteria.company ? criteria.company.split(',').map(c => c.trim()) : undefined;
+      
+      const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
+        storage.getExtendedSettings(),
+        storage.getEnabledCompanies(),
+        storage.getAllCompanies(),
+        companyIds ? storage.getFilteredJobs(companyIds) : storage.getAllJobs(),
+      ]);
+
+      allJobs = rawAllJobs;
+      const disabledIds = new Set(allCompanies.filter((c) => !c.enabled).flatMap((c) => [c.id.toLowerCase(), c.name.toLowerCase()]));
+      const enabledCompsMap = new Map<string, any>();
+      for (const c of companies) {
+        enabledCompsMap.set(c.id.toLowerCase(), c);
+        enabledCompsMap.set(c.name.toLowerCase(), c);
+      }
+
+      for (const j of allJobs) {
+        const compKey = (j.company || '').toLowerCase();
+        if (disabledIds.has(compKey)) continue;
+
+        const comp = enabledCompsMap.get(compKey) || { resume_profiles: [], priority: 2 };
+        const rawProfiles = comp.resume_profiles || [];
+        const profiles = rawProfiles.length > 0 ? rawProfiles : [];
+        const bestScore = 0;
+        const recommendation = { opportunityScore: 0, breakdown: {} };
+
+        allActiveScoredJobs.push({
+          job: j,
+          score: bestScore,
+          opportunityScore: recommendation.opportunityScore,
+          weightedScore: recommendation.opportunityScore,
+          breakdown: recommendation.breakdown,
+        });
+      }
+
+      scoredJobsCache = {
+        jobs: rawAllJobs,
+        allActiveScoredJobs,
+        timestamp: now,
+      };
+    }
+
+    // Calculate facets
+    const facetsData = SearchEngine.calculateCascadingFacets(allActiveScoredJobs, criteria);
+
+    // Calculate search results
+    const targetMinScore = criteria.minScore ? Number(criteria.minScore) : 0;
+    const ps = Math.min(100, Math.max(1, Number(pageSize || 25)));
+    const offset = SearchEngine.decodeCursor(cursor as string);
+
+    const filteredJobs = SearchEngine.quickFilterRawJobs(allJobs, criteria);
+    const scoredJobs = SearchEngine.scoreJobs(filteredJobs, criteria);
+    const totalResults = scoredJobs.length;
+
+    let sortedJobs = scoredJobs;
+    if (sort === 'newest') {
+      sortedJobs = SearchEngine.sortByNewest(scoredJobs);
+    } else if (sort === 'relevance') {
+      sortedJobs = SearchEngine.sortByRelevance(scoredJobs);
+    } else if (sort === 'company_name') {
+      sortedJobs = SearchEngine.sortByCompanyName(scoredJobs);
+    } else if (sort === 'experience_asc') {
+      sortedJobs = SearchEngine.sortByExperienceAsc(scoredJobs);
+    }
+
+    const paginatedJobs = sortedJobs.slice(offset, offset + ps);
+    const nextCursor = paginatedJobs.length > 0 && offset + ps < totalResults 
+      ? SearchEngine.encodeCursor(offset + ps) 
+      : null;
+
+    const response = {
+      jobs: paginatedJobs,
+      facets: facetsData,
+      pagination: {
+        total: totalResults,
+        pageSize: ps,
+        cursor: nextCursor,
+        hasMore: nextCursor !== null,
+      },
+      execution: {
+        searchTimeMs: Date.now() - startTime,
+        totalResults,
+      },
+    };
+
+    setCacheWithLimit(searchCacheMap, cacheKey, response);
+    return sendSuccess(res, response);
+  } catch (err: unknown) {
+    const error = err as Error;
+    Logger.error('Error in /api/v1/jobs/combined', err as Error);
     return res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -1050,6 +1187,9 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
 
     const rawQuery = (q as string) || (technology as string) || '';
     const nlParsed = SearchEngine.parseNLQuery(rawQuery);
+    
+    // Extract company IDs for filtering
+    const companyIds = company ? String(company).split(',').map(c => c.trim()) : undefined;
 
     const targetKeyword = nlParsed.keyword;
     const targetCompany = (company as string) || '';
@@ -1079,11 +1219,12 @@ app.get('/api/jobs', authMiddleware, async (req, res) => {
       allActiveScoredJobs = scoredJobsCache.allActiveScoredJobs;
       allJobs = scoredJobsCache.jobs;
     } else {
+      // Use filtered job fetching when company filter is present
       const [settings, companies, allCompanies, rawAllJobs] = await Promise.all([
         storage.getExtendedSettings(),
         storage.getEnabledCompanies(),
         storage.getAllCompanies(),
-        storage.getAllJobs(),
+        companyIds ? storage.getFilteredJobs(companyIds) : storage.getAllJobs(),
       ]);
 
       allJobs = rawAllJobs;
@@ -1185,11 +1326,23 @@ app.get('/api/jobs/:hash', authMiddleware, async (req, res) => {
     let foundJob: any = null;
     let matchedComp: any = null;
 
-    const allJobs = await storage.getAllJobs();
-    const j = allJobs.find((x) => x.jobHash === hash);
-    if (j) {
-      foundJob = j;
-      matchedComp = companies.find((c) => c.id.toLowerCase() === (j.company || '').toLowerCase() || c.name.toLowerCase() === (j.company || '').toLowerCase());
+    // First try to find job in cache for better performance
+    if (scoredJobsCache && Date.now() - scoredJobsCache.timestamp < JOBS_CACHE_TTL_MS) {
+      const j = scoredJobsCache.jobs.find((x) => x.jobHash === hash);
+      if (j) {
+        foundJob = j;
+        matchedComp = companies.find((c) => c.id.toLowerCase() === (j.company || '').toLowerCase() || c.name.toLowerCase() === (j.company || '').toLowerCase());
+      }
+    }
+    
+    // If not in cache, fetch from database
+    if (!foundJob) {
+      const allJobs = await storage.getAllJobs();
+      const j = allJobs.find((x) => x.jobHash === hash);
+      if (j) {
+        foundJob = j;
+        matchedComp = companies.find((c) => c.id.toLowerCase() === (j.company || '').toLowerCase() || c.name.toLowerCase() === (j.company || '').toLowerCase());
+      }
     }
 
     if (!foundJob) {

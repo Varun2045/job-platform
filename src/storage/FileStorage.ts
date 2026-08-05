@@ -271,6 +271,103 @@ export class FileStorage implements StorageProvider {
     return allJobs;
   }
 
+  /**
+   * Get jobs with database-level filtering for better performance
+   * This reduces the amount of data loaded from storage
+   */
+  public async getFilteredJobs(companyIds?: string[]): Promise<Job[]> {
+    const configs = await this.getAllCompanies();
+    const filteredConfigs = companyIds 
+      ? configs.filter(c => companyIds.includes(c.id))
+      : configs;
+    
+    const allJobs: Job[] = [];
+    const seenHashes = new Set<string>();
+
+    // Collect jobs from filtered company JSON files
+    for (const c of filteredConfigs) {
+      const jobs = await this.getCompanyJobs(c.id);
+      for (const j of jobs) {
+        if (j && j.jobHash && !seenHashes.has(j.jobHash)) {
+          seenHashes.add(j.jobHash);
+          allJobs.push(j);
+        }
+      }
+    }
+
+    // Collect from global storage/jobs.json if no company filter
+    if (!companyIds) {
+      const globalJobsPath = path.join(this.storageDir, 'jobs.json');
+      if (fs.existsSync(globalJobsPath)) {
+        const globalJobs = this.readJsonFile<Job[]>(globalJobsPath, []);
+        for (const j of globalJobs) {
+          if (j && j.jobHash && !seenHashes.has(j.jobHash)) {
+            seenHashes.add(j.jobHash);
+            allJobs.push(j);
+          }
+        }
+      }
+    }
+
+    return allJobs;
+  }
+
+  /**
+   * Get jobs with pagination support
+   * @param page Page number (0-indexed)
+   * @param limit Number of companies to fetch per page
+   */
+  public async getJobsPaginated(page: number = 0, limit: number = 50): Promise<Job[]> {
+    const configs = await this.getAllCompanies();
+    const paginatedConfigs = configs.slice(page * limit, (page + 1) * limit);
+    
+    const allJobs: Job[] = [];
+    const seenHashes = new Set<string>();
+
+    for (const c of paginatedConfigs) {
+      const jobs = await this.getCompanyJobs(c.id);
+      for (const j of jobs) {
+        if (j && j.jobHash && !seenHashes.has(j.jobHash)) {
+          seenHashes.add(j.jobHash);
+          allJobs.push(j);
+        }
+      }
+    }
+
+    return allJobs;
+  }
+
+  /**
+   * Get jobs with both filtering and pagination
+   */
+  public async getFilteredJobsPaginated(
+    companyIds?: string[],
+    page: number = 0,
+    limit: number = 50
+  ): Promise<Job[]> {
+    const configs = await this.getAllCompanies();
+    const filteredConfigs = companyIds 
+      ? configs.filter(c => companyIds.includes(c.id))
+      : configs;
+    
+    const paginatedConfigs = filteredConfigs.slice(page * limit, (page + 1) * limit);
+    
+    const allJobs: Job[] = [];
+    const seenHashes = new Set<string>();
+
+    for (const c of paginatedConfigs) {
+      const jobs = await this.getCompanyJobs(c.id);
+      for (const j of jobs) {
+        if (j && j.jobHash && !seenHashes.has(j.jobHash)) {
+          seenHashes.add(j.jobHash);
+          allJobs.push(j);
+        }
+      }
+    }
+
+    return allJobs;
+  }
+
   public async saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void> {
     const companyJobsPath = path.join(this.storageDir, `${companyId}.json`);
     this.writeJsonFile(companyJobsPath, jobs);

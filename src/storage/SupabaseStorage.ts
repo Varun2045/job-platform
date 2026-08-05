@@ -275,6 +275,98 @@ export class SupabaseStorage implements StorageProvider {
     return allJobs;
   }
 
+  /**
+   * Get jobs with database-level filtering for better performance
+   * This reduces the amount of data loaded from the database
+   */
+  public async getFilteredJobs(companyIds?: string[]): Promise<Job[]> {
+    let query = this.client
+      .from('job_monitor_state')
+      .select('jobs_data, company_id');
+
+    // Filter by specific companies if provided
+    if (companyIds && companyIds.length > 0) {
+      query = query.in('company_id', companyIds);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      Logger.error('Error fetching filtered jobs state', error);
+      return [];
+    }
+
+    const filteredJobs: Job[] = [];
+    for (const row of data || []) {
+      if (row.jobs_data) {
+        filteredJobs.push(...(row.jobs_data as Job[]));
+      }
+    }
+    return filteredJobs;
+  }
+
+  /**
+   * Get jobs with pagination support
+   * @param page Page number (0-indexed)
+   * @param limit Number of companies to fetch per page
+   */
+  public async getJobsPaginated(page: number = 0, limit: number = 50): Promise<Job[]> {
+    const { data, error } = await this.client
+      .from('job_monitor_state')
+      .select('jobs_data')
+      .order('updated_at', { ascending: false })
+      .range(page * limit, (page + 1) * limit - 1);
+
+    if (error) {
+      Logger.error('Error fetching paginated jobs state', error);
+      return [];
+    }
+
+    const paginatedJobs: Job[] = [];
+    for (const row of data || []) {
+      if (row.jobs_data) {
+        paginatedJobs.push(...(row.jobs_data as Job[]));
+      }
+    }
+    return paginatedJobs;
+  }
+
+  /**
+   * Get jobs with both filtering and pagination
+   */
+  public async getFilteredJobsPaginated(
+    companyIds?: string[],
+    page: number = 0,
+    limit: number = 50
+  ): Promise<Job[]> {
+    let query = this.client
+      .from('job_monitor_state')
+      .select('jobs_data')
+      .order('updated_at', { ascending: false });
+
+    // Filter by specific companies if provided
+    if (companyIds && companyIds.length > 0) {
+      query = query.in('company_id', companyIds);
+    }
+
+    query = query.range(page * limit, (page + 1) * limit - 1);
+
+    const { data, error } = await query;
+
+    if (error) {
+      Logger.error('Error fetching filtered paginated jobs state', error);
+      return [];
+    }
+
+    const filteredPaginatedJobs: Job[] = [];
+    for (const row of data || []) {
+      if (row.jobs_data) {
+        filteredPaginatedJobs.push(...(row.jobs_data as Job[]));
+      }
+    }
+    return filteredPaginatedJobs;
+  }
+
   public async saveCompanyJobs(companyId: string, jobs: Job[]): Promise<void> {
     // Use upsert to overwrite or create state
     const { error } = await this.client.from('job_monitor_state').upsert({

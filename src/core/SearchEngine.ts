@@ -650,4 +650,67 @@ export class SearchEngine {
   public static calculateDatabaseFacets(candidateJobs: { job: Job; score: number; opportunityScore: number }[]) {
     return this.calculateCascadingFacets(candidateJobs, {});
   }
+
+  /**
+   * Score jobs based on criteria
+   */
+  public static scoreJobs(jobs: Job[], criteria: SearchCriteria): { job: Job; score: number }[] {
+    return jobs.map(job => ({
+      job,
+      score: this.calculateWeightedScore({ job, score: 0, opportunityScore: 0 }, criteria.technology || '')
+    }));
+  }
+
+  /**
+   * Sort jobs by newest (date posted)
+   */
+  public static sortByNewest(jobs: { job: Job; score: number }[]): { job: Job; score: number }[] {
+    return [...jobs].sort((a, b) => {
+      const dateA = a.job.datePosted ? new Date(a.job.datePosted).getTime() : 0;
+      const dateB = b.job.datePosted ? new Date(b.job.datePosted).getTime() : 0;
+      return dateB - dateA; // Descending order (newest first)
+    });
+  }
+
+  /**
+   * Sort jobs by relevance score
+   */
+  public static sortByRelevance(jobs: { job: Job; score: number }[]): { job: Job; score: number }[] {
+    return [...jobs].sort((a, b) => b.score - a.score); // Descending order (highest score first)
+  }
+
+  /**
+   * Sort jobs by company name
+   */
+  public static sortByCompanyName(jobs: { job: Job; score: number }[]): { job: Job; score: number }[] {
+    return [...jobs].sort((a, b) => {
+      const companyA = (a.job.company || '').toLowerCase();
+      const companyB = (b.job.company || '').toLowerCase();
+      return companyA.localeCompare(companyB);
+    });
+  }
+
+  /**
+   * Sort jobs by experience level (ascending)
+   */
+  public static sortByExperienceAsc(jobs: { job: Job; score: number }[]): { job: Job; score: number }[] {
+    const experienceOrder: Record<string, number> = {
+      'entry': 1,
+      'junior': 2,
+      'mid': 3,
+      'senior': 4,
+      'lead': 5,
+      'principal': 6,
+      'director': 7,
+      'executive': 8
+    };
+
+    return [...jobs].sort((a, b) => {
+      const expA = (a.job.experience || '').toLowerCase();
+      const expB = (b.job.experience || '').toLowerCase();
+      const orderA = experienceOrder[expA] || 999;
+      const orderB = experienceOrder[expB] || 999;
+      return orderA - orderB;
+    });
+  }
 }
