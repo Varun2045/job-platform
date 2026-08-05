@@ -4,14 +4,14 @@ import { AtsRegistryService } from '../core/AtsRegistryService.js';
 describe('AtsRegistryService Unit Tests', () => {
   const service = new AtsRegistryService();
 
-  it('should return dynamically generated ATS registry overview with 2 public category groups', () => {
+  it('should return dynamically generated ATS registry overview with 3 public category groups', () => {
     const overview = service.getRegistryOverview();
 
-    expect(overview.totalCategories).toBe(2);
+    expect(overview.totalCategories).toBe(3);
     expect(overview.totalCompanies).toBeGreaterThan(0);
     expect(overview.totalCompanyPlugins).toBeGreaterThanOrEqual(50);
     expect(Array.isArray(overview.groups)).toBe(true);
-    expect(overview.groups.length).toBe(2);
+    expect(overview.groups.length).toBe(3);
   });
 
   it('should detect Greenhouse URLs cleanly with Priority 1', () => {

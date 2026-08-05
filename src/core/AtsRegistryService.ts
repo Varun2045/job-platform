@@ -440,23 +440,39 @@ export class AtsRegistryService {
     const existingCompanyNames = new Set<string>();
     nativeGroup.parsers.forEach((p) => p.companies.forEach((name) => existingCompanyNames.add(name.toLowerCase())));
 
-    // 2. Company Career Portals Category Group (Playwright Extractor Plugins + Registered Database Companies)
-    const companyPluginParsers: AtsSubParserInfo[] = SUPPORTED_50_COMPANIES.map((c: any) => {
-      existingCompanyNames.add(c.name.toLowerCase());
-      const override = this.customUrlOverrides[c.name];
-      const careerPage = override?.careerPage || c.careerPage || `https://${c.pattern}/careers`;
-      const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `https://${c.pattern}/careers#all-jobs`;
-      const compHealth = getHealth(c.name);
+    // 2. Dedicated Company Plugins Category Group (13 Enterprise Custom Extractor Plugins)
+    const dedicatedPluginsRaw = [
+      { id: 'amazon', name: 'Amazon Dedicated Plugin', pattern: 'amazon.jobs', company: 'Amazon', url: 'https://amazon.jobs' },
+      { id: 'apple', name: 'Apple Dedicated Plugin', pattern: 'jobs.apple.com', company: 'Apple', url: 'https://jobs.apple.com' },
+      { id: 'google', name: 'Google Dedicated Plugin', pattern: 'careers.google.com', company: 'Google', url: 'https://careers.google.com' },
+      { id: 'meta', name: 'Meta Dedicated Plugin', pattern: 'metacareers.com', company: 'Meta', url: 'https://www.metacareers.com' },
+      { id: 'microsoft', name: 'Microsoft Dedicated Plugin', pattern: 'careers.microsoft.com', company: 'Microsoft', url: 'https://careers.microsoft.com' },
+      { id: 'avature', name: 'Avature Portal Extractor', pattern: 'avature.net', company: 'Deutsche Bank', url: 'https://careers.db.com' },
+      { id: 'bamboohr', name: 'BambooHR Portal Extractor', pattern: 'bamboohr.com', company: 'BambooHR Network', url: 'https://www.bamboohr.com/careers' },
+      { id: 'darwinbox', name: 'Darwinbox Portal Extractor', pattern: 'darwinbox.in', company: 'Darwinbox', url: 'https://darwinbox.com/careers' },
+      { id: 'eightfold', name: 'Eightfold Portal Extractor', pattern: 'eightfold.ai', company: 'American Express', url: 'https://www.americanexpress.com/en-us/careers' },
+      { id: 'phenom', name: 'Phenom Portal Extractor', pattern: 'phenompeople.com', company: 'Barclays', url: 'https://search.jobs.barclays' },
+      { id: 'workable', name: 'Workable Portal Extractor', pattern: 'workable.com', company: 'Workable Network', url: 'https://www.workable.com/careers' },
+      { id: 'oraclecloud', name: 'Oracle Cloud Portal Extractor', pattern: 'oraclecloud.com', company: 'Oracle', url: 'https://careers.oracle.com' },
+      { id: 'smartrecruiters-custom', name: 'SmartRecruiters Custom Extractor', pattern: 'smartrecruiters.com', company: 'Bosch', url: 'https://careers.smartrecruiters.com/BoschGroup' },
+    ];
+
+    const dedicatedPlugins: AtsSubParserInfo[] = dedicatedPluginsRaw.map((p) => {
+      existingCompanyNames.add(p.company.toLowerCase());
+      const override = this.customUrlOverrides[p.company];
+      const careerPage = override?.careerPage || p.url;
+      const jobBoardUrl = override?.jobBoardUrl || p.url;
+      const compHealth = getHealth(p.company);
 
       return {
-        id: `plugin-${c.id}`,
-        name: `${c.name} Careers`,
-        pattern: c.pattern,
-        averageExtractionMs: 320,
-        companies: [c.name],
+        id: `plugin-${p.id}`,
+        name: p.name,
+        pattern: p.pattern,
+        averageExtractionMs: 145,
+        companies: [p.company],
         companyDetails: [
           {
-            name: c.name,
+            name: p.company,
             health: compHealth,
             lastScraped: 'Today',
             lastVerified: 'Today',
@@ -469,6 +485,49 @@ export class AtsRegistryService {
         ],
       };
     });
+
+    const dedicatedGroup: AtsCategoryGroup = {
+      id: 'dedicated-plugins',
+      category: 'Dedicated Company Plugins' as any,
+      priority: 2,
+      totalParsers: dedicatedPlugins.length,
+      totalCompanies: dedicatedPlugins.length,
+      averageExtractionMs: 145,
+      lastVerified: 'Today',
+      parsers: dedicatedPlugins,
+    };
+
+    // 3. Company Career Portals Category Group (Remaining Registered Database Companies)
+    const companyPluginParsers: AtsSubParserInfo[] = SUPPORTED_50_COMPANIES
+      .filter((c: any) => !existingCompanyNames.has(c.name.toLowerCase()))
+      .map((c: any) => {
+        existingCompanyNames.add(c.name.toLowerCase());
+        const override = this.customUrlOverrides[c.name];
+        const careerPage = override?.careerPage || c.careerPage || `https://${c.pattern}/careers`;
+        const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `https://${c.pattern}/careers#all-jobs`;
+        const compHealth = getHealth(c.name);
+
+        return {
+          id: `plugin-${c.id}`,
+          name: `${c.name} Careers`,
+          pattern: c.pattern,
+          averageExtractionMs: 320,
+          companies: [c.name],
+          companyDetails: [
+            {
+              name: c.name,
+              health: compHealth,
+              lastScraped: 'Today',
+              lastVerified: 'Today',
+              careerPage,
+              jobBoardUrl,
+              careerPageNeedsReview: override?.careerPageNeedsReview ?? false,
+              jobBoardNeedsReview: override?.jobBoardNeedsReview ?? false,
+              recentErrors: [],
+            },
+          ],
+        };
+      });
 
     // Dynamically include all remaining companies from the database
     if (dbCompanies && Array.isArray(dbCompanies)) {
@@ -508,7 +567,7 @@ export class AtsRegistryService {
     const companyPortalsGroup: AtsCategoryGroup = {
       id: 'company-portals',
       category: 'Company Career Portals',
-      priority: 2,
+      priority: 3,
       totalParsers: companyPluginParsers.length,
       totalCompanies: companyPluginParsers.length,
       averageExtractionMs: 320,
@@ -516,14 +575,14 @@ export class AtsRegistryService {
       parsers: companyPluginParsers.sort((a, b) => a.name.localeCompare(b.name)),
     };
 
-    const groups = [nativeGroup, companyPortalsGroup];
+    const groups = [nativeGroup, dedicatedGroup, companyPortalsGroup];
     const totalCompanies = groups.reduce((acc, g) => acc + g.totalCompanies, 0);
 
     return {
       totalCategories: groups.length,
-      totalPlatforms: nativeGroup.totalParsers + companyPortalsGroup.totalParsers,
+      totalPlatforms: nativeGroup.totalParsers + dedicatedGroup.totalParsers + companyPortalsGroup.totalParsers,
       totalCompanies,
-      totalCompanyPlugins: companyPluginParsers.length,
+      totalCompanyPlugins: dedicatedGroup.totalParsers + companyPortalsGroup.totalParsers,
       totalNativeParsers: nativeGroup.totalParsers,
       groups,
     };
