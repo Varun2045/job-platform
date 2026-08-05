@@ -94,24 +94,24 @@ export class SupabaseStorage implements StorageProvider {
     }
     Logger.info('Supabase migration check: All required tables exist.');
 
-    // Self-seeding check: if database has 0 companies, seed from local config/companies.json
+    // Self-seeding & sync check: if database has fewer companies than config/companies.json, sync all companies
     try {
-      const { error, count } = await this.client
-        .from('job_monitor_companies')
-        .select('id', { count: 'exact', head: true });
-
-      if (error) {
-        throw error;
-      }
-
-      if (count === 0 || count === null) {
-        const seedPath = path.join(process.cwd(), 'config', 'companies.json');
-        if (fs.existsSync(seedPath)) {
+      const seedPath = path.join(process.cwd(), 'config', 'companies.json');
+      if (fs.existsSync(seedPath)) {
         const raw = fs.readFileSync(seedPath, 'utf-8');
         const seedConfigs = JSON.parse(raw) as CompanyConfig[];
         const validIds = new Set(seedConfigs.map((c) => c.id));
 
-        Logger.info(`Syncing ${seedConfigs.length} companies from config/companies.json into database...`);
+        const { error, count } = await this.client
+          .from('job_monitor_companies')
+          .select('id', { count: 'exact', head: true });
+
+        if (error) {
+          throw error;
+        }
+
+        if (count === null || count === 0 || count < seedConfigs.length) {
+          Logger.info(`Syncing ${seedConfigs.length} companies from config/companies.json into database (current DB count: ${count ?? 0})...`);
         const dbRows = seedConfigs.map((c) => ({
           id: c.id,
           name: c.name,
