@@ -1,0 +1,44 @@
+{
+  "name": "Job Platform - AI Career Operating System",
+  "description": "Heroku deployment configuration for production and review apps",
+  "scripts": {
+    "postdeploy": "npm run build"
+  },
+  "env": {
+    "NODE_ENV": {
+      "value": "production",
+      "description": "Application environment"
+    },
+    "RATE_LIMIT_WINDOW_MS": {
+      "value": "900000",
+      "description": "Rate limit window in milliseconds (15 minutes)"
+    },
+    "CIRCUIT_BREAKER_FAILURE_THRESHOLD": {
+      "value": "5",
+      "description": "Number of failures before circuit breaker opens"
+    },
+    "CIRCUIT_BREAKER_RESET_TIMEOUT_MS": {
+      "value": "30000",
+      "description": "Time in milliseconds before circuit breaker reset attempt"
+    },
+    "PLAYWRIGHT_CONCURRENCY": {
+      "value": "2",
+      "description": "Maximum concurrent Playwright browser contexts"
+    },
+    "LOG_LEVEL": {
+      "value": "info",
+      "description": "Logging level (debug, info, warn, error)"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/mxschmitt/heroku-buildpack-playwright.git"
+    }
+  ],
+  "addons": [
+    "heroku-postgresql"
+  ]
+}

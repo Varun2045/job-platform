@@ -54,6 +54,13 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const jwt = localStorage.getItem('token');
   const authHeader: Record<string, string> = jwt ? { Authorization: `Bearer ${jwt}` } : {};
 
+  // Add CSRF token for state-changing requests
+  const csrfToken = document.cookie.match(/_csrf=([^;]+)/)?.[1];
+  const csrfHeader: Record<string, string> = {};
+  if (csrfToken && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(init?.method || 'GET')) {
+    csrfHeader['X-CSRF-Token'] = csrfToken;
+  }
+
   const existingHeaders = init?.headers
     ? init.headers instanceof Headers
       ? Object.fromEntries(init.headers.entries())
@@ -67,7 +74,9 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     headers: {
       ...existingHeaders,
       ...authHeader,
+      ...csrfHeader,
     },
+    credentials: 'include', // Include cookies for CSRF
   };
   return originalFetch(input, updatedInit);
 };

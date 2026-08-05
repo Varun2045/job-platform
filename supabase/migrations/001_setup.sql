@@ -76,6 +76,11 @@ CREATE TABLE IF NOT EXISTS job_monitor_applications (
 -- Create Indexes for optimization
 CREATE INDEX IF NOT EXISTS idx_companies_enabled ON job_monitor_companies(enabled);
 CREATE INDEX IF NOT EXISTS idx_companies_priority ON job_monitor_companies(priority);
+CREATE INDEX IF NOT EXISTS idx_companies_last_scrape ON job_monitor_companies(last_successful_scrape DESC);
+CREATE INDEX IF NOT EXISTS idx_companies_failures ON job_monitor_companies(consecutive_failures);
 CREATE INDEX IF NOT EXISTS idx_notifications_notified_at ON job_monitor_notifications(notified_at);
 CREATE INDEX IF NOT EXISTS idx_scores_lookup ON job_monitor_scores(job_hash, resume_profile);
+CREATE INDEX IF NOT EXISTS idx_scores_score ON job_monitor_scores(score DESC);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON job_monitor_applications(status);
+CREATE INDEX IF NOT EXISTS idx_applications_company ON job_monitor_applications(company);
+CREATE INDEX IF NOT EXISTS idx_state_updated ON job_monitor_state(updated_at DESC);

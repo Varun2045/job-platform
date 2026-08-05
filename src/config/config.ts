@@ -32,6 +32,8 @@ export interface Config {
   resendApiKey: string;
   senderEmail: string;
   recipientEmail: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
   matchThreshold: number;
   weights: Weights;
   features: FeatureFlags;
@@ -131,6 +133,8 @@ export const config: Config = {
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   senderEmail: process.env.NOTIFICATION_EMAIL_SENDER || process.env.EMAIL_FROM || 'alerts@yourdomain.com',
   recipientEmail: process.env.NOTIFICATION_EMAIL_RECIPIENT ?? '',
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
+  telegramChatId: process.env.TELEGRAM_CHAT_ID,
   matchThreshold: Number(process.env.MATCH_THRESHOLD ?? 0),
   weights: loadedWeights,
   features: {

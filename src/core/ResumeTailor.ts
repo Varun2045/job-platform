@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Job } from '../companies/Scraper.js';
-import { ResumeMatcher } from './ResumeMatcher.js';
+import { Logger } from './Logger.js';
 
 export interface TailoredResumeResult {
   tailoredResume: string;
@@ -12,7 +12,7 @@ export interface TailoredResumeResult {
 
 export class ResumeTailor {
   public static tailor(job: Job, profile: string): TailoredResumeResult {
-    const explanation = ResumeMatcher.explain(job, profile);
+    const explanation = { missingSkills: [], matchedSkills: [] };
     const resumesDir = path.join(process.cwd(), 'resumes');
     const resumePath = path.join(resumesDir, `${profile.toLowerCase()}.txt`);
 

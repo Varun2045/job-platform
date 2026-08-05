@@ -1,4 +1,5 @@
 import { StorageProvider } from '../storage/StorageProvider.js';
+import { Logger } from './Logger.js';
 
 export interface RecruiterContact {
   id?: string;
@@ -38,7 +39,9 @@ export class RecruiterManager {
           conversation_history: parsed.conversation_history || [],
         };
       }
-    } catch {}
+    } catch (error) {
+      Logger.warn('Failed to parse interview notes', error as Error);
+    }
     return { notes: notesStr, conversation_history: [] };
   }
 
@@ -67,7 +70,7 @@ export class RecruiterManager {
   ): Promise<void> {
     const notesStr = this.serializeNotes(contact.phone, contact.notes, []);
     const referral = {
-      id: contact.id || Math.random().toString(36).substring(2, 11),
+      id: contact.id || crypto.randomUUID().substring(0, 11),
       userId,
       name: contact.name,
       role: 'Recruiter',

@@ -34,7 +34,7 @@ describe('Playwright E2E Browser Flows', () => {
     process.env.SUPABASE_SERVICE_KEY = '';
 
     // Load Express Server
-    await import('../core/server.js');
+    await import('../server.js');
 
     // Launch headless chromium browser
     browser = await chromium.launch({ headless: true });
@@ -95,3 +95,4 @@ describe('Playwright E2E Browser Flows', () => {
     expect(dashboardContent).toBeDefined();
   });
 });
+

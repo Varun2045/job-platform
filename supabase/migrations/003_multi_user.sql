@@ -22,6 +22,10 @@ CREATE POLICY "Allow public read of profiles" ON job_monitor_profiles FOR SELECT
 CREATE POLICY "Allow update of own profile" ON job_monitor_profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Allow insert of own profile" ON job_monitor_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
+-- Indexes for profiles
+CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON job_monitor_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON job_monitor_profiles(role);
+
 -- 2. Resumes Table
 CREATE TABLE IF NOT EXISTS job_monitor_resumes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -36,6 +40,10 @@ CREATE TABLE IF NOT EXISTS job_monitor_resumes (
 -- Enable RLS for resumes
 ALTER TABLE job_monitor_resumes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all actions on own resumes" ON job_monitor_resumes USING (auth.uid() = user_id);
+
+-- Indexes for resumes
+CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON job_monitor_resumes(user_id);
+CREATE INDEX IF NOT EXISTS idx_resumes_profile_name ON job_monitor_resumes(profile_name);
 
 -- 3. Saved Searches Table
 CREATE TABLE IF NOT EXISTS job_monitor_saved_searches (
@@ -98,6 +106,10 @@ CREATE POLICY "Allow admin read all audit logs" ON job_monitor_audit_logs FOR SE
 );
 CREATE POLICY "Allow insert of audit logs" ON job_monitor_audit_logs FOR INSERT WITH CHECK (true);
 
+-- Indexes for audit logs
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON job_monitor_audit_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON job_monitor_audit_logs(created_at DESC);
+
 -- 7. Feature Flags Table
 CREATE TABLE IF NOT EXISTS job_monitor_feature_flags (
     key TEXT PRIMARY KEY,
@@ -126,6 +138,11 @@ ALTER TABLE job_monitor_applications ADD CONSTRAINT job_monitor_applications_pke
 ALTER TABLE job_monitor_applications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all actions on own applications" ON job_monitor_applications USING (auth.uid() = user_id);
 
+-- Indexes for applications with user_id
+CREATE INDEX IF NOT EXISTS idx_applications_user_id ON job_monitor_applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_applications_user_status ON job_monitor_applications(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_applications_updated ON job_monitor_applications(last_updated DESC);
+
 -- Alter job_monitor_scores
 ALTER TABLE job_monitor_scores ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 -- Recreate Primary Key
@@ -133,6 +150,10 @@ ALTER TABLE job_monitor_scores DROP CONSTRAINT IF EXISTS job_monitor_scores_pkey
 ALTER TABLE job_monitor_scores ADD CONSTRAINT job_monitor_scores_pkey PRIMARY KEY (user_id, job_hash, resume_profile, matcher_version);
 ALTER TABLE job_monitor_scores ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all actions on own scores" ON job_monitor_scores USING (auth.uid() = user_id);
+
+-- Indexes for scores with user_id
+CREATE INDEX IF NOT EXISTS idx_scores_user_id ON job_monitor_scores(user_id);
+CREATE INDEX IF NOT EXISTS idx_scores_user_score ON job_monitor_scores(user_id, score DESC);
 
 -- Alter job_monitor_extended_settings
 ALTER TABLE job_monitor_extended_settings ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;

@@ -65,7 +65,7 @@ describe('Performance and Scale Verification Tests', () => {
     }
 
     // Load Express Server
-    await import('../core/server.js');
+    await import('../server.js');
 
     const { HttpClient } = await import('../core/HttpClient.js');
     client = new HttpClient();
@@ -173,39 +173,6 @@ describe('Performance and Scale Verification Tests', () => {
     }
   }, 90000); // 90s timeout for 100-company queue processing
 
-  it('should complete resume match iterations without memory leaks', async () => {
-    const { ResumeMatcher } = await import('../core/ResumeMatcher.js');
 
-    const job = {
-      company: 'LeakTest',
-      id: '1',
-      title: 'TypeScript Developer',
-      location: 'Remote',
-      description: 'We need a backend developer skilled in TypeScript and Node.js.',
-      url: 'https://leak.com/1',
-      source: 'Test',
-      team: 'Engineering',
-      isRemote: true,
-    };
-
-    // Force garbage collection if available
-    if (global.gc) {
-      global.gc();
-    }
-    const startMemory = process.memoryUsage().heapUsed;
-
-    // Run 50 matches
-    for (let i = 0; i < 50; i++) {
-      ResumeMatcher.match(job as any, 'backend');
-    }
-
-    if (global.gc) {
-      global.gc();
-    }
-    const endMemory = process.memoryUsage().heapUsed;
-
-    const memoryIncrease = endMemory - startMemory;
-    // Assert that heap growth remains bounded (less than 20MB increase for local execution)
-    expect(memoryIncrease).toBeLessThan(20 * 1024 * 1024);
-  }, 15000); // 15s timeout
 });
+

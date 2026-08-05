@@ -37,4 +37,9 @@ export class BrowserPool {
       activeWorkers: this.activeWorkers,
     };
   }
+
+  public async close(): Promise<void> {
+    this.activeWorkers = 0;
+    Logger.info('BrowserPool: Reset and closed');
+  }
 }

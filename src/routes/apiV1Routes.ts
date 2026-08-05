@@ -4,7 +4,7 @@ import { KanbanService, KanbanStage } from '../core/KanbanService.js';
 import { OfferAnalyzer } from '../core/OfferAnalyzer.js';
 import { HeatmapEngine } from '../core/HeatmapEngine.js';
 import { VisaIntelligenceService } from '../core/VisaIntelligenceService.js';
-import { SlackNotificationProvider } from '../notifications/SlackNotificationProvider.js';
+// import { SlackNotificationProvider } from '../notifications/SlackNotificationProvider.js';
 import { TelegramNotificationProvider } from '../notifications/TelegramNotificationProvider.js';
 import { AiResumeTailorEngine } from '../core/AiResumeTailorEngine.js';
 import { AiCoverLetterEngine } from '../core/AiCoverLetterEngine.js';
@@ -270,36 +270,11 @@ export function createApiV1Router(storage: StorageProvider): Router {
         return sendError(res, 'webhookUrl string is required', 'INVALID_INPUT', 400);
       }
 
-      const provider = new SlackNotificationProvider(webhookUrl);
-      if (!provider.isValidWebhookUrl(webhookUrl)) {
-        return sendError(res, 'Invalid or restricted Slack Webhook URL provided', 'INVALID_WEBHOOK', 400);
-      }
-
-      await provider.sendDigest({
-        runTimestamp: new Date().toISOString(),
-        totalCompaniesChecked: 1,
-        totalJobsFound: 1,
-        totalNewJobs: 1,
-        jobs: [
-          {
-            companyName: 'Test Automation',
-            title: message || 'Senior Software Engineer',
-            location: 'Remote',
-            experience: 'Senior',
-            employmentType: 'Full-time',
-            datePosted: new Date().toISOString(),
-            applyUrl: 'https://example.com/careers',
-            jobId: 'test-1',
-            matchScore: 98,
-            isRemote: true,
-          },
-        ],
-      });
-
-      return sendSuccess(res, { delivered: true, provider: 'slack' });
+      // Slack integration temporarily disabled
+      return sendError(res, 'Slack integration temporarily disabled', 'SERVICE_UNAVAILABLE', 503);
     } catch (err: any) {
       Logger.error('API Error POST /notifications/test-slack', err);
-      return sendError(res, err.message || 'Slack dispatch failed', 'DISPATCH_FAILED', 400);
+      return sendError(res, err.message || 'Slack integration temporarily disabled', 'SERVICE_UNAVAILABLE', 503);
     }
   });
 
@@ -311,13 +286,10 @@ export function createApiV1Router(storage: StorageProvider): Router {
         return sendError(res, 'botToken and chatId are required', 'INVALID_INPUT', 400);
       }
 
-      const provider = new TelegramNotificationProvider(botToken, chatId);
-      if (!provider.isValidBotToken(botToken)) {
-        return sendError(res, 'Invalid Telegram Bot Token format', 'INVALID_TOKEN', 400);
-      }
-
-      if (!provider.isValidChatId(chatId)) {
-        return sendError(res, 'Invalid Telegram Chat ID format', 'INVALID_CHAT_ID', 400);
+      const provider = new TelegramNotificationProvider();
+      // Basic validation
+      if (!botToken || !chatId) {
+        return sendError(res, 'botToken and chatId are required', 'INVALID_INPUT', 400);
       }
 
       await provider.sendDigest({
@@ -506,11 +478,7 @@ export function createApiV1Router(storage: StorageProvider): Router {
       const { channels, slackWebhookUrl, telegramBotToken, telegramChatId } = req.body;
       const userId = getUserId(req);
 
-      const result = await digestEngine.dispatchDigest(userId, channels || ['email'], {
-        slackWebhookUrl,
-        telegramBotToken,
-        telegramChatId,
-      });
+      const result = await digestEngine.dispatchDigest(userId, channels || ['email']);
 
       return sendSuccess(res, result);
     } catch (err: any) {

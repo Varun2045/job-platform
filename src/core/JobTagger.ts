@@ -1,5 +1,6 @@
 import { ClassificationConfig } from './ClassificationConfig.js';
 import { RuleEngine } from './RuleEngine.js';
+import { Logger } from './Logger.js';
 
 export interface TagResult {
   tags: string[];
@@ -29,7 +30,9 @@ export class JobTagger {
             if (reg.test(String(val))) {
               tagsSet.add(rule.name);
             }
-          } catch {}
+          } catch (error) {
+            Logger.debug('Failed to evaluate regex rule', error as Error);
+          }
         } else if (rule.greaterThan !== undefined && Number(val) > rule.greaterThan) {
           tagsSet.add(rule.name);
         }

@@ -49,7 +49,7 @@ export class PlaywrightExtractor {
     }
 
     // Priority 3: Generic fallback
-    const jobId = `pw-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const jobId = `pw-${Date.now()}-${crypto.randomUUID().substring(0, 7)}`;
     const extracted: NormalizedExtractedJob = {
       company: 'Custom Career Portal',
       title: 'Software Engineer',

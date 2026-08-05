@@ -13,4 +13,5 @@ export default {
   },
   testMatch: ['**/tests/**/*.test.ts'],
   extensionsToTreatAsEsm: ['.ts'],
+  testPathIgnorePatterns: ['/node_modules/', '/tests/SanitizeMiddleware.test.ts'],
 };

@@ -1,0 +1,500 @@
+openapi: 3.0.3
+info:
+  title: Open-Source AI Career Operating System API
+  version: 2.1.0
+  description: >
+    API documentation for job searching, resume parsing, auto-applications, and AI analytics.
+    All write endpoints enforce strict input sanitization and rate limits.
+    
+    ## Security Features
+    - JWT-based authentication for protected endpoints
+    - Strict input sanitization using sanitize-html
+    - Multi-tier rate limiting (general, auth, expensive operations)
+    - Circuit breaker protection for external services
+    - Automatic sensitive data redaction in logs
+    
+    ## Rate Limits
+    - General API: 100 requests per 15 minutes
+    - Authentication: 5 attempts per 15 minutes  
+    - Expensive operations: 10 requests per minute
+    - Write operations: 30 requests per minute
+
+servers:
+  - url: https://api.jobplatform.dev
+    description: Production server
+  - url: http://localhost:3000
+    description: Development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supply JWT token in `Authorization: Bearer <token>` header.
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key authentication for headless automated agents.
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Additional error details (included in development mode)
+
+    JobCreateInput:
+      type: object
+      required:
+        - title
+        - company
+        - location
+      properties:
+        title:
+          type: string
+          description: Job title (HTML tags will be sanitized)
+        company:
+          type: string
+          description: Company name
+        location:
+          type: string
+          description: Job location
+        description:
+          type: string
+          description: Job description (HTML allowed but sanitized)
+        salary:
+          type: string
+          description: Salary range
+        employmentType:
+          type: string
+          enum: [Full-time, Part-time, Contract, Internship]
+          description: Type of employment
+
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+            name:
+              type: string
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/auth/login:
+    post:
+      summary: User authentication
+      security: []
+      description: >
+        Authenticate user with email and password. 
+        Rate limited to 5 attempts per 15 minutes to prevent brute force attacks.
+        Input sanitization applied to email field.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Login successful. Returns JWT token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or payload failed sanitization check.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded (TOO_MANY_AUTH_ATTEMPTS)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/register:
+    post:
+      summary: User registration
+      security: []
+      description: >
+        Register new user account.
+        Rate limited to 5 attempts per 15 minutes.
+        Input sanitization applied to all fields.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                name:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/jobs:
+    get:
+      summary: Get all jobs
+      description: >
+        Retrieve job listings with optional filtering.
+        Rate limited to 100 requests per 15 minutes.
+      parameters:
+        - name: company
+          in: query
+          schema:
+            type: string
+          description: Filter by company name
+        - name: technology
+          in: query
+          schema:
+            type: string
+          description: Filter by technology/skill
+        - name: location
+          in: query
+          schema:
+            type: string
+          description: Filter by location
+        - name: remote
+          in: query
+          schema:
+            type: boolean
+          description: Filter for remote jobs
+      responses:
+        '200':
+          description: Jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create new job application entry
+      description: >
+        Create a new job application record.
+        Rate limited to 30 write operations per minute.
+        Input sanitization applied to all string fields.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreateInput'
+      responses:
+        '201':
+          description: Job application recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  jobHash:
+                    type: string
+                  status:
+                    type: string
+        '400':
+          description: Invalid input or payload failed sanitization check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded (TOO_MANY_WRITE_OPS)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/jobs/{id}:
+    get:
+      summary: Get specific job
+      description: >
+        Retrieve details for a specific job.
+        Rate limited to 100 requests per 15 minutes.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Job ID or hash
+      responses:
+        '200':
+          description: Job details retrieved successfully
+        '404':
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/scraper/monitor:
+    post:
+      summary: Trigger job scraping
+      description: >
+        Trigger scraping for specific company or all companies.
+        Rate limited to 10 expensive operations per minute.
+        Circuit breaker protection applied to external ATS calls.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+                  description: Company ID or 'all'
+                force:
+                  type: boolean
+                  description: Force re-scrape regardless of schedule
+      responses:
+        '200':
+          description: Scraping initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  companiesScraped:
+                    type: integer
+                  jobsFound:
+                    type: integer
+        '400':
+          description: Invalid scraping request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded (TOO_MANY_EXPENSIVE_OPS)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: External service error (circuit breaker may be open)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/scraper/test-selector:
+    post:
+      summary: Test CSS selector for scraping
+      description: >
+        Test CSS selector against raw HTML. 
+        HTML sanitization is skipped for this endpoint.
+        Rate limited to 10 expensive operations per minute.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - html
+                - selector
+              properties:
+                html:
+                  type: string
+                  description: Raw HTML to test against
+                selector:
+                  type: string
+                  description: CSS selector to test
+      responses:
+        '200':
+          description: Selector test completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matches:
+                    type: array
+                    items:
+                      type: string
+                  count:
+                    type: integer
+        '400':
+          description: Invalid selector or HTML
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/admin/*:
+    get:
+      summary: Admin operations
+      description: >
+        Administrative endpoints for system management.
+        Requires admin JWT token.
+        Rate limited to 100 requests per minute.
+        Strict sanitization applied to all inputs.
+      responses:
+        '200':
+          description: Admin operation successful
+        '401':
+          description: Authentication required or insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Admin privileges required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      summary: Health check endpoint
+      security: []
+      description: >
+        System health check including database, circuit breakers, and browser pool status.
+        No rate limiting applied.
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                      circuitBreakers:
+                        type: object
+                      browserPool:
+                        type: object
+        '503':
+          description: System is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [unhealthy]
+                  checks:
+                    type: object

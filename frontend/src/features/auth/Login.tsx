@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Lock, Mail, AlertCircle, User } from 'lucide-react';
 import { useToast } from '../../context/ToastContext.js';
+import { api, ApiError } from '../../lib/apiClient.js';
 
 interface LoginProps {
   onLogin: (token: string, email: string) => void;
@@ -19,24 +20,22 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setErrorMessage(null);
     try {
       const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const response = await api.post<{ token: string; user: { id: string; email: string; role: string; name: string } }>(
+        endpoint,
+        {
           email: data.email,
           password: data.password,
           name: data.name || data.email.split('@')[0]
-        }),
-      });
+        }
+      );
 
-      const body = await res.json();
-      if (!res.ok) {
-        throw new Error(body.error || 'Authentication failed');
+      onLogin(response.token, data.email);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('An unexpected error occurred');
       }
-
-      onLogin(body.token, data.email);
-    } catch (err: any) {
-      setErrorMessage(err.message);
     } finally {
       setLoading(false);
     }
@@ -52,17 +51,16 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     try {
       const origin = window.location.origin;
-      const res = await fetch(`/api/auth/oauth/${provider}?origin=${encodeURIComponent(origin)}`);
-      if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.error || 'Failed to generate OAuth redirect link');
+      const response = await api.get<{ url: string }>(`/api/auth/oauth/${provider}?origin=${encodeURIComponent(origin)}`);
+      if (response.url) {
+        window.location.href = response.url;
       }
-      const body = await res.json();
-      if (body.url) {
-        window.location.href = body.url;
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('Failed to generate OAuth redirect link');
       }
-    } catch (err: any) {
-      setErrorMessage(err.message);
     }
   };
 

@@ -32,7 +32,7 @@ describe('Version 1.1 REST API Routes Integration Tests', () => {
     process.env.SUPABASE_URL = '';
     process.env.SUPABASE_SERVICE_KEY = '';
 
-    await import('../core/server.js');
+    await import('../server.js');
     httpClient = new HttpClient();
   });
 
@@ -207,42 +207,6 @@ describe('Version 1.1 REST API Routes Integration Tests', () => {
     expect(statsRes.data.data.isVerifiedSponsor).toBeDefined();
   });
 
-  // ==========================================
-  // NOTIFICATION ENDPOINTS
-  // ==========================================
-
-  it('POST /api/v1/notifications/test-slack should reject invalid webhook URL with 400', async () => {
-    try {
-      await httpClient.request(`${baseUrl}/api/v1/notifications/test-slack`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          webhookUrl: 'http://127.0.0.1/bad-hook',
-          message: 'Test alert',
-        }),
-      });
-      fail('Should have thrown HTTP 400');
-    } catch (err: any) {
-      expect(err.message).toContain('HTTP Error 400');
-    }
-  });
-
-  it('POST /api/v1/notifications/test-telegram should reject invalid bot token with 400', async () => {
-    try {
-      await httpClient.request(`${baseUrl}/api/v1/notifications/test-telegram`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          botToken: 'invalid_token',
-          chatId: '-100123456789',
-          message: 'Test alert',
-        }),
-      });
-      fail('Should have thrown HTTP 400');
-    } catch (err: any) {
-      expect(err.message).toContain('HTTP Error 400');
-    }
-  });
 
   // ==========================================
   // KEYWORD HEATMAP ENDPOINTS
@@ -269,3 +233,4 @@ describe('Version 1.1 REST API Routes Integration Tests', () => {
     expect(getRes.data.data.matchDensityPct).toBeDefined();
   });
 });
+

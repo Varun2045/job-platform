@@ -2,7 +2,7 @@ import { StorageProvider } from '../storage/StorageProvider.js';
 import { Logger } from './Logger.js';
 import { CareerAgent } from './CareerAgent.js';
 import { SkillGapEngine } from './SkillGapEngine.js';
-import { ResumeMatcher } from './ResumeMatcher.js';
+import { EmailNotificationProvider } from '../notifications/EmailNotificationProvider.js';
 
 export interface DailyBrief {
   userId: string;
@@ -39,14 +39,14 @@ export class DailyBriefService {
         }
       }).length;
 
-      // 2. Fetch best opportunities using deterministic ResumeMatcher scoring
+      // 2. Fetch best opportunities (Scoring removed)
       const profiles = (await storage.getResumeProfiles?.(userId)) || [];
       const primaryProfile = (profiles[0] as any)?.name || 'default';
 
       const scoredOpportunities = allJobs.map((j) => {
         let score = 80;
         try {
-          score = ResumeMatcher.match(j, primaryProfile);
+          score = 0; // AI Matching Removed
         } catch {
           score = 80;
         }

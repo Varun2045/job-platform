@@ -29,7 +29,9 @@ export class BackupService {
             analyses.push(analysis);
           }
         }
-      } catch {}
+      } catch (error) {
+        Logger.warn('Failed to parse job analysis in backup', error as Error);
+      }
     }
 
     return {

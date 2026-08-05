@@ -3,8 +3,9 @@ import { FileStorage } from '../storage/FileStorage.js';
 import { SupabaseStorage } from '../storage/SupabaseStorage.js';
 import { StorageProvider } from '../storage/StorageProvider.js';
 import { config } from '../config/config.js';
+import { ConfigValidator } from '../core/ConfigValidator.js';
 import { Logger } from '../core/Logger.js';
-import { ResumeMatcher } from '../core/ResumeMatcher.js';
+import { SecureLogger } from '../utils/SecureLogger.js';
 import { StatsReporter } from '../core/Telemetry.js';
 
 async function main() {
@@ -23,9 +24,7 @@ async function main() {
     case 'monitor': {
       const target = args[1];
       if (!target) {
-        console.error(
-          'ERROR: Missing target. Specify a company ID, "all", or "priority <number>". Example: npm run monitor google',
-        );
+        SecureLogger.logError('ERROR: Missing target. Specify a company ID, "all", or "priority <number>". Example: npm run monitor google');
         process.exit(1);
       }
 
@@ -35,7 +34,7 @@ async function main() {
       } else if (target.toLowerCase() === 'priority') {
         const priorityNum = Number(args[2]);
         if (isNaN(priorityNum) || priorityNum < 1 || priorityNum > 3) {
-          console.error('ERROR: Missing or invalid priority. Specify a number: 1, 2, or 3.');
+          SecureLogger.logError('ERROR: Missing or invalid priority. Specify a number: 1, 2, or 3.');
           process.exit(1);
         }
         Logger.info(`CLI Triggered: Running monitor for due priority ${priorityNum} companies...`);
@@ -48,14 +47,14 @@ async function main() {
     }
 
     case 'health': {
-      console.log('\n================ SCRAPER COVERAGE HEALTH ================');
+      SecureLogger.logInfo('\n================ SCRAPER COVERAGE HEALTH ================');
       const companies = await storage.getAllCompanies();
       if (companies.length === 0) {
-        console.log('No companies registered.');
+        SecureLogger.logInfo('No companies registered.');
         return;
       }
 
-      console.log(
+      SecureLogger.logInfo(
         String('COMPANY').padEnd(15) +
           ' | ' +
           String('ATS/SCRAPER').padEnd(12) +
@@ -68,7 +67,7 @@ async function main() {
           ' | ' +
           'LAST SCRAPE',
       );
-      console.log('-'.repeat(80));
+      SecureLogger.logInfo('-'.repeat(80));
 
       companies
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -83,7 +82,7 @@ async function main() {
                 ? '\x1b[33mDEGRADED\x1b[0m'
                 : '\x1b[32mHEALTHY\x1b[0m';
 
-          console.log(
+          SecureLogger.logInfo(
             c.name.padEnd(15) +
               ' | ' +
               (c.detected_ats || 'auto').padEnd(12) +
@@ -97,27 +96,27 @@ async function main() {
               (c.last_successful_scrape ? new Date(c.last_successful_scrape).toLocaleString() : 'Never'),
           );
         });
-      console.log('=========================================================\n');
+      SecureLogger.logInfo('=========================================================\n');
       break;
     }
 
     case 'stats': {
-      console.log('\n================ SYSTEM RUN METRICS ================');
+      SecureLogger.logInfo('\n================ SYSTEM RUN METRICS ================');
       const companies = await storage.getEnabledCompanies();
       const stats = StatsReporter.calculate(companies);
 
-      console.log(`Total Companies Active:  ${stats.totalCompanies}`);
-      console.log(`Aggregated Scrapes Run:  ${stats.totalScrapes}`);
-      console.log(`Aggregated Failures:     ${stats.totalFailures} (Rate: ${stats.failureRate}%)`);
-      console.log(`Average Response Time:   ${stats.avgResponseTimeSec} seconds`);
-      console.log('====================================================\n');
+      SecureLogger.logInfo(`Total Companies Active:  ${stats.totalCompanies}`);
+      SecureLogger.logInfo(`Aggregated Scrapes Run:  ${stats.totalScrapes}`);
+      SecureLogger.logInfo(`Aggregated Failures:     ${stats.totalFailures} (Rate: ${stats.failureRate}%)`);
+      SecureLogger.logInfo(`Average Response Time:   ${stats.avgResponseTimeSec} seconds`);
+      SecureLogger.logInfo('====================================================\n');
       break;
     }
 
     case 'resume-score': {
       const target = args[1];
       if (!target) {
-        console.error(
+        SecureLogger.logError(
           'ERROR: Missing target. Specify a company ID to score existing jobs. Example: npm run resume-score microsoft',
         );
         process.exit(1);
@@ -126,25 +125,21 @@ async function main() {
       Logger.info(`CLI Triggered: Resume Score test check for company: ${target}`);
       const companyConfig = await storage.getCompanyConfig(target);
       if (!companyConfig) {
-        console.error(`ERROR: Company config "${target}" not found.`);
+        SecureLogger.logError(`ERROR: Company config "${target}" not found.`);
         process.exit(1);
       }
 
       const jobs = await storage.getCompanyJobs(target);
-      console.log(`\nFound ${jobs.length} stored jobs for ${companyConfig.name}. Running score evaluation:`);
-      console.log('-'.repeat(70));
+      SecureLogger.logInfo(`\nFound ${jobs.length} stored jobs for ${companyConfig.name}. Running score evaluation:`);
+      SecureLogger.logInfo('-'.repeat(70));
 
       const profiles = companyConfig.resume_profiles.length > 0 ? companyConfig.resume_profiles : [];
 
       jobs.forEach((job) => {
-        console.log(`\nJob: ${job.title} | Location: ${job.location}`);
-        profiles.forEach((profile) => {
-          const score = ResumeMatcher.match(job, profile);
-          const status = score >= config.matchThreshold ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m';
-          console.log(`  - Profile [${profile}]: ${score}% Score (${status} vs threshold ${config.matchThreshold}%)`);
-        });
+        SecureLogger.logInfo(`\nJob: ${job.title} | Location: ${job.location}`);
+        SecureLogger.logInfo(`  - Score Evaluation: [REMOVED - AI Matching Disabled]`);
       });
-      console.log('-'.repeat(70) + '\n');
+      SecureLogger.logInfo('-'.repeat(70) + '\n');
       break;
     }
 
@@ -154,7 +149,7 @@ async function main() {
       const notes = args.slice(3).join(' ') || '';
 
       if (!jobHash || !status) {
-        console.error('ERROR: Missing arguments. Usage: node dist/cli/admin.js track <job_hash> <status> [notes]');
+        SecureLogger.logError('ERROR: Missing arguments. Usage: node dist/cli/admin.js track <job_hash> <status> [notes]');
         process.exit(1);
       }
 
@@ -171,7 +166,7 @@ async function main() {
       ];
       const normalizedStatus = validStatuses.find((s) => s.toLowerCase() === status.toLowerCase());
       if (!normalizedStatus) {
-        console.error(`ERROR: Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+        SecureLogger.logError(`ERROR: Invalid status. Must be one of: ${validStatuses.join(', ')}`);
         process.exit(1);
       }
 
@@ -208,7 +203,7 @@ async function main() {
       const val = args[2];
 
       if (!queryType || !val) {
-        console.error(
+        SecureLogger.logError(
           'ERROR: Missing arguments. Usage: node dist/cli/admin.js search <company|tech|score|location|remote|date> <value>',
         );
         process.exit(1);
@@ -220,9 +215,7 @@ async function main() {
       for (const comp of companies) {
         const jobs = await storage.getCompanyJobs(comp.id);
         const scored = jobs.map((j) => {
-          const profiles = comp.resume_profiles.length > 0 ? comp.resume_profiles : [];
-          const bestScore = profiles.length > 0 ? Math.max(...profiles.map((p) => ResumeMatcher.match(j, p))) : 0;
-          return { job: j, score: bestScore };
+          return { job: j, score: 0 };
         });
         allScoredJobs.push(...scored);
       }
@@ -238,25 +231,25 @@ async function main() {
       const { SearchEngine } = await import('../core/SearchEngine.js');
       const results = SearchEngine.search(allScoredJobs, criteria);
 
-      console.log(`\n================ SEARCH RESULTS (${results.length} found) ================`);
+      SecureLogger.logInfo(`\n================ SEARCH RESULTS (${results.length} found) ================`);
       results.forEach(({ job, score }) => {
-        console.log(`- [${score}% Match] ${job.title} at ${job.company} (${job.location})`);
-        console.log(`  URL: ${job.url}`);
-        console.log(`  Hash: ${job.jobHash}\n`);
+        SecureLogger.logInfo(`- [${score}% Match] ${job.title} at ${job.company} (${job.location})`);
+        SecureLogger.logInfo(`  URL: ${job.url}`);
+        SecureLogger.logInfo(`  Hash: ${job.jobHash}\n`);
       });
-      console.log('=======================================================\n');
+      SecureLogger.logInfo('=======================================================\n');
       break;
     }
 
     default:
-      console.error(`ERROR: Unknown command "${command}"`);
+      SecureLogger.logError(`ERROR: Unknown command "${command}"`);
       printHelp();
       process.exit(1);
   }
 }
 
 function printHelp() {
-  console.log(`
+  SecureLogger.logInfo(`
 Job Monitor Admin CLI Utility
 -----------------------------
 Usage:
@@ -271,6 +264,6 @@ Usage:
 }
 
 main().catch((e) => {
-  console.error('CLI Command execution crashed:', e);
+  SecureLogger.logError('CLI Command execution crashed:', e);
   process.exit(1);
 });

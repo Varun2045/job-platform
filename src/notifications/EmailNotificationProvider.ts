@@ -74,14 +74,14 @@ export class EmailNotificationProvider implements NotificationProvider {
 
     const sortedJobs = [...targetJobs];
 
-    const subject = `NEW GRAD & ENTRY LEVEL JOBS ALERT | ${targetJobs.length} Match${targetJobs.length > 1 ? 'es' : ''} Found`;
+    const subject = `NEW GRAD & ENTRY LEVEL JOBS ALERT | ${targetJobs.length} New Job${targetJobs.length > 1 ? 's' : ''} Found`;
 
     const htmlContent = this.buildHtml(digest, sortedJobs);
     const textContent = this.buildPlainText(digest, sortedJobs);
 
     let attempts = 3;
     let success = false;
-    let lastError: any = null;
+    let lastError: Error | null = null;
 
     while (attempts > 0) {
       try {
@@ -101,7 +101,8 @@ export class EmailNotificationProvider implements NotificationProvider {
         }
 
         Logger.info(`Email digest successfully sent. Message ID: ${response.data?.id}`);
-        Telemetry.recordEmail(true);
+        const telemetry = Telemetry.getInstance();
+        telemetry.recordEmail(true);
         success = true;
         break;
       } catch (e: any) {
@@ -118,17 +119,29 @@ export class EmailNotificationProvider implements NotificationProvider {
     }
 
     if (!success) {
-      Telemetry.recordEmail(false);
-      Logger.error('Failed to send email alert via Resend after all retries', lastError);
+      const telemetry = Telemetry.getInstance();
+      telemetry.recordEmail(false);
+      Logger.error('Failed to send email alert via Resend after all retries', lastError || new Error('Unknown error'));
     }
   }
 
   private buildHtml(digest: JobDigest, jobs: typeof digest.jobs): string {
-    // Sort jobs by datePosted (most recent first)
+    // Sort jobs by when they were discovered (most recent discovery first)
+    // Use the current run timestamp as discovery time for all jobs in this batch
+    const discoveryTime = new Date(digest.runTimestamp).getTime();
+    
     const sortedJobs = [...jobs].sort((a, b) => {
-      const dateA = a.datePosted ? new Date(a.datePosted).getTime() : 0;
-      const dateB = b.datePosted ? new Date(b.datePosted).getTime() : 0;
-      return dateB - dateA;
+      // If both have datePosted, sort by posted date (most recent first)
+      if (a.datePosted && b.datePosted) {
+        const dateA = new Date(a.datePosted).getTime();
+        const dateB = new Date(b.datePosted).getTime();
+        return dateB - dateA;
+      }
+      // If one has datePosted, put it first
+      if (a.datePosted && !b.datePosted) return -1;
+      if (!a.datePosted && b.datePosted) return 1;
+      // If neither has datePosted, maintain original order (discovery order)
+      return 0;
     });
 
     const jobListingsHtml = sortedJobs
@@ -239,11 +252,20 @@ export class EmailNotificationProvider implements NotificationProvider {
   }
 
   private buildPlainText(digest: JobDigest, jobs: typeof digest.jobs): string {
-    // Sort jobs by datePosted (most recent first)
+    // Sort jobs by discovery order (most recently discovered first)
+    // Maintain the order they were found in this scraping run
     const sortedJobs = [...jobs].sort((a, b) => {
-      const dateA = a.datePosted ? new Date(a.datePosted).getTime() : 0;
-      const dateB = b.datePosted ? new Date(b.datePosted).getTime() : 0;
-      return dateB - dateA;
+      // If both have datePosted, prioritize by posted date (most recent first)
+      if (a.datePosted && b.datePosted) {
+        const dateA = new Date(a.datePosted).getTime();
+        const dateB = new Date(b.datePosted).getTime();
+        return dateB - dateA;
+      }
+      // If one has datePosted, put it first
+      if (a.datePosted && !b.datePosted) return -1;
+      if (!a.datePosted && b.datePosted) return 1;
+      // If neither has datePosted, maintain discovery order
+      return 0;
     });
 
     const header = `=== RECENT GRADUATE & ENTRY LEVEL JOB DIGEST ===\nRun Timestamp: ${new Date(digest.runTimestamp).toLocaleString()}\nTarget: Entry Level / New Grad (0–2 Yrs Exp) • India & Remote Only\nSorted by: Most Recent First\nTotal Matches: ${sortedJobs.length}\n\n`;

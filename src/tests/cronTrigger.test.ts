@@ -43,7 +43,7 @@ describe('Secure Cron Trigger Webhook API Integration Tests', () => {
     process.env.SUPABASE_SERVICE_KEY = '';
 
     // Load server
-    await import('../core/server.js');
+    await import('../server.js');
 
     // Import HttpClient dynamically to avoid loading before mock setup
     const { HttpClient } = await import('../core/HttpClient.js');
@@ -120,3 +120,4 @@ describe('Secure Cron Trigger Webhook API Integration Tests', () => {
     expect(mockRunOrchestratorCalled).toBe(true);
   });
 });
+

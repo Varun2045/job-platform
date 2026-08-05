@@ -38,7 +38,7 @@ describe('Express REST API Server Integration Tests', () => {
     process.env.LOCAL_VIEWER_PASSWORD = 'viewer123';
 
     // Load server which triggers app.listen on testPort
-    await import('../core/server.js');
+    await import('../server.js');
 
     // Import HttpClient dynamically to avoid loading before mock setup
     const { HttpClient } = await import('../core/HttpClient.js');
@@ -129,3 +129,4 @@ describe('Express REST API Server Integration Tests', () => {
     expect(res.data.text).toBe(rawContent);
   });
 });
+

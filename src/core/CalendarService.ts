@@ -43,7 +43,7 @@ export class CalendarService {
       return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
 
-    const uid = options.id || Math.random().toString(36).substring(2, 15);
+    const uid = options.id || crypto.randomUUID().substring(0, 15);
     const dtstamp = formatICSDate(new Date());
     const dtstart = formatICSDate(options.startTime);
     const dtend = formatICSDate(options.endTime);

@@ -4,6 +4,16 @@ import { GlobalMetrics } from './MetricsExporter.js';
 import { Job, Application } from '../companies/Scraper.js';
 import { Logger } from './Logger.js';
 
+// Helper function to escape HTML content to prevent XSS
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export interface DashboardData {
   runTimestamp: string;
   totalDurationMs: number;
@@ -817,6 +827,16 @@ export class DashboardGenerator {
   <script>
     let rawDashboardData = null;
     let selectedJobHash = null;
+
+    // Helper function to escape HTML content to prevent XSS
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
     let selectedJobDetails = null;
 
     function switchSidebarTab(tab) {
@@ -865,10 +885,10 @@ export class DashboardGenerator {
             const item = document.createElement('div');
             item.className = 'status-item';
             item.innerHTML = '<div class="company-info">' +
-              '<span class="company-name">' + c.name + '</span>' +
-              '<span class="company-meta">Found: ' + c.jobsCount + ' • Scraped in: ' + durationText + '</span>' +
+              '<span class="company-name">' + escapeHtml(c.name) + '</span>' +
+              '<span class="company-meta">Found: ' + escapeHtml(String(c.jobsCount)) + ' - Scraped in: ' + escapeHtml(durationText) + '</span>' +
               '</div>' +
-              '<span class="status-badge ' + statusClass + '">' + c.status + '</span>';
+              '<span class="status-badge ' + statusClass + '">' + escapeHtml(c.status) + '</span>';
             statusList.appendChild(item);
           });
 
@@ -882,8 +902,11 @@ export class DashboardGenerator {
         document.getElementById('score-filter').addEventListener('change', renderFilteredMatches);
 
       } catch (err) {
-        console.error('Error parsing dashboard.json', err);
-        document.getElementById('matches-container').innerHTML = '<div class="no-matches" style="color: var(--danger);">Error loading metrics: ' + err.message + '</div>';
+        Logger.logError('Error parsing dashboard.json', err as Error);
+        const matchesContainer = document.getElementById('matches-container');
+        if (matchesContainer) {
+          matchesContainer.textContent = 'Error loading metrics: ' + (err as Error).message;
+        }
       }
 
       // Load Analytics separately
@@ -905,17 +928,17 @@ export class DashboardGenerator {
             const item = document.createElement('div');
             item.className = 'trend-bar-container';
             item.innerHTML = '<div class="trend-bar-label">' +
-              '<span>' + c.name + '</span>' +
-              '<span>' + c.jobsCount + ' jobs</span>' +
+              '<span>' + escapeHtml(c.name) + '</span>' +
+              '<span>' + escapeHtml(String(c.jobsCount)) + ' jobs</span>' +
               '</div>' +
               '<div class="trend-bar-bg">' +
-              '<div class="trend-bar-fill" style="width: ' + pct + '%;"></div>' +
+              '<div class="trend-bar-fill" style="width: ' + escapeHtml(String(pct)) + '%;"></div>' +
               '</div>';
             activeCont.appendChild(item);
           });
         }
       } catch (e) {
-        console.warn('analytics.json not found or failed to load. Skipping trends load.', e);
+        Logger.logWarn('analytics.json not found or failed to load. Skipping trends load.', e as Error);
       }
     }
 
@@ -941,10 +964,10 @@ export class DashboardGenerator {
         const item = document.createElement('div');
         item.className = 'status-item';
         item.innerHTML = '<div class="company-info">' +
-          '<span class="company-name">' + a.company + '</span>' +
-          '<span class="company-meta">ID: ' + a.jobId + ' • Notes: ' + (a.notes || 'None') + '</span>' +
+          '<span class="company-name">' + escapeHtml(a.company) + '</span>' +
+          '<span class="company-meta">ID: ' + escapeHtml(a.jobId) + ' • Notes: ' + escapeHtml(a.notes || 'None') + '</span>' +
           '</div>' +
-          '<span class="status-badge healthy">' + a.status + '</span>';
+          '<span class="status-badge healthy">' + escapeHtml(a.status) + '</span>';
         trackerList.appendChild(item);
       });
     }
@@ -1040,12 +1063,17 @@ export class DashboardGenerator {
       });
 
       const container = document.getElementById('matches-container');
-      container.innerHTML = '';
+      if (container) {
+        container.textContent = '';
+      }
 
-      document.getElementById('matches-count-badge').innerText = filtered.length + ' matched';
+      const matchesCountBadge = document.getElementById('matches-count-badge');
+      if (matchesCountBadge) {
+        matchesCountBadge.textContent = filtered.length + ' matched';
+      }
 
-      if (filtered.length === 0) {
-        container.innerHTML = '<div class="no-matches">No postings matching search criteria.</div>';
+      if (filtered.length === 0 && container) {
+        container.textContent = 'No postings matching search criteria.';
         return;
       }
 
@@ -1056,15 +1084,15 @@ export class DashboardGenerator {
         card.setAttribute('onclick', 'toggleExplanation("' + id + '")');
 
         const tags = [
-          '<span class="tag">📍 ' + m.location + '</span>',
-          '<span class="tag">💼 ' + (m.employmentType || 'Full-time') + '</span>',
-          '<span class="tag">🎓 ' + (m.experience || 'Entry') + '</span>'
+          '<span class="tag">📍 ' + escapeHtml(m.location) + '</span>',
+          '<span class="tag">💼 ' + escapeHtml(m.employmentType || 'Full-time') + '</span>',
+          '<span class="tag">🎓 ' + escapeHtml(m.experience || 'Entry') + '</span>'
         ];
         if (m.isRemote) tags.push('<span class="tag accent">🌐 Remote</span>');
         
         const trackingStatus = (rawDashboardData.applications || []).find(a => a.jobHash === m.jobHash);
         if (trackingStatus) {
-          tags.push('<span class="tag success">💼 ' + trackingStatus.status + '</span>');
+          tags.push('<span class="tag success">💼 ' + escapeHtml(trackingStatus.status) + '</span>');
         }
 
         const dateStr = m.datePosted ? new Date(m.datePosted).toLocaleDateString() : 'Just now';
@@ -1072,10 +1100,10 @@ export class DashboardGenerator {
         let explainHtml = '';
         if (m.explanation) {
           const exp = m.explanation;
-          const matchedList = exp.matchedSkills.map(s => '<span class="skill-badge matched">✓ ' + s + '</span>').join(' ');
-          const missingList = exp.missingSkills.map(s => '<span class="skill-badge missing">✗ ' + s + '</span>').join(' ');
-          const strengthsList = exp.strengths.map(s => '<li>' + s + '</li>').join('');
-          const weaknessesList = exp.weaknesses.map(w => '<li>' + w + '</li>').join('');
+          const matchedList = exp.matchedSkills.map(s => '<span class="skill-badge matched">✓ ' + escapeHtml(s) + '</span>').join(' ');
+          const missingList = exp.missingSkills.map(s => '<span class="skill-badge missing">✗ ' + escapeHtml(s) + '</span>').join(' ');
+          const strengthsList = exp.strengths.map(s => '<li>' + escapeHtml(s) + '</li>').join('');
+          const weaknessesList = exp.weaknesses.map(w => '<li>' + escapeHtml(w) + '</li>').join('');
 
           explainHtml = '<div class="explanation-panel" id="explain-' + id + '" onclick="event.stopPropagation()">' +
             '<div class="explain-title">Skills Overview</div>' +
@@ -1096,21 +1124,23 @@ export class DashboardGenerator {
           '</div>';
         }
 
+        const card = document.createElement('div');
+        card.className = 'match-card';
         card.innerHTML = '<div class="match-header">' +
             '<div>' +
-              '<span class="match-company">' + m.company + '</span>' +
-              '<h3 class="match-title">' + m.title + '</h3>' +
+              '<span class="match-company">' + escapeHtml(m.company) + '</span>' +
+              '<h3 class="match-title">' + escapeHtml(m.title) + '</h3>' +
             '</div>' +
-            '<span class="score-badge">' + m.matchScore + '% Match</span>' +
+            '<span class="score-badge">' + escapeHtml(String(m.matchScore)) + '% Match</span>' +
           '</div>' +
           '<div class="match-tags">' +
             tags.join('') +
           '</div>' +
           '<div class="match-footer">' +
-            '<span class="match-date">Posted on: ' + dateStr + '</span>' +
+            '<span class="match-date">Posted on: ' + escapeHtml(dateStr) + '</span>' +
             '<div class="btn-group">' +
-              '<button class="action-btn" onclick="openTrackModal(\'' + m.jobHash + '\', \'' + m.company + '\', \'' + (m.jobId || 'N/A') + '\', event)">Track Status</button>' +
-              '<a href="' + m.url + '" target="_blank" class="apply-btn" onclick="event.stopPropagation()">View Job</a>' +
+              '<button class="action-btn" onclick="openTrackModal(\'' + escapeHtml(m.jobHash) + '\', \'' + escapeHtml(m.company) + '\', \'' + escapeHtml(m.jobId || 'N/A') + '\', event)">Track Status</button>' +
+              '<a href="' + escapeHtml(m.url) + '" target="_blank" class="apply-btn" onclick="event.stopPropagation()">View Job</a>' +
             '</div>' +
           '</div>' +
           explainHtml;

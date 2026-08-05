@@ -87,6 +87,23 @@ export class Logger {
     Logger.log(LogLevel.CRITICAL, message, { ...errorMeta, ...meta });
   }
 
+  // Aliases for compatibility
+  public static logDebug(message: string, meta?: Record<string, any>) {
+    Logger.debug(message, meta);
+  }
+
+  public static logInfo(message: string, meta?: Record<string, any>) {
+    Logger.info(message, meta);
+  }
+
+  public static logWarn(message: string, meta?: Record<string, any>) {
+    Logger.warn(message, meta);
+  }
+
+  public static logError(message: string, error?: Error | string, meta?: Record<string, any>) {
+    Logger.error(message, error, meta);
+  }
+
   // Helper for company-specific metrics logging
   public static logCompanyRun(
     company: string,

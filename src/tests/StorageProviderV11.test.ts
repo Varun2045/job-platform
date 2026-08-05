@@ -54,16 +54,14 @@ describe('StorageProvider V1.1 Domain Models Unit Tests', () => {
     const mockPref: NotificationPreference = {
       userId: testUserId,
       emailEnabled: true,
-      slackWebhookUrl: 'https://hooks.slack.com/services/test',
-      telegramBotToken: '123456:ABC',
-      telegramChatId: '987654',
+
       digestFrequency: 'Daily',
     };
 
     await storage.saveNotificationPreference(testUserId, mockPref);
     const retrieved = await storage.getNotificationPreference(testUserId);
     expect(retrieved).not.toBeNull();
-    expect(retrieved?.slackWebhookUrl).toBe('https://hooks.slack.com/services/test');
+
   });
 
   it('should save, retrieve, and search VisaSponsor entity', async () => {

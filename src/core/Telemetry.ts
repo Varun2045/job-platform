@@ -14,26 +14,76 @@ export interface TelemetryMetrics {
   uptimeSeconds: number;
 }
 
+/**
+ * Thread-safe Telemetry class using instance-based state
+ * to avoid race conditions in multi-worker scenarios
+ */
 export class Telemetry {
-  public static activeWorkers = 0;
-  public static queueSize = 0;
-  public static totalRequests = 0;
-  private static totalLatencyMs = 0;
-  public static emailSuccessCount = 0;
-  public static emailFailureCount = 0;
-  public static lastSchedulerRun: string | null = null;
-  public static schedulerStatus: 'idle' | 'running' | 'healthy' | 'degraded' | 'disabled' = 'healthy';
+  private static instance: Telemetry;
+  
+  // Instance-based state to avoid race conditions
+  private activeWorkers: number = 0;
+  private queueSize: number = 0;
+  private totalRequests: number = 0;
+  private totalLatencyMs: number = 0;
+  private emailSuccessCount: number = 0;
+  private emailFailureCount: number = 0;
+  private lastSchedulerRun: string | null = null;
+  private schedulerStatus: 'idle' | 'running' | 'healthy' | 'degraded' | 'disabled' = 'healthy';
+  private startTime: number = Date.now();
 
-  public static recordRequest(latencyMs: number): void {
+  private constructor() {}
+
+  static getInstance(): Telemetry {
+    if (!Telemetry.instance) {
+      Telemetry.instance = new Telemetry();
+    }
+    return Telemetry.instance;
+  }
+
+  // Reset state (useful for testing)
+  reset(): void {
+    this.activeWorkers = 0;
+    this.queueSize = 0;
+    this.totalRequests = 0;
+    this.totalLatencyMs = 0;
+    this.emailSuccessCount = 0;
+    this.emailFailureCount = 0;
+    this.lastSchedulerRun = null;
+    this.schedulerStatus = 'healthy';
+    this.startTime = Date.now();
+  }
+
+  setActiveWorkers(count: number): void {
+    this.activeWorkers = Math.max(0, count);
+  }
+
+  incrementActiveWorkers(): void {
+    this.activeWorkers++;
+  }
+
+  decrementActiveWorkers(): void {
+    this.activeWorkers = Math.max(0, this.activeWorkers - 1);
+  }
+
+  setQueueSize(size: number): void {
+    this.queueSize = Math.max(0, size);
+  }
+
+  setSchedulerStatus(status: 'idle' | 'running' | 'healthy' | 'degraded' | 'disabled'): void {
+    this.schedulerStatus = status;
+  }
+
+  recordRequest(latencyMs: number): void {
     this.totalRequests++;
     this.totalLatencyMs += latencyMs;
   }
 
-  public static getAverageLatency(): number {
+  getAverageLatency(): number {
     return this.totalRequests > 0 ? Math.round(this.totalLatencyMs / this.totalRequests) : 0;
   }
 
-  public static recordEmail(success: boolean): void {
+  recordEmail(success: boolean): void {
     if (success) {
       this.emailSuccessCount++;
     } else {
@@ -41,7 +91,11 @@ export class Telemetry {
     }
   }
 
-  public static getMetricsReport(dbStatus: 'connected' | 'disconnected'): TelemetryMetrics {
+  recordSchedulerRun(): void {
+    this.lastSchedulerRun = new Date().toISOString();
+  }
+
+  getMetricsReport(dbStatus: 'connected' | 'disconnected'): TelemetryMetrics {
     const mem = process.memoryUsage();
     return {
       activeWorkers: this.activeWorkers,
@@ -54,11 +108,11 @@ export class Telemetry {
       schedulerStatus: this.schedulerStatus,
       cpuUsage: os.loadavg()[0],
       memoryUsageBytes: mem.heapUsed,
-      uptimeSeconds: Math.round(process.uptime()),
+      uptimeSeconds: Math.round((Date.now() - this.startTime) / 1000),
     };
   }
 
-  public static toPrometheusFormat(metrics: TelemetryMetrics): string {
+  toPrometheusFormat(metrics: TelemetryMetrics): string {
     const lines: string[] = [];
 
     lines.push('# HELP job_monitor_active_workers Active parallel scraper workers');
@@ -108,7 +162,11 @@ export class Telemetry {
    * Safely aggregates scraper run statistics across all active companies,
    * handling missing or partial statistics and preventing divide-by-zero.
    */
-  public static calculateScraperStats(companies: any[]): SystemStats {
+  static calculateScraperStats(companies: Array<{
+    total_scrapes?: number;
+    total_failures?: number;
+    avg_response_time_ms?: number;
+  }>): SystemStats {
     const totalCompanies = companies.length;
     const totalScrapes = companies.reduce((acc, c) => acc + (c.total_scrapes ?? 0), 0);
     const totalFailures = companies.reduce((acc, c) => acc + (c.total_failures ?? 0), 0);

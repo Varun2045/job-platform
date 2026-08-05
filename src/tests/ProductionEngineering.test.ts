@@ -13,14 +13,15 @@ describe('Version 2.2.0 Production Engineering Checks', () => {
   });
 
   it('should verify Telemetry tracking registry metrics updates', () => {
-    Telemetry.activeWorkers = 2;
-    Telemetry.queueSize = 10;
-    Telemetry.recordRequest(120);
-    Telemetry.recordRequest(80);
-    Telemetry.recordEmail(true);
-    Telemetry.recordEmail(false);
+    const telemetry = Telemetry.getInstance();
+    telemetry.setActiveWorkers(2);
+    telemetry.setQueueSize(10);
+    telemetry.recordRequest(120);
+    telemetry.recordRequest(80);
+    telemetry.recordEmail(true);
+    telemetry.recordEmail(false);
 
-    const report = Telemetry.getMetricsReport('connected');
+    const report = telemetry.getMetricsReport('connected');
 
     expect(report.activeWorkers).toBe(2);
     expect(report.queueSize).toBe(10);
@@ -29,7 +30,7 @@ describe('Version 2.2.0 Production Engineering Checks', () => {
     expect(report.emailSuccessCount).toBeGreaterThanOrEqual(1);
     expect(report.emailFailureCount).toBeGreaterThanOrEqual(1);
 
-    const promOutput = Telemetry.toPrometheusFormat(report);
+    const promOutput = telemetry.toPrometheusFormat(report);
     expect(promOutput).toContain('job_monitor_active_workers 2');
     expect(promOutput).toContain('job_monitor_queue_size 10');
     expect(promOutput).toContain('job_monitor_db_connected 1');

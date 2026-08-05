@@ -15,6 +15,8 @@
  * - Email integration for outreach
  */
 
+import { Logger } from './Logger.js';
+
 export interface LinkedInConnection {
   id: string;
   name: string;
@@ -367,7 +369,7 @@ ${context.body}`;
       await navigator.clipboard.writeText(text);
       return true;
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      Logger.logError('Failed to copy to clipboard:', error as Error);
       return false;
     }
   }

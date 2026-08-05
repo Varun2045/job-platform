@@ -42,8 +42,9 @@ export class TaskQueue {
     const activeTasks = new Set<Promise<any>>();
     const results: TaskResult[] = [];
     const tasksToProcess = [...this.queue];
-
-    Telemetry.queueSize = tasksToProcess.length;
+    
+    const telemetry = Telemetry.getInstance();
+    telemetry.setQueueSize(tasksToProcess.length);
 
     Logger.info(
       `Starting priority queue execution. Total tasks: ${tasksToProcess.length}, Concurrency: ${concurrency}`,
@@ -53,8 +54,8 @@ export class TaskQueue {
       if (tasksToProcess.length === 0) return;
 
       const task = tasksToProcess.shift()!;
-      Telemetry.queueSize = tasksToProcess.length;
-      Telemetry.activeWorkers++;
+      telemetry.setQueueSize(tasksToProcess.length);
+      telemetry.incrementActiveWorkers();
 
       const taskPromise = (async () => {
         try {
@@ -65,7 +66,7 @@ export class TaskQueue {
           Logger.error(`Task rejected: ${task.id}`, err as any);
           results.push({ id: task.id, status: 'rejected', reason: err });
         } finally {
-          Telemetry.activeWorkers--;
+          telemetry.decrementActiveWorkers();
         }
       })();
 

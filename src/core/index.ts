@@ -10,6 +10,7 @@ import { ScraperRegistry } from '../companies/ScraperRegistry.js';
 import { JobNormalizer } from './JobNormalizer.js';
 import { ComparisonEngine } from './ComparisonEngine.js';
 import { EmailNotificationProvider } from '../notifications/EmailNotificationProvider.js';
+import { TelegramNotificationProvider } from '../notifications/TelegramNotificationProvider.js';
 import { MetricsExporter, GlobalMetrics } from './MetricsExporter.js';
 import { DashboardGenerator } from './DashboardGenerator.js';
 import { CompanyConfig, Job, RawJob } from '../companies/Scraper.js';
@@ -18,6 +19,7 @@ import { FallbackScraper } from '../companies/FallbackScraper.js';
 import { AtsDetector } from './AtsDetector.js';
 import { JobFilter } from './JobFilter.js';
 import { CsvExporter } from './CsvExporter.js';
+import { ExperienceLevelDetector } from './ExperienceLevelDetector.js';
 import { DailyReportGenerator } from './DailyReportGenerator.js';
 import { AnalyticsGenerator } from './AnalyticsGenerator.js';
 import { WeeklyReportGenerator } from './WeeklyReportGenerator.js';
@@ -33,7 +35,8 @@ export async function runOrchestrator(
   } = {},
 ): Promise<void> {
   const startTime = Date.now();
-  Telemetry.schedulerStatus = 'running';
+  const telemetry = Telemetry.getInstance();
+  telemetry.setSchedulerStatus('running');
   Logger.info('Initializing Job Monitor Platform...');
 
   // 1. Select Storage Provider
@@ -52,16 +55,20 @@ export async function runOrchestrator(
     try {
       Logger.info('Acquiring distributed Postgres advisory lock...');
       const supabase = (storage as any).client;
-      // Acquire session-level lock (8675309 is the lock ID key)
-      const { data, error } = await supabase.rpc('pg_try_advisory_lock', { '': 8675309 });
+      
+      // Use atomic function to check and acquire the lock
+      const { data, error } = await supabase.rpc('try_advisory_lock', { 
+        lock_key: 8675309 
+      });
 
       if (error) throw error;
 
-      const lockResult = data ?? (await supabase.select('pg_try_advisory_lock(8675309)')).data;
-      if (!lockResult) {
+      // Function returns true if lock was acquired, false if already held
+      if (data === false) {
         Logger.warn('Another monitor instance is currently running. Exiting to prevent execution race.');
         return;
       }
+      
       Logger.info('Distributed lock acquired successfully.');
     } catch (e) {
       Logger.warn(
@@ -451,12 +458,55 @@ export async function runOrchestrator(
       const locLower = (job.location || '').toLowerCase();
       const countryLower = (job.country || '').toLowerCase();
       
+      // Use ExperienceLevelDetector to filter senior roles
+      if (ExperienceLevelDetector.isSeniorOrAbove(job.title, job.description)) {
+        return false;
+      }
+      
+      // Foreign locations to explicitly reject
+      const FOREIGN_LOCATIONS = [
+        'united states', 'usa', 'us', 'uk', 'united kingdom', 'london', 'beijing', 'china',
+        'brazil', 'são paulo', 'sao paulo', 'germany', 'munich', 'berlin', 'tokyo', 'japan',
+        'france', 'paris', 'canada', 'toronto', 'vancouver', 'australia', 'sydney', 'singapore',
+        'europe', 'latam', 'apac', 'emea', 'netherlands', 'amsterdam', 'ireland', 'dublin',
+        'spain', 'madrid', 'italy', 'rome', 'switzerland', 'zurich', 'sweden', 'stockholm',
+        'norway', 'oslo', 'denmark', 'copenhagen', 'finland', 'helsinki', 'poland', 'warsaw',
+        'belgium', 'brussels', 'austria', 'vienna', 'czech republic', 'prague', 'south korea',
+        'seoul', 'taiwan', 'taipei', 'hong kong', 'malaysia', 'kuala lumpur', 'thailand', 'bangkok',
+        'vietnam', 'ho chi minh', 'philippines', 'manila', 'indonesia', 'jakarta', 'uae', 'dubai',
+        'saudi arabia', 'riyadh', 'israel', 'tel aviv', 'south africa', 'johannesburg', 'egypt', 'cairo',
+        'mexico', 'mexico city', 'argentina', 'buenos aires', 'colombia', 'bogota', 'chile', 'santiago',
+        'peru', 'lima', 'new zealand', 'auckland'
+      ];
+      
+      // Reject explicit foreign locations
+      const isExplicitForeign = FOREIGN_LOCATIONS.some((fLoc) => locLower.includes(fLoc));
+      if (isExplicitForeign) {
+        return false;
+      }
+      
+      // Reject foreign countries
+      const isForeignCountry = !!(
+        countryLower && 
+        countryLower !== 'india' && 
+        countryLower !== 'in' &&
+        !/india|in\./i.test(countryLower)
+      );
+      if (isForeignCountry) {
+        return false;
+      }
+      
       const isRemote = !!(
         job.isRemote ||
         locLower.includes('remote') ||
         locLower.includes('work from home') ||
         locLower.includes('anywhere')
       );
+
+      // For remote jobs, ensure they're not explicitly foreign
+      if (isRemote && isExplicitForeign) {
+        return false;
+      }
 
       const isIndia = !!(
         countryLower === 'india' ||
@@ -524,11 +574,23 @@ export async function runOrchestrator(
 
       try {
         await emailProvider.sendDigest(digest);
+        
+        // Also send to Telegram if configured
+        if (config.telegramBotToken && config.telegramChatId) {
+          try {
+            const telegramProvider = new TelegramNotificationProvider();
+            await telegramProvider.sendDigest(digest);
+            Logger.info('Telegram digest sent successfully');
+          } catch (e: any) {
+            Logger.warn('Failed to send Telegram digest (continuing with email notification)', e);
+          }
+        }
+        
         for (const alert of finalAlertList) {
           await storage.saveJobNotified(alert.job.jobHash);
         }
       } catch (e: any) {
-        Logger.error('Failed to send daily/weekly email digest', e);
+        Logger.error('Failed to send notifications', e);
       }
     } else {
       Logger.info(
@@ -645,7 +707,9 @@ export async function runOrchestrator(
         if (fs.existsSync(historyPath)) {
           try {
             history = JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
-          } catch {}
+          } catch (error) {
+            Logger.warn('Failed to parse history file', error as Error);
+          }
         }
 
         const newLogs = globalMetrics.companies.map((c) => ({
@@ -667,8 +731,9 @@ export async function runOrchestrator(
       await BackupService.triggerAutoBackup(storage);
     }
 
-    Telemetry.lastSchedulerRun = new Date().toISOString();
-    Telemetry.schedulerStatus = totalFailuresCount > 0 ? 'degraded' : 'healthy';
+    const telemetry = Telemetry.getInstance();
+    telemetry.recordSchedulerRun();
+    telemetry.setSchedulerStatus(totalFailuresCount > 0 ? 'degraded' : 'healthy');
     Logger.info(
       `Job Monitor Platform run completed in ${(totalDurationMs / 1000).toFixed(1)}s. Total matches: ${finalAlertList.length + finalUpdatedAlertList.length}`,
     );

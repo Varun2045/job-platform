@@ -2,16 +2,17 @@ import { ConfigValidator } from '../core/ConfigValidator.js';
 import { HybridExperienceClassifier } from '../core/HybridExperienceClassifier.js';
 import { DepartmentClassifier } from '../core/DepartmentClassifier.js';
 import { JobTagger } from '../core/JobTagger.js';
+import { Logger } from '../core/Logger.js';
 
-console.log('=== Classification System Validation ===\n');
+Logger.logInfo('=== Classification System Validation ===\n');
 
 // 1. Validate JSON Configurations
 const report = ConfigValidator.validateAll();
 if (report.valid) {
-  console.log('✅ Configuration Files: 100% Valid');
+  Logger.logInfo('✅ Configuration Files: 100% Valid');
 } else {
-  console.error('❌ Configuration Files Errors:');
-  report.errors.forEach((e) => console.error(`  - ${e}`));
+  Logger.logError('❌ Configuration Files Errors:');
+  report.errors.forEach((e) => Logger.logError(`  - ${e}`));
   process.exit(1);
 }
 
@@ -34,16 +35,16 @@ const sampleJobs = [
   },
 ];
 
-console.log('\n=== Benchmark Sample Classifications ===');
+Logger.logInfo('\n=== Benchmark Sample Classifications ===');
 for (const sample of sampleJobs) {
   const exp = HybridExperienceClassifier.classify(sample.title, sample.description, '', sample.company);
   const dept = DepartmentClassifier.classify(sample.title, sample.description);
   const tag = JobTagger.tag(sample);
 
-  console.log(`\nTitle: "${sample.title}" (${sample.company})`);
-  console.log(`  - Experience Level: ${exp.level} (Confidence: ${exp.confidence}%, Source: ${exp.source})`);
-  console.log(`  - Primary Dept:     ${dept.primaryDepartment} (Secondary: ${dept.secondaryDepartments.join(', ') || 'None'})`);
-  console.log(`  - Tags:             ${tag.tags.join(', ')}`);
+  Logger.logInfo(`\nTitle: "${sample.title}" (${sample.company})`);
+  Logger.logInfo(`  - Experience Level: ${exp.level} (Confidence: ${exp.confidence}%, Source: ${exp.source})`);
+  Logger.logInfo(`  - Primary Dept:     ${dept.primaryDepartment} (Secondary: ${dept.secondaryDepartments.join(', ') || 'None'})`);
+  Logger.logInfo(`  - Tags:             ${tag.tags.join(', ')}`);
 }
 
-console.log('\n✅ Offline Classification Validation Completed Successfully!');
+Logger.logInfo('\n✅ Offline Classification Validation Completed Successfully!');

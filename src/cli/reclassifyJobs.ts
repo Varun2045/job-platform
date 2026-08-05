@@ -4,15 +4,16 @@ import { StorageProvider } from '../storage/StorageProvider.js';
 import { config } from '../config/config.js';
 import { JobNormalizer } from '../core/JobNormalizer.js';
 import { Job } from '../companies/Scraper.js';
+import { Logger } from '../core/Logger.js';
 
-console.log('=== Batch Historical Job Reclassification Tool ===\n');
+Logger.logInfo('=== Batch Historical Job Reclassification Tool ===\n');
 
 async function run() {
   const storage: StorageProvider = config.isLocal ? new FileStorage() : new SupabaseStorage();
   await storage.initialize();
 
   const jobs = await storage.getAllJobs();
-  console.log(`Loaded ${jobs.length} stored job records.`);
+  Logger.logInfo(`Loaded ${jobs.length} stored job records.`);
 
   const companyJobsMap: Record<string, Job[]> = {};
 
@@ -69,10 +70,10 @@ async function run() {
     await storage.saveCompanyJobs(cId, updatedJobs);
   }
 
-  console.log(`\n✅ Successfully reclassified ${reclassified} historical jobs.`);
+  Logger.logInfo(`\n✅ Successfully reclassified ${reclassified} historical jobs.`);
 }
 
 run().catch((err) => {
-  console.error('❌ Reclassification Error:', err);
+  Logger.logError('❌ Reclassification Error:', err);
   process.exit(1);
 });

@@ -27,14 +27,13 @@
 
 ## ✨ Key Features
 
-- 🧩 **Manifest V3 Chrome Extension**: One-click job capture from LinkedIn, Greenhouse, Lever, Workday, Ashby, Wellfound, SmartRecruiters, Taleo, Indeed, and Glassdoor with offline queueing (`chrome.storage.local`).
-- 🤖 **Playwright Fallback & 50 Company Plugins**: Plugin-based fallback layer with dedicated extractors for 50 tech giants (Google, Microsoft, Amazon, Meta, Apple, NVIDIA, OpenAI, Stripe, Netflix, etc.).
+-  **Playwright Fallback & 50 Company Plugins**: Plugin-based fallback layer with dedicated extractors for 50 tech giants (Google, Microsoft, Amazon, Meta, Apple, NVIDIA, OpenAI, Stripe, Netflix, etc.).
 - 🌐 **Supported ATS Explorer**: Dynamic frontend dashboard showing ATS coverage, company mappings, and real-time URL parser diagnostic testing.
 - 📥 **Job Inbox Queue**: Intermediate staging queue separating raw web captures from active application cards.
 - 📋 **11-Stage Kanban Tracker**: Visual drag-and-drop workflow tracking applications through customizable lifecycle stages with single-row fractional sorting algorithms ($O(1)$ updates).
 - 🧠 **Zero-Fabrication AI Workspaces**: Keyword match density heatmaps, ATS bullet optimization suggestions, and interview topic extraction without experience hallucination.
 - ✉️ **Tone-Tailored Cover Letter Generator**: Generates customized cover letter drafts matching specific company profiles with customizable tone and length constraints.
-- 🔔 **Multi-Channel Daily Career Digest**: Scheduled digest dispatching notifications via Email, Slack Webhooks (with SSRF protection), and Telegram Bots.
+- 🔔 **Daily Career Digest**: Scheduled digest dispatching notifications via Email.
 - 📅 **Calendar `.ics` Sync**: One-click RFC-5545 calendar invite export for Google Calendar, Apple Calendar, and Outlook.
 
 ---

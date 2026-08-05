@@ -1,12 +1,17 @@
 import crypto from 'crypto';
 import { RawJob, Job, CompanyConfig } from '../companies/Scraper.js';
-import { SkillNormalizer } from './ResumeMatcher.js';
 import { HybridExperienceClassifier } from './HybridExperienceClassifier.js';
 import { DepartmentClassifier } from './DepartmentClassifier.js';
 import { JobTagger } from './JobTagger.js';
 import { FreshnessCalculator } from './FreshnessCalculator.js';
 import { ClassificationConfig } from './ClassificationConfig.js';
 import { ClassificationMetrics } from './ClassificationMetrics.js';
+
+class SkillNormalizer {
+  static normalizeText(text: string): string {
+    return text.trim().replace(/\s+/g, ' ');
+  }
+}
 
 export class JobNormalizer {
   /**

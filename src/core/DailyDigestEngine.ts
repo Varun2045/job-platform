@@ -1,6 +1,4 @@
 import { StorageProvider } from '../storage/StorageProvider.js';
-import { SlackNotificationProvider } from '../notifications/SlackNotificationProvider.js';
-import { TelegramNotificationProvider } from '../notifications/TelegramNotificationProvider.js';
 import { Logger } from './Logger.js';
 
 export interface DailyDigestPayload {
@@ -49,8 +47,7 @@ export class DailyDigestEngine {
 
   public async dispatchDigest(
     userId: string,
-    channels: Array<'slack' | 'telegram' | 'email'>,
-    options?: { slackWebhookUrl?: string; telegramBotToken?: string; telegramChatId?: string },
+    channels: Array<'email'>
   ): Promise<DigestDispatchResult> {
     const payload = await this.compileDigest(userId);
     const dispatched: string[] = [];
@@ -62,26 +59,6 @@ export class DailyDigestEngine {
       totalNewJobs: payload.totalApplicationsTracked,
       jobs: [],
     };
-
-    if (channels.includes('slack') && options?.slackWebhookUrl) {
-      try {
-        const provider = new SlackNotificationProvider(options.slackWebhookUrl);
-        await provider.sendDigest(mockDigest);
-        dispatched.push('slack');
-      } catch (err: any) {
-        Logger.warn(`DailyDigestEngine: Slack dispatch failed - ${err.message}`);
-      }
-    }
-
-    if (channels.includes('telegram') && options?.telegramBotToken && options?.telegramChatId) {
-      try {
-        const provider = new TelegramNotificationProvider(options.telegramBotToken, options.telegramChatId);
-        await provider.sendDigest(mockDigest);
-        dispatched.push('telegram');
-      } catch (err: any) {
-        Logger.warn(`DailyDigestEngine: Telegram dispatch failed - ${err.message}`);
-      }
-    }
 
     if (channels.includes('email')) {
       dispatched.push('email');

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { StorageProvider, Offer, FollowUp, NotificationPreference, VisaSponsor, SavedExtensionJob } from './StorageProvider.js';
 import { CompanyConfig, Job, Application } from '../companies/Scraper.js';
 import { Logger } from '../core/Logger.js';
@@ -435,7 +436,7 @@ export class FileStorage implements StorageProvider {
   public async saveSavedSearch(userId: string, name: string, filters: any): Promise<void> {
     const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'saved_searches.json'), []);
     list.push({
-      id: Math.random().toString(36).substring(7),
+      id: crypto.randomUUID().substring(0, 9),
       userId,
       name,
       filters,
@@ -459,7 +460,7 @@ export class FileStorage implements StorageProvider {
   public async saveWatchlist(userId: string, name: string, filters: any): Promise<void> {
     const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'watchlists.json'), []);
     list.push({
-      id: Math.random().toString(36).substring(7),
+      id: crypto.randomUUID().substring(0, 9),
       userId,
       name,
       filters,
@@ -483,7 +484,7 @@ export class FileStorage implements StorageProvider {
   public async saveUserNotification(userId: string, title: string, message: string, priority?: string): Promise<void> {
     const list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'user_notifications.json'), []);
     list.push({
-      id: Math.random().toString(36).substring(7),
+      id: crypto.randomUUID().substring(0, 9),
       userId,
       title,
       message,
@@ -529,7 +530,7 @@ export class FileStorage implements StorageProvider {
   public async saveAuditLog(userId: string | null, action: string, details: any, ipAddress?: string): Promise<void> {
     const logs = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'audit_logs.json'), []);
     logs.push({
-      id: Math.random().toString(36).substring(7),
+      id: crypto.randomUUID().substring(0, 9),
       user_id: userId,
       userId,
       action,
@@ -659,7 +660,7 @@ export class FileStorage implements StorageProvider {
     let list = this.readJsonFile<any[]>(path.join(process.cwd(), 'storage', 'resume_profiles.json'), []);
     const idx = list.findIndex((r) => r.user_id === userId && r.profile_name === profileName);
     const item = {
-      id: idx !== -1 ? list[idx].id : Math.random().toString(36).substring(2, 11),
+      id: idx !== -1 ? list[idx].id : crypto.randomUUID().substring(0, 11),
       user_id: userId,
       profile_name: profileName,
       content,
@@ -691,7 +692,7 @@ export class FileStorage implements StorageProvider {
     const idx = list.findIndex((a) => a.id === item.id && a.user_id === userId);
     const record = {
       ...item,
-      id: item.id || Math.random().toString(36).substring(2, 11),
+      id: item.id || crypto.randomUUID().substring(0, 11),
       user_id: userId,
       created_at: item.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -742,7 +743,7 @@ export class FileStorage implements StorageProvider {
     const idx = list.findIndex((r) => r.id === referral.id && r.userId === userId);
     const record = {
       ...referral,
-      id: referral.id || Math.random().toString(36).substring(2, 11),
+      id: referral.id || crypto.randomUUID().substring(0, 11),
       userId,
       createdAt: referral.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -829,7 +830,7 @@ export class FileStorage implements StorageProvider {
     const idx = list.findIndex((e) => e.id === event.id && e.user_id === userId);
     const record = {
       ...event,
-      id: event.id || Math.random().toString(36).substring(2, 11),
+      id: event.id || crypto.randomUUID().substring(0, 11),
       user_id: userId,
       created_at: event.created_at || new Date().toISOString(),
     };
@@ -858,7 +859,7 @@ export class FileStorage implements StorageProvider {
     const idx = list.findIndex((e) => e.id === exportItem.id && e.user_id === userId);
     const record = {
       ...exportItem,
-      id: exportItem.id || Math.random().toString(36).substring(2, 11),
+      id: exportItem.id || crypto.randomUUID().substring(0, 11),
       user_id: userId,
       created_at: exportItem.created_at || new Date().toISOString(),
     };
@@ -887,7 +888,7 @@ export class FileStorage implements StorageProvider {
     const idx = list.findIndex((e) => e.id === coverLetter.id && e.user_id === userId);
     const record = {
       ...coverLetter,
-      id: coverLetter.id || Math.random().toString(36).substring(2, 11),
+      id: coverLetter.id || crypto.randomUUID().substring(0, 11),
       user_id: userId,
       created_at: coverLetter.created_at || new Date().toISOString(),
     };
@@ -1012,7 +1013,7 @@ export class FileStorage implements StorageProvider {
     const list = this.readJsonFile<SavedExtensionJob[]>(filePath, []);
     const record: SavedExtensionJob = {
       ...job,
-      id: job.id || `ext-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: job.id || `ext-${Date.now()}-${crypto.randomUUID().substring(0, 7)}`,
       createdAt: job.createdAt || new Date().toISOString(),
       status: job.status || 'Captured',
     };
