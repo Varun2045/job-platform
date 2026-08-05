@@ -447,14 +447,14 @@ export class AtsRegistryService {
       { id: 'google', name: 'Google Dedicated Plugin', pattern: 'careers.google.com', company: 'Google', url: 'https://careers.google.com' },
       { id: 'meta', name: 'Meta Dedicated Plugin', pattern: 'metacareers.com', company: 'Meta', url: 'https://www.metacareers.com' },
       { id: 'microsoft', name: 'Microsoft Dedicated Plugin', pattern: 'careers.microsoft.com', company: 'Microsoft', url: 'https://careers.microsoft.com' },
-      { id: 'avature', name: 'Avature Portal Extractor', pattern: 'avature.net', company: 'Deutsche Bank', url: 'https://careers.db.com' },
-      { id: 'bamboohr', name: 'BambooHR Portal Extractor', pattern: 'bamboohr.com', company: 'BambooHR Network', url: 'https://www.bamboohr.com/careers' },
-      { id: 'darwinbox', name: 'Darwinbox Portal Extractor', pattern: 'darwinbox.in', company: 'Darwinbox', url: 'https://darwinbox.com/careers' },
-      { id: 'eightfold', name: 'Eightfold Portal Extractor', pattern: 'eightfold.ai', company: 'American Express', url: 'https://www.americanexpress.com/en-us/careers' },
-      { id: 'phenom', name: 'Phenom Portal Extractor', pattern: 'phenompeople.com', company: 'Barclays', url: 'https://search.jobs.barclays' },
-      { id: 'workable', name: 'Workable Portal Extractor', pattern: 'workable.com', company: 'Workable Network', url: 'https://www.workable.com/careers' },
-      { id: 'oraclecloud', name: 'Oracle Cloud Portal Extractor', pattern: 'oraclecloud.com', company: 'Oracle', url: 'https://careers.oracle.com' },
-      { id: 'smartrecruiters-custom', name: 'SmartRecruiters Custom Extractor', pattern: 'smartrecruiters.com', company: 'Bosch', url: 'https://careers.smartrecruiters.com/BoschGroup' },
+      { id: 'avature', name: 'Avature Dedicated Plugin', pattern: 'avature.net', company: 'Deutsche Bank', url: 'https://careers.db.com' },
+      { id: 'bamboohr', name: 'BambooHR Dedicated Plugin', pattern: 'bamboohr.com', company: 'BambooHR Network', url: 'https://www.bamboohr.com/careers' },
+      { id: 'darwinbox', name: 'Darwinbox Dedicated Plugin', pattern: 'darwinbox.in', company: 'Darwinbox', url: 'https://darwinbox.com/careers' },
+      { id: 'eightfold', name: 'Eightfold Dedicated Plugin', pattern: 'eightfold.ai', company: 'American Express', url: 'https://www.americanexpress.com/en-us/careers' },
+      { id: 'phenom', name: 'Phenom Dedicated Plugin', pattern: 'phenompeople.com', company: 'Barclays', url: 'https://search.jobs.barclays' },
+      { id: 'workable', name: 'Workable Dedicated Plugin', pattern: 'workable.com', company: 'Workable Network', url: 'https://www.workable.com/careers' },
+      { id: 'goodspace-ai', name: 'GoodSpace AI Dedicated Plugin', pattern: 'goodspace.ai', company: 'GoodSpace AI', url: 'https://goodspace.ai/careers' },
+      { id: 'optum', name: 'Optum Dedicated Plugin', pattern: 'optum.com', company: 'Optum', url: 'https://optum.com/careers' },
     ];
 
     const dedicatedPlugins: AtsSubParserInfo[] = dedicatedPluginsRaw.map((p) => {
