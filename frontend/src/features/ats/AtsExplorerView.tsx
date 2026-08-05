@@ -28,7 +28,7 @@ export interface AtsSubParserInfo {
 
 export interface AtsCategoryGroup {
   id: string;
-  category: 'Native ATS' | 'Dedicated Company Plugins' | 'Company Career Portals' | 'Experimental' | 'Deprecated';
+  category: 'Native ATS' | 'Dedicated Company Plugins' | 'Company & Dedicated Scraper Parsers' | 'Company Career Portals' | 'Experimental' | 'Deprecated';
   priority: number;
   totalParsers: number;
   totalCompanies: number;
