@@ -107,7 +107,8 @@ if (sum !== 100) {
 }
 
 // Determine if we are running in local/offline mode
-const hasSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY);
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
+const hasSupabase = !!(process.env.SUPABASE_URL && supabaseServiceKey);
 const hasResend = !!process.env.RESEND_API_KEY;
 
 // Check production prerequisites
@@ -118,7 +119,9 @@ const isFileStorageMode = process.env.STORAGE_MODE === 'file' || !hasSupabase;
 // In production, require Supabase keys if STORAGE_MODE is explicitly set to supabase
 if (isProduction && process.env.STORAGE_MODE === 'supabase' && process.env.IS_LOCAL !== 'true') {
   validateEnv('SUPABASE_URL', true);
-  validateEnv('SUPABASE_SERVICE_KEY', true);
+  if (!supabaseServiceKey) {
+    validateEnv('SUPABASE_SERVICE_ROLE_KEY', true);
+  }
   if (process.env.RESEND_API_KEY) {
     if (!process.env.NOTIFICATION_EMAIL_SENDER && !process.env.EMAIL_FROM) {
       validateEnv('NOTIFICATION_EMAIL_SENDER', true);
@@ -129,7 +132,7 @@ if (isProduction && process.env.STORAGE_MODE === 'supabase' && process.env.IS_LO
 
 export const config: Config = {
   supabaseUrl: process.env.SUPABASE_URL ?? '',
-  supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY ?? '',
+  supabaseServiceKey: supabaseServiceKey,
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   senderEmail: process.env.NOTIFICATION_EMAIL_SENDER || process.env.EMAIL_FROM || 'alerts@yourdomain.com',
   recipientEmail: process.env.NOTIFICATION_EMAIL_RECIPIENT ?? '',

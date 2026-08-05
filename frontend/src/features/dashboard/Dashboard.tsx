@@ -56,7 +56,7 @@ export const Dashboard: React.FC = () => {
     return <div className="p-4 md:p-8 text-red-500">Error loading dashboard: {(error as any).message}</div>;
   }
 
-  const { stats } = data;
+  const stats = data?.data?.stats || data?.stats || {};
   const todayJobsList = (recentJobsData?.jobs || []).map((j: any) => j.job || j);
 
   const quickActions = [
@@ -70,16 +70,16 @@ export const Dashboard: React.FC = () => {
   const cardItems = [
     { label: 'New Jobs Today', value: stats.jobsToday || 0, icon: Activity, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
     { label: 'Jobs Match Profile', value: stats.matches || 0, icon: Award, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Active Applications', value: stats.applications || 0, icon: FileText, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { label: 'Active Applications', value: stats.applications || stats.totalApplications || 0, icon: FileText, color: 'text-amber-400', bg: 'bg-amber-500/10' },
     { label: 'Upcoming Interviews', value: stats.interviews || 0, icon: Calendar, color: 'text-purple-400', bg: 'bg-purple-500/10' },
     { label: 'Referral Opportunities', value: stats.referrals || 0, icon: Users, color: 'text-pink-400', bg: 'bg-pink-500/10' },
-    { label: 'Scraper Health', value: stats.companiesHealthy || 0, icon: CheckCircle2, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { label: 'Scraper Health', value: stats.companiesHealthy || stats.healthyCompanies || 0, icon: CheckCircle2, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
   ];
 
   const scraperStatus =
-    (stats.companiesDisabled || 0) > 0
+    (stats.companiesDisabled || stats.disabledCompanies || 0) > 0
       ? 'failing'
-      : (stats.companiesDegraded || 0) > 0
+      : (stats.companiesDegraded || stats.degradedCompanies || 0) > 0
       ? 'degraded'
       : 'healthy';
   const scraperStatusColor =
