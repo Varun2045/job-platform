@@ -3,6 +3,7 @@ export interface DigestJob {
   title: string;
   location: string;
   experience: string;
+  experienceLevel?: string;
   employmentType: string;
   datePosted: string;
   applyUrl: string;

@@ -48,9 +48,22 @@ export class EmailNotificationProvider implements NotificationProvider {
 
       const title = (j.title || '').toLowerCase();
       const loc = (j.location || '').toLowerCase();
+      const exp = (j.experience || j.experienceLevel || '').toLowerCase();
 
-      // 1. Reject Senior & Mid-Level roles
-      if (SENIOR_PATTERNS.some((pat) => pat.test(title))) {
+      // 1. Reject Senior & Mid-Level roles (both in title AND experienceLevel property)
+      if (
+        exp.includes('mid level') ||
+        exp.includes('senior') ||
+        exp.includes('manager') ||
+        exp.includes('executive') ||
+        exp.includes('director') ||
+        exp.includes('staff') ||
+        exp.includes('principal') ||
+        exp.includes('2–5 years') ||
+        exp.includes('5–8 years') ||
+        SENIOR_PATTERNS.some((pat) => pat.test(title)) ||
+        SENIOR_PATTERNS.some((pat) => pat.test(exp))
+      ) {
         return false;
       }
 
