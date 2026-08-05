@@ -67,25 +67,40 @@ export class JobFilter {
       return false;
     }
 
-    if (isTargetingEntryLevel) {
-      const SENIOR_PATTERNS = [
-        /\bsenior\b/i,
-        /\bsr\.?\b/i,
-        /\bstaff\b/i,
-        /\bprincipal\b/i,
-        /\blead\b/i,
-        /\barchitect\b/i,
-        /\bdirector\b/i,
-        /\bmanager\b/i,
-        /\bhead\b/i,
-        /\bvp\b/i,
-        /\bexecutive\b/i,
-      ];
+    // Reject Senior & Mid-Level roles (both in title AND experienceLevel property)
+    const expLower = (job.experienceLevel || job.experience || '').toLowerCase();
+    const SENIOR_MID_PATTERNS = [
+      /\bsenior\b/i,
+      /\bsr\.?\b/i,
+      /\bstaff\b/i,
+      /\bprincipal\b/i,
+      /\blead\b/i,
+      /\barchitect\b/i,
+      /\bdirector\b/i,
+      /\bmanager\b/i,
+      /\bhead\b/i,
+      /\bvp\b/i,
+      /\bexecutive\b/i,
+      /\bmid[- ]level\b/i,
+      /\b2[–-]5\s*years?\b/i,
+      /\b3[–-]5\s*years?\b/i,
+      /\b5[–-]8\s*years?\b/i,
+    ];
 
-      const isSeniorTitle = SENIOR_PATTERNS.some((pat) => pat.test(titleLower));
-      if (isSeniorTitle) {
-        return false;
-      }
+    if (
+      expLower.includes('mid level') ||
+      expLower.includes('senior') ||
+      expLower.includes('manager') ||
+      expLower.includes('executive') ||
+      expLower.includes('director') ||
+      expLower.includes('staff') ||
+      expLower.includes('principal') ||
+      expLower.includes('2–5 years') ||
+      expLower.includes('5–8 years') ||
+      SENIOR_MID_PATTERNS.some((pat) => pat.test(titleLower)) ||
+      SENIOR_MID_PATTERNS.some((pat) => pat.test(expLower))
+    ) {
+      return false;
     }
 
     // 1. Workplace Type Check
