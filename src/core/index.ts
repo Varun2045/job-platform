@@ -457,9 +457,21 @@ export async function runOrchestrator(
     const isIndiaOrRemoteJob = (job: Job): boolean => {
       const locLower = (job.location || '').toLowerCase();
       const countryLower = (job.country || '').toLowerCase();
+      const expLower = (job.experienceLevel || job.experience || '').toLowerCase();
       
-      // Use ExperienceLevelDetector to filter senior roles
-      if (ExperienceLevelDetector.isSeniorOrAbove(job.title, job.description)) {
+      // REJECT if categorized as Senior OR Mid Level (or Lead / Manager / Director / Executive)
+      if (
+        expLower.includes('mid level') ||
+        expLower.includes('senior') ||
+        expLower.includes('manager') ||
+        expLower.includes('executive') ||
+        expLower.includes('director') ||
+        expLower.includes('staff') ||
+        expLower.includes('principal') ||
+        expLower.includes('2–5 years') ||
+        expLower.includes('5–8 years') ||
+        ExperienceLevelDetector.isSeniorOrAbove(job.title, job.description)
+      ) {
         return false;
       }
       
@@ -549,7 +561,8 @@ export async function runOrchestrator(
           companyName: m.job.company,
           title: m.job.title,
           location: m.job.location,
-          experience: m.job.experience,
+          experience: m.job.experienceLevel || m.job.experience || 'Entry Level',
+          experienceLevel: m.job.experienceLevel || m.job.experience || 'Entry Level',
           employmentType: m.job.employmentType,
           datePosted: m.job.datePosted,
           applyUrl: m.job.url,
@@ -561,7 +574,8 @@ export async function runOrchestrator(
           companyName: m.job.company,
           title: m.job.title,
           location: m.job.location,
-          experience: m.job.experience,
+          experience: m.job.experienceLevel || m.job.experience || 'Entry Level',
+          experienceLevel: m.job.experienceLevel || m.job.experience || 'Entry Level',
           employmentType: m.job.employmentType,
           datePosted: m.job.datePosted,
           applyUrl: m.job.url,
