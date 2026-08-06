@@ -90,6 +90,9 @@ export const App: React.FC = () => {
     setEmail(userEmail);
     localStorage.setItem('token', jwt);
     localStorage.setItem('email', userEmail);
+    if (window.location.pathname === '/login') {
+      window.history.replaceState(null, '', '/');
+    }
   };
 
   const handleLogout = () => {
@@ -106,7 +109,7 @@ export const App: React.FC = () => {
     const userEmail = urlParams.get('email');
     if (jwt) {
       handleLogin(jwt, userEmail || 'oauth-user@careeros.studio');
-      window.history.replaceState(null, '', window.location.pathname);
+      window.history.replaceState(null, '', '/');
       return;
     }
 
@@ -117,7 +120,7 @@ export const App: React.FC = () => {
       const hashJwt = params.get('access_token');
       if (hashJwt) {
         handleLogin(hashJwt, 'oauth-user@careeros.studio');
-        window.history.replaceState(null, '', window.location.pathname);
+        window.history.replaceState(null, '', '/');
       }
     }
   }, []);
@@ -200,6 +203,7 @@ export const App: React.FC = () => {
                   <Route path="/export-center" element={<ExportCenterView />} />
                   <Route path="/ats-explorer" element={<AtsExplorerView />} />
                   <Route path="/profile-builder" element={<ProfileBuilder />} />
+                  <Route path="/login" element={<Navigate to="/" replace />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
