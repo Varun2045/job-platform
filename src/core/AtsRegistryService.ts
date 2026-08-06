@@ -120,11 +120,11 @@ export class AtsRegistryService {
       name: 'Workday',
       averageExtractionMs: 18,
       companies: [
-        'Adobe', 'American Airlines GCC', 'Analog Devices', 'Applied Materials', 'ASML', 'Autodesk',
-        'BlackRock', 'Broadcom', 'BrowserStack', 'Cadence Design Systems', 'Citadel', 'CrowdStrike',
+        'Adobe', 'Analog Devices', 'Applied Materials', 'ASML', 'Autodesk',
+        'BlackRock', 'Broadcom', 'BrowserStack', 'Cadence Design Systems', 'CrowdStrike',
         'Expedia', 'Fortinet', 'GE Aerospace', 'GE HealthCare', 'GE Vernova', 'HP Inc.', 'HPE',
         'Informatica', 'Intel', 'Jio Hotstar', 'Juniper Networks', 'KLA Corporation', 'Lam Research',
-        'Logitech', 'Marvell Technology', 'Mastercard', 'Micron Technology', 'Motorola Solutions',
+        'Logitech', 'Marvell Technology', 'Mastercard', 'Motorola Solutions',
         'NetApp', 'NVIDIA', 'Optum', 'Pfizer', 'Philips', 'Red Hat', 'Salesforce', 'Samsung',
         'Siemens', 'Slack', 'Splunk', 'Texas Instruments', 'Visa', 'Warner Bros. Discovery',
         'Workday', 'Zendesk', 'Zoom',
@@ -136,8 +136,8 @@ export class AtsRegistryService {
       name: 'Greenhouse',
       averageExtractionMs: 15,
       companies: [
-        'Adyen', 'Affirm', 'Airbnb', 'Airbyte', 'Anthropic', 'Anyscale', 'Box', 'Cashfree Payments',
-        'Cerebras Systems', 'CleverTap', 'ClickHouse', 'Cloudflare', 'Cockroach Labs', 'Cohere',
+        'Adyen', 'Affirm', 'Airbnb', 'Anthropic', 'Box',
+        'ClickHouse', 'Cloudflare', 'Cockroach Labs', 'Cohere',
         'CoreWeave', 'Dagster Labs', 'Databricks', 'Datadog', 'Fastly', 'GitLab', 'Grafana Labs',
         'Groq', 'Groww', 'HashiCorp', 'Hasura', 'Headlands Tech', 'Hudson River Trading', 'InMobi',
         'Innovaccer', 'Instacart', 'JetBrains', 'Jump Trading', 'Klaviyo', 'LaunchDarkly', 'Luma AI',
@@ -154,7 +154,7 @@ export class AtsRegistryService {
       name: 'Ashby',
       averageExtractionMs: 14,
       companies: [
-        'Baseten', 'Character.ai', 'Chroma', 'Classplus', 'Clerk', 'Cognition AI', 'Cursor',
+        'Airbyte', 'Anyscale', 'Baseten', 'Character.ai', 'Chroma', 'Classplus', 'Clerk', 'Cognition AI', 'Cursor',
         'ElevenLabs', 'Harvey', 'Ideogram', 'LangChain', 'Linear', 'Mercor', 'Mistral AI',
         'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Photoroom', 'Pinecone',
         'Qdrant', 'Railway', 'Ramp', 'Replicate', 'Replit', 'Resend', 'Rocketlane', 'Sentry',
@@ -187,7 +187,7 @@ export class AtsRegistryService {
       id: 'phenom',
       name: 'Phenom',
       averageExtractionMs: 21,
-      companies: ['Barclays', 'Fidelity Investments', "Lowe's India", 'Wells Fargo'],
+      companies: ['Barclays', 'Fidelity Investments', "Lowe's India", 'Micron Technology', 'Wells Fargo'],
       companyDetails: [],
     },
     {

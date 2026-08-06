@@ -132,7 +132,7 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'fi-money', name: 'Fi Money', pattern: 'fi.money', careerPage: 'https://fi.money/careers', jobBoardUrl: 'https://fi.money/careers' },
 
-  { id: 'cashfree-payments', name: 'Cashfree Payments', pattern: 'cashfree.com', careerPage: 'https://cashfree.com/careers', jobBoardUrl: 'https://cashfree.com/careers' },
+  { id: 'cashfree-payments', name: 'Cashfree Payments', pattern: 'cashfree.com', careerPage: 'https://www.cashfree.com/careers/', jobBoardUrl: 'https://www.cashfree.com/careers/' },
 
   { id: 'signzy', name: 'Signzy', pattern: 'signzy.com', careerPage: 'https://signzy.com/careers', jobBoardUrl: 'https://signzy.com/careers' },
 
@@ -152,7 +152,7 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'webengage', name: 'WebEngage', pattern: 'webengage.com', careerPage: 'https://webengage.com/careers', jobBoardUrl: 'https://webengage.com/careers' },
 
-  { id: 'clevertap', name: 'CleverTap', pattern: 'clevertap.com', careerPage: 'https://clevertap.com/careers', jobBoardUrl: 'https://clevertap.com/careers' },
+  { id: 'clevertap', name: 'CleverTap', pattern: 'clevertap.com', careerPage: 'https://careers.kula.ai/clevertap', jobBoardUrl: 'https://careers.kula.ai/clevertap' },
 
   { id: 'chargebee', name: 'Chargebee', pattern: 'chargebee.com', careerPage: 'https://chargebee.com/careers', jobBoardUrl: 'https://chargebee.com/careers' },
 

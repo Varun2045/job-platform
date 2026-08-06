@@ -1,25 +1,7 @@
 # Company List by ATS Type
 
 Total Companies: 392
-Total ATS Types: 177
-
-## ACCENTURE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Accenture | https://www.accenture.com/in-en/careers/jobsearch | ✅ Enabled |
-
-## ADDA247 (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Adda247 | https://www.adda247.com/careers | ✅ Enabled |
-
-## AKAMAI (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | ✅ Enabled |
+Total ATS Types: 20
 
 ## AMAZON (1 companies, 1 enabled)
 
@@ -27,34 +9,18 @@ Total ATS Types: 177
 |--------------|--------------|--------|
 | Amazon | https://amazon.jobs/en/search | ✅ Enabled |
 
-## AMD (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| AMD | https://careers.amd.com/careers-home/jobs | ✅ Enabled |
-
 ## APPLE (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Apple | https://jobs.apple.com/en-in/search?location=india-INDC | ✅ Enabled |
 
-## ARM (1 companies, 1 enabled)
+## ASHBY (38 companies, 38 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| ARM | https://careers.arm.com/search-jobs | ✅ Enabled |
-
-## ASANA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Asana | https://asana.com/jobs/all | ✅ Enabled |
-
-## ASHBY (36 companies, 36 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
+| Airbyte | https://airbyte.com/company/careers#open-roles | ✅ Enabled |
+| Anyscale | https://jobs.ashbyhq.com/anyscale | ✅ Enabled |
 | Baseten | https://jobs.ashbyhq.com/baseten | ✅ Enabled |
 | Character.ai | https://jobs.ashbyhq.com/character.ai | ✅ Enabled |
 | Chroma | https://jobs.ashbyhq.com/chroma | ✅ Enabled |
@@ -92,12 +58,6 @@ Total ATS Types: 177
 | Vellum | https://jobs.ashbyhq.com/vellum | ✅ Enabled |
 | World Labs | https://jobs.ashbyhq.com/worldlabs | ✅ Enabled |
 
-## ATLASSIAN (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Atlassian | https://www.atlassian.com/company/careers/all-jobs | ✅ Enabled |
-
 ## AVATURE (2 companies, 2 enabled)
 
 | Company Name | API Endpoint | Status |
@@ -105,171 +65,213 @@ Total ATS Types: 177
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
 | UBS | https://jobs.ubs.com | ✅ Enabled |
 
-## AXIO (1 companies, 1 enabled)
+## CUSTOM (203 companies, 203 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Axio | https://axio.in/careers/ | ✅ Enabled |
-
-## BAIN&COMPANY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Bain & Company | https://www.bain.com/careers/find-a-role/ | ✅ Enabled |
-
-## BANKOFAMERICA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Bank of America | https://careers.bankofamerica.com/en-us/job-search | ✅ Enabled |
-
-## BCG (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| BCG | https://careers.bcg.com/global/en/ | ✅ Enabled |
-
-## BEWAKOOF (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Bewakoof | https://www.bewakoof.com/careers | ✅ Enabled |
-
-## BLOCK (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Block | https://block.xyz/careers/jobs | ✅ Enabled |
-
-## BLOOMBERG (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Bloomberg | https://www.bloomberg.com/company/careers/ | ✅ Enabled |
-
-## BOOKING.COM (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Booking.com | https://jobs.booking.com | ✅ Enabled |
-
-## BREX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Brex | https://www.brex.com/careers | ✅ Enabled |
-
-## BYTEDANCE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| ByteDance | https://joinbytedance.com/search | ✅ Enabled |
-
-## CANONICAL (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Canonical | https://canonical.com/careers/all | ✅ Enabled |
-
-## CANVA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Canva | https://www.lifeatcanva.com/en/jobs/ | ✅ Enabled |
-
-## CAPGEMINI (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Capgemini | https://www.capgemini.com/careers | ✅ Enabled |
-
-## CHARGEBEE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Chargebee | https://www.chargebee.com/careers/ | ✅ Enabled |
-
-## CIRCLECI (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| CircleCI | https://circleci.com/careers/jobs/ | ✅ Enabled |
-
-## CISCO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Cisco | https://jobs.cisco.com/jobs/SearchJobs | ✅ Enabled |
-
-## COHESITY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Cohesity | https://www.cohesity.com/careers/open-positions/ | ✅ Enabled |
-
-## COINBASE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Coinbase | https://www.coinbase.com/careers/positions | ✅ Enabled |
-
-## CONFLUENT (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Confluent | https://careers.confluent.io/jobs | ✅ Enabled |
-
-## COUNTRYDELIGHT (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Country Delight | https://countrydelight.in/careers | ✅ Enabled |
-
-## CUSTOM (41 companies, 41 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
+| Accenture | https://www.accenture.com/in-en/careers/jobsearch | ✅ Enabled |
+| Adda247 | https://www.adda247.com/careers | ✅ Enabled |
+| Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | ✅ Enabled |
 | AlphaGrep | https://www.alpha-grep.com/careers/ | ✅ Enabled |
+| AMD | https://careers.amd.com/careers-home/jobs | ✅ Enabled |
 | Arista Networks | https://www.arista.com/en/careers | ✅ Enabled |
+| ARM | https://careers.arm.com/search-jobs | ✅ Enabled |
+| Asana | https://asana.com/jobs/all | ✅ Enabled |
 | Ather Energy | https://www.atherenergy.com/careers | ✅ Enabled |
+| Atlassian | https://www.atlassian.com/company/careers/all-jobs | ✅ Enabled |
+| Axio | https://axio.in/careers/ | ✅ Enabled |
+| Bain & Company | https://www.bain.com/careers/find-a-role/ | ✅ Enabled |
+| Bank of America | https://careers.bankofamerica.com/en-us/job-search | ✅ Enabled |
+| BCG | https://careers.bcg.com/global/en/ | ✅ Enabled |
+| Bewakoof | https://www.bewakoof.com/careers | ✅ Enabled |
 | Blinkit | https://blinkit.com/careers | ✅ Enabled |
+| Block | https://block.xyz/careers/jobs | ✅ Enabled |
+| Bloomberg | https://www.bloomberg.com/company/careers/ | ✅ Enabled |
+| Booking.com | https://jobs.booking.com | ✅ Enabled |
 | BookMyShow | https://in.bookmyshow.com/careers/ | ✅ Enabled |
+| Brex | https://www.brex.com/careers | ✅ Enabled |
+| ByteDance | https://joinbytedance.com/search | ✅ Enabled |
+| Canonical | https://canonical.com/careers/all | ✅ Enabled |
+| Canva | https://www.lifeatcanva.com/en/jobs/ | ✅ Enabled |
+| Capgemini | https://www.capgemini.com/careers | ✅ Enabled |
 | Cars24 | https://www.cars24.com/careers/ | ✅ Enabled |
+| Cashfree Payments | https://www.cashfree.com/careers/ | ✅ Enabled |
+| Cerebras Systems | https://www.cerebras.ai/open-positions | ✅ Enabled |
+| Chargebee | https://www.chargebee.com/careers/ | ✅ Enabled |
 | Check Point | https://careers.checkpoint.com/ | ✅ Enabled |
+| CircleCI | https://circleci.com/careers/jobs/ | ✅ Enabled |
+| Cisco | https://jobs.cisco.com/jobs/SearchJobs | ✅ Enabled |
+| Citadel | https://www.citadel.com/careers/open-opportunities/ | ✅ Enabled |
+| Cohesity | https://www.cohesity.com/careers/open-positions/ | ✅ Enabled |
+| Coinbase | https://www.coinbase.com/careers/positions | ✅ Enabled |
+| Confluent | https://careers.confluent.io/jobs | ✅ Enabled |
+| Country Delight | https://countrydelight.in/careers | ✅ Enabled |
 | Curefit (Cult.fit) | https://cult.fit/careers | ✅ Enabled |
 | D. E. Shaw | https://www.deshaw.com/careers | ✅ Enabled |
+| DataStax | https://www.datastax.com/company/careers | ✅ Enabled |
+| dbt Labs | https://www.getdbt.com/about-us/careers#roles | ✅ Enabled |
+| Decentro | https://decentro.tech/careers | ✅ Enabled |
+| DeHaat | https://agrevolution.in/careers | ✅ Enabled |
 | Delhivery | https://www.delhivery.com/careers/ | ✅ Enabled |
+| Dell | https://jobs.dell.com/ | ✅ Enabled |
+| Deloitte | https://careers.deloitte.com | ✅ Enabled |
+| Discord | https://discord.com/careers#all-jobs | ✅ Enabled |
+| Docker | https://www.docker.com/career-openings/ | ✅ Enabled |
+| DoorDash | https://careersatdoordash.com/job-search/ | ✅ Enabled |
+| Dream11 | https://dreamsports.group/careers#jobs | ✅ Enabled |
+| Dropbox | https://www.dropbox.jobs/en/jobs/ | ✅ Enabled |
 | DRW | https://drw.com/careers | ✅ Enabled |
+| EA | https://jobs.ea.com/en_US/careers | ✅ Enabled |
+| eBay | https://jobs.ebayinc.com/us/en/search-results | ✅ Enabled |
+| Eka Care | https://www.eka.care/careers | ✅ Enabled |
+| Elastic | https://jobs.elastic.co/ | ✅ Enabled |
+| Elasticrun | https://www.elasticrun.com/careers | ✅ Enabled |
+| EPAM | https://careers.epam.com/en/jobs | ✅ Enabled |
+| Epic Games | https://www.epicgames.com/site/careers/jobs | ✅ Enabled |
+| Equinix | https://careers.equinix.com/equinix-is-hiring-in-india | ✅ Enabled |
+| Ericsson | https://jobs.ericsson.com | ✅ Enabled |
+| Exotel | https://exotel.com/careers/ | ✅ Enabled |
+| EY | https://careers.ey.com/ | ✅ Enabled |
+| Fi Money | https://fi.money/careers | ✅ Enabled |
+| Fibe | https://www.fibe.in/careers/ | ✅ Enabled |
+| Figma | https://www.figma.com/careers/#job-openings | ✅ Enabled |
 | Five Rings | https://fiverings.com/careers/ | ✅ Enabled |
+| Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | ✅ Enabled |
+| Gartner | https://jobs.gartner.com | ✅ Enabled |
+| GitHub | https://www.github.careers/careers-home/jobs | ✅ Enabled |
+| Goldman Sachs | https://www.goldmansachs.com/careers | ✅ Enabled |
+| GoodSpace AI | https://goodspace.ai/careers | ✅ Enabled |
 | Graviton Research Capital | https://gravitonresearch.com/careers/ | ✅ Enabled |
+| Healthplix | https://healthplix.com/careers/ | ✅ Enabled |
+| HSBC | https://www.hsbc.com/careers | ✅ Enabled |
+| IBM | https://www.ibm.com/in-en/careers/search | ✅ Enabled |
+| IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | ✅ Enabled |
 | IMC Trading | https://www.imc.com/us/careers/ | ✅ Enabled |
+| Increff | https://www.increff.com/careers | ✅ Enabled |
+| Indeed | https://careers.indeed.com | ✅ Enabled |
 | IndiaMART | https://careers.indiamart.com/ | ✅ Enabled |
 | Indmoney | https://www.indmoney.com/careers | ✅ Enabled |
 | Infra.Market | https://infra.market/careers | ✅ Enabled |
+| Intuit | https://jobs.intuit.com/search-jobs | ✅ Enabled |
+| Jai Kisan | https://jaikisan.co/careers | ✅ Enabled |
 | Jane Street | https://www.janestreet.com/join-jane-street/open-roles/ | ✅ Enabled |
+| Jupiter | https://jupiter.money/careers/ | ✅ Enabled |
+| Juspay | https://juspay.io/careers | ✅ Enabled |
+| Keka | https://www.keka.com/careers | ✅ Enabled |
+| Khatabook | https://khatabook.turbohire.co/careerpage/alljobs | ✅ Enabled |
 | Klarna | https://www.klarna.com/careers/ | ✅ Enabled |
+| KreditBee | https://www.kreditbee.in/careers | ✅ Enabled |
+| Leadsquared | https://www.leadsquared.com/careers/ | ✅ Enabled |
+| Lenovo | https://jobs.lenovo.com/en_US/careers | ✅ Enabled |
 | Lenskart | https://www.lenskart.com/careers | ✅ Enabled |
+| Licious | https://www.licious.in/careers | ✅ Enabled |
+| LinkedIn | https://careers.linkedin.com/ | ✅ Enabled |
+| Locus | https://locus.sh/careers/ | ✅ Enabled |
+| Loom | https://loom.technology/careers/ | ✅ Enabled |
 | M2P Fintech | https://m2pfintech.com/careers | ✅ Enabled |
 | MakeMyTrip | https://careers.makemytrip.com/ | ✅ Enabled |
+| McKinsey | https://www.mckinsey.com/careers/search-jobs | ✅ Enabled |
 | MediaTek | https://careers.mediatek.com/ | ✅ Enabled |
+| MediBuddy | https://www.medibuddy.in/careers | ✅ Enabled |
+| Mensa Brands | https://mensabrands.com/careers/ | ✅ Enabled |
+| Miro | https://miro.com/careers/open-positions/ | ✅ Enabled |
+| MongoDB | https://www.mongodb.com/company/careers/see-jobs#positions | ✅ Enabled |
+| Morgan Stanley | https://www.morganstanley.com/careers/career-opportunities-search/ | ✅ Enabled |
+| Moveworks | https://www.moveworks.com/us/en/company/careers#open-roles | ✅ Enabled |
+| MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
+| Myntra | https://careers.myntra.com/ | ✅ Enabled |
+| Nagarro | https://www.nagarro.com/en/careers | ✅ Enabled |
+| Navi | https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6 | ✅ Enabled |
+| Nazara Technologies | https://www.nazara.com/careers/ | ✅ Enabled |
+| Netflix | https://explore.jobs.netflix.net/careers | ✅ Enabled |
+| NielsenIQ | https://nielseniq.com/global/en/jobs/india/ | ✅ Enabled |
+| Nike | https://careers.nike.com/jobs | ✅ Enabled |
+| Ninjacart | https://ninjacart.com/careers/ | ✅ Enabled |
+| NinjaOne | https://jobs.jobvite.com/ninjaone/jobs | ✅ Enabled |
 | NK Securities | https://www.nksecurities.com/careers/ | ✅ Enabled |
+| NoBroker | https://www.nobroker.in/careers | ✅ Enabled |
+| Nokia | https://jobs.nokia.com/en/sites/CX_1 | ✅ Enabled |
+| Nutanix | https://careers.nutanix.com/en/jobs/ | ✅ Enabled |
 | Nykaa | https://www.nykaa.com/careers | ✅ Enabled |
+| Okta | https://www.okta.com/company/careers/job-listing/ | ✅ Enabled |
+| Ola | https://olacareers.turbohire.co/careerpage/e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212 | ✅ Enabled |
 | Optiver | https://www.optiver.com/working-at-optiver/open-roles/ | ✅ Enabled |
 | OYO | https://www.oyorooms.com/careers | ✅ Enabled |
+| Palo Alto Networks | https://jobs.paloaltonetworks.com/en | ✅ Enabled |
+| Perfios | https://www.perfios.com/careers | ✅ Enabled |
 | PhysicsWallah | https://pw.live/careers | ✅ Enabled |
 | Pine Labs | https://www.pinelabs.com/careers | ✅ Enabled |
+| Plaid | https://plaid.com/careers/ | ✅ Enabled |
 | PolicyBazaar | https://www.policybazaar.com/careers | ✅ Enabled |
+| Porter | https://porter.in/careers | ✅ Enabled |
+| PostHog | https://posthog.com/careers | ✅ Enabled |
+| Pristyn Care | https://www.pristyncare.com/careers/ | ✅ Enabled |
+| Purplle | https://www.purplle.com/careers | ✅ Enabled |
+| PwC | https://jobs-ta.pwc.com/global/en/ac-india-job-search | ✅ Enabled |
 | Quadeye | https://quadeye.com/careers | ✅ Enabled |
+| Qualcomm | https://careers.qualcomm.com/careers | ✅ Enabled |
+| QuestDB | https://questdb.com/careers/ | ✅ Enabled |
 | Rapido | https://rapido.bike/careers | ✅ Enabled |
+| Retool | https://retool.com/careers#open-positions | ✅ Enabled |
+| Riot Games | https://www.riotgames.com/en/work-with-us/jobs | ✅ Enabled |
+| Rippling | https://www.rippling.com/careers/open-roles | ✅ Enabled |
+| Rivian | https://careers.rivian.com/careers-home/ | ✅ Enabled |
+| Robinhood | https://careers.robinhood.com/ | ✅ Enabled |
+| Roblox | https://careers.roblox.com/jobs | ✅ Enabled |
 | Rockstar Games | https://www.rockstargames.com/careers | ✅ Enabled |
+| Rubrik | https://www.rubrik.com/company/careers#positions | ✅ Enabled |
+| Rupeek | https://rupeek.com/careers | ✅ Enabled |
+| SAP | https://jobs.sap.com/ | ✅ Enabled |
+| Scale AI | https://scale.com/careers | ✅ Enabled |
+| ServiceNow | https://careers.servicenow.com/ | ✅ Enabled |
+| Setu | https://setu.co/careers | ✅ Enabled |
+| Shadowfax | https://www.shadowfax.in/careers | ✅ Enabled |
+| ShareChat | https://sharechat.com/careers | ✅ Enabled |
+| Shiprocket | https://www.shiprocket.in/careers/ | ✅ Enabled |
+| Shopee | https://careers.shopee.sg/ | ✅ Enabled |
+| Shopify | https://shopify.com/careers | ✅ Enabled |
 | SIG (Susquehanna) | https://sig.com/careers/ | ✅ Enabled |
+| Signzy | https://www.signzy.com/careers/ | ✅ Enabled |
+| Snowplow | https://snowplow.careers.hibob.com/ | ✅ Enabled |
+| Sony | https://www.sony.com/en_us/SCA/careers/overview.html | ✅ Enabled |
 | Spinny | https://www.spinny.com/careers/ | ✅ Enabled |
+| Square Yards | https://www.squareyards.com/careers | ✅ Enabled |
+| Stanza Living | https://www.stanzaliving.com/careers | ✅ Enabled |
+| Stripe | https://stripe.com/jobs/search | ✅ Enabled |
+| Sugar Cosmetics | https://sugarcosmetics.com/pages/careers | ✅ Enabled |
+| Supercell | https://supercell.com/en/careers/ | ✅ Enabled |
+| Swiggy | https://careers.swiggy.com | ✅ Enabled |
+| Synopsys | https://www.synopsys.com/company/careers.html | ✅ Enabled |
 | Tailscale | https://tailscale.com/careers | ✅ Enabled |
+| Target | https://jobs.target.com | ✅ Enabled |
 | Tata Digital | https://www.tatadigital.com/careers | ✅ Enabled |
+| Tesla | https://www.tesla.com/careers | ✅ Enabled |
+| Testbook | https://testbook.com/careers | ✅ Enabled |
 | Two Sigma | https://www.twosigma.com/careers/ | ✅ Enabled |
+| Uber | https://jobs.uber.com/en/jobs/ | ✅ Enabled |
+| Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
+| UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | ✅ Enabled |
+| Unity | https://unity.com/careers/positions | ✅ Enabled |
+| VMware | https://www.broadcom.com/company/careers | ✅ Enabled |
+| Walmart | https://careers.walmart.com/us/en/home | ✅ Enabled |
+| Waycool | https://www.waycool.in/careers/ | ✅ Enabled |
+| Wayfair | https://www.wayfair.com/careers/jobs | ✅ Enabled |
 | Weaviate | https://weaviate.io/careers | ✅ Enabled |
+| WebEngage | https://webengage.com/careers/ | ✅ Enabled |
+| Weights & Biases | https://www.coreweave.com/careers/weights-biases | ✅ Enabled |
+| Whatfix | https://whatfix.com/careers | ✅ Enabled |
+| WinZo | https://www.winzogames.com/careers | ✅ Enabled |
+| Wise | https://wise.jobs/ | ✅ Enabled |
+| Wiz | https://www.wiz.io/careers | ✅ Enabled |
 | WorldQuant | https://www.worldquant.com/careers/ | ✅ Enabled |
+| Yellow.ai | https://yellow.ai/careers/ | ✅ Enabled |
+| Zapier | https://zapier.com/jobs#job-openings | ✅ Enabled |
+| Zepto | https://zepto.talentrecruit.com/career-page | ✅ Enabled |
 | Zerodha | https://zerodha.tech/careers/ | ✅ Enabled |
+| Zoho | https://www.zoho.com/careers/ | ✅ Enabled |
+| Zomato (Eternal) | https://www.eternal.com/careers/ | ✅ Enabled |
+| ZS Associates | https://jobs.zs.com/jobs | ✅ Enabled |
+| Zscaler | https://www.zscaler.com/careers | ✅ Enabled |
 
 ## DARWINBOX (2 companies, 2 enabled)
 
@@ -278,84 +280,6 @@ Total ATS Types: 177
 | Darwinbox | https://dbx.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | NxtWave | https://nxtwave.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 
-## DATASTAX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| DataStax | https://www.datastax.com/company/careers | ✅ Enabled |
-
-## DBTLABS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| dbt Labs | https://www.getdbt.com/about-us/careers#roles | ✅ Enabled |
-
-## DECENTRO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Decentro | https://decentro.tech/careers | ✅ Enabled |
-
-## DEHAAT (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| DeHaat | https://agrevolution.in/careers | ✅ Enabled |
-
-## DELL (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Dell | https://jobs.dell.com/ | ✅ Enabled |
-
-## DELOITTE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Deloitte | https://careers.deloitte.com | ✅ Enabled |
-
-## DISCORD (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Discord | https://discord.com/careers#all-jobs | ✅ Enabled |
-
-## DOCKER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Docker | https://www.docker.com/career-openings/ | ✅ Enabled |
-
-## DOORDASH (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| DoorDash | https://careersatdoordash.com/job-search/ | ✅ Enabled |
-
-## DREAM11 (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Dream11 | https://dreamsports.group/careers#jobs | ✅ Enabled |
-
-## DROPBOX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Dropbox | https://www.dropbox.jobs/en/jobs/ | ✅ Enabled |
-
-## EA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| EA | https://jobs.ea.com/en_US/careers | ✅ Enabled |
-
-## EBAY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| eBay | https://jobs.ebayinc.com/us/en/search-results | ✅ Enabled |
-
 ## EIGHTFOLD (2 companies, 2 enabled)
 
 | Company Name | API Endpoint | Status |
@@ -363,128 +287,21 @@ Total ATS Types: 177
 | American Express | https://www.americanexpress.com/en-us/careers | ✅ Enabled |
 | PayPal | https://paypal.eightfold.ai/careers | ✅ Enabled |
 
-## EKACARE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Eka Care | https://www.eka.care/careers | ✅ Enabled |
-
-## ELASTIC (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Elastic | https://jobs.elastic.co/ | ✅ Enabled |
-
-## ELASTICRUN (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Elasticrun | https://www.elasticrun.com/careers | ✅ Enabled |
-
-## EPAM (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| EPAM | https://careers.epam.com/en/jobs | ✅ Enabled |
-
-## EPICGAMES (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Epic Games | https://www.epicgames.com/site/careers/jobs | ✅ Enabled |
-
-## EQUINIX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Equinix | https://careers.equinix.com/equinix-is-hiring-in-india | ✅ Enabled |
-
-## ERICSSON (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Ericsson | https://jobs.ericsson.com | ✅ Enabled |
-
-## EXOTEL (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Exotel | https://exotel.com/careers/ | ✅ Enabled |
-
-## EY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| EY | https://careers.ey.com/ | ✅ Enabled |
-
-## FIBE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Fibe | https://www.fibe.in/careers/ | ✅ Enabled |
-
-## FIGMA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Figma | https://www.figma.com/careers/#job-openings | ✅ Enabled |
-
-## FIMONEY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Fi Money | https://fi.money/careers | ✅ Enabled |
-
-## FLIPKART (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | ✅ Enabled |
-
-## GARTNER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Gartner | https://jobs.gartner.com | ✅ Enabled |
-
-## GITHUB (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| GitHub | https://www.github.careers/careers-home/jobs | ✅ Enabled |
-
-## GOLDMANSACHS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Goldman Sachs | https://www.goldmansachs.com/careers | ✅ Enabled |
-
-## GOODSPACE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| GoodSpace AI | https://goodspace.ai/careers | ✅ Enabled |
-
 ## GOOGLE (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Google | https://careers.google.com/jobs/results | ✅ Enabled |
 
-## GREENHOUSE (67 companies, 67 enabled)
+## GREENHOUSE (62 companies, 62 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Adyen | https://boards.greenhouse.io/adyen | ✅ Enabled |
 | Affirm | https://boards.greenhouse.io/affirm | ✅ Enabled |
 | Airbnb | https://boards.greenhouse.io/airbnb | ✅ Enabled |
-| Airbyte | https://boards.greenhouse.io/airbyte | ✅ Enabled |
 | Anthropic | https://job-boards.greenhouse.io/anthropic | ✅ Enabled |
-| Anyscale | https://boards.greenhouse.io/anyscale | ✅ Enabled |
-| Box | https://boards.greenhouse.io/box | ✅ Enabled |
-| Cashfree Payments | https://boards.greenhouse.io/cashfree | ✅ Enabled |
-| Cerebras Systems | https://boards.greenhouse.io/cerebras | ✅ Enabled |
-| CleverTap | https://boards.greenhouse.io/clevertap | ✅ Enabled |
+| Box | https://job-boards.greenhouse.io/boxinc | ✅ Enabled |
 | ClickHouse | https://job-boards.greenhouse.io/clickhouse | ✅ Enabled |
 | Cloudflare | https://boards.greenhouse.io/cloudflare | ✅ Enabled |
 | Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | ✅ Enabled |
@@ -543,89 +360,11 @@ Total ATS Types: 177
 | Waymo | https://boards.greenhouse.io/waymo | ✅ Enabled |
 | YubiKey | https://boards.greenhouse.io/yubikey | ✅ Enabled |
 
-## HEALTHPLIX (1 companies, 1 enabled)
+## KULA (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Healthplix | https://healthplix.com/careers/ | ✅ Enabled |
-
-## HSBC (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| HSBC | https://www.hsbc.com/careers | ✅ Enabled |
-
-## IBM (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| IBM | https://www.ibm.com/in-en/careers/search | ✅ Enabled |
-
-## IKEA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | ✅ Enabled |
-
-## INCREFF (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Increff | https://www.increff.com/careers | ✅ Enabled |
-
-## INDEED (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Indeed | https://careers.indeed.com | ✅ Enabled |
-
-## INTUIT (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Intuit | https://jobs.intuit.com/search-jobs | ✅ Enabled |
-
-## JAIKISAN (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Jai Kisan | https://jaikisan.co/careers | ✅ Enabled |
-
-## JUPITER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Jupiter | https://jupiter.money/careers/ | ✅ Enabled |
-
-## JUSPAY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Juspay | https://juspay.io/careers | ✅ Enabled |
-
-## KEKA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Keka | https://www.keka.com/careers | ✅ Enabled |
-
-## KREDITBEE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| KreditBee | https://www.kreditbee.in/careers | ✅ Enabled |
-
-## LEADSQUARED (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Leadsquared | https://www.leadsquared.com/careers/ | ✅ Enabled |
-
-## LENOVO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Lenovo | https://jobs.lenovo.com/en_US/careers | ✅ Enabled |
+| CleverTap | https://careers.kula.ai/clevertap | ✅ Enabled |
 
 ## LEVER (14 companies, 14 enabled)
 
@@ -646,48 +385,6 @@ Total ATS Types: 177
 | Spotify | https://jobs.lever.co/spotify | ✅ Enabled |
 | Upstox | https://jobs.lever.co/upstox | ✅ Enabled |
 
-## LICIOUS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Licious | https://www.licious.in/careers | ✅ Enabled |
-
-## LINKEDIN (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| LinkedIn | https://careers.linkedin.com/ | ✅ Enabled |
-
-## LOCUS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Locus | https://locus.sh/careers/ | ✅ Enabled |
-
-## LOOM (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Loom | https://loom.technology/careers/ | ✅ Enabled |
-
-## MCKINSEY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| McKinsey | https://www.mckinsey.com/careers/search-jobs | ✅ Enabled |
-
-## MEDIBUDDY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| MediBuddy | https://www.medibuddy.in/careers | ✅ Enabled |
-
-## MENSABRANDS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Mensa Brands | https://mensabrands.com/careers/ | ✅ Enabled |
-
 ## META (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
@@ -700,120 +397,6 @@ Total ATS Types: 177
 |--------------|--------------|--------|
 | Microsoft | https://apply.careers.microsoft.com/careers?domain=microsoft.com | ✅ Enabled |
 
-## MIRO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Miro | https://miro.com/careers/open-positions/ | ✅ Enabled |
-
-## MONGODB (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| MongoDB | https://www.mongodb.com/company/careers/see-jobs#positions | ✅ Enabled |
-
-## MORGANSTANLEY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Morgan Stanley | https://www.morganstanley.com/careers/career-opportunities-search/ | ✅ Enabled |
-
-## MOVEWORKS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Moveworks | https://www.moveworks.com/us/en/company/careers#open-roles | ✅ Enabled |
-
-## MYGATE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
-
-## MYNTRA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Myntra | https://careers.myntra.com/ | ✅ Enabled |
-
-## NAGARRO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Nagarro | https://www.nagarro.com/en/careers | ✅ Enabled |
-
-## NAVI (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Navi | https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6 | ✅ Enabled |
-
-## NAZARA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Nazara Technologies | https://www.nazara.com/careers/ | ✅ Enabled |
-
-## NETFLIX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Netflix | https://explore.jobs.netflix.net/careers | ✅ Enabled |
-
-## NIELSENIQ (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| NielsenIQ | https://nielseniq.com/global/en/jobs/india/ | ✅ Enabled |
-
-## NIKE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Nike | https://careers.nike.com/jobs | ✅ Enabled |
-
-## NINJACART (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Ninjacart | https://ninjacart.com/careers/ | ✅ Enabled |
-
-## NINJAONE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| NinjaOne | https://jobs.jobvite.com/ninjaone/jobs | ✅ Enabled |
-
-## NOBROKER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| NoBroker | https://www.nobroker.in/careers | ✅ Enabled |
-
-## NOKIA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Nokia | https://jobs.nokia.com/en/sites/CX_1 | ✅ Enabled |
-
-## NUTANIX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Nutanix | https://careers.nutanix.com/en/jobs/ | ✅ Enabled |
-
-## OKTA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Okta | https://www.okta.com/company/careers/job-listing/ | ✅ Enabled |
-
-## OLA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Ola | https://olacareers.turbohire.co/careerpage/e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212 | ✅ Enabled |
-
 ## ORACLECLOUD (5 companies, 5 enabled)
 
 | Company Name | API Endpoint | Status |
@@ -824,182 +407,15 @@ Total ATS Types: 177
 | Oracle | https://careers.oracle.com/en/sites/jobsearch/jobs?location=India | ✅ Enabled |
 | Tesco Bengaluru | https://apply.tesco-careers.com | ✅ Enabled |
 
-## PALOALTONETWORKS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Palo Alto Networks | https://jobs.paloaltonetworks.com/en | ✅ Enabled |
-
-## PERFIOS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Perfios | https://www.perfios.com/careers | ✅ Enabled |
-
-## PHENOM (4 companies, 4 enabled)
+## PHENOM (5 companies, 5 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Barclays | https://search.jobs.barclays | ✅ Enabled |
 | Fidelity Investments | https://jobs.fidelity.com | ✅ Enabled |
 | Lowe's India | https://talent.lowes.com | ✅ Enabled |
+| Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | ✅ Enabled |
 | Wells Fargo | https://www.wellsfargojobs.com/en | ✅ Enabled |
-
-## PLAID (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Plaid | https://plaid.com/careers/ | ✅ Enabled |
-
-## PORTER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Porter | https://porter.in/careers | ✅ Enabled |
-
-## POSTHOG (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| PostHog | https://posthog.com/careers | ✅ Enabled |
-
-## PRISTYNCARE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Pristyn Care | https://www.pristyncare.com/careers/ | ✅ Enabled |
-
-## PURPLLE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Purplle | https://www.purplle.com/careers | ✅ Enabled |
-
-## PWC (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| PwC | https://jobs-ta.pwc.com/global/en/ac-india-job-search | ✅ Enabled |
-
-## QUALCOMM (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Qualcomm | https://careers.qualcomm.com/careers | ✅ Enabled |
-
-## QUESTDB (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| QuestDB | https://questdb.com/careers/ | ✅ Enabled |
-
-## RETOOL (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Retool | https://retool.com/careers#open-positions | ✅ Enabled |
-
-## RIOTGAMES (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Riot Games | https://www.riotgames.com/en/work-with-us/jobs | ✅ Enabled |
-
-## RIPPLING (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Rippling | https://www.rippling.com/careers/open-roles | ✅ Enabled |
-
-## RIVIAN (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Rivian | https://careers.rivian.com/careers-home/ | ✅ Enabled |
-
-## ROBINHOOD (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Robinhood | https://careers.robinhood.com/ | ✅ Enabled |
-
-## ROBLOX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Roblox | https://careers.roblox.com/jobs | ✅ Enabled |
-
-## RUBRIK (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Rubrik | https://www.rubrik.com/company/careers#positions | ✅ Enabled |
-
-## RUPEEK (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Rupeek | https://rupeek.com/careers | ✅ Enabled |
-
-## SAP (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| SAP | https://jobs.sap.com/ | ✅ Enabled |
-
-## SCALEAI (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Scale AI | https://scale.com/careers | ✅ Enabled |
-
-## SERVICENOW (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| ServiceNow | https://careers.servicenow.com/ | ✅ Enabled |
-
-## SETU (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Setu | https://setu.co/careers | ✅ Enabled |
-
-## SHADOWFAX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Shadowfax | https://www.shadowfax.in/careers | ✅ Enabled |
-
-## SHARECHAT (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| ShareChat | https://sharechat.com/careers | ✅ Enabled |
-
-## SHIPROCKET (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Shiprocket | https://www.shiprocket.in/careers/ | ✅ Enabled |
-
-## SHOPEE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Shopee | https://careers.shopee.sg/ | ✅ Enabled |
-
-## SHOPIFY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Shopify | https://shopify.com/careers | ✅ Enabled |
-
-## SIGNZY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Signzy | https://www.signzy.com/careers/ | ✅ Enabled |
 
 ## SMARTRECRUITERS (3 companies, 3 enabled)
 
@@ -1009,59 +425,11 @@ Total ATS Types: 177
 | Freshworks | https://careers.smartrecruiters.com/freshworks | ✅ Enabled |
 | Ubisoft | https://careers.smartrecruiters.com/ubisoft | ✅ Enabled |
 
-## SNOWPLOW (1 companies, 1 enabled)
+## TALENT500 (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Snowplow | https://snowplow.careers.hibob.com/ | ✅ Enabled |
-
-## SONY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Sony | https://www.sony.com/en_us/SCA/careers/overview.html | ✅ Enabled |
-
-## SQUAREYARDS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Square Yards | https://www.squareyards.com/careers | ✅ Enabled |
-
-## STANZALIVING (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Stanza Living | https://www.stanzaliving.com/careers | ✅ Enabled |
-
-## STRIPE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Stripe | https://stripe.com/jobs/search | ✅ Enabled |
-
-## SUGARCOSMETICS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Sugar Cosmetics | https://sugarcosmetics.com/pages/careers | ✅ Enabled |
-
-## SUPERCELL (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Supercell | https://supercell.com/en/careers/ | ✅ Enabled |
-
-## SWIGGY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Swiggy | https://careers.swiggy.com | ✅ Enabled |
-
-## SYNOPSYS (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Synopsys | https://www.synopsys.com/company/careers.html | ✅ Enabled |
+| American Airlines GCC | https://talent500.com/jobs/aatechhubindia/ | ✅ Enabled |
 
 ## TALEO (4 companies, 4 enabled)
 
@@ -1072,135 +440,25 @@ Total ATS Types: 177
 | FedEx | https://careers.fedex.com | ✅ Enabled |
 | Lockheed Martin | https://www.lockheedmartinjobs.com | ✅ Enabled |
 
-## TARGET (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Target | https://jobs.target.com | ✅ Enabled |
-
-## TESLA (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Tesla | https://www.tesla.com/careers | ✅ Enabled |
-
-## TESTBOOK (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Testbook | https://testbook.com/careers | ✅ Enabled |
-
-## TURBOHIRE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Khatabook | https://khatabook.turbohire.co/careerpage/alljobs | ✅ Enabled |
-
-## UBER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Uber | https://jobs.uber.com/en/jobs/ | ✅ Enabled |
-
-## UNACADEMY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
-
-## UNITEDHEALTH (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | ✅ Enabled |
-
-## UNITY (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Unity | https://unity.com/careers/positions | ✅ Enabled |
-
-## VMWARE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| VMware | https://www.broadcom.com/company/careers | ✅ Enabled |
-
-## WALMART (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Walmart | https://careers.walmart.com/us/en/home | ✅ Enabled |
-
-## WAYCOOL (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Waycool | https://www.waycool.in/careers/ | ✅ Enabled |
-
-## WAYFAIR (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Wayfair | https://www.wayfair.com/careers/jobs | ✅ Enabled |
-
-## WEBENGAGE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| WebEngage | https://webengage.com/careers/ | ✅ Enabled |
-
-## WEIGHTS&BIASES (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Weights & Biases | https://www.coreweave.com/careers/weights-biases | ✅ Enabled |
-
-## WHATFIX (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Whatfix | https://whatfix.com/careers | ✅ Enabled |
-
-## WINZO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| WinZo | https://www.winzogames.com/careers | ✅ Enabled |
-
-## WISE (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Wise | https://wise.jobs/ | ✅ Enabled |
-
-## WIZ (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Wiz | https://www.wiz.io/careers | ✅ Enabled |
-
 ## WORKABLE (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Hugging Face | https://apply.workable.com/huggingface/?lng=en | ✅ Enabled |
 
-## WORKDAY (47 companies, 47 enabled)
+## WORKDAY (44 companies, 44 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Adobe | https://adobe.wd5.myworkdayjobs.com/external_experienced | ✅ Enabled |
-| American Airlines GCC | https://jobs.aa.com | ✅ Enabled |
 | Analog Devices | https://analogdevices.wd1.myworkdayjobs.com/External | ✅ Enabled |
 | Applied Materials | https://amat.wd1.myworkdayjobs.com/External_Careers | ✅ Enabled |
-| ASML | https://www.asml.com/en/careers/job-search | ✅ Enabled |
+| ASML | https://www.asml.com/en/careers/find-your-job | ✅ Enabled |
 | Autodesk | https://autodesk.wd1.myworkdayjobs.com/Ext | ✅ Enabled |
 | BlackRock | https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional | ✅ Enabled |
 | Broadcom | https://broadcom.wd1.myworkdayjobs.com/External_Career | ✅ Enabled |
 | BrowserStack | https://browserstack.wd3.myworkdayjobs.com/External | ✅ Enabled |
 | Cadence Design Systems | https://cadence.wd1.myworkdayjobs.com/External_Careers | ✅ Enabled |
-| Citadel | https://www.citadel.com/careers/open-opportunities/ | ✅ Enabled |
 | CrowdStrike | https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers | ✅ Enabled |
 | Expedia | https://expedia.wd108.myworkdayjobs.com/en-US/search | ✅ Enabled |
 | Fortinet | https://fortinet.wd1.myworkdayjobs.com/External | ✅ Enabled |
@@ -1218,7 +476,6 @@ Total ATS Types: 177
 | Logitech | https://logitech.wd5.myworkdayjobs.com/Logitech | ✅ Enabled |
 | Marvell Technology | https://marvell.wd1.myworkdayjobs.com/MarvellCareers | ✅ Enabled |
 | Mastercard | https://mastercard.wd1.myworkdayjobs.com/CorporateCareers | ✅ Enabled |
-| Micron Technology | https://incareers.micron.com/ | ✅ Enabled |
 | Motorola Solutions | https://motorolasolutions.wd5.myworkdayjobs.com/Careers | ✅ Enabled |
 | NetApp | https://netapp.wd1.myworkdayjobs.com/External | ✅ Enabled |
 | NVIDIA | https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite | ✅ Enabled |
@@ -1237,46 +494,4 @@ Total ATS Types: 177
 | Workday | https://workday.wd5.myworkdayjobs.com/Workday | ✅ Enabled |
 | Zendesk | https://zendesk.wd1.myworkdayjobs.com/zendesk | ✅ Enabled |
 | Zoom | https://zoom.wd5.myworkdayjobs.com/Zoom | ✅ Enabled |
-
-## YELLOWAI (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Yellow.ai | https://yellow.ai/careers/ | ✅ Enabled |
-
-## ZAPIER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Zapier | https://zapier.com/jobs#job-openings | ✅ Enabled |
-
-## ZEPTO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Zepto | https://zepto.talentrecruit.com/career-page | ✅ Enabled |
-
-## ZOHO (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Zoho | https://www.zoho.com/careers/ | ✅ Enabled |
-
-## ZOMATO(ETERNAL) (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Zomato (Eternal) | https://www.eternal.com/careers/ | ✅ Enabled |
-
-## ZSASSOCIATES (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| ZS Associates | https://jobs.zs.com/jobs | ✅ Enabled |
-
-## ZSCALER (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Zscaler | https://www.zscaler.com/careers | ✅ Enabled |
 
