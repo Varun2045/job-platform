@@ -203,7 +203,7 @@ Meesho | https://jobs.lever.co/meesho | lever
 Mensa Brands | https://mensabrands.com/careers/ | custom
 Mercor | https://jobs.ashbyhq.com/mercor | ashby
 Meta | https://www.metacareers.com/jobsearch/ | meta
-Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | phenom
+Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | eightfold
 Microsoft | https://apply.careers.microsoft.com/careers?domain=microsoft.com | microsoft
 Mindtickle | https://jobs.lever.co/mindtickle | lever
 Miro | https://miro.com/careers/open-positions/ | custom

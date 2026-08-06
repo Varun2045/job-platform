@@ -187,7 +187,7 @@ export class AtsRegistryService {
       id: 'phenom',
       name: 'Phenom',
       averageExtractionMs: 21,
-      companies: ['Barclays', 'Fidelity Investments', "Lowe's India", 'Micron Technology', 'Wells Fargo'],
+      companies: ['Barclays', 'Fidelity Investments', "Lowe's India", 'Wells Fargo'],
       companyDetails: [],
     },
     {
@@ -208,7 +208,7 @@ export class AtsRegistryService {
       id: 'eightfold',
       name: 'Eightfold',
       averageExtractionMs: 22,
-      companies: ['American Express', 'PayPal'],
+      companies: ['American Express', 'Micron Technology', 'PayPal'],
       companyDetails: [],
     },
     {
@@ -223,6 +223,13 @@ export class AtsRegistryService {
       name: 'Workable',
       averageExtractionMs: 19,
       companies: ['Hugging Face'],
+      companyDetails: [],
+    },
+    {
+      id: 'talent500',
+      name: 'Talent500',
+      averageExtractionMs: 25,
+      companies: ['American Airlines GCC'],
       companyDetails: [],
     },
   ];

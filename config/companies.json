@@ -2036,7 +2036,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "api_endpoint": "https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot",
-    "detected_ats": "phenom",
+    "detected_ats": "eightfold",
     "resume_profiles": []
   },
   {

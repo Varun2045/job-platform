@@ -280,11 +280,12 @@ Total ATS Types: 20
 | Darwinbox | https://dbx.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | NxtWave | https://nxtwave.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 
-## EIGHTFOLD (2 companies, 2 enabled)
+## EIGHTFOLD (3 companies, 3 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | American Express | https://www.americanexpress.com/en-us/careers | ✅ Enabled |
+| Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | ✅ Enabled |
 | PayPal | https://paypal.eightfold.ai/careers | ✅ Enabled |
 
 ## GOOGLE (1 companies, 1 enabled)
@@ -407,14 +408,13 @@ Total ATS Types: 20
 | Oracle | https://careers.oracle.com/en/sites/jobsearch/jobs?location=India | ✅ Enabled |
 | Tesco Bengaluru | https://apply.tesco-careers.com | ✅ Enabled |
 
-## PHENOM (5 companies, 5 enabled)
+## PHENOM (4 companies, 4 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Barclays | https://search.jobs.barclays | ✅ Enabled |
 | Fidelity Investments | https://jobs.fidelity.com | ✅ Enabled |
 | Lowe's India | https://talent.lowes.com | ✅ Enabled |
-| Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | ✅ Enabled |
 | Wells Fargo | https://www.wellsfargojobs.com/en | ✅ Enabled |
 
 ## SMARTRECRUITERS (3 companies, 3 enabled)
