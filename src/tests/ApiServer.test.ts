@@ -82,8 +82,8 @@ describe('Express REST API Server Integration Tests', () => {
     });
 
     expect(res.status).toBe(200);
-    expect(res.data).toHaveProperty('token');
-    expect(res.data.user.email).toBe('user@jobmonitor.com');
+    expect(res.data.data).toHaveProperty('token');
+    expect(res.data.data.user.email).toBe('user@jobmonitor.com');
   });
 
   it('should reject invalid auth credentials', async () => {
@@ -110,7 +110,7 @@ describe('Express REST API Server Integration Tests', () => {
     });
 
     expect(res.status).toBe(200);
-    expect(res.data).toHaveProperty('stats');
+    expect(res.data.data).toHaveProperty('stats');
   });
 
   it('should parse raw files correctly in parse endpoint', async () => {
@@ -126,7 +126,7 @@ describe('Express REST API Server Integration Tests', () => {
     });
 
     expect(res.status).toBe(200);
-    expect(res.data.text).toBe(rawContent);
+    expect(res.data.data.text).toBe(rawContent);
   });
 });
 

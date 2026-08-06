@@ -1,11 +1,13 @@
 [
   {
-    "id": "mockcorp",
-    "name": "MockCorp",
+    "id": "test",
+    "name": "Test Corp",
     "enabled": true,
-    "url": "https://mockcorp.com",
-    "last_successful_scrape": "2026-08-05T16:11:01.533Z",
-    "total_failures": 0,
-    "total_scrapes": 1
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [],
+    "avg_response_time_ms": 0,
+    "total_scrapes": 10,
+    "total_failures": 0
   }
 ]

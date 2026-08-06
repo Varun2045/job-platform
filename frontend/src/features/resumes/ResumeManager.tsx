@@ -127,12 +127,18 @@ export const ResumeManager: React.FC = () => {
     },
   });
 
-  // Ensure default resume is auto-selected if not set
+  // Ensure default resume is valid and auto-selected
   useEffect(() => {
-    if (resumes.length > 0 && !defaultResume) {
-      const first = resumes[0].name;
-      setDefaultResume(first);
-      localStorage.setItem('defaultResumeProfile', first);
+    if (resumes.length > 0) {
+      const exists = resumes.some((r) => r.name === defaultResume);
+      if (!defaultResume || !exists) {
+        const first = resumes[0].name;
+        setDefaultResume(first);
+        localStorage.setItem('defaultResumeProfile', first);
+      }
+    } else if (defaultResume !== '') {
+      setDefaultResume('');
+      localStorage.removeItem('defaultResumeProfile');
     }
   }, [resumes, defaultResume]);
 
@@ -385,7 +391,9 @@ export const ResumeManager: React.FC = () => {
 
   // Calculate Statistics
   const totalResumes = resumes.length;
-  const currentDefaultName = defaultResume || (resumes[0]?.name || 'None');
+  const currentDefaultName = resumes.length > 0
+    ? (resumes.some((r) => r.name === defaultResume) ? defaultResume : resumes[0].name)
+    : 'None';
   const totalSizeBytes = resumes.reduce((sum, r) => {
     const meta = getResumeMeta(r.name, r.content, r.pdf_data);
     return sum + (meta.fileSizeBytes || 150000);

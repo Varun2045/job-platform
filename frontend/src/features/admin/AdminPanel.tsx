@@ -310,7 +310,7 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap sm:flex-nowrap gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <button
                           onClick={() => exportMutation.mutate()}
                           className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 whitespace-nowrap rounded-xl transition duration-200 cursor-pointer shadow-md"

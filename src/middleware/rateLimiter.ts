@@ -17,7 +17,7 @@ export const apiRateLimiter = rateLimit({
   },
   skip: (req) => {
     // Skip rate limiting in development mode if needed
-    return process.env.NODE_ENV === 'test';
+    return process.env.NODE_ENV === 'test' && req.path !== '/api/test';
   },
 });
 
@@ -37,7 +37,7 @@ export const authRateLimiter = rateLimit({
     },
   },
   skip: (req) => {
-    return process.env.NODE_ENV === 'test';
+    return process.env.NODE_ENV === 'test' && req.path !== '/api/auth/login';
   },
   // Store IP addresses to track attempts
   keyGenerator: (req) => {

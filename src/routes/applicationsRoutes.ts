@@ -45,20 +45,28 @@ router.get('/', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
-    const { jobHash, company, status, notes, resumeUsed } = req.body;
+    const { jobHash, company, jobId, status, notes, resumeUsed, title, location, employmentType, isRemote, salary } = req.body;
 
     if (!jobHash || !company) {
       return sendError(res, ErrorCodes.VALIDATION_ERROR, 'jobHash and company are required', 400);
     }
 
-    const application = await storage.createApplication({
-      userId,
+    const application = {
       jobHash,
       company,
-      status: status || 'New',
-      notes,
-      resumeUsed,
-    });
+      jobId: jobId || jobHash,
+      status: status || 'Saved',
+      notes: notes || null,
+      resumeUsed: resumeUsed || null,
+      lastUpdated: new Date().toISOString(),
+      title: title || undefined,
+      location: location || undefined,
+      employmentType: employmentType || undefined,
+      isRemote: isRemote || undefined,
+      salary: salary || undefined,
+    };
+
+    await storage.saveApplication(application, userId);
 
     return sendSuccess(res, application, 201);
   } catch (err: unknown) {

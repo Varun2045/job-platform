@@ -69,7 +69,8 @@ const JobMonitoring: React.FC = () => {
     queryFn: async () => {
       const res = await fetch('/api/monitoring');
       if (!res.ok) throw new Error('Failed to load monitoring data');
-      return res.json();
+      const json = await res.json();
+      return json.data;
     },
     refetchInterval: 30000, // Auto refresh every 30 seconds
   });
@@ -522,10 +523,19 @@ const JobMonitoring: React.FC = () => {
 };
 
 const EmailAutomation: React.FC = () => {
-  const [instantAlerts, setInstantAlerts] = useState(false);
-  const [dailyDigest, setDailyDigest] = useState(true);
-  const [weeklyReport, setWeeklyReport] = useState(false);
-  const [monthlySummary, setMonthlySummary] = useState(false);
+  const instantAlerts = true;
+  const [dailyDigest, setDailyDigest] = useState<boolean>(() => {
+    const val = localStorage.getItem('email_pref_dailyDigest');
+    return val !== null ? val === 'true' : true;
+  });
+  const [weeklyReport, setWeeklyReport] = useState<boolean>(() => {
+    const val = localStorage.getItem('email_pref_weeklyReport');
+    return val !== null ? val === 'true' : false;
+  });
+  const [monthlySummary, setMonthlySummary] = useState<boolean>(() => {
+    const val = localStorage.getItem('email_pref_monthlySummary');
+    return val !== null ? val === 'true' : false;
+  });
   const [showPreview, setShowPreview] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState({ company: 'Google', role: 'Software Engineer', location: 'Mountain View, CA', match_score: 85, resume: 'Backend Resume', date: new Date().toLocaleDateString() });
@@ -699,10 +709,11 @@ const EmailAutomation: React.FC = () => {
               <span className="text-sm font-bold text-white">Instant Alerts</span>
             </div>
             <button
-              onClick={() => setInstantAlerts(!instantAlerts)}
-              className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${instantAlerts ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
+              disabled
+              className="w-12 h-6 rounded-full bg-emerald-600 cursor-not-allowed opacity-80"
+              title="Instant alerts are permanently enabled"
             >
-              <div className={`w-5 h-5 bg-white rounded-full transition-transform ${instantAlerts ? 'translate-x-6' : 'translate-x-0.5'}`} />
+              <div className="w-5 h-5 bg-white rounded-full translate-x-6" />
             </button>
           </div>
           <p className="text-xs text-slate-300">Send immediately when a matching job is found.</p>
@@ -724,7 +735,11 @@ const EmailAutomation: React.FC = () => {
               <span className="text-sm font-bold text-white">Daily Digest</span>
             </div>
             <button
-              onClick={() => setDailyDigest(!dailyDigest)}
+              onClick={() => {
+                const next = !dailyDigest;
+                setDailyDigest(next);
+                localStorage.setItem('email_pref_dailyDigest', String(next));
+              }}
               className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${dailyDigest ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${dailyDigest ? 'translate-x-6' : 'translate-x-0.5'}`} />
@@ -749,7 +764,11 @@ const EmailAutomation: React.FC = () => {
               <span className="text-sm font-bold text-white">Weekly Report</span>
             </div>
             <button
-              onClick={() => setWeeklyReport(!weeklyReport)}
+              onClick={() => {
+                const next = !weeklyReport;
+                setWeeklyReport(next);
+                localStorage.setItem('email_pref_weeklyReport', String(next));
+              }}
               className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${weeklyReport ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${weeklyReport ? 'translate-x-6' : 'translate-x-0.5'}`} />
@@ -774,7 +793,11 @@ const EmailAutomation: React.FC = () => {
               <span className="text-sm font-bold text-white">Monthly Summary</span>
             </div>
             <button
-              onClick={() => setMonthlySummary(!monthlySummary)}
+              onClick={() => {
+                const next = !monthlySummary;
+                setMonthlySummary(next);
+                localStorage.setItem('email_pref_monthlySummary', String(next));
+              }}
               className={`w-12 h-6 rounded-full transition-colors cursor-pointer ${monthlySummary ? 'bg-emerald-600' : 'bg-[#232d3f]'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform ${monthlySummary ? 'translate-x-6' : 'translate-x-0.5'}`} />
@@ -1031,7 +1054,8 @@ const CalendarAutomation: React.FC = () => {
     // Check Google Calendar connection status from backend
     fetch('/api/calendar/google/status')
       .then(res => res.json())
-      .then(data => {
+      .then(json => {
+        const data = json.data || json;
         if (data && typeof data.linked === 'boolean') {
           setIsConnected(data.linked);
         }
@@ -1041,7 +1065,8 @@ const CalendarAutomation: React.FC = () => {
     // Fetch initial calendar events
     fetch('/api/calendar')
       .then(res => res.ok ? res.json() : [])
-      .then(data => {
+      .then(json => {
+        const data = Array.isArray(json) ? json : (json.data || []);
         if (Array.isArray(data) && data.length > 0) {
           setEvents(data.map((e: any) => ({
             id: e.id || String(Date.now()),
@@ -1073,7 +1098,8 @@ const CalendarAutomation: React.FC = () => {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || `Server returned status ${res.status}`);
       }
-      const data = await res.json();
+      const json = await res.json();
+      const data = json.data || json;
       if (data.url) {
         window.open(data.url, '_blank');
       } else {

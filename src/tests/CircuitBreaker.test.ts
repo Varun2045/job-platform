@@ -1,3 +1,5 @@
+import { jest as jestActual } from '@jest/globals';
+const jest = jestActual as any;
 import { CircuitBreaker, CircuitBreakerRegistry, CircuitState } from '../utils/circuitBreaker.js';
 
 describe('Circuit Breaker Integration Tests', () => {

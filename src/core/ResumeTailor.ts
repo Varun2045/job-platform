@@ -12,7 +12,6 @@ export interface TailoredResumeResult {
 
 export class ResumeTailor {
   public static tailor(job: Job, profile: string): TailoredResumeResult {
-    const explanation = { missingSkills: [], matchedSkills: [] };
     const resumesDir = path.join(process.cwd(), 'resumes');
     const resumePath = path.join(resumesDir, `${profile.toLowerCase()}.txt`);
 
@@ -21,8 +20,15 @@ export class ResumeTailor {
       originalResume = fs.readFileSync(resumePath, 'utf-8');
     }
 
-    const missingKeywords = explanation.missingSkills;
-    const skillsToEmphasize = explanation.matchedSkills;
+    const skillsList = ['typescript', 'react', 'node.js', 'javascript', 'python', 'go', 'rust', 'c++', 'java', 'sql', 'postgresql', 'supabase', 'aws'];
+    const searchStr = ((job.description || '') + ' ' + (job.title || '')).toLowerCase();
+    
+    const skillsToEmphasize = skillsList.filter(skill => searchStr.includes(skill));
+    const missingKeywords: string[] = [];
+
+    if (skillsToEmphasize.length === 0) {
+      skillsToEmphasize.push('software engineering');
+    }
 
     const betterBulletPoints: string[] = [];
     if (missingKeywords.length > 0) {

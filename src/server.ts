@@ -2576,7 +2576,7 @@ app.post('/api/monitoring/cron-trigger', async (req, res) => {
     });
 
     Logger.info('Scrapers run triggered via secure cron webhook.');
-    return sendSuccess(res, { success: true, message: 'Scrapers run triggered via webhook successfully' });
+    return res.status(200).json({ success: true, message: 'Scrapers run triggered via webhook successfully' });
   } catch (err: unknown) {
     const error = err as Error;
     Logger.error('Error in cron-trigger endpoint', err as Error);
