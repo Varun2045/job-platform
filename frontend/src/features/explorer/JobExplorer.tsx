@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Search, Briefcase, Globe, ExternalLink, X, Sparkles, 
-  FileText, CheckSquare, Bookmark, Filter,
-  ChevronLeft, ChevronRight
+  FileText, Bookmark, Filter, ChevronLeft, ChevronRight,
+  MapPin, DollarSign, Clock, Plus, Check, BookOpen,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 import { CardSkeleton } from '../../components/Skeleton.js';
 import { CoverLetterModal } from './CoverLetterModal.js';
 import { ResumeTailoringModal } from './ResumeTailoringModal.js';
 import { InterviewPrepPanel } from './InterviewPrepPanel.js';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader.js';
 import { useToast } from '../../context/ToastContext.js';
 
@@ -54,12 +55,11 @@ const HighlightText: React.FC<{ text?: string; highlight?: string; className?: s
 };
 
 export const JobExplorer: React.FC = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Saved Filters Helper for Persistence (Requirement 10)
+  // Saved Filters Helper for Persistence
   const getSavedFilter = (key: string, defaultValue: any) => {
     try {
       const saved = localStorage.getItem('job_explorer_filters_v2');
@@ -102,7 +102,7 @@ export const JobExplorer: React.FC = () => {
     (searchParams.get('sort') as any) || getSavedFilter('sortBy', 'newest')
   );
 
-  // Page-based Pagination State (Requirement: 30 jobs per page with Next/Prev navigation)
+  // Page-based Pagination State
   const [page, setPage] = useState<number>(Number(searchParams.get('page')) || 1);
   const jobFeedTopRef = useRef<HTMLDivElement>(null);
 
@@ -115,7 +115,6 @@ export const JobExplorer: React.FC = () => {
     }
   });
   const [hiddenJobs] = useState<Set<string>>(new Set());
-  const [showAllEmpTypes, setShowAllEmpTypes] = useState(false);
 
   // UI Drawer & Modal state
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
@@ -123,6 +122,7 @@ export const JobExplorer: React.FC = () => {
   const [openTailor, setOpenTailor] = useState(false);
   const [openPrep, setOpenPrep] = useState(false);
   const [trackNotes, setTrackNotes] = useState('');
+  const [activeTab, setActiveTab] = useState<'details' | 'matching' | 'toolkit'>('details');
 
   // Department Sub-Category Collapsible States
   const [openDeptCategories, setOpenDeptCategories] = useState<Record<string, boolean>>(() => {
@@ -153,7 +153,7 @@ export const JobExplorer: React.FC = () => {
   const toggleDeptCategoryOpen = (catName: string) => {
     setOpenDeptCategories(prev => {
       const isCurrentlyOpen = prev[catName];
-      const next: Record<string, boolean> = isCurrentlyOpen ? {} : { [catName]: true };
+      const next: Record<string, boolean> = { [catName]: !isCurrentlyOpen };
       try {
         localStorage.setItem('job_explorer_open_dept_cats_v1', JSON.stringify(next));
       } catch {}
@@ -171,26 +171,16 @@ export const JobExplorer: React.FC = () => {
     experience: false,
     employment: false,
     remote: false,
-    tags: false,
-    quality: false,
     location: false,
-    skills: false,
-    salary: false,
-    minScore: false,
-    recommendations: false,
   });
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => {
-      const isCurrentlyOpen = prev[section];
-      if (!isCurrentlyOpen) {
-        const singleOpen: Record<string, boolean> = {};
-        Object.keys(prev).forEach(key => {
-          singleOpen[key] = key === section;
-        });
-        return singleOpen;
-      }
-      return { ...prev, [section]: false };
+      const next: Record<string, boolean> = {};
+      Object.keys(prev).forEach(key => {
+        next[key] = key === section ? !prev[section] : false;
+      });
+      return next;
     });
   };
 
@@ -220,11 +210,11 @@ export const JobExplorer: React.FC = () => {
     if (!range) return '';
     const dateLimit = new Date();
     if (range === '1d') {
-      dateLimit.setHours(0, 0, 0, 0); // Local Midnight today
+      dateLimit.setHours(0, 0, 0, 0);
     } else {
       const days = range === '3d' ? 3 : range === '7d' ? 7 : range === '30d' ? 30 : 365;
       dateLimit.setDate(dateLimit.getDate() - days);
-      dateLimit.setHours(0, 0, 0, 0); // Local Midnight N days ago
+      dateLimit.setHours(0, 0, 0, 0);
     }
     return dateLimit.toISOString();
   };
@@ -275,7 +265,7 @@ export const JobExplorer: React.FC = () => {
     page,
   ]);
 
-  // Combined Query for Facets and Jobs (Single API call for better performance)
+  // Combined Query for Facets and Jobs
   const { data: combinedData, isLoading: isCombinedLoading, isFetching } = useQuery({
     queryKey: [
       'jobs-combined',
@@ -400,7 +390,7 @@ export const JobExplorer: React.FC = () => {
     } catch {}
   };
 
-  // Persist filter selections to local storage (Requirement 10)
+  // Persist filter selections to local storage
   useEffect(() => {
     try {
       const stored = {
@@ -429,7 +419,6 @@ export const JobExplorer: React.FC = () => {
   const renderSidebarContents = () => {
     const facets = facetsData?.facets || {};
 
-    // Department grouping configurations
     const deptGroups: Record<string, string[]> = {
       'Engineering': [
         'Software Engineering',
@@ -494,8 +483,6 @@ export const JobExplorer: React.FC = () => {
       'Gurgaon',
       'Noida',
       'Mumbai',
-      'International',
-      'Other Locations'
     ];
 
     const getLocCount = (locOption: string) => {
@@ -522,7 +509,6 @@ export const JobExplorer: React.FC = () => {
     };
 
     const primaryEmpTypes = ['Full-time', 'Internship', 'Graduate Program', 'Part-time', 'Contract'];
-    const secondaryEmpTypes = ['Temporary', 'Freelance', 'Apprenticeship', 'Co-op', 'Consultant', 'Seasonal', 'Volunteer'];
 
     const getEmpCount = (empLabel: string) => {
       const match = (facets.employmentTypes || []).find((f: any) => f.label.toLowerCase() === empLabel.toLowerCase());
@@ -531,69 +517,70 @@ export const JobExplorer: React.FC = () => {
 
     return (
       <div className="space-y-4">
-        {/* 1. DEPARTMENT & CATEGORIES */}
-        <div>
+        {/* DEPARTMENT SECTION */}
+        <div className="border-b border-[#232d3f] pb-3">
           <button
             onClick={() => toggleSection('department')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+            className="w-full flex items-center justify-between py-2 text-left cursor-pointer group"
           >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Department {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{department.length}</span>}
+            <span className="text-xs font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-indigo-500" /> Department {department.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 text-[10px] rounded-full font-bold">{department.length}</span>}
             </span>
+            {openSections.department ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
           
           {openSections.department && (
-            <div className="space-y-2 mt-2 transition-all">
+            <div className="space-y-2.5 mt-2 transition-all">
               {Object.entries(deptGroups).map(([groupName, deptList]) => {
                 const isOpen = openDeptCategories[groupName] ?? false;
                 const isExpanded = expandedDeptCategories[groupName] ?? false;
+                const visibleDepts = isExpanded ? deptList : deptList.slice(0, 4);
+                const totalCategoryJobs = deptList.reduce((acc, d) => acc + getDeptCount(d), 0);
 
-                const availableDepts = deptList;
-                const visibleDepts = isExpanded ? availableDepts : availableDepts.slice(0, 5);
-                const totalCategoryJobs = availableDepts.reduce((acc, d) => acc + getDeptCount(d), 0);
+                if (totalCategoryJobs === 0 && !department.some(d => deptList.includes(d))) return null;
 
                 return (
-                  <div key={groupName} className="bg-[#090d16]/60 border border-[#243147]/50 rounded-xl p-2 space-y-1.5">
+                  <div key={groupName} className="bg-[#131a26]/70 border border-[#232d3f] rounded-xl p-2.5 space-y-2">
                     <button
                       onClick={() => toggleDeptCategoryOpen(groupName)}
                       className="w-full flex items-center justify-between text-left cursor-pointer group/cat px-1 py-0.5"
                     >
-                      <span className="text-[10px] font-extrabold text-[#94a3b8] group-hover/cat:text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-slate-400 group-hover/cat:text-white uppercase tracking-wider">
                         {groupName}
                       </span>
-                      <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
+                      <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
                         {totalCategoryJobs}
                       </span>
                     </button>
 
                     {isOpen && (
-                      <div className="space-y-0.5 pt-1 pl-1.5 transition-all">
+                      <div className="space-y-1.5 pt-1 pl-1">
                         {visibleDepts.map((lvl) => {
                           const count = getDeptCount(lvl);
                           return (
-                            <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
+                            <label key={lvl} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-2 rounded-lg hover:bg-[#1b2535] transition-all">
                               <div className="flex items-center gap-2 min-w-0">
                                 <input
                                   type="checkbox"
                                   checked={department.includes(lvl)}
                                   onChange={() => toggleArrayFilter(department, lvl, setDepartment)}
-                                  className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                                  className="rounded border-[#232d3f] bg-[#0b0f19] text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <span className="truncate">{lvl}</span>
                               </div>
-                              <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                              <span className="text-[10px] font-bold text-slate-500 bg-[#0b0f19] px-2 py-0.5 rounded-full border border-[#232d3f]">
                                 {count}
                               </span>
                             </label>
                           );
                         })}
 
-                        {availableDepts.length > 5 && (
+                        {deptList.length > 4 && (
                           <button
                             onClick={() => toggleDeptCategoryExpand(groupName)}
                             className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
                           >
-                            {isExpanded ? 'Show Less' : `Show More (${availableDepts.length - 5})`}
+                            {isExpanded ? 'Show Less' : `Show More (${deptList.length - 4})`}
                           </button>
                         )}
                       </div>
@@ -601,97 +588,40 @@ export const JobExplorer: React.FC = () => {
                   </div>
                 );
               })}
-
-              {(() => {
-                const groupedDeptsSet = new Set(Object.values(deptGroups).flat());
-                const leftovers = (facets.departments || []).filter((d: any) => !groupedDeptsSet.has(d.label));
-                if (leftovers.length === 0) return null;
-
-                const isOpen = openDeptCategories['Other Categories'] ?? false;
-                const isExpanded = expandedDeptCategories['Other Categories'] ?? false;
-                const visibleLeftovers = isExpanded ? leftovers : leftovers.slice(0, 5);
-
-                return (
-                  <div className="bg-[#090d16]/60 border border-[#243147]/50 rounded-xl p-2 space-y-1.5">
-                    <button
-                      onClick={() => toggleDeptCategoryOpen('Other Categories')}
-                      className="w-full flex items-center justify-between text-left cursor-pointer group/cat px-1 py-0.5"
-                    >
-                      <span className="text-[10px] font-extrabold text-[#94a3b8] group-hover/cat:text-white uppercase tracking-wider flex items-center gap-1.5">
-                        Other Categories
-                      </span>
-                      <span className="text-[9px] font-bold text-[#64748b] bg-[#111827] px-1.5 py-0.5 rounded-full border border-[#243147]/40">
-                        {leftovers.reduce((acc: number, d: any) => acc + d.count, 0)}
-                      </span>
-                    </button>
-
-                    {isOpen && (
-                      <div className="space-y-0.5 pt-1 pl-1.5 transition-all">
-                        {visibleLeftovers.map((f: any) => (
-                          <label key={f.label} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <input
-                                type="checkbox"
-                                checked={department.includes(f.label)}
-                                onChange={() => toggleArrayFilter(department, f.label, setDepartment)}
-                                className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <span className="truncate">{f.label}</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                              {f.count}
-                            </span>
-                          </label>
-                        ))}
-
-                        {leftovers.length > 5 && (
-                          <button
-                            onClick={() => toggleDeptCategoryExpand('Other Categories')}
-                            className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1 cursor-pointer"
-                          >
-                            {isExpanded ? 'Show Less' : `Show More (${leftovers.length - 5})`}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
             </div>
           )}
         </div>
 
-        {/* 2. EXPERIENCE */}
-        <div className="border-t border-[#243147]/40 pt-3">
+        {/* EXPERIENCE SECTION */}
+        <div className="border-b border-[#232d3f] pb-3">
           <button
             onClick={() => toggleSection('experience')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+            className="w-full flex items-center justify-between py-2 text-left cursor-pointer group"
           >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Experience {experience.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{experience.length}</span>}
+            <span className="text-xs font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+              <Clock className="w-4 h-4 text-emerald-500" /> Experience {experience.length > 0 && <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 text-[10px] rounded-full font-bold">{experience.length}</span>}
             </span>
+            {openSections.experience ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
-          
+
           {openSections.experience && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
+            <div className="space-y-1.5 mt-2 transition-all">
               {['Freshers', '0–2 Years', '2–5 Years', '5+ Years'].map((expOpt) => {
                 const count = getExperienceCount(expOpt);
                 return (
-                  <label key={expOpt} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
+                  <label key={expOpt} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1.5 px-2 rounded-lg hover:bg-[#1b2535] transition-all">
+                    <div className="flex items-center gap-2 min-w-0">
                       <input
                         type="checkbox"
                         checked={experience.includes(expOpt)}
                         onChange={() => toggleArrayFilter(experience, expOpt, setExperience)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        className="rounded border-[#232d3f] bg-[#0b0f19] text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span>{expOpt}</span>
+                      <span className="truncate">{expOpt}</span>
                     </div>
-                    {count > 0 && (
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                        {count}
-                      </span>
-                    )}
+                    <span className="text-[10px] font-bold text-slate-500 bg-[#0b0f19] px-2 py-0.5 rounded-full border border-[#232d3f]">
+                      {count}
+                    </span>
                   </label>
                 );
               })}
@@ -699,71 +629,72 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 3. WORK MODE */}
-        <div className="border-t border-[#243147]/40 pt-3">
+        {/* WORK MODE / REMOTE SECTION */}
+        <div className="border-b border-[#232d3f] pb-3">
           <button
             onClick={() => toggleSection('remote')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+            className="w-full flex items-center justify-between py-2 text-left cursor-pointer group"
           >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Work Mode {remote.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{remote.length}</span>}
+            <span className="text-xs font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+              <Globe className="w-4 h-4 text-cyan-500" /> Work Mode {remote.length > 0 && <span className="bg-cyan-500/20 text-cyan-400 px-2 py-0.5 text-[10px] rounded-full font-bold">{remote.length}</span>}
             </span>
+            {openSections.remote ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
-          
+
           {openSections.remote && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
+            <div className="space-y-1.5 mt-2 transition-all">
               {[
-                { label: 'Remote', value: 'true' },
+                { label: 'Remote Only', value: 'true' },
                 { label: 'Hybrid', value: 'hybrid' },
                 { label: 'On-site', value: 'false' },
-                { label: 'Remote Worldwide', value: 'remote worldwide' },
-                { label: 'Remote India', value: 'remote india' },
-                { label: 'Remote US', value: 'remote us' }
-              ].map(opt => (
-                <label key={opt.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={remote.includes(opt.value)}
-                      onChange={() => toggleArrayFilter(remote, opt.value, setRemote)}
-                      className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span>{opt.label}</span>
-                  </div>
-                </label>
-              ))}
+              ].map((opt) => {
+                return (
+                  <label key={opt.value} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1.5 px-2 rounded-lg hover:bg-[#1b2535] transition-all">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={remote.includes(opt.value)}
+                        onChange={() => toggleArrayFilter(remote, opt.value, setRemote)}
+                        className="rounded border-[#232d3f] bg-[#0b0f19] text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="truncate">{opt.label}</span>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           )}
         </div>
 
-        {/* 4. LOCATION */}
-        <div className="border-t border-[#243147]/40 pt-3">
+        {/* LOCATION SECTION */}
+        <div className="border-b border-[#232d3f] pb-3">
           <button
             onClick={() => toggleSection('location')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+            className="w-full flex items-center justify-between py-2 text-left cursor-pointer group"
           >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Location {location.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{location.length}</span>}
+            <span className="text-xs font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-rose-500" /> Location {location.length > 0 && <span className="bg-rose-500/20 text-rose-400 px-2 py-0.5 text-[10px] rounded-full font-bold">{location.length}</span>}
             </span>
+            {openSections.location ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
-          
+
           {openSections.location && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
-              {quickLocations.map((locOpt) => {
-                const count = getLocCount(locOpt);
+            <div className="space-y-1.5 mt-2 transition-all">
+              {quickLocations.map((loc) => {
+                const count = getLocCount(loc);
                 return (
-                  <label key={locOpt} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
+                  <label key={loc} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1.5 px-2 rounded-lg hover:bg-[#1b2535] transition-all">
+                    <div className="flex items-center gap-2 min-w-0">
                       <input
                         type="checkbox"
-                        checked={location.includes(locOpt)}
-                        onChange={() => toggleArrayFilter(location, locOpt, setLocation)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        checked={location.includes(loc)}
+                        onChange={() => toggleArrayFilter(location, loc, setLocation)}
+                        className="rounded border-[#232d3f] bg-[#0b0f19] text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span>{locOpt}</span>
+                      <span className="truncate">{loc}</span>
                     </div>
                     {count > 0 && (
-                      <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
+                      <span className="text-[10px] font-bold text-slate-500 bg-[#0b0f19] px-2 py-0.5 rounded-full border border-[#232d3f]">
                         {count}
                       </span>
                     )}
@@ -774,106 +705,53 @@ export const JobExplorer: React.FC = () => {
           )}
         </div>
 
-        {/* 5. EMPLOYMENT TYPE */}
-        <div className="border-t border-[#243147]/40 pt-3">
+        {/* EMPLOYMENT TYPE SECTION */}
+        <div className="pb-2">
           <button
             onClick={() => toggleSection('employment')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
+            className="w-full flex items-center justify-between py-2 text-left cursor-pointer group"
           >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Employment Type {employmentType.length > 0 && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">{employmentType.length}</span>}
+            <span className="text-xs font-bold text-slate-300 group-hover:text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-amber-500" /> Employment Type {employmentType.length > 0 && <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 text-[10px] rounded-full font-bold">{employmentType.length}</span>}
             </span>
+            {openSections.employment ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
-          
+
           {openSections.employment && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
+            <div className="space-y-1.5 mt-2 transition-all">
               {primaryEmpTypes.map((emp) => {
                 const count = getEmpCount(emp);
                 return (
-                  <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
+                  <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1.5 px-2 rounded-lg hover:bg-[#1b2535] transition-all">
+                    <div className="flex items-center gap-2 min-w-0">
                       <input
                         type="checkbox"
                         checked={employmentType.includes(emp)}
                         onChange={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
+                        className="rounded border-[#232d3f] bg-[#0b0f19] text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span>{emp}</span>
+                      <span className="truncate">{emp}</span>
                     </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {count}
-                    </span>
+                    {count > 0 && (
+                      <span className="text-[10px] font-bold text-slate-500 bg-[#0b0f19] px-2 py-0.5 rounded-full border border-[#232d3f]">
+                        {count}
+                      </span>
+                    )}
                   </label>
                 );
               })}
-
-              {showAllEmpTypes && secondaryEmpTypes.map((emp) => {
-                const count = getEmpCount(emp);
-                return (
-                  <label key={emp} className="flex items-center justify-between text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={employmentType.includes(emp)}
-                        onChange={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}
-                        className="rounded border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span>{emp}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-[#64748b] bg-[#090d16] px-2 py-0.5 rounded-full border border-[#243147]/50">
-                      {count}
-                    </span>
-                  </label>
-                );
-              })}
-
-              <button
-                onClick={() => setShowAllEmpTypes(!showAllEmpTypes)}
-                className="w-full text-center text-[10px] font-bold text-indigo-400 hover:text-indigo-300 pt-1.5 cursor-pointer"
-              >
-                {showAllEmpTypes ? 'Show Less' : 'Show More'}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* 6. POSTING DATE */}
-        <div className="border-t border-[#243147]/40 pt-3">
-          <button
-            onClick={() => toggleSection('datePosted')}
-            className="w-full flex items-center justify-between py-0.5 text-left cursor-pointer group"
-          >
-            <span className="text-[11px] font-bold text-[#64748b] group-hover:text-white uppercase tracking-wider flex items-center gap-1.5">
-              Posting Date {dateRange && <span className="bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full font-bold">Active</span>}
-            </span>
-          </button>
-          
-          {openSections.datePosted && (
-            <div className="space-y-0.5 mt-1.5 transition-all">
-              {[
-                { label: 'Any Time', value: '' },
-                { label: 'Today', value: '1d' },
-                { label: 'Last 3 Days', value: '3d' },
-                { label: 'Last Week', value: '7d' },
-                { label: 'Last Month', value: '30d' }
-              ].map(opt => (
-                <label key={opt.value} className="flex items-center gap-2 text-xs text-[#94a3b8] hover:text-white cursor-pointer py-1 px-1.5 rounded-lg hover:bg-[#192438] transition-all">
-                  <input
-                    type="radio"
-                    name="datePostedOption"
-                    checked={dateRange === opt.value}
-                    onChange={() => setDateRange(opt.value)}
-                    className="border-[#243147] bg-[#090d16] text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span>{opt.label}</span>
-                </label>
-              ))}
             </div>
           )}
         </div>
       </div>
     );
   };
+
+  const pageJobs = useMemo(() => apiResponse?.jobs || [], [apiResponse]);
+
+  const visibleJobs = useMemo(() => {
+    return pageJobs.filter((j: any) => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
+  }, [pageJobs, hiddenJobs]);
 
   const isJobActive = (jobItem: any) => {
     if (!jobItem) return false;
@@ -888,12 +766,6 @@ export const JobExplorer: React.FC = () => {
     return true;
   };
 
-  const pageJobs = useMemo(() => apiResponse?.jobs || [], [apiResponse]);
-
-  const visibleJobs = useMemo(() => {
-    return pageJobs.filter((j: any) => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
-  }, [pageJobs, hiddenJobs]);
-
   const totalCount = apiResponse?.pagination?.totalResults || apiResponse?.execution?.totalResults || visibleJobs.length;
   const totalPages = apiResponse?.pagination?.totalPages || Math.ceil(totalCount / 30) || 1;
   const currentPage = apiResponse?.pagination?.page || page;
@@ -903,7 +775,7 @@ export const JobExplorer: React.FC = () => {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen text-white font-sans bg-[#090d16]">
       
-      {/* PAGE TITLE HEADER AT THE TOP */}
+      {/* Page Header */}
       <PageHeader
         themeKey="explorer"
         title="Job Explorer"
@@ -911,9 +783,9 @@ export const JobExplorer: React.FC = () => {
         icon={Search}
       />
 
-      {/* STICKY GLOBAL SEARCH BAR */}
-      <div className="sticky top-0 z-30 bg-[#090d16]/95 backdrop-blur-md pb-2 pt-1">
-        <div className="flex items-center gap-3">
+      {/* Modern Search & Options Panel */}
+      <div className="bg-[#131a26]/80 backdrop-blur-md border border-[#232d3f] rounded-2xl p-4 md:p-5 shadow-lg space-y-4">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-3.5 w-5 h-5 text-indigo-400 pointer-events-none transition-colors" />
             <input
@@ -921,159 +793,139 @@ export const JobExplorer: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder='Search "Java Spring Boot Bangalore", "React Remote", "AI Engineer"... (Press "/" to focus)'
-              className="w-full bg-[#111827] border border-indigo-500/40 hover:border-indigo-500/60 rounded-2xl py-3 pl-12 pr-12 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 focus:shadow-[0_0_15px_rgba(99,102,241,0.25)] shadow-md transition-all"
+              placeholder='Search "Java", "React", "AI", "Remote" or company names... (Press "/" to focus)'
+              className="w-full bg-[#0b0f19] border border-[#232d3f] hover:border-indigo-500/50 rounded-xl py-3 pl-12 pr-12 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all"
             />
             {searchQuery && (
               <button 
                 onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
-                className="absolute right-4 top-3.5 text-[#64748b] hover:text-white cursor-pointer p-1 transition-colors"
-                title="Clear search"
+                className="absolute right-4 top-3.5 text-slate-500 hover:text-white p-1 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
-          <button
-            onClick={() => setMobileFilterOpen(true)}
-            className="lg:hidden flex items-center gap-2 bg-[#111827] border border-[#243147] px-4 py-3 rounded-2xl text-xs font-bold text-white hover:bg-[#162135]"
-          >
-            <Filter className="w-4 h-4 text-indigo-400" /> Filters
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="lg:hidden flex items-center justify-center gap-2 bg-[#0b0f19] border border-[#232d3f] px-5 py-3 rounded-xl text-xs font-bold text-white hover:bg-[#1b2535] transition-colors"
+            >
+              <Filter className="w-4 h-4 text-indigo-400" /> Filters
+            </button>
+
+            <div className="flex items-center gap-2 bg-[#0b0f19] border border-[#232d3f] px-3.5 py-1.5 rounded-xl">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase">Sort</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer pr-1"
+              >
+                <option value="newest">Newest</option>
+                <option value="relevance">Relevance</option>
+                <option value="company_name">Company Name</option>
+                <option value="experience_asc">Experience</option>
+              </select>
+            </div>
+          </div>
         </div>
+
+        {/* Active Filters Bar */}
+        {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || employmentType.length > 0 || dateRange) && (
+          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[#232d3f]/60">
+            <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mr-1">Active:</span>
+
+            {debouncedQuery && (
+              <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                Query: "{debouncedQuery}" <button onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              </span>
+            )}
+
+            {location.map(loc => (
+              <span key={loc} className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                {loc} <button onClick={() => toggleArrayFilter(location, loc, setLocation)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              </span>
+            ))}
+
+            {remote.map(rem => (
+              <span key={rem} className="bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                {rem === 'true' ? 'Remote Only' : rem === 'hybrid' ? 'Hybrid' : 'On-site'} <button onClick={() => toggleArrayFilter(remote, rem, setRemote)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              </span>
+            ))}
+
+            {experience.map(exp => (
+              <span key={exp} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              </span>
+            ))}
+
+            {department.map(dept => (
+              <span key={dept} className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              </span>
+            ))}
+
+            {employmentType.map(emp => (
+              <span key={emp} className="bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                {emp} <button onClick={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
+              </span>
+            ))}
+
+            <button
+              onClick={clearAllFilters}
+              className="text-xs font-bold text-rose-400 hover:text-rose-300 underline ml-auto cursor-pointer"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* ACTIVE FILTER CHIPS BAR */}
-      {(debouncedQuery || location.length > 0 || remote.length > 0 || experience.length > 0 || department.length > 0 || company.length > 0 || employmentType.length > 0 || dateRange) && (
-        <div className="flex flex-wrap items-center gap-2 bg-[#111827] border border-[#243147] rounded-xl p-3 shadow-sm">
-          <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider mr-1">Active Filters:</span>
-
-          {debouncedQuery && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Query: "{debouncedQuery}" <button onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          )}
-
-          {location.map(loc => (
-            <span key={loc} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              {loc} <button onClick={() => toggleArrayFilter(location, loc, setLocation)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {remote.map(rem => (
-            <span key={rem} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              {rem === 'true' ? 'Remote Only' : rem === 'hybrid' ? 'Hybrid' : 'On-site'} <button onClick={() => toggleArrayFilter(remote, rem, setRemote)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {experience.map(exp => (
-            <span key={exp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              {exp} <button onClick={() => toggleArrayFilter(experience, exp, setExperience)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {department.map(dept => (
-            <span key={dept} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              {dept} <button onClick={() => toggleArrayFilter(department, dept, setDepartment)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {company.map(comp => (
-            <span key={comp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              {comp} <button onClick={() => toggleArrayFilter(company, comp, setCompany)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {employmentType.map(emp => (
-            <span key={emp} className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              {emp} <button onClick={() => toggleArrayFilter(employmentType, emp, setEmploymentType)}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          ))}
-
-          {dateRange && (
-            <span className="bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-fadeIn">
-              Posted: {dateRange} <button onClick={() => setDateRange('')}><X className="w-3 h-3 hover:text-white cursor-pointer" /></button>
-            </span>
-          )}
-
-          <button
-            onClick={clearAllFilters}
-            className="ml-auto text-xs font-bold text-rose-400 hover:text-rose-300 underline cursor-pointer hover:no-underline transition-all"
-          >
-            Clear All
-          </button>
-        </div>
-      )}
-
-      {/* DASHBOARD MAIN GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Main Content Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* COLLAPSIBLE FACETED LEFT SIDEBAR */}
-        <div className="hidden lg:block lg:col-span-3 space-y-6 bg-[#111827] border border-[#243147] rounded-2xl p-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar shadow-lg">
-          <div className="flex items-center justify-between border-b border-[#243147] pb-3 mb-4">
+        {/* Faceted Filters Sidebar - Left */}
+        <div className="hidden lg:block lg:col-span-3 bg-[#131a26]/80 backdrop-blur-md border border-[#232d3f] rounded-2xl p-5 sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar shadow-lg">
+          <div className="flex items-center justify-between border-b border-[#232d3f] pb-3 mb-4">
             <h3 className="text-xs font-extrabold uppercase tracking-wider text-white flex items-center gap-2">
-              <Filter className="w-4 h-4 text-indigo-400" /> Faceted Filters
+              <Filter className="w-4 h-4 text-indigo-400" /> Filter Options
             </h3>
             <span className="text-[10px] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold px-2 py-0.5 rounded-full">
-              {totalCount.toLocaleString()} jobs
+              {totalCount} jobs
             </span>
           </div>
 
           {isFacetsLoading ? (
             <div className="space-y-4 py-4">
-              <div className="h-6 bg-[#1f2937] rounded animate-pulse" />
-              <div className="h-10 bg-[#1f2937] rounded animate-pulse" />
-              <div className="h-6 bg-[#1f2937] rounded animate-pulse" />
+              <div className="h-6 bg-[#1b2535] rounded animate-pulse" />
+              <div className="h-10 bg-[#1b2535] rounded animate-pulse" />
+              <div className="h-6 bg-[#1b2535] rounded animate-pulse" />
             </div>
           ) : (
             renderSidebarContents()
           )}
         </div>
 
-        {/* CENTRAL JOB FEED */}
+        {/* Central Job Feed */}
         <div ref={jobFeedTopRef} className="lg:col-span-5 space-y-4">
-          
-          {/* Feed Toolbar with Sort & Results Counter */}
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#111827] border border-[#243147] rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between bg-[#131a26] border border-[#232d3f] rounded-2xl px-5 py-4 shadow-sm">
             <span className="text-xs font-bold text-[#94a3b8]">
-              Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount.toLocaleString()}</span> Jobs
-              {totalPages > 1 && <span className="ml-1 text-[11px] text-[#64748b]">(Page {currentPage} of {totalPages})</span>}
+              Showing <span className="text-white font-extrabold">{visibleJobs.length}</span> of <span className="text-indigo-400 font-extrabold">{totalCount}</span> Opportunities
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-[#64748b]">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-[#090d16] border border-[#243147] text-white text-xs rounded-xl px-3 py-1.5 font-semibold focus:outline-none focus:border-indigo-500 cursor-pointer"
-              >
-                <option value="newest">Newest (Default)</option>
-                <option value="relevance">Relevance</option>
-                <option value="company_name">Company (A–Z)</option>
-                <option value="experience_asc">Experience (Low → High)</option>
-              </select>
-            </div>
           </div>
 
-          {/* Job Feed List */}
           {isJobsLoading && visibleJobs.length === 0 ? (
             <div className="space-y-4">
-              {[1, 2, 3, 4].map(i => <CardSkeleton key={i} />)}
+              {[1, 2, 3].map(i => <CardSkeleton key={i} />)}
             </div>
           ) : visibleJobs.length === 0 ? (
-            /* CONTEXTUAL SMART EMPTY STATE */
-            <div className="bg-[#111827] border border-[#243147] rounded-2xl p-8 text-center space-y-4 shadow-md">
+            <div className="bg-[#131a26] border border-[#232d3f] rounded-2xl p-8 text-center space-y-4 shadow-md">
               <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mx-auto">
                 <Search className="w-6 h-6" />
               </div>
               <div className="space-y-2">
                 <h3 className="text-base font-bold text-white">No jobs matched your current filters</h3>
-                <div className="text-xs text-[#94a3b8] space-y-1 pt-1">
-                  <p className="font-semibold text-white">Try:</p>
-                  <p>• Expanding your location</p>
-                  <p>• Selecting a broader experience range</p>
-                  <p>• Clearing some filters</p>
-                </div>
+                <p className="text-xs text-slate-400">Try expanding your locations, choosing multiple experience tiers, or clearing active filters.</p>
               </div>
               <div className="pt-2">
                 <button
@@ -1097,47 +949,60 @@ export const JobExplorer: React.FC = () => {
                   return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString();
                 })();
 
-                const rawApplyUrl = job.applyUrl || job.jobUrl || job.postingUrl || job.applicationUrl || job.url;
+                const isEntryLevel = ['fresher', 'intern', 'associate', '0-2'].some(kw => 
+                  (job.experienceLevel || job.experience || '').toLowerCase().includes(kw)
+                );
 
                 return (
                   <div
                     key={job.jobHash}
                     onClick={() => setSelectedJobHash(job.jobHash)}
-                    className={`bg-[#111827] border rounded-xl p-4 transition-all duration-200 cursor-pointer space-y-3 shadow-sm ${
+                    className={`bg-[#131a26]/70 border rounded-xl p-4 transition-all duration-200 cursor-pointer space-y-3.5 relative overflow-hidden ${
                       isSelected 
-                        ? 'border-indigo-500 ring-2 ring-indigo-500/20 bg-[#162035]' 
-                        : 'border-[#243147] hover:border-indigo-500/50 hover:bg-[#141d2f]'
+                        ? 'border-indigo-500 ring-1 ring-indigo-500/20 bg-[#1b2535]' 
+                        : 'border-[#232d3f] hover:border-slate-500/40 hover:bg-[#182130]'
                     }`}
                   >
-                    <div>
+                    {isEntryLevel && (
+                      <div className="absolute top-0 right-0 bg-emerald-500/10 border-l border-b border-emerald-500/20 px-2 py-0.5 rounded-bl-lg text-[9px] font-bold text-emerald-400 uppercase">
+                        Entry Level
+                      </div>
+                    )}
+
+                    <div className="space-y-1">
                       <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
                         <HighlightText text={job.company} highlight={debouncedQuery} />
                       </div>
-                      <div className="text-sm font-bold text-white leading-snug mt-0.5">
+                      <h4 className="text-sm font-bold text-white leading-snug">
                         <HighlightText text={job.title} highlight={debouncedQuery} />
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-[#94a3b8]">
-                        <span>{job.location || 'Location Not Specified'}</span>
-                        <span>•</span>
-                        <span>{job.experienceLevel || job.experience || 'Experience Not Specified'}</span>
-                        <span>•</span>
-                        <span className="text-emerald-400 font-semibold">{postedDateStr}</span>
+                      </h4>
+                      
+                      <div className="flex flex-wrap gap-1.5 pt-2">
+                        <span className="bg-[#0b0f19] text-[#94a3b8] px-2 py-0.5 rounded text-[10px] font-medium border border-[#232d3f]">
+                          {job.location || 'India'}
+                        </span>
+                        <span className="bg-[#0b0f19] text-[#94a3b8] px-2 py-0.5 rounded text-[10px] font-medium border border-[#232d3f]">
+                          {job.experienceLevel || job.experience || 'Fresher'}
+                        </span>
+                        <span className="bg-indigo-500/5 text-indigo-300 px-2 py-0.5 rounded text-[10px] font-semibold border border-indigo-500/10 ml-auto">
+                          {postedDateStr}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-2 border-t border-[#243147]/50">
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#232d3f]/40">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedJobHash(job.jobHash);
                         }}
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                        className={`flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer text-center ${
                           isSelected
-                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
-                            : 'bg-[#090d16] hover:bg-[#162135] text-[#94a3b8] hover:text-white border border-[#243147]'
+                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                            : 'bg-[#0b0f19] hover:bg-[#1b2535] text-slate-400 hover:text-white border border-[#232d3f]'
                         }`}
                       >
-                        View Details
+                        View Info
                       </button>
 
                       <button
@@ -1145,127 +1010,103 @@ export const JobExplorer: React.FC = () => {
                           e.stopPropagation();
                           toggleBookmark(job.jobHash, e);
                         }}
-                        className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
+                        className={`py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
                           isBookmarked
-                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                            : 'bg-[#090d16] hover:bg-[#162135] text-[#94a3b8] hover:text-white border border-[#243147]'
+                            ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                            : 'bg-[#0b0f19] hover:bg-[#1b2535] border-[#232d3f] text-slate-400'
                         }`}
+                        title={isBookmarked ? 'Bookmarked' : 'Bookmark Job'}
                       >
-                        {isBookmarked ? 'Saved' : 'Save'}
+                        <Bookmark className="w-3.5 h-3.5" />
                       </button>
 
                       <a
-                        href={rawApplyUrl}
+                        href={job.applyUrl || job.jobUrl || job.postingUrl || job.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer text-center shadow-sm"
+                        className="py-1.5 px-3 rounded-lg text-[11px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all cursor-pointer shadow-sm flex items-center gap-1"
                       >
-                        Apply
+                        Apply <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
                   </div>
                 );
               })}
 
-              {/* PAGE-BASED PAGINATION CONTROLS */}
+              {/* Pagination controls */}
               {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-2 border-t border-[#243147]/60 mt-4">
-                  <div className="text-xs text-[#94a3b8] font-medium">
-                    Showing <span className="text-white font-bold">{Math.min((currentPage - 1) * 30 + 1, totalCount)}–{Math.min(currentPage * 30, totalCount)}</span> of <span className="text-indigo-400 font-bold">{totalCount.toLocaleString()}</span> Jobs
+                <div className="flex items-center justify-between pt-6 mt-4">
+                  <button
+                    disabled={!hasPrevPage || isFetching}
+                    onClick={() => {
+                      setPage(prev => Math.max(1, prev - 1));
+                      jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-1 bg-[#131a26] hover:bg-[#1b2535] disabled:opacity-40 disabled:cursor-not-allowed border border-[#232d3f] text-white text-xs font-bold px-3 py-2 rounded-xl transition cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Prev
+                  </button>
+
+                  <div className="hidden sm:flex items-center gap-1">
+                    {Array.from({ length: Math.min(totalPages, 5) }).map((_, idx) => {
+                      const pNum = idx + 1;
+                      return (
+                        <button
+                          key={pNum}
+                          disabled={isFetching}
+                          onClick={() => {
+                            setPage(pNum);
+                            jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className={`w-8 h-8 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer ${
+                            pNum === currentPage
+                              ? 'bg-indigo-600 text-white'
+                              : 'bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          {pNum}
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    {/* Previous Page Button */}
-                    <button
-                      disabled={!hasPrevPage || isFetching}
-                      onClick={() => {
-                        setPage(prev => Math.max(1, prev - 1));
-                        jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="flex items-center gap-1 bg-[#111827] hover:bg-[#192438] disabled:opacity-40 disabled:cursor-not-allowed border border-[#243147] text-white text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> Prev
-                    </button>
-
-                    {/* Page numbers */}
-                    {(() => {
-                      const pages = [];
-                      const maxPagesToShow = 5;
-                      let startPage = Math.max(1, currentPage - 2);
-                      let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-                      if (endPage - startPage < maxPagesToShow - 1) {
-                        startPage = Math.max(1, endPage - maxPagesToShow + 1);
-                      }
-
-                      for (let p = startPage; p <= endPage; p++) {
-                        pages.push(
-                          <button
-                            key={p}
-                            disabled={isFetching}
-                            onClick={() => {
-                              setPage(p);
-                              jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className={`w-8 h-8 rounded-xl text-xs font-bold transition flex items-center justify-center cursor-pointer ${
-                              p === currentPage
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'bg-[#111827] hover:bg-[#192438] border border-[#243147] text-[#94a3b8] hover:text-white'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        );
-                      }
-                      return pages;
-                    })()}
-
-                    {/* Next Page Button */}
-                    <button
-                      disabled={!hasNextPage || isFetching}
-                      onClick={() => {
-                        setPage(prev => Math.min(totalPages, prev + 1));
-                        jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="flex items-center gap-1 bg-[#111827] hover:bg-[#192438] disabled:opacity-40 disabled:cursor-not-allowed border border-[#243147] text-white text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
-                    >
-                      Next <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    disabled={!hasNextPage || isFetching}
+                    onClick={() => {
+                      setPage(prev => Math.min(totalPages, prev + 1));
+                      jobFeedTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-1 bg-[#131a26] hover:bg-[#1b2535] disabled:opacity-40 disabled:cursor-not-allowed border border-[#232d3f] text-white text-xs font-bold px-3 py-2 rounded-xl transition cursor-pointer"
+                  >
+                    Next <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               )}
             </div>
           )}
-
         </div>
 
-        <div className="hidden lg:block lg:col-span-4 bg-[#111827] border border-[#243147] rounded-2xl p-6 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar space-y-6 shadow-lg">
+        {/* Detailed Job Information Deck - Right */}
+        <div className="hidden lg:block lg:col-span-4 bg-[#131a26]/80 backdrop-blur-md border border-[#232d3f] rounded-2xl p-6 sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar space-y-6 shadow-lg">
           {(() => {
             const selectedJobItem = visibleJobs.find((j: any) => j.job.jobHash === selectedJobHash)?.job || detailData?.job;
             const isBookmarked = selectedJobHash ? bookmarkedJobs.has(selectedJobHash) : false;
 
             if (!selectedJobItem) {
               return (
-                <div className="text-center py-12 text-xs text-[#94a3b8] font-medium">
-                  Select a job card from the feed or click View Details to inspect job summary.
+                <div className="text-center py-16 text-xs text-slate-500 font-medium space-y-3">
+                  <div className="w-12 h-12 rounded-full border border-dashed border-[#232d3f] flex items-center justify-center mx-auto text-[#232d3f]">
+                    <Briefcase className="w-5 h-5 text-slate-600" />
+                  </div>
+                  <p>Select any job card on the feed to view comprehensive descriptions, skill match analysis, and application tools.</p>
                 </div>
               );
             }
 
-            const rawApplyUrl = selectedJobItem.applyUrl || selectedJobItem.jobUrl || selectedJobItem.postingUrl || selectedJobItem.applicationUrl || selectedJobItem.url;
-
-            const salaryText = (() => {
-              const sal = selectedJobItem.salary || selectedJobItem.salaryRange;
-              if (!sal || sal === 'N/A' || sal === '0' || sal === 'As per company standards') return 'As per company standards';
-              return sal;
-            })();
-
-            const workModeText = (() => {
-              if (selectedJobItem.isRemote === true || String(selectedJobItem.isRemote).toLowerCase() === 'remote' || selectedJobItem.workMode?.toLowerCase().includes('remote')) return 'Remote';
-              if (selectedJobItem.workMode?.toLowerCase().includes('hybrid')) return 'Hybrid';
-              return selectedJobItem.workMode || 'Onsite';
-            })();
-
+            const rawApplyUrl = selectedJobItem.applyUrl || selectedJobItem.jobUrl || selectedJobItem.postingUrl || selectedJobItem.url;
+            const salaryText = selectedJobItem.salary || selectedJobItem.salaryRange || 'Not Specified';
+            const workModeText = selectedJobItem.isRemote === true || String(selectedJobItem.isRemote).toLowerCase() === 'remote' ? 'Remote' : 'Onsite';
             const postedDateText = (() => {
               const val = selectedJobItem.datePosted || selectedJobItem.firstSeen || selectedJobItem.created_at;
               if (!val) return 'Recently';
@@ -1274,129 +1115,202 @@ export const JobExplorer: React.FC = () => {
               return isNaN(d.getTime()) ? 'Recently' : d.toLocaleDateString();
             })();
 
-            const statusText = selectedJobItem.status || selectedJobItem.activeStatus || 'Active';
-
             return (
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="border-b border-[#243147] pb-4">
-                  <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                    <HighlightText text={selectedJobItem.company} highlight={debouncedQuery} />
-                  </span>
-                  <h2 className="text-xl font-extrabold text-white mt-1">
-                    <HighlightText text={selectedJobItem.title} highlight={debouncedQuery} />
-                  </h2>
-                </div>
-
-                {/* Details List */}
-                <div className="space-y-3 bg-[#090d16] border border-[#243147] rounded-xl p-4 text-xs">
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Company Name</span>
-                    <span className="font-bold text-white">
-                      <HighlightText text={selectedJobItem.company} highlight={debouncedQuery} />
+              <div className="space-y-5">
+                {/* Header Information */}
+                <div>
+                  <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider">{selectedJobItem.company}</div>
+                  <h3 className="text-lg font-black text-white mt-1 leading-snug">{selectedJobItem.title}</h3>
+                  <div className="flex items-center gap-2 mt-2.5">
+                    <span className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-500/20">
+                      {workModeText}
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Job Title</span>
-                    <span className="font-bold text-white">
-                      <HighlightText text={selectedJobItem.title} highlight={debouncedQuery} />
+                    <span className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded text-[10px] font-bold border border-indigo-500/20">
+                      {selectedJobItem.experienceLevel || selectedJobItem.experience || 'Fresher'}
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Location</span>
-                    <span className="font-bold text-white">
-                      <HighlightText text={selectedJobItem.location || 'Not Specified'} highlight={debouncedQuery} />
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Work Mode</span>
-                    <span className="font-bold text-emerald-400">{workModeText}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Experience</span>
-                    <span className="font-bold text-white">{selectedJobItem.experienceLevel || selectedJobItem.experience || '2–5 Years'}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Salary</span>
-                    <span className="font-bold text-amber-300">{salaryText}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5 border-b border-[#1f2937]">
-                    <span className="font-semibold text-[#64748b]">Posted Date</span>
-                    <span className="font-bold text-white">{postedDateText}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-1.5">
-                    <span className="font-semibold text-[#64748b]">Status</span>
-                    <span className="font-bold text-indigo-400">{statusText}</span>
                   </div>
                 </div>
 
-                {/* Primary Action Buttons */}
-                <div className="grid grid-cols-3 gap-2">
+                {/* Tabs for Details, Skills Matching, AI Toolkit */}
+                <div className="flex border-b border-[#232d3f] text-xs">
                   <button
-                    onClick={() => setSelectedJobHash(selectedJobItem.jobHash)}
-                    className="flex items-center justify-center gap-1.5 p-3 bg-[#131a26] hover:bg-[#1b2535] border border-[#232d3f] rounded-xl text-white font-bold text-xs transition duration-200 cursor-pointer text-center"
-                  >
-                    <ExternalLink className="w-4 h-4 text-cyan-400" />
-                    View Details
-                  </button>
-
-                  <button
-                    onClick={(e) => toggleBookmark(selectedJobItem.jobHash, e)}
-                    className={`flex items-center justify-center gap-1.5 p-3 border rounded-xl font-bold text-xs transition duration-200 cursor-pointer ${
-                      isBookmarked 
-                        ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' 
-                        : 'bg-[#131a26] hover:bg-[#1b2535] border-[#232d3f] text-white'
+                    onClick={() => setActiveTab('details')}
+                    className={`flex-1 pb-2 font-bold border-b-2 text-center transition-colors cursor-pointer ${
+                      activeTab === 'details' 
+                        ? 'border-indigo-500 text-white' 
+                        : 'border-transparent text-slate-500 hover:text-white'
                     }`}
                   >
-                    <Bookmark className="w-4 h-4 text-amber-400" />
-                    {isBookmarked ? 'Saved' : 'Save'}
+                    Overview
                   </button>
-
-                  <a
-                    href={rawApplyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1.5 p-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-lg shadow-indigo-500/20 text-center"
+                  <button
+                    onClick={() => setActiveTab('matching')}
+                    className={`flex-1 pb-2 font-bold border-b-2 text-center transition-colors cursor-pointer ${
+                      activeTab === 'matching' 
+                        ? 'border-indigo-500 text-white' 
+                        : 'border-transparent text-slate-500 hover:text-white'
+                    }`}
                   >
-                    <Sparkles className="w-4 h-4 text-yellow-300" />
-                    Apply
-                  </a>
+                    Required Skills
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('toolkit')}
+                    className={`flex-1 pb-2 font-bold border-b-2 text-center transition-colors cursor-pointer ${
+                      activeTab === 'toolkit' 
+                        ? 'border-indigo-500 text-white' 
+                        : 'border-transparent text-slate-500 hover:text-white'
+                    }`}
+                  >
+                    AI Toolkit
+                  </button>
                 </div>
 
-                {/* Secondary Action Grid */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#243147]">
-                  <button
-                    onClick={() => trackMutation.mutate('Saved')}
-                    className="flex items-center justify-center gap-1.5 p-2.5 bg-[#090d16] hover:bg-[#162135] border border-[#243147] rounded-xl text-slate-200 font-semibold text-xs transition duration-200 cursor-pointer"
-                  >
-                    <CheckSquare className="w-3.5 h-3.5 text-indigo-400" />
-                    Add to Kanban
-                  </button>
+                {/* Tab Contents */}
+                {activeTab === 'details' && (
+                  <div className="space-y-4">
+                    <div className="bg-[#0b0f19] border border-[#232d3f] rounded-xl p-4 space-y-3.5 text-xs">
+                      <div className="flex justify-between items-center py-1 border-b border-[#232d3f]/60">
+                        <span className="text-slate-500">Location</span>
+                        <span className="font-bold text-white">{selectedJobItem.location || 'India'}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-[#232d3f]/60">
+                        <span className="text-slate-500">Compensation</span>
+                        <span className="font-bold text-amber-400">{salaryText}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-[#232d3f]/60">
+                        <span className="text-slate-500">Posted On</span>
+                        <span className="font-bold text-white">{postedDateText}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <span className="text-slate-500">Job Hash</span>
+                        <span className="font-mono text-[10px] text-slate-400">{selectedJobItem.jobHash.slice(0, 12)}...</span>
+                      </div>
+                    </div>
 
-                  <button
-                    onClick={() => navigate(`/referrals?company=${encodeURIComponent(selectedJobItem.company)}`)}
-                    className="flex items-center justify-center gap-1.5 p-2.5 bg-[#090d16] hover:bg-[#162135] border border-[#243147] rounded-xl text-slate-200 font-semibold text-xs transition duration-200 cursor-pointer"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-teal-400" />
-                    Find Referral
-                  </button>
+                    <div className="space-y-2.5">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Actions</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => toggleBookmark(selectedJobItem.jobHash)}
+                          className={`flex items-center justify-center gap-1.5 p-2.5 border rounded-xl font-bold text-xs transition duration-200 cursor-pointer ${
+                            isBookmarked 
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' 
+                              : 'bg-[#0b0f19] hover:bg-[#1b2535] border-[#232d3f] text-white'
+                          }`}
+                        >
+                          <Bookmark className="w-3.5 h-3.5" />
+                          {isBookmarked ? 'Saved' : 'Save'}
+                        </button>
+                        <a
+                          href={rawApplyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1.5 p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer text-center"
+                        >
+                          Apply now <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-                  <button
-                    onClick={() => navigate('/ats-explorer')}
-                    className="flex items-center justify-center gap-1.5 p-2.5 bg-[#090d16] hover:bg-[#162135] border border-[#243147] rounded-xl text-slate-200 font-semibold text-xs transition duration-200 cursor-pointer"
-                  >
-                    <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
-                    Company Insights
-                  </button>
+                {activeTab === 'matching' && (
+                  <div className="space-y-4">
+                    <div className="bg-[#0b0f19] border border-[#232d3f] rounded-xl p-4 space-y-4">
+                      <div>
+                        <h4 className="text-xs font-extrabold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-emerald-400" /> Key Skills Required
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedJobItem.requiredSkills && selectedJobItem.requiredSkills.length > 0 ? (
+                            selectedJobItem.requiredSkills.map((sk: string) => (
+                              <span key={sk} className="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded border border-emerald-500/20">
+                                {sk}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-slate-500">Analyze job description for skills...</span>
+                          )}
+                        </div>
+                      </div>
 
-                  <button
-                    onClick={() => navigate(`/cheatsheets?topic=${encodeURIComponent(selectedJobItem.title)}`)}
-                    className="flex items-center justify-center gap-1.5 p-2.5 bg-[#090d16] hover:bg-[#162135] border border-[#243147] rounded-xl text-slate-200 font-semibold text-xs transition duration-200 cursor-pointer"
-                  >
-                    <FileText className="w-3.5 h-3.5 text-purple-400" />
-                    Interview Prep
-                  </button>
-                </div>
+                      {selectedJobItem.preferredSkills && selectedJobItem.preferredSkills.length > 0 && (
+                        <div>
+                          <h4 className="text-xs font-extrabold text-white uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <Plus className="w-3.5 h-3.5 text-indigo-400" /> Preferred / Nice to have
+                          </h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedJobItem.preferredSkills.map((sk: string) => (
+                              <span key={sk} className="bg-indigo-500/10 text-indigo-400 text-[10px] px-2 py-0.5 rounded border border-indigo-500/20">
+                                {sk}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'toolkit' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-2.5">
+                      <button
+                        onClick={() => setOpenCoverLetter(true)}
+                        className="flex items-center gap-3 p-3 bg-[#0b0f19] border border-[#232d3f] hover:border-indigo-500/50 hover:bg-[#1b2535] rounded-xl text-left transition duration-200 cursor-pointer"
+                      >
+                        <FileText className="w-5 h-5 text-indigo-400" />
+                        <div>
+                          <div className="text-xs font-bold text-white">Cover Letter Builder</div>
+                          <div className="text-[10px] text-slate-500">Draft a tailored letter for this role.</div>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setOpenTailor(true)}
+                        className="flex items-center gap-3 p-3 bg-[#0b0f19] border border-[#232d3f] hover:border-indigo-500/50 hover:bg-[#1b2535] rounded-xl text-left transition duration-200 cursor-pointer"
+                      >
+                        <Sparkles className="w-5 h-5 text-emerald-400" />
+                        <div>
+                          <div className="text-xs font-bold text-white">Tailor Resume</div>
+                          <div className="text-[10px] text-slate-500">Match resume bullets to job requirements.</div>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => setOpenPrep(true)}
+                        className="flex items-center gap-3 p-3 bg-[#0b0f19] border border-[#232d3f] hover:border-indigo-500/50 hover:bg-[#1b2535] rounded-xl text-left transition duration-200 cursor-pointer"
+                      >
+                        <BookOpen className="w-5 h-5 text-purple-400" />
+                        <div>
+                          <div className="text-xs font-bold text-white">Interview Cheat Sheet</div>
+                          <div className="text-[10px] text-slate-500">Key questions and tech topics guide.</div>
+                        </div>
+                      </button>
+                    </div>
+
+                    <div className="border-t border-[#232d3f] pt-4 space-y-3">
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Application Tracker</h4>
+                      
+                      <div className="flex items-center gap-2">
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              trackMutation.mutate(e.target.value);
+                            }
+                          }}
+                          className="bg-[#0b0f19] border border-[#232d3f] text-xs rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500 cursor-pointer flex-1"
+                        >
+                          <option value="">Move to stage...</option>
+                          <option value="Applied">Applied</option>
+                          <option value="Interviewing">Interviewing</option>
+                          <option value="Offer">Offer</option>
+                          <option value="Rejected">Archived</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -1404,19 +1318,19 @@ export const JobExplorer: React.FC = () => {
 
       </div>
 
-      {/* MOBILE SLIDE-OVER FILTER DRAWER */}
+      {/* Mobile Slide-Over Filter Drawer */}
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 flex bg-black/70 backdrop-blur-sm lg:hidden">
-          <div className="ml-auto w-4/5 max-w-xs bg-[#111827] border-l border-[#243147] p-5 h-full overflow-y-auto space-y-6">
-            <div className="flex justify-between items-center border-b border-[#243147] pb-3 mb-4">
+          <div className="ml-auto w-4/5 max-w-xs bg-[#131a26] border-l border-[#232d3f] p-5 h-full overflow-y-auto space-y-6">
+            <div className="flex justify-between items-center border-b border-[#232d3f] pb-3 mb-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-white">Filters</h3>
-              <button onClick={() => setMobileFilterOpen(false)}><X className="w-5 h-5 text-white" /></button>
+              <button onClick={() => setMobileFilterOpen(false)}><X className="w-5 h-5 text-white cursor-pointer" /></button>
             </div>
 
             {isFacetsLoading ? (
               <div className="space-y-4 py-4 animate-pulse">
-                <div className="h-6 bg-[#1f2937] rounded" />
-                <div className="h-10 bg-[#1f2937] rounded" />
+                <div className="h-6 bg-[#1b2535] rounded" />
+                <div className="h-10 bg-[#1b2535] rounded" />
               </div>
             ) : (
               renderSidebarContents()
@@ -1432,7 +1346,7 @@ export const JobExplorer: React.FC = () => {
         </div>
       )}
 
-      {/* MODALS */}
+      {/* Modal Injections */}
       {openCoverLetter && selectedJobHash && detailData && (
         <CoverLetterModal
           jobHash={selectedJobHash}
