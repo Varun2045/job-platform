@@ -337,17 +337,36 @@ export class AtsRegistryService {
   /**
    * Idempotent migration to separate Career Page & Job Board URL across all registry entries
    */
-  public migrateRegistryUrls(): void {
+  public migrateRegistryUrls(dbCompanies?: Array<any>): void {
+    const dbMap = new Map<string, any>();
+    if (dbCompanies && Array.isArray(dbCompanies)) {
+      for (const c of dbCompanies) {
+        dbMap.set(c.name.toLowerCase(), c);
+        dbMap.set(c.id.toLowerCase(), c);
+      }
+    }
+
     // 1. Native ATS platforms
     this.nativeAtsPlatforms.forEach((platform) => {
       platform.companyDetails.forEach((item) => {
         const override = this.customUrlOverrides[item.name];
+        const dbComp = dbMap.get(item.name.toLowerCase()) || dbMap.get(item.name.toLowerCase().replace(/\s+/g, ''));
+        
         if (override) {
           if (override.careerPage) item.careerPage = override.careerPage;
           if (override.jobBoardUrl) item.jobBoardUrl = override.jobBoardUrl;
           item.careerPageNeedsReview = override.careerPageNeedsReview ?? false;
           item.jobBoardNeedsReview = override.jobBoardNeedsReview ?? false;
           return;
+        }
+
+        // Use database api_endpoint if available
+        if (dbComp && dbComp.api_endpoint) {
+          item.jobBoardUrl = dbComp.api_endpoint;
+          if (!item.careerPage) {
+            item.careerPage = dbComp.api_endpoint;
+          }
+          item.jobBoardNeedsReview = false;
         }
 
         // Idempotent assignment: preserve existing if already valid
@@ -460,7 +479,7 @@ export class AtsRegistryService {
     dbCompanies?: Array<any>,
   ): AtsRegistryOverview {
     // Re-run migration to ensure full consistency
-    this.migrateRegistryUrls();
+    this.migrateRegistryUrls(dbCompanies);
 
     const getHealth = (compName: string): CompanyHealthType => {
       if (!healthMap) return 'Healthy';
@@ -581,8 +600,8 @@ export class AtsRegistryService {
         if (!existingCompanyNames.has(nameLower)) {
           existingCompanyNames.add(nameLower);
           const override = this.customUrlOverrides[c.name];
-          const careerPage = override?.careerPage || c.careerPage || c.url || `https://${nameLower.replace(/\s+/g, '')}.com/careers`;
-          const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || `${careerPage}#jobs`;
+          const careerPage = override?.careerPage || c.careerPage || c.url || c.api_endpoint || `https://${nameLower.replace(/\s+/g, '')}.com/careers`;
+          const jobBoardUrl = override?.jobBoardUrl || c.jobBoardUrl || c.api_endpoint || `${careerPage}#jobs`;
           const compHealth = getHealth(c.name);
 
           companyPluginParsers.push({
