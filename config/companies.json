@@ -75,8 +75,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/airbyte",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://airbyte.com/company/careers#open-roles",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {
@@ -125,8 +125,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.aa.com",
-    "detected_ats": "workday",
+    "api_endpoint": "https://talent500.com/jobs/aatechhubindia/",
+    "detected_ats": "talent500",
     "resume_profiles": []
   },
   {
@@ -165,8 +165,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/anyscale",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://jobs.ashbyhq.com/anyscale",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {
@@ -225,7 +225,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.asml.com/en/careers/job-search",
+    "api_endpoint": "https://www.asml.com/en/careers/find-your-job",
     "detected_ats": "workday",
     "resume_profiles": []
   },
@@ -415,7 +415,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/box",
+    "api_endpoint": "https://job-boards.greenhouse.io/boxinc",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -515,8 +515,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/cashfree",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://www.cashfree.com/careers/",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -535,8 +535,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/cerebras",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://www.cerebras.ai/open-positions",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -606,7 +606,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "api_endpoint": "https://www.citadel.com/careers/open-opportunities/",
-    "detected_ats": "workday",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -635,8 +635,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/clevertap",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://careers.kula.ai/clevertap",
+    "detected_ats": "kula",
     "resume_profiles": []
   },
   {
@@ -2035,8 +2035,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://incareers.micron.com/",
-    "detected_ats": "workday",
+    "api_endpoint": "https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot",
+    "detected_ats": "phenom",
     "resume_profiles": []
   },
   {

@@ -7,22 +7,22 @@ Adobe | https://adobe.wd5.myworkdayjobs.com/external_experienced | workday
 Adyen | https://boards.greenhouse.io/adyen | greenhouse
 Affirm | https://boards.greenhouse.io/affirm | greenhouse
 Airbnb | https://boards.greenhouse.io/airbnb | greenhouse
-Airbyte | https://boards.greenhouse.io/airbyte | greenhouse
+Airbyte | https://airbyte.com/company/careers#open-roles | ashby
 Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | akamai
 AlphaGrep | https://www.alpha-grep.com/careers/ | custom
 Amazon | https://amazon.jobs/en/search | amazon
 AMD | https://careers.amd.com/careers-home/jobs | amd
-American Airlines GCC | https://jobs.aa.com | workday
+American Airlines GCC | https://talent500.com/jobs/aatechhubindia/ | talent500
 American Express | https://www.americanexpress.com/en-us/careers | eightfold
 Analog Devices | https://analogdevices.wd1.myworkdayjobs.com/External | workday
 Anthropic | https://job-boards.greenhouse.io/anthropic | greenhouse
-Anyscale | https://boards.greenhouse.io/anyscale | greenhouse
+Anyscale | https://jobs.ashbyhq.com/anyscale | ashby
 Apple | https://jobs.apple.com/en-in/search?location=india-INDC | apple
 Applied Materials | https://amat.wd1.myworkdayjobs.com/External_Careers | workday
 Arista Networks | https://www.arista.com/en/careers | custom
 ARM | https://careers.arm.com/search-jobs | arm
 Asana | https://asana.com/jobs/all | asana
-ASML | https://www.asml.com/en/careers/job-search | workday
+ASML | https://www.asml.com/en/careers/find-your-job | workday
 Ather Energy | https://www.atherenergy.com/careers | custom
 Atlassian | https://www.atlassian.com/company/careers/all-jobs | atlassian
 Autodesk | https://autodesk.wd1.myworkdayjobs.com/Ext | workday
@@ -41,7 +41,7 @@ Boeing | https://jobs.boeing.com/ | taleo
 Booking.com | https://jobs.booking.com | booking.com
 BookMyShow | https://in.bookmyshow.com/careers/ | custom
 Bosch | https://careers.smartrecruiters.com/BoschGroup | smartrecruiters
-Box | https://boards.greenhouse.io/box | greenhouse
+Box | https://job-boards.greenhouse.io/boxinc | greenhouse
 Brex | https://www.brex.com/careers | brex
 Broadcom | https://broadcom.wd1.myworkdayjobs.com/External_Career | workday
 BrowserStack | https://browserstack.wd3.myworkdayjobs.com/External | workday
@@ -51,19 +51,19 @@ Canonical | https://canonical.com/careers/all | canonical
 Canva | https://www.lifeatcanva.com/en/jobs/ | canva
 Capgemini | https://www.capgemini.com/careers | capgemini
 Cars24 | https://www.cars24.com/careers/ | custom
-Cashfree Payments | https://boards.greenhouse.io/cashfree | greenhouse
+Cashfree Payments | https://www.cashfree.com/careers/ | custom
 Caterpillar | https://careers.caterpillar.com/en/jobs/ | taleo
-Cerebras Systems | https://boards.greenhouse.io/cerebras | greenhouse
+Cerebras Systems | https://www.cerebras.ai/open-positions | custom
 Character.ai | https://jobs.ashbyhq.com/character.ai | ashby
 Chargebee | https://www.chargebee.com/careers/ | chargebee
 Check Point | https://careers.checkpoint.com/ | custom
 Chroma | https://jobs.ashbyhq.com/chroma | ashby
 CircleCI | https://circleci.com/careers/jobs/ | circleci
 Cisco | https://jobs.cisco.com/jobs/SearchJobs | cisco
-Citadel | https://www.citadel.com/careers/open-opportunities/ | workday
+Citadel | https://www.citadel.com/careers/open-opportunities/ | custom
 Classplus | https://jobs.ashbyhq.com/classplus | ashby
 Clerk | https://jobs.ashbyhq.com/clerk | ashby
-CleverTap | https://boards.greenhouse.io/clevertap | greenhouse
+CleverTap | https://careers.kula.ai/clevertap | kula
 ClickHouse | https://job-boards.greenhouse.io/clickhouse | greenhouse
 Cloudflare | https://boards.greenhouse.io/cloudflare | greenhouse
 Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | greenhouse
@@ -203,7 +203,7 @@ Meesho | https://jobs.lever.co/meesho | lever
 Mensa Brands | https://mensabrands.com/careers/ | mensabrands
 Mercor | https://jobs.ashbyhq.com/mercor | ashby
 Meta | https://www.metacareers.com/jobsearch/ | meta
-Micron Technology | https://incareers.micron.com/ | workday
+Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | phenom
 Microsoft | https://apply.careers.microsoft.com/careers?domain=microsoft.com | microsoft
 Mindtickle | https://jobs.lever.co/mindtickle | lever
 Miro | https://miro.com/careers/open-positions/ | miro
