@@ -494,9 +494,13 @@ async function handleGoogleAuthCallback(req: express.Request, res: express.Respo
       try {
         const decoded = JSON.parse(Buffer.from(stateStr, 'base64').toString('utf-8'));
         if (decoded.origin) clientOrigin = decoded.origin;
+        if (decoded.type === 'calendar') {
+          isCalendarConnection = true;
+          calendarUserId = decoded.userId;
+        }
       } catch {
-        isCalendarConnection = true;
-        calendarUserId = stateStr;
+        // Plain string state (e.g. login or guest ID) - treat as user login flow
+        isCalendarConnection = false;
       }
     }
 
