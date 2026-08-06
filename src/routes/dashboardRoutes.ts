@@ -61,6 +61,9 @@ router.get('/', async (req: Request, res: Response) => {
         healthyCompanies: healthyComps.length,
         degradedCompanies: degradedComps.length,
         disabledCompanies: disabledComps.length,
+        companiesHealthy: healthyComps.length,
+        companiesDegraded: degradedComps.length,
+        companiesDisabled: disabledComps.length,
         totalApplications: applications.length,
       },
       companies: {
