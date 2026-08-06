@@ -31,7 +31,7 @@ const newCompanies = [
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/box",
+    "api_endpoint": "https://job-boards.greenhouse.io/boxinc",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },

@@ -268,6 +268,9 @@ export class AtsRegistryService {
 
     // Known platform domain patterns
     if (platformId === 'greenhouse') {
+      if (name === 'Box') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/boxinc', jobBoardNeedsReview: false };
+      }
       if (name === 'Twitch') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/twitch', jobBoardNeedsReview: false };
       }
