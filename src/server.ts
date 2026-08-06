@@ -480,12 +480,13 @@ app.get('/api/auth/oauth/:provider', async (req, res) => {
 
   return sendError(res, ErrorCodes.VALIDATION_ERROR, `Unsupported OAuth provider: ${provider}`, 400);
 });
+*/
 
 // OAuth Callback Handler Functions
 async function handleGoogleAuthCallback(req: express.Request, res: express.Response) {
+  let clientOrigin = `${req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http'}://${req.get('host')}`;
   try {
     const { code, state } = req.query;
-    let clientOrigin = `${req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http'}://${req.get('host')}`;
     let isCalendarConnection = false;
     let calendarUserId: string | null = null;
 
@@ -564,8 +565,8 @@ async function handleGoogleAuthCallback(req: express.Request, res: express.Respo
       try {
         const payload = jwt.decode(tokenData.id_token) as { [key: string]: unknown };
         if (payload && payload.email) {
-          email = payload.email;
-          name = payload.name || email.split('@')[0];
+          email = payload.email as string;
+          name = (payload.name as string) || email.split('@')[0];
         }
       } catch {}
     }
@@ -682,7 +683,8 @@ app.get('/auth/google/callback', handleGoogleAuthCallback);
 
 app.get('/api/auth/oauth/github/callback', handleGitHubAuthCallback);
 app.get('/auth/github/callback', handleGitHubAuthCallback);
-*/
+
+
 
 // Legacy dashboard route - moved to dashboardRoutes.ts
 /*
