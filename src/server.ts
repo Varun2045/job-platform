@@ -1145,7 +1145,7 @@ app.get('/api/v1/jobs/combined', authMiddleware, async (req, res) => {
       : null;
 
     const response = {
-      jobs: paginatedJobs,
+      jobs: paginatedJobs.map((item: any) => (item && item.job ? { ...item.job, matchScore: item.score ?? 0 } : item)),
       facets: facetsData,
       pagination: {
         total: totalResults,

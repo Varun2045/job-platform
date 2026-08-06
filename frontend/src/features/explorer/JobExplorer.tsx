@@ -312,9 +312,14 @@ export const JobExplorer: React.FC = () => {
   });
 
   // Extract data from combined response
+  const rawJobs = combinedData?.jobs || [];
+  const normalizedJobs = useMemo(() => {
+    return rawJobs.map((item: any) => (item && item.job ? { ...item.job, matchScore: item.score ?? 0 } : item));
+  }, [rawJobs]);
+
   const facetsData = combinedData?.facets;
   const apiResponse = combinedData ? { 
-    jobs: combinedData.jobs, 
+    jobs: normalizedJobs, 
     pagination: combinedData.pagination,
     execution: combinedData.execution 
   } : null;
