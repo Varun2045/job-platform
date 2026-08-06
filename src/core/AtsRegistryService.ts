@@ -520,15 +520,13 @@ export class AtsRegistryService {
     const existingCompanyNames = new Set<string>();
     nativeGroup.parsers.forEach((p) => p.companies.forEach((name) => existingCompanyNames.add(name.toLowerCase())));
 
-    // 2. Company & Dedicated Scraper Parsers Category Group (7 Dedicated & Engine Parsers)
+    // 2. Company & Dedicated Scraper Parsers Category Group (5 Dedicated Parsers)
     const dedicatedPluginsRaw = [
       { id: 'amazon', name: 'Amazon Dedicated Parser', pattern: 'amazon.jobs', company: 'Amazon', url: 'https://amazon.jobs' },
       { id: 'apple', name: 'Apple Dedicated Parser', pattern: 'jobs.apple.com', company: 'Apple', url: 'https://jobs.apple.com' },
       { id: 'google', name: 'Google Dedicated Parser', pattern: 'careers.google.com', company: 'Google', url: 'https://careers.google.com' },
       { id: 'meta', name: 'Meta Dedicated Parser', pattern: 'metacareers.com', company: 'Meta', url: 'https://www.metacareers.com' },
       { id: 'microsoft', name: 'Microsoft Dedicated Parser', pattern: 'careers.microsoft.com', company: 'Microsoft', url: 'https://careers.microsoft.com' },
-      { id: 'fallback-json', name: 'Fallback REST/JSON Scraper Parser', pattern: 'generic-rest-api', company: 'Generic REST API Crawlers', url: 'https://careeros.studio/docs' },
-      { id: 'playwright-dom', name: 'Playwright Dynamic Browser Parser', pattern: 'headless-chrome', company: 'JS Dynamic Web Portals', url: 'https://careeros.studio/docs' },
     ];
 
     const dedicatedPlugins: AtsSubParserInfo[] = dedicatedPluginsRaw.map((p) => {
