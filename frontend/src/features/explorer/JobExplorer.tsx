@@ -747,24 +747,24 @@ export const JobExplorer: React.FC = () => {
     );
   };
 
-  const pageJobs = useMemo(() => apiResponse?.jobs || [], [apiResponse]);
-
-  const visibleJobs = useMemo(() => {
-    return pageJobs.filter((j: any) => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
-  }, [pageJobs, hiddenJobs]);
-
   const isJobActive = (jobItem: any) => {
     if (!jobItem) return false;
     const status = (jobItem.status || jobItem.activeStatus || '').toLowerCase();
     if (status === 'expired' || status === 'removed' || status === 'closed') {
       return false;
     }
-    const rawUrl = jobItem.applyUrl || jobItem.jobUrl || jobItem.postingUrl || jobItem.applicationUrl || jobItem.url;
+    const rawUrl = jobItem.applyUrl || jobItem.jobUrl || jobItem.postingUrl || jobItem.url;
     if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim() || rawUrl === '#' || rawUrl === 'N/A') {
       return false;
     }
     return true;
   };
+
+  const pageJobs = useMemo(() => apiResponse?.jobs || [], [apiResponse]);
+
+  const visibleJobs = useMemo(() => {
+    return pageJobs.filter((j: any) => !hiddenJobs.has(j.job.jobHash) && isJobActive(j.job));
+  }, [pageJobs, hiddenJobs]);
 
   const totalCount = apiResponse?.pagination?.totalResults || apiResponse?.execution?.totalResults || visibleJobs.length;
   const totalPages = apiResponse?.pagination?.totalPages || Math.ceil(totalCount / 30) || 1;
