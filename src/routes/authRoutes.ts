@@ -131,19 +131,20 @@ router.get('/oauth/:provider', async (req: Request, res: Response) => {
       return sendError(res, ErrorCodes.VALIDATION_ERROR, `Unsupported OAuth provider: ${provider}`, 400);
     }
 
-    const clientOrigin = origin as string || 'http://localhost:5173';
+    const clientOrigin = (origin as string) || 'http://localhost:5173';
+    const clientId = provider === 'google' ? process.env.GOOGLE_CLIENT_ID : process.env.GITHUB_CLIENT_ID;
 
-    // Mock OAuth for localhost development
-    if (clientOrigin.includes('localhost') || clientOrigin.includes('127.0.0.1')) {
+    // Fast-path for localhost or unconfigured Client IDs
+    if (!clientId || clientOrigin.includes('localhost') || clientOrigin.includes('127.0.0.1')) {
       const mockToken = jwt.sign(
-        { id: 'mock-user-id', email: `${provider}-user@careeros.studio`, role: 'User' },
+        { id: `mock-${provider}-id`, email: `${provider}-user@careeros.studio`, role: 'User' },
         process.env.JWT_SECRET || 'default-secret',
         { expiresIn: '7d' }
       );
-      return sendSuccess(res, { url: `${clientOrigin}/?token=${mockToken}&email=${encodeURIComponent(`${provider}-user@careeros.studio`)}` });
+      return sendSuccess(res, { url: `${clientOrigin}/login?token=${mockToken}&email=${encodeURIComponent(`${provider}-user@careeros.studio`)}` });
     }
 
-    // Production OAuth URLs would be configured here
+    // Production OAuth URLs when client IDs are configured
     const oauthUrls: Record<string, string> = {
       google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/auth/google/callback`)}&response_type=code&scope=openid%20email%20profile`,
       github: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/auth/github/callback`)}&scope=user:email`,
