@@ -344,6 +344,30 @@ export class AtsRegistryService {
     return { jobBoardUrl: `${careerPage}#all-jobs`, jobBoardNeedsReview: false };
   }
 
+  private formatTimeAgo(dateInput?: string | Date | null): string {
+    if (!dateInput) return 'Never';
+    try {
+      const past = new Date(dateInput).getTime();
+      if (isNaN(past)) return 'Never';
+      const diffMs = Date.now() - past;
+      if (diffMs < 0) return 'Just now';
+      
+      const diffSecs = Math.floor(diffMs / 1000);
+      if (diffSecs < 60) return 'Just now';
+      
+      const diffMins = Math.floor(diffSecs / 60);
+      if (diffMins < 60) return `${diffMins}m ago`;
+      
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      
+      const diffDays = Math.floor(diffHours / 24);
+      return `${diffDays}d ago`;
+    } catch {
+      return 'Never';
+    }
+  }
+
   /**
    * Idempotent migration to separate Career Page & Job Board URL across all registry entries
    */
@@ -370,13 +394,34 @@ export class AtsRegistryService {
           return;
         }
 
-        // Use database api_endpoint if available
-        if (dbComp && dbComp.api_endpoint) {
-          item.jobBoardUrl = dbComp.api_endpoint;
-          if (!item.careerPage) {
-            item.careerPage = dbComp.api_endpoint;
+        // Use database fields if available
+        if (dbComp) {
+          if (dbComp.api_endpoint) {
+            item.jobBoardUrl = dbComp.api_endpoint;
+            if (!item.careerPage) {
+              item.careerPage = dbComp.api_endpoint;
+            }
+            item.jobBoardNeedsReview = false;
           }
-          item.jobBoardNeedsReview = false;
+
+          if (dbComp.last_successful_scrape) {
+            item.lastScraped = this.formatTimeAgo(dbComp.last_successful_scrape);
+          } else {
+            item.lastScraped = 'Never';
+          }
+
+          const lastVerify = dbComp.last_failed_scrape && (!dbComp.last_successful_scrape || new Date(dbComp.last_failed_scrape) > new Date(dbComp.last_successful_scrape))
+            ? dbComp.last_failed_scrape
+            : dbComp.last_successful_scrape;
+          item.lastVerified = this.formatTimeAgo(lastVerify);
+
+          if (dbComp.enabled === false) {
+            item.health = 'Warning';
+          } else if (dbComp.consecutive_failures > 0) {
+            item.health = dbComp.consecutive_failures >= 3 ? 'Failing' : 'Warning';
+          } else {
+            item.health = 'Healthy';
+          }
         }
 
         // Idempotent assignment: preserve existing if already valid

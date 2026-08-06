@@ -315,8 +315,10 @@ export const AtsExplorerView: React.FC = () => {
     let jobBoardUrl = pattern ? `https://${pattern}/careers` : `${careerPage}#all-jobs`;
     let careerPageNeedsReview = false;
     let jobBoardNeedsReview = false;
-
     let foundHealth: CompanyHealthType = 'Healthy';
+    let lastScraped = 'Never';
+    let lastVerified = 'Never';
+    let recentErrors: string[] = [];
 
     // Search overview for rich companyDetails
     if (overview) {
@@ -329,6 +331,9 @@ export const AtsExplorerView: React.FC = () => {
             careerPageNeedsReview = detail.careerPageNeedsReview ?? false;
             jobBoardNeedsReview = detail.jobBoardNeedsReview ?? false;
             if (detail.health) foundHealth = detail.health;
+            if (detail.lastScraped) lastScraped = detail.lastScraped;
+            if (detail.lastVerified) lastVerified = detail.lastVerified;
+            if (detail.recentErrors) recentErrors = detail.recentErrors;
             break;
           }
         }
@@ -342,13 +347,13 @@ export const AtsExplorerView: React.FC = () => {
       parserType: category === 'Native ATS' ? 'Native ATS Parser' : 'Dedicated Company Plugin',
       averageExtractionMs,
       health: foundHealth,
-      lastScraped: '10 minutes ago',
-      lastVerified: category === 'Native ATS' ? '2 hours ago' : 'Today',
+      lastScraped,
+      lastVerified,
       careerPage,
       jobBoardUrl,
       careerPageNeedsReview,
       jobBoardNeedsReview,
-      recentErrors: [],
+      recentErrors,
     });
 
     setEditingField(null);
