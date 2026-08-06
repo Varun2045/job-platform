@@ -297,7 +297,8 @@ export const JobExplorer: React.FC = () => {
       });
       const res = await fetch(`/api/v1/jobs/combined?${params}`);
       if (!res.ok) throw new Error('Failed to fetch combined jobs data');
-      return res.json();
+      const json = await res.json();
+      return json?.data || json;
     }
   });
 
@@ -331,7 +332,8 @@ export const JobExplorer: React.FC = () => {
       if (!selectedJobHash) return null;
       const res = await fetch(`/api/jobs/${selectedJobHash}`);
       if (!res.ok) throw new Error('Failed to load job details');
-      return res.json();
+      const json = await res.json();
+      return json?.data || json;
     },
   });
 
