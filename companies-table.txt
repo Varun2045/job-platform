@@ -1,17 +1,17 @@
 Company Name | API Endpoint | ATS Type
 --- | --- | ---
-Accenture | https://www.accenture.com/in-en/careers/jobsearch | accenture
+Accenture | https://www.accenture.com/in-en/careers/jobsearch | custom
 Acko | https://jobs.lever.co/acko | lever
-Adda247 | https://www.adda247.com/careers | adda247
+Adda247 | https://www.adda247.com/careers | custom
 Adobe | https://adobe.wd5.myworkdayjobs.com/external_experienced | workday
 Adyen | https://boards.greenhouse.io/adyen | greenhouse
 Affirm | https://boards.greenhouse.io/affirm | greenhouse
 Airbnb | https://boards.greenhouse.io/airbnb | greenhouse
 Airbyte | https://airbyte.com/company/careers#open-roles | ashby
-Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | akamai
+Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | custom
 AlphaGrep | https://www.alpha-grep.com/careers/ | custom
 Amazon | https://amazon.jobs/en/search | amazon
-AMD | https://careers.amd.com/careers-home/jobs | amd
+AMD | https://careers.amd.com/careers-home/jobs | custom
 American Airlines GCC | https://talent500.com/jobs/aatechhubindia/ | talent500
 American Express | https://www.americanexpress.com/en-us/careers | eightfold
 Analog Devices | https://analogdevices.wd1.myworkdayjobs.com/External | workday
@@ -20,46 +20,46 @@ Anyscale | https://jobs.ashbyhq.com/anyscale | ashby
 Apple | https://jobs.apple.com/en-in/search?location=india-INDC | apple
 Applied Materials | https://amat.wd1.myworkdayjobs.com/External_Careers | workday
 Arista Networks | https://www.arista.com/en/careers | custom
-ARM | https://careers.arm.com/search-jobs | arm
-Asana | https://asana.com/jobs/all | asana
+ARM | https://careers.arm.com/search-jobs | custom
+Asana | https://asana.com/jobs/all | custom
 ASML | https://www.asml.com/en/careers/find-your-job | workday
 Ather Energy | https://www.atherenergy.com/careers | custom
-Atlassian | https://www.atlassian.com/company/careers/all-jobs | atlassian
+Atlassian | https://www.atlassian.com/company/careers/all-jobs | custom
 Autodesk | https://autodesk.wd1.myworkdayjobs.com/Ext | workday
-Axio | https://axio.in/careers/ | axio
-Bain & Company | https://www.bain.com/careers/find-a-role/ | bain&company
-Bank of America | https://careers.bankofamerica.com/en-us/job-search | bankofamerica
+Axio | https://axio.in/careers/ | custom
+Bain & Company | https://www.bain.com/careers/find-a-role/ | custom
+Bank of America | https://careers.bankofamerica.com/en-us/job-search | custom
 Barclays | https://search.jobs.barclays | phenom
 Baseten | https://jobs.ashbyhq.com/baseten | ashby
-BCG | https://careers.bcg.com/global/en/ | bcg
-Bewakoof | https://www.bewakoof.com/careers | bewakoof
+BCG | https://careers.bcg.com/global/en/ | custom
+Bewakoof | https://www.bewakoof.com/careers | custom
 BlackRock | https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional | workday
 Blinkit | https://blinkit.com/careers | custom
-Block | https://block.xyz/careers/jobs | block
-Bloomberg | https://www.bloomberg.com/company/careers/ | bloomberg
+Block | https://block.xyz/careers/jobs | custom
+Bloomberg | https://www.bloomberg.com/company/careers/ | custom
 Boeing | https://jobs.boeing.com/ | taleo
-Booking.com | https://jobs.booking.com | booking.com
+Booking.com | https://jobs.booking.com | custom
 BookMyShow | https://in.bookmyshow.com/careers/ | custom
 Bosch | https://careers.smartrecruiters.com/BoschGroup | smartrecruiters
 Box | https://job-boards.greenhouse.io/boxinc | greenhouse
-Brex | https://www.brex.com/careers | brex
+Brex | https://www.brex.com/careers | custom
 Broadcom | https://broadcom.wd1.myworkdayjobs.com/External_Career | workday
 BrowserStack | https://browserstack.wd3.myworkdayjobs.com/External | workday
-ByteDance | https://joinbytedance.com/search | bytedance
+ByteDance | https://joinbytedance.com/search | custom
 Cadence Design Systems | https://cadence.wd1.myworkdayjobs.com/External_Careers | workday
-Canonical | https://canonical.com/careers/all | canonical
-Canva | https://www.lifeatcanva.com/en/jobs/ | canva
-Capgemini | https://www.capgemini.com/careers | capgemini
+Canonical | https://canonical.com/careers/all | custom
+Canva | https://www.lifeatcanva.com/en/jobs/ | custom
+Capgemini | https://www.capgemini.com/careers | custom
 Cars24 | https://www.cars24.com/careers/ | custom
 Cashfree Payments | https://www.cashfree.com/careers/ | custom
 Caterpillar | https://careers.caterpillar.com/en/jobs/ | taleo
 Cerebras Systems | https://www.cerebras.ai/open-positions | custom
 Character.ai | https://jobs.ashbyhq.com/character.ai | ashby
-Chargebee | https://www.chargebee.com/careers/ | chargebee
+Chargebee | https://www.chargebee.com/careers/ | custom
 Check Point | https://careers.checkpoint.com/ | custom
 Chroma | https://jobs.ashbyhq.com/chroma | ashby
-CircleCI | https://circleci.com/careers/jobs/ | circleci
-Cisco | https://jobs.cisco.com/jobs/SearchJobs | cisco
+CircleCI | https://circleci.com/careers/jobs/ | custom
+Cisco | https://jobs.cisco.com/jobs/SearchJobs | custom
 Citadel | https://www.citadel.com/careers/open-opportunities/ | custom
 Classplus | https://jobs.ashbyhq.com/classplus | ashby
 Clerk | https://jobs.ashbyhq.com/clerk | ashby
@@ -69,11 +69,11 @@ Cloudflare | https://boards.greenhouse.io/cloudflare | greenhouse
 Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | greenhouse
 Cognition AI | https://jobs.ashbyhq.com/cognition | ashby
 Cohere | https://boards.greenhouse.io/cohere | greenhouse
-Cohesity | https://www.cohesity.com/careers/open-positions/ | cohesity
-Coinbase | https://www.coinbase.com/careers/positions | coinbase
-Confluent | https://careers.confluent.io/jobs | confluent
+Cohesity | https://www.cohesity.com/careers/open-positions/ | custom
+Coinbase | https://www.coinbase.com/careers/positions | custom
+Confluent | https://careers.confluent.io/jobs | custom
 CoreWeave | https://boards.greenhouse.io/coreweave | greenhouse
-Country Delight | https://countrydelight.in/careers | countrydelight
+Country Delight | https://countrydelight.in/careers | custom
 CRED | https://jobs.lever.co/cred | lever
 CrowdStrike | https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers | workday
 Curefit (Cult.fit) | https://cult.fit/careers | custom
@@ -83,51 +83,51 @@ Dagster Labs | https://job-boards.greenhouse.io/dagsterlabs | greenhouse
 Darwinbox | https://dbx.darwinbox.in/ms/candidatev2/main/careers/allJobs | darwinbox
 Databricks | https://boards.greenhouse.io/databricks | greenhouse
 Datadog | https://boards.greenhouse.io/datadog | greenhouse
-DataStax | https://www.datastax.com/company/careers | datastax
-dbt Labs | https://www.getdbt.com/about-us/careers#roles | dbtlabs
-Decentro | https://decentro.tech/careers | decentro
-DeHaat | https://agrevolution.in/careers | dehaat
+DataStax | https://www.datastax.com/company/careers | custom
+dbt Labs | https://www.getdbt.com/about-us/careers#roles | custom
+Decentro | https://decentro.tech/careers | custom
+DeHaat | https://agrevolution.in/careers | custom
 Delhivery | https://www.delhivery.com/careers/ | custom
-Dell | https://jobs.dell.com/ | dell
-Deloitte | https://careers.deloitte.com | deloitte
+Dell | https://jobs.dell.com/ | custom
+Deloitte | https://careers.deloitte.com | custom
 Deutsche Bank | https://careers.db.com | avature
-Discord | https://discord.com/careers#all-jobs | discord
-Docker | https://www.docker.com/career-openings/ | docker
-DoorDash | https://careersatdoordash.com/job-search/ | doordash
-Dream11 | https://dreamsports.group/careers#jobs | dream11
-Dropbox | https://www.dropbox.jobs/en/jobs/ | dropbox
+Discord | https://discord.com/careers#all-jobs | custom
+Docker | https://www.docker.com/career-openings/ | custom
+DoorDash | https://careersatdoordash.com/job-search/ | custom
+Dream11 | https://dreamsports.group/careers#jobs | custom
+Dropbox | https://www.dropbox.jobs/en/jobs/ | custom
 DRW | https://drw.com/careers | custom
-EA | https://jobs.ea.com/en_US/careers | ea
-eBay | https://jobs.ebayinc.com/us/en/search-results | ebay
-Eka Care | https://www.eka.care/careers | ekacare
-Elastic | https://jobs.elastic.co/ | elastic
-Elasticrun | https://www.elasticrun.com/careers | elasticrun
+EA | https://jobs.ea.com/en_US/careers | custom
+eBay | https://jobs.ebayinc.com/us/en/search-results | custom
+Eka Care | https://www.eka.care/careers | custom
+Elastic | https://jobs.elastic.co/ | custom
+Elasticrun | https://www.elasticrun.com/careers | custom
 ElevenLabs | https://jobs.ashbyhq.com/elevenlabs | ashby
-EPAM | https://careers.epam.com/en/jobs | epam
-Epic Games | https://www.epicgames.com/site/careers/jobs | epicgames
-Equinix | https://careers.equinix.com/equinix-is-hiring-in-india | equinix
-Ericsson | https://jobs.ericsson.com | ericsson
-Exotel | https://exotel.com/careers/ | exotel
+EPAM | https://careers.epam.com/en/jobs | custom
+Epic Games | https://www.epicgames.com/site/careers/jobs | custom
+Equinix | https://careers.equinix.com/equinix-is-hiring-in-india | custom
+Ericsson | https://jobs.ericsson.com | custom
+Exotel | https://exotel.com/careers/ | custom
 Expedia | https://expedia.wd108.myworkdayjobs.com/en-US/search | workday
-EY | https://careers.ey.com/ | ey
+EY | https://careers.ey.com/ | custom
 Fastly | https://boards.greenhouse.io/fastly | greenhouse
 FedEx | https://careers.fedex.com | taleo
-Fi Money | https://fi.money/careers | fimoney
-Fibe | https://www.fibe.in/careers/ | fibe
+Fi Money | https://fi.money/careers | custom
+Fibe | https://www.fibe.in/careers/ | custom
 Fidelity Investments | https://jobs.fidelity.com | phenom
-Figma | https://www.figma.com/careers/#job-openings | figma
+Figma | https://www.figma.com/careers/#job-openings | custom
 Five Rings | https://fiverings.com/careers/ | custom
-Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | flipkart
+Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | custom
 Fortinet | https://fortinet.wd1.myworkdayjobs.com/External | workday
 Freshworks | https://careers.smartrecruiters.com/freshworks | smartrecruiters
-Gartner | https://jobs.gartner.com | gartner
+Gartner | https://jobs.gartner.com | custom
 GE Aerospace | https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite | workday
 GE HealthCare | https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite | workday
 GE Vernova | https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite | workday
-GitHub | https://www.github.careers/careers-home/jobs | github
+GitHub | https://www.github.careers/careers-home/jobs | custom
 GitLab | https://job-boards.greenhouse.io/gitlab | greenhouse
-Goldman Sachs | https://www.goldmansachs.com/careers | goldmansachs
-GoodSpace AI | https://goodspace.ai/careers | goodspace
+Goldman Sachs | https://www.goldmansachs.com/careers | custom
+GoodSpace AI | https://goodspace.ai/careers | custom
 Google | https://careers.google.com/jobs/results | google
 Grafana Labs | https://boards.greenhouse.io/grafanalabs | greenhouse
 Graviton Research Capital | https://gravitonresearch.com/careers/ | custom
@@ -137,20 +137,20 @@ Harvey | https://jobs.ashbyhq.com/harvey | ashby
 HashiCorp | https://boards.greenhouse.io/hashicorp | greenhouse
 Hasura | https://boards.greenhouse.io/hasura | greenhouse
 Headlands Tech | https://job-boards.greenhouse.io/headlandstechnologiesllc | greenhouse
-Healthplix | https://healthplix.com/careers/ | healthplix
+Healthplix | https://healthplix.com/careers/ | custom
 Honeywell | https://careers.honeywell.com/en/sites/Honeywell | oraclecloud
 HP Inc. | https://hp.wd5.myworkdayjobs.com/ExternalCareerSite | workday
 HPE | https://hpe.wd5.myworkdayjobs.com/Jobsathpe | workday
-HSBC | https://www.hsbc.com/careers | hsbc
+HSBC | https://www.hsbc.com/careers | custom
 Hudson River Trading | https://www.hudsonrivertrading.com/careers/ | greenhouse
-Hugging Face | https://apply.workable.com/huggingface/?lng=en | huggingface
+Hugging Face | https://apply.workable.com/huggingface/?lng=en | workable
 HyperVerge | https://jobs.lever.co/hyperverge | lever
-IBM | https://www.ibm.com/in-en/careers/search | ibm
+IBM | https://www.ibm.com/in-en/careers/search | custom
 Ideogram | https://jobs.ashbyhq.com/ideogram | ashby
-IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | ikea
+IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | custom
 IMC Trading | https://www.imc.com/us/careers/ | custom
-Increff | https://www.increff.com/careers | increff
-Indeed | https://careers.indeed.com | indeed
+Increff | https://www.increff.com/careers | custom
+Indeed | https://careers.indeed.com | custom
 IndiaMART | https://careers.indiamart.com/ | custom
 Indmoney | https://www.indmoney.com/careers | custom
 Informatica | https://informatica.wd1.myworkdayjobs.com/Informatica | workday
@@ -159,8 +159,8 @@ InMobi | https://boards.greenhouse.io/inmobi | greenhouse
 Innovaccer | https://boards.greenhouse.io/innovaccer | greenhouse
 Instacart | https://boards.greenhouse.io/instacart | greenhouse
 Intel | https://intel.wd1.myworkdayjobs.com/External | workday
-Intuit | https://jobs.intuit.com/search-jobs | intuit
-Jai Kisan | https://jaikisan.co/careers | jaikisan
+Intuit | https://jobs.intuit.com/search-jobs | custom
+Jai Kisan | https://jaikisan.co/careers | custom
 Jane Street | https://www.janestreet.com/join-jane-street/open-roles/ | custom
 Jar | https://jobs.lever.co/myjar | lever
 JetBrains | https://job-boards.eu.greenhouse.io/jetbrains | greenhouse
@@ -168,75 +168,75 @@ Jio Hotstar | https://jiostar.wd102.myworkdayjobs.com/JioStar | workday
 JPMorgan Chase | https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs | oraclecloud
 Jump Trading | https://www.jumptrading.com/careers/ | greenhouse
 Juniper Networks | https://juniper.wd1.myworkdayjobs.com/JuniperCareers | workday
-Jupiter | https://jupiter.money/careers/ | jupiter
-Juspay | https://juspay.io/careers | juspay
-Keka | https://www.keka.com/careers | keka
-Khatabook | https://khatabook.turbohire.co/careerpage/alljobs | turbohire
+Jupiter | https://jupiter.money/careers/ | custom
+Juspay | https://juspay.io/careers | custom
+Keka | https://www.keka.com/careers | custom
+Khatabook | https://khatabook.turbohire.co/careerpage/alljobs | custom
 KLA Corporation | https://kla.wd1.myworkdayjobs.com/Search | workday
 Klarna | https://www.klarna.com/careers/ | custom
 Klaviyo | https://boards.greenhouse.io/klaviyo | greenhouse
 KPMG | https://ejgk.fa.em2.oraclecloud.com/careers | oraclecloud
-KreditBee | https://www.kreditbee.in/careers | kreditbee
+KreditBee | https://www.kreditbee.in/careers | custom
 Lam Research | https://lamresearch.wd1.myworkdayjobs.com/LamCareers | workday
 LangChain | https://jobs.ashbyhq.com/langchain | ashby
 LaunchDarkly | https://boards.greenhouse.io/launchdarkly | greenhouse
-Leadsquared | https://www.leadsquared.com/careers/ | leadsquared
-Lenovo | https://jobs.lenovo.com/en_US/careers | lenovo
+Leadsquared | https://www.leadsquared.com/careers/ | custom
+Lenovo | https://jobs.lenovo.com/en_US/careers | custom
 Lenskart | https://www.lenskart.com/careers | custom
-Licious | https://www.licious.in/careers | licious
+Licious | https://www.licious.in/careers | custom
 Linear | https://jobs.ashbyhq.com/linear | ashby
-LinkedIn | https://careers.linkedin.com/ | linkedin
+LinkedIn | https://careers.linkedin.com/ | custom
 Lockheed Martin | https://www.lockheedmartinjobs.com | taleo
-Locus | https://locus.sh/careers/ | locus
+Locus | https://locus.sh/careers/ | custom
 Logitech | https://logitech.wd5.myworkdayjobs.com/Logitech | workday
-Loom | https://loom.technology/careers/ | loom
+Loom | https://loom.technology/careers/ | custom
 Lowe's India | https://talent.lowes.com | phenom
 Luma AI | https://boards.greenhouse.io/lumaai | greenhouse
 M2P Fintech | https://m2pfintech.com/careers | custom
 MakeMyTrip | https://careers.makemytrip.com/ | custom
 Marvell Technology | https://marvell.wd1.myworkdayjobs.com/MarvellCareers | workday
 Mastercard | https://mastercard.wd1.myworkdayjobs.com/CorporateCareers | workday
-McKinsey | https://www.mckinsey.com/careers/search-jobs | mckinsey
+McKinsey | https://www.mckinsey.com/careers/search-jobs | custom
 MediaTek | https://careers.mediatek.com/ | custom
-MediBuddy | https://www.medibuddy.in/careers | medibuddy
+MediBuddy | https://www.medibuddy.in/careers | custom
 Meesho | https://jobs.lever.co/meesho | lever
-Mensa Brands | https://mensabrands.com/careers/ | mensabrands
+Mensa Brands | https://mensabrands.com/careers/ | custom
 Mercor | https://jobs.ashbyhq.com/mercor | ashby
 Meta | https://www.metacareers.com/jobsearch/ | meta
 Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | phenom
 Microsoft | https://apply.careers.microsoft.com/careers?domain=microsoft.com | microsoft
 Mindtickle | https://jobs.lever.co/mindtickle | lever
-Miro | https://miro.com/careers/open-positions/ | miro
+Miro | https://miro.com/careers/open-positions/ | custom
 Mistral AI | https://jobs.ashbyhq.com/mistral | ashby
 Modal Labs | https://jobs.ashbyhq.com/modal | ashby
-MongoDB | https://www.mongodb.com/company/careers/see-jobs#positions | mongodb
-Morgan Stanley | https://www.morganstanley.com/careers/career-opportunities-search/ | morganstanley
+MongoDB | https://www.mongodb.com/company/careers/see-jobs#positions | custom
+Morgan Stanley | https://www.morganstanley.com/careers/career-opportunities-search/ | custom
 Motorola Solutions | https://motorolasolutions.wd5.myworkdayjobs.com/Careers | workday
-Moveworks | https://www.moveworks.com/us/en/company/careers#open-roles | moveworks
+Moveworks | https://www.moveworks.com/us/en/company/careers#open-roles | custom
 MPL | https://jobs.lever.co/mpl | lever
-MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | mygate
-Myntra | https://careers.myntra.com/ | myntra
-Nagarro | https://www.nagarro.com/en/careers | nagarro
-Navi | https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6 | navi
-Nazara Technologies | https://www.nazara.com/careers/ | nazara
+MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | custom
+Myntra | https://careers.myntra.com/ | custom
+Nagarro | https://www.nagarro.com/en/careers | custom
+Navi | https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6 | custom
+Nazara Technologies | https://www.nazara.com/careers/ | custom
 Neon | https://jobs.ashbyhq.com/neon | ashby
 NetApp | https://netapp.wd1.myworkdayjobs.com/External | workday
-Netflix | https://explore.jobs.netflix.net/careers | netflix
+Netflix | https://explore.jobs.netflix.net/careers | custom
 Netlify | https://boards.greenhouse.io/netlify | greenhouse
-NielsenIQ | https://nielseniq.com/global/en/jobs/india/ | nielseniq
-Nike | https://careers.nike.com/jobs | nike
-Ninjacart | https://ninjacart.com/careers/ | ninjacart
-NinjaOne | https://jobs.jobvite.com/ninjaone/jobs | ninjaone
+NielsenIQ | https://nielseniq.com/global/en/jobs/india/ | custom
+Nike | https://careers.nike.com/jobs | custom
+Ninjacart | https://ninjacart.com/careers/ | custom
+NinjaOne | https://jobs.jobvite.com/ninjaone/jobs | custom
 NK Securities | https://www.nksecurities.com/careers/ | custom
-NoBroker | https://www.nobroker.in/careers | nobroker
-Nokia | https://jobs.nokia.com/en/sites/CX_1 | nokia
+NoBroker | https://www.nobroker.in/careers | custom
+Nokia | https://jobs.nokia.com/en/sites/CX_1 | custom
 Notion | https://jobs.ashbyhq.com/notion | ashby
-Nutanix | https://careers.nutanix.com/en/jobs/ | nutanix
+Nutanix | https://careers.nutanix.com/en/jobs/ | custom
 NVIDIA | https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite | workday
 NxtWave | https://nxtwave.darwinbox.in/ms/candidatev2/main/careers/allJobs | darwinbox
 Nykaa | https://www.nykaa.com/careers | custom
-Okta | https://www.okta.com/company/careers/job-listing/ | okta
-Ola | https://olacareers.turbohire.co/careerpage/e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212 | ola
+Okta | https://www.okta.com/company/careers/job-listing/ | custom
+Ola | https://olacareers.turbohire.co/careerpage/e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212 | custom
 Old Mission Capital | https://boards.greenhouse.io/oldmissioncapital | greenhouse
 OpenAI | https://jobs.ashbyhq.com/openai | ashby
 Optiver | https://www.optiver.com/working-at-optiver/open-roles/ | custom
@@ -245,10 +245,10 @@ Oracle | https://careers.oracle.com/en/sites/jobsearch/jobs?location=India | ora
 OYO | https://www.oyorooms.com/careers | custom
 PagerDuty | https://boards.greenhouse.io/pagerduty | greenhouse
 Palantir | https://jobs.lever.co/palantir | lever
-Palo Alto Networks | https://jobs.paloaltonetworks.com/en | paloaltonetworks
-PayPal | https://paypal.eightfold.ai/careers | paypal
+Palo Alto Networks | https://jobs.paloaltonetworks.com/en | custom
+PayPal | https://paypal.eightfold.ai/careers | eightfold
 Paytm | https://jobs.lever.co/paytm | lever
-Perfios | https://www.perfios.com/careers | perfios
+Perfios | https://www.perfios.com/careers | custom
 Perplexity | https://jobs.ashbyhq.com/perplexity | ashby
 Pfizer | https://pfizer.wd1.myworkdayjobs.com/PfizerCareers | workday
 Philips | https://www.careers.philips.com/global/en/search-results | workday
@@ -257,23 +257,23 @@ Photoroom | https://jobs.ashbyhq.com/photoroom | ashby
 PhysicsWallah | https://pw.live/careers | custom
 Pine Labs | https://www.pinelabs.com/careers | custom
 Pinecone | https://jobs.ashbyhq.com/pinecone | ashby
-Pinterest | https://boards.greenhouse.io/pinterest | pinterest
-Plaid | https://plaid.com/careers/ | plaid
+Pinterest | https://boards.greenhouse.io/pinterest | greenhouse
+Plaid | https://plaid.com/careers/ | custom
 PlanetScale | https://job-boards.greenhouse.io/planetscale | greenhouse
 Pocket FM | https://boards.greenhouse.io/pocketfm | greenhouse
 PolicyBazaar | https://www.policybazaar.com/careers | custom
-Porter | https://porter.in/careers | porter
-PostHog | https://posthog.com/careers | posthog
+Porter | https://porter.in/careers | custom
+PostHog | https://posthog.com/careers | custom
 Postman | https://job-boards.greenhouse.io/postman | greenhouse
-Pristyn Care | https://www.pristyncare.com/careers/ | pristyncare
+Pristyn Care | https://www.pristyncare.com/careers/ | custom
 Pulumi | https://boards.greenhouse.io/pulumi | greenhouse
 Pure Storage | https://job-boards.greenhouse.io/purestorage | greenhouse
-Purplle | https://www.purplle.com/careers | purplle
-PwC | https://jobs-ta.pwc.com/global/en/ac-india-job-search | pwc
+Purplle | https://www.purplle.com/careers | custom
+PwC | https://jobs-ta.pwc.com/global/en/ac-india-job-search | custom
 Qdrant | https://jobs.ashbyhq.com/qdrant.tech | ashby
 Quadeye | https://quadeye.com/careers | custom
-Qualcomm | https://careers.qualcomm.com/careers | qualcomm
-QuestDB | https://questdb.com/careers/ | questdb
+Qualcomm | https://careers.qualcomm.com/careers | custom
+QuestDB | https://questdb.com/careers/ | custom
 Railway | https://jobs.ashbyhq.com/railway | ashby
 Ramp | https://jobs.ashbyhq.com/ramp | ashby
 Rapido | https://rapido.bike/careers | custom
@@ -285,64 +285,64 @@ Render | https://boards.greenhouse.io/render | greenhouse
 Replicate | https://jobs.ashbyhq.com/replicate | ashby
 Replit | https://jobs.ashbyhq.com/replit | ashby
 Resend | https://jobs.ashbyhq.com/resend | ashby
-Retool | https://retool.com/careers#open-positions | retool
+Retool | https://retool.com/careers#open-positions | custom
 Revolut | https://www.revolut.com/careers/ | lever
-Riot Games | https://www.riotgames.com/en/work-with-us/jobs | riotgames
-Rippling | https://www.rippling.com/careers/open-roles | rippling
-Rivian | https://careers.rivian.com/careers-home/ | rivian
-Robinhood | https://careers.robinhood.com/ | robinhood
-Roblox | https://careers.roblox.com/jobs | roblox
+Riot Games | https://www.riotgames.com/en/work-with-us/jobs | custom
+Rippling | https://www.rippling.com/careers/open-roles | custom
+Rivian | https://careers.rivian.com/careers-home/ | custom
+Robinhood | https://careers.robinhood.com/ | custom
+Roblox | https://careers.roblox.com/jobs | custom
 Rocketlane | https://jobs.ashbyhq.com/rocketlane | ashby
 Rockstar Games | https://www.rockstargames.com/careers | custom
-Rubrik | https://www.rubrik.com/company/careers#positions | rubrik
+Rubrik | https://www.rubrik.com/company/careers#positions | custom
 Runway | https://boards.greenhouse.io/runwayml | greenhouse
-Rupeek | https://rupeek.com/careers | rupeek
+Rupeek | https://rupeek.com/careers | custom
 Salesforce | https://salesforce.wd12.myworkdayjobs.com/External_Career_Site | workday
 SambaNova Systems | https://boards.greenhouse.io/sambanova | greenhouse
 Samsara | https://boards.greenhouse.io/samsara | greenhouse
 Samsung | http://sec.wd3.myworkdayjobs.com/Samsung_Careers | workday
-SAP | https://jobs.sap.com/ | sap
-Scale AI | https://scale.com/careers | scaleai
+SAP | https://jobs.sap.com/ | custom
+Scale AI | https://scale.com/careers | custom
 SentinelOne | https://boards.greenhouse.io/sentinelone | greenhouse
 Sentry | https://jobs.ashbyhq.com/sentry | ashby
-ServiceNow | https://careers.servicenow.com/ | servicenow
-Setu | https://setu.co/careers | setu
-Shadowfax | https://www.shadowfax.in/careers | shadowfax
-ShareChat | https://sharechat.com/careers | sharechat
-Shiprocket | https://www.shiprocket.in/careers/ | shiprocket
-Shopee | https://careers.shopee.sg/ | shopee
-Shopify | https://shopify.com/careers | shopify
+ServiceNow | https://careers.servicenow.com/ | custom
+Setu | https://setu.co/careers | custom
+Shadowfax | https://www.shadowfax.in/careers | custom
+ShareChat | https://sharechat.com/careers | custom
+Shiprocket | https://www.shiprocket.in/careers/ | custom
+Shopee | https://careers.shopee.sg/ | custom
+Shopify | https://shopify.com/careers | custom
 Siemens | https://siemens.wd3.myworkdayjobs.com/Siemens_Careers | workday
 SIG (Susquehanna) | https://sig.com/careers/ | custom
-Signzy | https://www.signzy.com/careers/ | signzy
+Signzy | https://www.signzy.com/careers/ | custom
 Slack | https://salesforce.wd12.myworkdayjobs.com/Slack | workday
 Slice | https://jobs.lever.co/slice | lever
 Smallcase | https://jobs.lever.co/smallcase | lever
 SmartBear | https://job-boards.greenhouse.io/smartbear | greenhouse
 Snowflake | https://jobs.ashbyhq.com/snowflake | ashby
-Snowplow | https://snowplow.careers.hibob.com/ | snowplow
-Sony | https://www.sony.com/en_us/SCA/careers/overview.html | sony
+Snowplow | https://snowplow.careers.hibob.com/ | custom
+Sony | https://www.sony.com/en_us/SCA/careers/overview.html | custom
 Sourcegraph | https://boards.greenhouse.io/sourcegraph | greenhouse
 Spinny | https://www.spinny.com/careers/ | custom
 Splunk | https://splunk.wd1.myworkdayjobs.com/External | workday
 Spotify | https://jobs.lever.co/spotify | lever
-Square Yards | https://www.squareyards.com/careers | squareyards
-Stanza Living | https://www.stanzaliving.com/careers | stanzaliving
-Stripe | https://stripe.com/jobs/search | stripe
-Sugar Cosmetics | https://sugarcosmetics.com/pages/careers | sugarcosmetics
+Square Yards | https://www.squareyards.com/careers | custom
+Stanza Living | https://www.stanzaliving.com/careers | custom
+Stripe | https://stripe.com/jobs/search | custom
+Sugar Cosmetics | https://sugarcosmetics.com/pages/careers | custom
 Sumo Logic | https://job-boards.greenhouse.io/sumologic | greenhouse
 Supabase | https://jobs.ashbyhq.com/supabase | ashby
-Supercell | https://supercell.com/en/careers/ | supercell
+Supercell | https://supercell.com/en/careers/ | custom
 Superhuman | https://jobs.ashbyhq.com/superhuman | ashby
-Swiggy | https://careers.swiggy.com | swiggy
-Synopsys | https://www.synopsys.com/company/careers.html | synopsys
+Swiggy | https://careers.swiggy.com | custom
+Synopsys | https://www.synopsys.com/company/careers.html | custom
 Tailscale | https://tailscale.com/careers | custom
-Target | https://jobs.target.com | target
+Target | https://jobs.target.com | custom
 Tata Digital | https://www.tatadigital.com/careers | custom
 Temporal | https://jobs.ashbyhq.com/temporal | ashby
 Tesco Bengaluru | https://apply.tesco-careers.com | oraclecloud
-Tesla | https://www.tesla.com/careers | tesla
-Testbook | https://testbook.com/careers | testbook
+Tesla | https://www.tesla.com/careers | custom
+Testbook | https://testbook.com/careers | custom
 Texas Instruments | https://careers.ti.com/search-jobs/ | workday
 Toast | https://boards.greenhouse.io/toast | greenhouse
 Together AI | https://boards.greenhouse.io/togetherai | greenhouse
@@ -351,44 +351,44 @@ Turso | https://jobs.ashbyhq.com/turso | ashby
 Twilio | https://boards.greenhouse.io/twilio | greenhouse
 Twitch | https://job-boards.greenhouse.io/twitch | greenhouse
 Two Sigma | https://www.twosigma.com/careers/ | custom
-Uber | https://jobs.uber.com/en/jobs/ | uber
+Uber | https://jobs.uber.com/en/jobs/ | custom
 Ubisoft | https://careers.smartrecruiters.com/ubisoft | smartrecruiters
 UBS | https://jobs.ubs.com | avature
-Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | unacademy
+Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | custom
 Uniphore | https://boards.greenhouse.io/uniphore | greenhouse
-UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | unitedhealth
-Unity | https://unity.com/careers/positions | unity
+UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | custom
+Unity | https://unity.com/careers/positions | custom
 Upstox | https://jobs.lever.co/upstox | lever
 Urban Company | https://boards.greenhouse.io/urbancompany | greenhouse
 Vast Data | https://boards.greenhouse.io/vastdata | greenhouse
 Vellum | https://jobs.ashbyhq.com/vellum | ashby
 Vercel | https://boards.greenhouse.io/vercel | greenhouse
 Visa | https://visa.wd1.myworkdayjobs.com/Careers | workday
-VMware | https://www.broadcom.com/company/careers | vmware
-Walmart | https://careers.walmart.com/us/en/home | walmart
+VMware | https://www.broadcom.com/company/careers | custom
+Walmart | https://careers.walmart.com/us/en/home | custom
 Warner Bros. Discovery | https://careers.wbd.com | workday
-Waycool | https://www.waycool.in/careers/ | waycool
-Wayfair | https://www.wayfair.com/careers/jobs | wayfair
+Waycool | https://www.waycool.in/careers/ | custom
+Wayfair | https://www.wayfair.com/careers/jobs | custom
 Waymo | https://boards.greenhouse.io/waymo | greenhouse
 Weaviate | https://weaviate.io/careers | custom
-WebEngage | https://webengage.com/careers/ | webengage
-Weights & Biases | https://www.coreweave.com/careers/weights-biases | weights&biases
+WebEngage | https://webengage.com/careers/ | custom
+Weights & Biases | https://www.coreweave.com/careers/weights-biases | custom
 Wells Fargo | https://www.wellsfargojobs.com/en | phenom
-Whatfix | https://whatfix.com/careers | whatfix
-WinZo | https://www.winzogames.com/careers | winzo
-Wise | https://wise.jobs/ | wise
-Wiz | https://www.wiz.io/careers | wiz
+Whatfix | https://whatfix.com/careers | custom
+WinZo | https://www.winzogames.com/careers | custom
+Wise | https://wise.jobs/ | custom
+Wiz | https://www.wiz.io/careers | custom
 Workday | https://workday.wd5.myworkdayjobs.com/Workday | workday
 World Labs | https://jobs.ashbyhq.com/worldlabs | ashby
 WorldQuant | https://www.worldquant.com/careers/ | custom
-Yellow.ai | https://yellow.ai/careers/ | yellowai
+Yellow.ai | https://yellow.ai/careers/ | custom
 YubiKey | https://boards.greenhouse.io/yubikey | greenhouse
-Zapier | https://zapier.com/jobs#job-openings | zapier
+Zapier | https://zapier.com/jobs#job-openings | custom
 Zendesk | https://zendesk.wd1.myworkdayjobs.com/zendesk | workday
-Zepto | https://zepto.talentrecruit.com/career-page | zepto
+Zepto | https://zepto.talentrecruit.com/career-page | custom
 Zerodha | https://zerodha.tech/careers/ | custom
-Zoho | https://www.zoho.com/careers/ | zoho
-Zomato (Eternal) | https://www.eternal.com/careers/ | zomato(eternal)
+Zoho | https://www.zoho.com/careers/ | custom
+Zomato (Eternal) | https://www.eternal.com/careers/ | custom
 Zoom | https://zoom.wd5.myworkdayjobs.com/Zoom | workday
-ZS Associates | https://jobs.zs.com/jobs | zsassociates
-Zscaler | https://www.zscaler.com/careers | zscaler
+ZS Associates | https://jobs.zs.com/jobs | custom
+Zscaler | https://www.zscaler.com/careers | custom
