@@ -1,6 +1,6 @@
 # Company List by ATS Type
 
-Total Companies: 392
+Total Companies: 390
 Total ATS Types: 20
 
 ## AMAZON (1 companies, 1 enabled)
@@ -15,7 +15,7 @@ Total ATS Types: 20
 |--------------|--------------|--------|
 | Apple | https://jobs.apple.com/en-in/search?location=india-INDC | ✅ Enabled |
 
-## ASHBY (38 companies, 38 enabled)
+## ASHBY (40 companies, 40 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -27,12 +27,14 @@ Total ATS Types: 20
 | Classplus | https://jobs.ashbyhq.com/classplus | ✅ Enabled |
 | Clerk | https://jobs.ashbyhq.com/clerk | ✅ Enabled |
 | Cognition AI | https://jobs.ashbyhq.com/cognition | ✅ Enabled |
+| Cohere | https://jobs.ashbyhq.com/cohere | ✅ Enabled |
 | Cursor | https://jobs.ashbyhq.com/cursor | ✅ Enabled |
 | ElevenLabs | https://jobs.ashbyhq.com/elevenlabs | ✅ Enabled |
 | Harvey | https://jobs.ashbyhq.com/harvey | ✅ Enabled |
 | Ideogram | https://jobs.ashbyhq.com/ideogram | ✅ Enabled |
 | LangChain | https://jobs.ashbyhq.com/langchain | ✅ Enabled |
 | Linear | https://jobs.ashbyhq.com/linear | ✅ Enabled |
+| Luma AI | https://jobs.ashbyhq.com/lumaai | ✅ Enabled |
 | Mercor | https://jobs.ashbyhq.com/mercor | ✅ Enabled |
 | Mistral AI | https://jobs.ashbyhq.com/mistral | ✅ Enabled |
 | Modal Labs | https://jobs.ashbyhq.com/modal | ✅ Enabled |
@@ -65,7 +67,7 @@ Total ATS Types: 20
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
 | UBS | https://jobs.ubs.com | ✅ Enabled |
 
-## CUSTOM (203 companies, 203 enabled)
+## CUSTOM (205 companies, 205 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -142,6 +144,7 @@ Total ATS Types: 20
 | Goldman Sachs | https://www.goldmansachs.com/careers | ✅ Enabled |
 | GoodSpace AI | https://goodspace.ai/careers | ✅ Enabled |
 | Graviton Research Capital | https://gravitonresearch.com/careers/ | ✅ Enabled |
+| Groq | https://groq.com/careers-at-groq | ✅ Enabled |
 | Healthplix | https://healthplix.com/careers/ | ✅ Enabled |
 | HSBC | https://www.hsbc.com/careers | ✅ Enabled |
 | IBM | https://www.ibm.com/in-en/careers/search | ✅ Enabled |
@@ -152,6 +155,7 @@ Total ATS Types: 20
 | IndiaMART | https://careers.indiamart.com/ | ✅ Enabled |
 | Indmoney | https://www.indmoney.com/careers | ✅ Enabled |
 | Infra.Market | https://infra.market/careers | ✅ Enabled |
+| Innovaccer | https://innovaccer.com/careers/jobs | ✅ Enabled |
 | Intuit | https://jobs.intuit.com/search-jobs | ✅ Enabled |
 | Jai Kisan | https://jaikisan.co/careers | ✅ Enabled |
 | Jane Street | https://www.janestreet.com/join-jane-street/open-roles/ | ✅ Enabled |
@@ -294,7 +298,7 @@ Total ATS Types: 20
 |--------------|--------------|--------|
 | Google | https://careers.google.com/jobs/results | ✅ Enabled |
 
-## GREENHOUSE (62 companies, 62 enabled)
+## GREENHOUSE (56 companies, 56 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -306,7 +310,6 @@ Total ATS Types: 20
 | ClickHouse | https://job-boards.greenhouse.io/clickhouse | ✅ Enabled |
 | Cloudflare | https://boards.greenhouse.io/cloudflare | ✅ Enabled |
 | Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | ✅ Enabled |
-| Cohere | https://boards.greenhouse.io/cohere | ✅ Enabled |
 | CoreWeave | https://boards.greenhouse.io/coreweave | ✅ Enabled |
 | Dagster Labs | https://job-boards.greenhouse.io/dagsterlabs | ✅ Enabled |
 | Databricks | https://boards.greenhouse.io/databricks | ✅ Enabled |
@@ -314,20 +317,15 @@ Total ATS Types: 20
 | Fastly | https://boards.greenhouse.io/fastly | ✅ Enabled |
 | GitLab | https://job-boards.greenhouse.io/gitlab | ✅ Enabled |
 | Grafana Labs | https://boards.greenhouse.io/grafanalabs | ✅ Enabled |
-| Groq | https://boards.greenhouse.io/groq | ✅ Enabled |
 | Groww | https://boards.greenhouse.io/groww | ✅ Enabled |
-| HashiCorp | https://boards.greenhouse.io/hashicorp | ✅ Enabled |
-| Hasura | https://boards.greenhouse.io/hasura | ✅ Enabled |
 | Headlands Tech | https://job-boards.greenhouse.io/headlandstechnologiesllc | ✅ Enabled |
 | Hudson River Trading | https://www.hudsonrivertrading.com/careers/ | ✅ Enabled |
 | InMobi | https://boards.greenhouse.io/inmobi | ✅ Enabled |
-| Innovaccer | https://boards.greenhouse.io/innovaccer | ✅ Enabled |
 | Instacart | https://boards.greenhouse.io/instacart | ✅ Enabled |
 | JetBrains | https://job-boards.eu.greenhouse.io/jetbrains | ✅ Enabled |
 | Jump Trading | https://www.jumptrading.com/careers/ | ✅ Enabled |
 | Klaviyo | https://boards.greenhouse.io/klaviyo | ✅ Enabled |
 | LaunchDarkly | https://boards.greenhouse.io/launchdarkly | ✅ Enabled |
-| Luma AI | https://boards.greenhouse.io/lumaai | ✅ Enabled |
 | Netlify | https://boards.greenhouse.io/netlify | ✅ Enabled |
 | Old Mission Capital | https://boards.greenhouse.io/oldmissioncapital | ✅ Enabled |
 | PagerDuty | https://boards.greenhouse.io/pagerduty | ✅ Enabled |

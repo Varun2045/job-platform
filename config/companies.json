@@ -685,8 +685,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/cohere",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://jobs.ashbyhq.com/cohere",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {
@@ -1315,8 +1315,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/groq",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://groq.com/careers-at-groq",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -1337,26 +1337,6 @@
     "interval_minutes": 60,
     "api_endpoint": "https://jobs.ashbyhq.com/harvey",
     "detected_ats": "ashby",
-    "resume_profiles": []
-  },
-  {
-    "id": "hashicorp",
-    "name": "HashiCorp",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/hashicorp",
-    "detected_ats": "greenhouse",
-    "resume_profiles": []
-  },
-  {
-    "id": "hasura",
-    "name": "Hasura",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/hasura",
-    "detected_ats": "greenhouse",
     "resume_profiles": []
   },
   {
@@ -1565,8 +1545,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/innovaccer",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://innovaccer.com/careers/jobs",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -1915,8 +1895,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/lumaai",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://jobs.ashbyhq.com/lumaai",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {

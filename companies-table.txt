@@ -68,7 +68,7 @@ ClickHouse | https://job-boards.greenhouse.io/clickhouse | greenhouse
 Cloudflare | https://boards.greenhouse.io/cloudflare | greenhouse
 Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | greenhouse
 Cognition AI | https://jobs.ashbyhq.com/cognition | ashby
-Cohere | https://boards.greenhouse.io/cohere | greenhouse
+Cohere | https://jobs.ashbyhq.com/cohere | ashby
 Cohesity | https://www.cohesity.com/careers/open-positions/ | custom
 Coinbase | https://www.coinbase.com/careers/positions | custom
 Confluent | https://careers.confluent.io/jobs | custom
@@ -131,11 +131,9 @@ GoodSpace AI | https://goodspace.ai/careers | custom
 Google | https://careers.google.com/jobs/results | google
 Grafana Labs | https://boards.greenhouse.io/grafanalabs | greenhouse
 Graviton Research Capital | https://gravitonresearch.com/careers/ | custom
-Groq | https://boards.greenhouse.io/groq | greenhouse
+Groq | https://groq.com/careers-at-groq | custom
 Groww | https://boards.greenhouse.io/groww | greenhouse
 Harvey | https://jobs.ashbyhq.com/harvey | ashby
-HashiCorp | https://boards.greenhouse.io/hashicorp | greenhouse
-Hasura | https://boards.greenhouse.io/hasura | greenhouse
 Headlands Tech | https://job-boards.greenhouse.io/headlandstechnologiesllc | greenhouse
 Healthplix | https://healthplix.com/careers/ | custom
 Honeywell | https://careers.honeywell.com/en/sites/Honeywell | oraclecloud
@@ -156,7 +154,7 @@ Indmoney | https://www.indmoney.com/careers | custom
 Informatica | https://informatica.wd1.myworkdayjobs.com/Informatica | workday
 Infra.Market | https://infra.market/careers | custom
 InMobi | https://boards.greenhouse.io/inmobi | greenhouse
-Innovaccer | https://boards.greenhouse.io/innovaccer | greenhouse
+Innovaccer | https://innovaccer.com/careers/jobs | custom
 Instacart | https://boards.greenhouse.io/instacart | greenhouse
 Intel | https://intel.wd1.myworkdayjobs.com/External | workday
 Intuit | https://jobs.intuit.com/search-jobs | custom
@@ -191,7 +189,7 @@ Locus | https://locus.sh/careers/ | custom
 Logitech | https://logitech.wd5.myworkdayjobs.com/Logitech | workday
 Loom | https://loom.technology/careers/ | custom
 Lowe's India | https://talent.lowes.com | phenom
-Luma AI | https://boards.greenhouse.io/lumaai | greenhouse
+Luma AI | https://jobs.ashbyhq.com/lumaai | ashby
 M2P Fintech | https://m2pfintech.com/careers | custom
 MakeMyTrip | https://careers.makemytrip.com/ | custom
 Marvell Technology | https://marvell.wd1.myworkdayjobs.com/MarvellCareers | workday

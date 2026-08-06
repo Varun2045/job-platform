@@ -114,7 +114,7 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'pristyn-care', name: 'Pristyn Care', pattern: 'pristyncare.com', careerPage: 'https://pristyncare.com/careers', jobBoardUrl: 'https://pristyncare.com/careers' },
 
-  { id: 'innovaccer', name: 'Innovaccer', pattern: 'innovaccer.com', careerPage: 'https://innovaccer.com/careers', jobBoardUrl: 'https://innovaccer.com/careers' },
+  { id: 'innovaccer', name: 'Innovaccer', pattern: 'innovaccer.com', careerPage: 'https://innovaccer.com/careers/jobs', jobBoardUrl: 'https://innovaccer.com/careers/jobs' },
 
   { id: 'khatabook', name: 'Khatabook', pattern: 'khatabook.com', careerPage: 'https://khatabook.com/careers', jobBoardUrl: 'https://khatabook.com/careers' },
 
@@ -159,8 +159,6 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'decentro', name: 'Decentro', pattern: 'decentro.tech', careerPage: 'https://decentro.tech/careers', jobBoardUrl: 'https://decentro.tech/careers' },
 
   { id: 'setu', name: 'Setu', pattern: 'setu.co', careerPage: 'https://setu.co/careers', jobBoardUrl: 'https://setu.co/careers' },
-
-  { id: 'hasura', name: 'Hasura', pattern: 'hasura.io', careerPage: 'https://hasura.io/careers', jobBoardUrl: 'https://hasura.io/careers' },
 
   // Big Tech & Custom Portals
   { id: 'google', name: 'Google', pattern: 'google.com', careerPage: 'https://careers.google.com', jobBoardUrl: 'https://careers.google.com/jobs/results' },
