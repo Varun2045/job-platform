@@ -2,10 +2,10 @@
 
 | ATS Type | Companies | % of Total | Enabled |
 |----------|-----------|------------|--------|
-| CUSTOM | 205 | 52.3% | 205 |
-| GREENHOUSE | 56 | 14.3% | 56 |
-| WORKDAY | 44 | 11.2% | 44 |
-| ASHBY | 40 | 10.2% | 40 |
+| CUSTOM | 211 | 53.8% | 211 |
+| GREENHOUSE | 46 | 11.7% | 46 |
+| WORKDAY | 45 | 11.5% | 45 |
+| ASHBY | 42 | 10.7% | 42 |
 | LEVER | 14 | 3.6% | 14 |
 | ORACLECLOUD | 5 | 1.3% | 5 |
 | PHENOM | 4 | 1.0% | 4 |

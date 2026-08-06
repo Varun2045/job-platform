@@ -258,13 +258,12 @@ Pinecone | https://jobs.ashbyhq.com/pinecone | ashby
 Pinterest | https://boards.greenhouse.io/pinterest | greenhouse
 Plaid | https://plaid.com/careers/ | custom
 PlanetScale | https://job-boards.greenhouse.io/planetscale | greenhouse
-Pocket FM | https://boards.greenhouse.io/pocketfm | greenhouse
 PolicyBazaar | https://www.policybazaar.com/careers | custom
 Porter | https://porter.in/careers | custom
 PostHog | https://posthog.com/careers | custom
 Postman | https://job-boards.greenhouse.io/postman | greenhouse
 Pristyn Care | https://www.pristyncare.com/careers/ | custom
-Pulumi | https://boards.greenhouse.io/pulumi | greenhouse
+Pulumi | https://job-boards.greenhouse.io/pulumicorporation | greenhouse
 Pure Storage | https://job-boards.greenhouse.io/purestorage | greenhouse
 Purplle | https://www.purplle.com/careers | custom
 PwC | https://jobs-ta.pwc.com/global/en/ac-india-job-search | custom
@@ -278,8 +277,8 @@ Rapido | https://rapido.bike/careers | custom
 Razorpay | https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited | greenhouse
 Red Hat | https://redhat.wd5.myworkdayjobs.com/Jobs | workday
 Reddit | https://job-boards.greenhouse.io/reddit | greenhouse
-Redis | https://boards.greenhouse.io/redis | greenhouse
-Render | https://boards.greenhouse.io/render | greenhouse
+Redis | https://jobs.ashbyhq.com/redis | ashby
+Render | https://jobs.ashbyhq.com/render | ashby
 Replicate | https://jobs.ashbyhq.com/replicate | ashby
 Replit | https://jobs.ashbyhq.com/replit | ashby
 Resend | https://jobs.ashbyhq.com/resend | ashby
@@ -293,15 +292,15 @@ Roblox | https://careers.roblox.com/jobs | custom
 Rocketlane | https://jobs.ashbyhq.com/rocketlane | ashby
 Rockstar Games | https://www.rockstargames.com/careers | custom
 Rubrik | https://www.rubrik.com/company/careers#positions | custom
-Runway | https://boards.greenhouse.io/runwayml | greenhouse
+Runway | https://runway.com/careers | custom
 Rupeek | https://rupeek.com/careers | custom
 Salesforce | https://salesforce.wd12.myworkdayjobs.com/External_Career_Site | workday
-SambaNova Systems | https://boards.greenhouse.io/sambanova | greenhouse
+SambaNova Systems | https://sambanova.ai/company/careers/job-openings | custom
 Samsara | https://boards.greenhouse.io/samsara | greenhouse
 Samsung | http://sec.wd3.myworkdayjobs.com/Samsung_Careers | workday
 SAP | https://jobs.sap.com/ | custom
 Scale AI | https://scale.com/careers | custom
-SentinelOne | https://boards.greenhouse.io/sentinelone | greenhouse
+SentinelOne | https://www.sentinelone.com/jobs/ | custom
 Sentry | https://jobs.ashbyhq.com/sentry | ashby
 ServiceNow | https://careers.servicenow.com/ | custom
 Setu | https://setu.co/careers | custom
@@ -320,7 +319,7 @@ SmartBear | https://job-boards.greenhouse.io/smartbear | greenhouse
 Snowflake | https://jobs.ashbyhq.com/snowflake | ashby
 Snowplow | https://snowplow.careers.hibob.com/ | custom
 Sony | https://www.sony.com/en_us/SCA/careers/overview.html | custom
-Sourcegraph | https://boards.greenhouse.io/sourcegraph | greenhouse
+Sourcegraph | https://job-boards.greenhouse.io/sourcegraph91 | greenhouse
 Spinny | https://www.spinny.com/careers/ | custom
 Splunk | https://splunk.wd1.myworkdayjobs.com/External | workday
 Spotify | https://jobs.lever.co/spotify | lever
@@ -353,12 +352,12 @@ Uber | https://jobs.uber.com/en/jobs/ | custom
 Ubisoft | https://careers.smartrecruiters.com/ubisoft | smartrecruiters
 UBS | https://jobs.ubs.com | avature
 Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | custom
-Uniphore | https://boards.greenhouse.io/uniphore | greenhouse
+Uniphore | https://uniphore.wd503.myworkdayjobs.com/Uniphore | workday
 UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | custom
 Unity | https://unity.com/careers/positions | custom
 Upstox | https://jobs.lever.co/upstox | lever
-Urban Company | https://boards.greenhouse.io/urbancompany | greenhouse
-Vast Data | https://boards.greenhouse.io/vastdata | greenhouse
+Urban Company | https://careers.urbancompany.com/jobs | custom
+Vast Data | https://www.vastdata.com/careers#open-positions | custom
 Vellum | https://jobs.ashbyhq.com/vellum | ashby
 Vercel | https://boards.greenhouse.io/vercel | greenhouse
 Visa | https://visa.wd1.myworkdayjobs.com/Careers | workday
@@ -380,7 +379,7 @@ Workday | https://workday.wd5.myworkdayjobs.com/Workday | workday
 World Labs | https://jobs.ashbyhq.com/worldlabs | ashby
 WorldQuant | https://www.worldquant.com/careers/ | custom
 Yellow.ai | https://yellow.ai/careers/ | custom
-YubiKey | https://boards.greenhouse.io/yubikey | greenhouse
+YubiKey | https://www.go-yubi.com/careers | custom
 Zapier | https://zapier.com/jobs#job-openings | custom
 Zendesk | https://zendesk.wd1.myworkdayjobs.com/zendesk | workday
 Zepto | https://zepto.talentrecruit.com/career-page | custom

@@ -140,8 +140,6 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'yellow-ai', name: 'Yellow.ai', pattern: 'yellow.ai', careerPage: 'https://yellow.ai/careers', jobBoardUrl: 'https://yellow.ai/careers' },
 
-  { id: 'uniphore', name: 'Uniphore', pattern: 'uniphore.com', careerPage: 'https://uniphore.com/careers', jobBoardUrl: 'https://uniphore.com/careers' },
-
   { id: 'keka', name: 'Keka', pattern: 'keka.com', careerPage: 'https://keka.com/careers', jobBoardUrl: 'https://keka.com/careers' },
 
   { id: 'rocketlane', name: 'Rocketlane', pattern: 'rocketlane.com', careerPage: 'https://rocketlane.com/careers', jobBoardUrl: 'https://rocketlane.com/careers' },

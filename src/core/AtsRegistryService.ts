@@ -126,7 +126,7 @@ export class AtsRegistryService {
         'Informatica', 'Intel', 'Jio Hotstar', 'Juniper Networks', 'KLA Corporation', 'Lam Research',
         'Logitech', 'Marvell Technology', 'Mastercard', 'Motorola Solutions',
         'NetApp', 'NVIDIA', 'Optum', 'Pfizer', 'Philips', 'Red Hat', 'Salesforce', 'Samsung',
-        'Siemens', 'Slack', 'Splunk', 'Texas Instruments', 'Visa', 'Warner Bros. Discovery',
+        'Siemens', 'Slack', 'Splunk', 'Texas Instruments', 'Uniphore', 'Visa', 'Warner Bros. Discovery',
         'Workday', 'Zendesk', 'Zoom',
       ],
       companyDetails: [],
@@ -142,10 +142,10 @@ export class AtsRegistryService {
         'Groww', 'Headlands Tech', 'Hudson River Trading', 'InMobi',
         'Instacart', 'JetBrains', 'Jump Trading', 'Klaviyo', 'LaunchDarkly',
         'Netlify', 'Old Mission Capital', 'PagerDuty', 'PhonePe', 'Pinterest', 'PlanetScale',
-        'Pocket FM', 'Postman', 'Pulumi', 'Pure Storage', 'Razorpay', 'Reddit', 'Redis', 'Render',
-        'Runway', 'SambaNova Systems', 'Samsara', 'SentinelOne', 'SmartBear', 'Sourcegraph',
+        'Postman', 'Pulumi', 'Pure Storage', 'Razorpay', 'Reddit',
+        'Samsara', 'SmartBear', 'Sourcegraph',
         'Sumo Logic', 'Toast', 'Together AI', 'Tower Research Capital', 'Twilio', 'Twitch',
-        'Uniphore', 'Urban Company', 'Vast Data', 'Vercel', 'Waymo', 'YubiKey',
+        'Vercel', 'Waymo',
       ],
       companyDetails: [],
     },
@@ -157,7 +157,7 @@ export class AtsRegistryService {
         'Airbyte', 'Anyscale', 'Baseten', 'Character.ai', 'Chroma', 'Classplus', 'Clerk', 'Cognition AI', 'Cohere', 'Cursor',
         'ElevenLabs', 'Harvey', 'Ideogram', 'LangChain', 'Linear', 'Luma AI', 'Mercor', 'Mistral AI',
         'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Photoroom', 'Pinecone',
-        'Qdrant', 'Railway', 'Ramp', 'Replicate', 'Replit', 'Resend', 'Rocketlane', 'Sentry',
+        'Qdrant', 'Railway', 'Ramp', 'Redis', 'Render', 'Replicate', 'Replit', 'Resend', 'Rocketlane', 'Sentry',
         'Snowflake', 'Supabase', 'Superhuman', 'Temporal', 'Turso', 'Vellum', 'World Labs',
       ],
       companyDetails: [],
@@ -289,9 +289,6 @@ export class AtsRegistryService {
       }
       if (name === 'JetBrains') {
         return { jobBoardUrl: 'https://job-boards.eu.greenhouse.io/jetbrains', jobBoardNeedsReview: false };
-      }
-      if (name === 'YubiKey' || name === 'Yubico') {
-        return { jobBoardUrl: 'https://job-boards.greenhouse.io/yubico', jobBoardNeedsReview: false };
       }
       if (name === 'Together AI') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/togetherai', jobBoardNeedsReview: false };

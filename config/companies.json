@@ -2580,16 +2580,6 @@
     "resume_profiles": []
   },
   {
-    "id": "pocket-fm",
-    "name": "Pocket FM",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/pocketfm",
-    "detected_ats": "greenhouse",
-    "resume_profiles": []
-  },
-  {
     "id": "policybazaar",
     "name": "PolicyBazaar",
     "enabled": true,
@@ -2645,7 +2635,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/pulumi",
+    "api_endpoint": "https://job-boards.greenhouse.io/pulumicorporation",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -2785,8 +2775,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/redis",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://jobs.ashbyhq.com/redis",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {
@@ -2795,8 +2785,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/render",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://jobs.ashbyhq.com/render",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {
@@ -2935,8 +2925,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/runwayml",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://runway.com/careers",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -2965,8 +2955,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/sambanova",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://sambanova.ai/company/careers/job-openings",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -3015,8 +3005,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/sentinelone",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://www.sentinelone.com/jobs/",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -3205,7 +3195,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/sourcegraph",
+    "api_endpoint": "https://job-boards.greenhouse.io/sourcegraph91",
     "detected_ats": "greenhouse",
     "resume_profiles": []
   },
@@ -3535,8 +3525,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/uniphore",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://uniphore.wd503.myworkdayjobs.com/Uniphore",
+    "detected_ats": "workday",
     "resume_profiles": []
   },
   {
@@ -3575,8 +3565,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/urbancompany",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://careers.urbancompany.com/jobs",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -3585,8 +3575,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/vastdata",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://www.vastdata.com/careers#open-positions",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -3805,8 +3795,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://boards.greenhouse.io/yubikey",
-    "detected_ats": "greenhouse",
+    "api_endpoint": "https://www.go-yubi.com/careers",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
