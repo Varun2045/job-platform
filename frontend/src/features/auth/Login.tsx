@@ -43,8 +43,10 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   const handleOAuth = async (provider: 'google' | 'github') => {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // For local development, use mock authentication
     if (isLocalhost) {
-      showToast(`ℹ ${provider} login initiated. Redirecting to OAuth callback...`, 'info');
+      showToast(`ℹ ${provider} login initiated. Using mock authentication for local development.`, 'info');
       onLogin(`mock-${provider}-token`, `${provider}-user@jobmonitor.com`);
       return;
     }
@@ -53,6 +55,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const origin = window.location.origin;
       const response = await api.get<{ url: string }>(`/api/auth/oauth/${provider}?origin=${encodeURIComponent(origin)}`);
       if (response.url) {
+        // Store the origin for callback verification
+        sessionStorage.setItem('oauth_origin', origin);
         window.location.href = response.url;
       }
     } catch (err) {

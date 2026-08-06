@@ -107,9 +107,11 @@ export const App: React.FC = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const jwt = urlParams.get('token');
     const userEmail = urlParams.get('email');
+    
     if (jwt) {
       handleLogin(jwt, userEmail || 'oauth-user@careeros.studio');
-      window.history.replaceState(null, '', '/');
+      // Clean up URL by removing query parameters
+      window.history.replaceState(null, '', window.location.pathname);
       return;
     }
 
@@ -120,7 +122,8 @@ export const App: React.FC = () => {
       const hashJwt = params.get('access_token');
       if (hashJwt) {
         handleLogin(hashJwt, 'oauth-user@careeros.studio');
-        window.history.replaceState(null, '', '/');
+        // Clean up URL by removing hash
+        window.history.replaceState(null, '', window.location.pathname);
       }
     }
   }, []);

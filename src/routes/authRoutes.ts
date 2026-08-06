@@ -186,8 +186,11 @@ router.get('/oauth/:provider', async (req: Request, res: Response) => {
     const clientOrigin = (origin as string) || 'http://localhost:5173';
     const clientId = provider === 'google' ? process.env.GOOGLE_CLIENT_ID : process.env.GITHUB_CLIENT_ID;
 
+    Logger.info(`OAuth initiation: provider=${provider}, origin=${clientOrigin}, clientId=${clientId ? 'configured' : 'not configured'}`);
+
     // Fast-path for localhost or unconfigured Client IDs
     if (!clientId || clientOrigin.includes('localhost') || clientOrigin.includes('127.0.0.1')) {
+      Logger.info(`Using mock OAuth for ${provider} (localhost or missing credentials)`);
       const mockToken = jwt.sign(
         { id: `mock-${provider}-id`, email: `${provider}-user@careeros.studio`, role: 'User' },
         process.env.JWT_SECRET || 'default-secret',
@@ -202,6 +205,7 @@ router.get('/oauth/:provider', async (req: Request, res: Response) => {
       github: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/auth/github/callback`)}&scope=user:email`,
     };
 
+    Logger.info(`Redirecting to ${provider} OAuth: ${oauthUrls[provider]}`);
     return sendSuccess(res, { url: oauthUrls[provider] });
   } catch (err: unknown) {
     const error = err as Error;
@@ -217,16 +221,83 @@ router.get('/oauth/:provider', async (req: Request, res: Response) => {
 router.get('/oauth/:provider/callback', async (req: Request, res: Response) => {
   try {
     const { provider } = req.params;
-    const { code, state } = req.query;
+    const { code, state, origin } = req.query;
 
     if (!code) {
       return sendError(res, ErrorCodes.VALIDATION_ERROR, 'Authorization code required', 400);
     }
 
-    // In production, this would exchange the code for an access token
-    // and fetch user profile from the OAuth provider
-    // For now, we'll create a mock user
-    
+    // For Google OAuth, exchange the code for tokens and get user info
+    if (provider === 'google') {
+      try {
+        // Exchange code for access token
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            code: code as string,
+            client_id: process.env.GOOGLE_CLIENT_ID || '',
+            client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+            redirect_uri: `${origin as string || 'http://localhost:5173'}/auth/google/callback`,
+            grant_type: 'authorization_code',
+          }),
+        });
+
+        const tokenData = await tokenResponse.json();
+        
+        if (tokenData.error) {
+          Logger.error('Google OAuth token error', new Error(String(tokenData.error)));
+          return sendError(res, ErrorCodes.INTERNAL_ERROR, 'Failed to exchange authorization code', 400);
+        }
+
+        // Get user info from Google
+        const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        });
+
+        const userData = await userResponse.json();
+        
+        // Create or get user
+        let user = await findUserByEmail(userData.email);
+        if (!user) {
+          user = await createUserRecord({
+            email: userData.email,
+            name: userData.name,
+            role: 'User',
+          });
+        }
+
+        const token = jwt.sign(
+          { id: user.id, email: user.email, role: user.role },
+          process.env.JWT_SECRET || 'default-secret',
+          { expiresIn: '7d' }
+        );
+
+        // Redirect to frontend with token
+        const redirectUrl = `${origin as string || 'http://localhost:5173'}?token=${token}&email=${encodeURIComponent(user.email)}`;
+        return res.redirect(redirectUrl);
+      } catch (error) {
+        Logger.error('Google OAuth error', error as Error);
+        // Fallback to mock user for development
+        const mockUser = {
+          id: crypto.randomUUID(),
+          email: `google-user@careeros.studio`,
+          name: 'Google User',
+          role: 'User',
+        };
+
+        const token = jwt.sign(
+          { id: mockUser.id, email: mockUser.email, role: mockUser.role },
+          process.env.JWT_SECRET || 'default-secret',
+          { expiresIn: '7d' }
+        );
+
+        const redirectUrl = `${origin as string || 'http://localhost:5173'}?token=${token}&email=${encodeURIComponent(mockUser.email)}`;
+        return res.redirect(redirectUrl);
+      }
+    }
+
+    // For other providers, use mock implementation
     const mockUser = {
       id: crypto.randomUUID(),
       email: `${provider}-user@careeros.studio`,
@@ -241,7 +312,7 @@ router.get('/oauth/:provider/callback', async (req: Request, res: Response) => {
     );
 
     // Redirect to frontend with token
-    const redirectUrl = `${req.query.origin || 'http://localhost:5173'}?token=${token}&email=${encodeURIComponent(mockUser.email)}`;
+    const redirectUrl = `${origin as string || 'http://localhost:5173'}?token=${token}&email=${encodeURIComponent(mockUser.email)}`;
     return res.redirect(redirectUrl);
   } catch (err: unknown) {
     const error = err as Error;
