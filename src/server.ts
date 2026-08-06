@@ -512,7 +512,7 @@ async function handleGoogleAuthCallback(req: express.Request, res: express.Respo
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET || config.googleClientSecret;
     const reqHost = req.get('host');
     const reqProtocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || config.googleRedirectUri || `${reqProtocol}://${reqHost}/api/auth/oauth/google/callback`;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || config.googleRedirectUri || `${reqProtocol}://${reqHost}/auth/google/callback`;
 
     if (!clientId || !clientSecret) {
       throw new Error('Google OAuth credentials not configured');

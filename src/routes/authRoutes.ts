@@ -198,8 +198,8 @@ router.get('/oauth/:provider', async (req: Request, res: Response) => {
 
     // Production OAuth URLs when client IDs are configured
     const oauthUrls: Record<string, string> = {
-      google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/api/auth/oauth/google/callback`)}&response_type=code&scope=openid%20email%20profile`,
-      github: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/api/auth/oauth/github/callback`)}&scope=user:email`,
+      google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/auth/google/callback`)}&response_type=code&scope=openid%20email%20profile`,
+      github: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(`${clientOrigin}/auth/github/callback`)}&scope=user:email`,
     };
 
     return sendSuccess(res, { url: oauthUrls[provider] });
