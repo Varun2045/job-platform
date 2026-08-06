@@ -537,8 +537,6 @@ export const JobExplorer: React.FC = () => {
                 const visibleDepts = isExpanded ? deptList : deptList.slice(0, 4);
                 const totalCategoryJobs = deptList.reduce((acc, d) => acc + getDeptCount(d), 0);
 
-                if (totalCategoryJobs === 0 && !department.some(d => deptList.includes(d))) return null;
-
                 return (
                   <div key={groupName} className="bg-[#131a26]/70 border border-[#232d3f] rounded-xl p-2.5 space-y-2">
                     <button
@@ -819,12 +817,12 @@ export const JobExplorer: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent text-white text-xs font-bold focus:outline-none cursor-pointer pr-1"
+                className="bg-[#0b0f19] text-white text-xs font-bold focus:outline-none cursor-pointer pr-1"
               >
-                <option value="newest">Newest</option>
-                <option value="relevance">Relevance</option>
-                <option value="company_name">Company Name</option>
-                <option value="experience_asc">Experience</option>
+                <option value="newest" className="bg-[#0b0f19] text-white">Newest</option>
+                <option value="relevance" className="bg-[#0b0f19] text-white">Relevance</option>
+                <option value="company_name" className="bg-[#0b0f19] text-white">Company Name</option>
+                <option value="experience_asc" className="bg-[#0b0f19] text-white">Experience</option>
               </select>
             </div>
           </div>
@@ -1293,7 +1291,7 @@ export const JobExplorer: React.FC = () => {
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Application Tracker</h4>
                       
                       <div className="flex items-center gap-2">
-                        <select
+                         <select
                           onChange={(e) => {
                             if (e.target.value) {
                               trackMutation.mutate(e.target.value);
@@ -1301,11 +1299,11 @@ export const JobExplorer: React.FC = () => {
                           }}
                           className="bg-[#0b0f19] border border-[#232d3f] text-xs rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500 cursor-pointer flex-1"
                         >
-                          <option value="">Move to stage...</option>
-                          <option value="Applied">Applied</option>
-                          <option value="Interviewing">Interviewing</option>
-                          <option value="Offer">Offer</option>
-                          <option value="Rejected">Archived</option>
+                          <option value="" className="bg-[#0b0f19] text-white">Move to stage...</option>
+                          <option value="Applied" className="bg-[#0b0f19] text-white">Applied</option>
+                          <option value="Interviewing" className="bg-[#0b0f19] text-white">Interviewing</option>
+                          <option value="Offer" className="bg-[#0b0f19] text-white">Offer</option>
+                          <option value="Rejected" className="bg-[#0b0f19] text-white">Archived</option>
                         </select>
                       </div>
                     </div>
