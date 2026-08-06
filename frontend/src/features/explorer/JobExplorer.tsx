@@ -314,7 +314,15 @@ export const JobExplorer: React.FC = () => {
   // Extract data from combined response
   const rawJobs = combinedData?.jobs || [];
   const normalizedJobs = useMemo(() => {
-    return rawJobs.map((item: any) => (item && item.job ? { ...item.job, matchScore: item.score ?? 0 } : item));
+    return rawJobs.map((item: any) => {
+      if (item && item.job) {
+        return item;
+      }
+      return {
+        job: item,
+        score: item?.matchScore ?? 0,
+      };
+    });
   }, [rawJobs]);
 
   const facetsData = combinedData?.facets;
