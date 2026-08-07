@@ -82,6 +82,42 @@ const JobMonitoring: React.FC = () => {
     let ws: WebSocket | null = null;
     let sse: EventSource | null = null;
     let isDestroyed = false;
+    let wsReconnectDelay = 1000;
+    let sseReconnectDelay = 1000;
+
+    let lastRefetchTime = 0;
+    let refetchTimeout: NodeJS.Timeout | null = null;
+
+    function throttledRefetch() {
+      const now = Date.now();
+      const timeSinceLastRefetch = now - lastRefetchTime;
+      if (timeSinceLastRefetch >= 5000) {
+        lastRefetchTime = now;
+        refetch();
+      } else {
+        if (refetchTimeout) clearTimeout(refetchTimeout);
+        refetchTimeout = setTimeout(() => {
+          lastRefetchTime = Date.now();
+          refetch();
+        }, 5000 - timeSinceLastRefetch);
+      }
+    }
+
+    const eventBuffer: { id: string; time: string; message: string; type: 'info' | 'success' | 'error' | 'warn' }[] = [];
+
+    const flushInterval = setInterval(() => {
+      if (isDestroyed || eventBuffer.length === 0) return;
+      setRealtimeLogs((prev) => {
+        const deduplicated = [...prev];
+        for (const item of eventBuffer) {
+          if (!deduplicated.some((x) => x.id === item.id)) {
+            deduplicated.push(item);
+          }
+        }
+        return deduplicated.slice(-100);
+      });
+      eventBuffer.length = 0;
+    }, 200);
 
     function connectWebSocket() {
       if (isDestroyed) return;
@@ -100,13 +136,14 @@ const JobMonitoring: React.FC = () => {
         }
         console.log('[WS] Connected to real-time scraper stream');
         setConnectionStatus('websocket');
+        wsReconnectDelay = 1000; // Reset backoff on success
       };
 
       ws.onmessage = (event) => {
         if (isDestroyed) return;
         try {
-          const payload = JSON.parse(event.data);
-          handleRealtimeEvent(payload);
+          const parsed = JSON.parse(event.data);
+          handleRealtimeEvent(parsed);
         } catch (err) {
           console.error('Error parsing WS message', err);
         }
@@ -125,7 +162,10 @@ const JobMonitoring: React.FC = () => {
         if (isDestroyed) return;
         if (connectionStatus === 'websocket') {
           setConnectionStatus('disconnected');
-          setTimeout(connectWebSocket, 5000);
+          setTimeout(() => {
+            wsReconnectDelay = Math.min(wsReconnectDelay * 2, 30000);
+            connectWebSocket();
+          }, wsReconnectDelay);
         }
       };
     }
@@ -144,13 +184,14 @@ const JobMonitoring: React.FC = () => {
         }
         console.log('[SSE] Connected to real-time scraper stream');
         setConnectionStatus('sse');
+        sseReconnectDelay = 1000; // Reset backoff on success
       };
 
       sse.onmessage = (event) => {
         if (isDestroyed) return;
         try {
-          const payload = JSON.parse(event.data);
-          handleRealtimeEvent(payload);
+          const parsed = JSON.parse(event.data);
+          handleRealtimeEvent(parsed);
         } catch (err) {
           console.error('Error parsing SSE message', err);
         }
@@ -163,65 +204,72 @@ const JobMonitoring: React.FC = () => {
           sse = null;
         }
         setConnectionStatus('disconnected');
-        setTimeout(connectWebSocket, 10000);
+        setTimeout(() => {
+          sseReconnectDelay = Math.min(sseReconnectDelay * 2, 30000);
+          connectWebSocket();
+        }, sseReconnectDelay);
       };
     }
 
     function handleRealtimeEvent(event: any) {
-      const { type, timestamp, data } = event;
-      const timeStr = new Date(timestamp || Date.now()).toLocaleTimeString();
+      const { id, timestamp, type, level, payload } = event;
+      if (type === 'heartbeat' || type === 'connected') {
+        return; // Ignore internal events in visual console logs
+      }
 
+      const timeStr = new Date(timestamp || Date.now()).toLocaleTimeString();
       let message = '';
       let logType: 'info' | 'success' | 'error' | 'warn' = 'info';
 
+      if (level === 'success') logType = 'success';
+      else if (level === 'error') logType = 'error';
+      else if (level === 'warning') logType = 'warn';
+
       switch (type) {
         case 'run:start':
-          message = `🚀 Scraper Run Started: Monitoring ${data.totalCompanies} companies`;
-          logType = 'info';
+          message = `🚀 Scraper Run Started: Monitoring ${payload.totalCompanies} companies`;
           setIsRunning(true);
           break;
         case 'batch:start':
-          message = `📦 Enqueueing Batch ${data.batchIndex}/${data.totalBatches}`;
-          logType = 'info';
+          message = `📦 Enqueueing Batch ${payload.batchIndex}/${payload.totalBatches}`;
           break;
         case 'scraper:start':
-          message = `🔍 [${data.companyName}] Starting scraper...`;
-          logType = 'info';
+          message = `🔍 [${payload.companyName}] Starting scraper...`;
           break;
         case 'scraper:progress':
-          message = `✓ [${data.companyName}] Finished: ${data.jobsFound} jobs found (${data.newJobs} new matches) in ${(data.durationMs / 1000).toFixed(1)}s`;
-          logType = data.status === 'failed' ? 'error' : 'success';
-          refetch();
+          message = `✓ [${payload.companyName}] Finished: ${payload.jobsFound} jobs found (${payload.newJobs} new matches) in ${(payload.durationMs / 1000).toFixed(1)}s`;
+          throttledRefetch();
           break;
         case 'scraper:error':
-          message = `✕ [${data.companyName}] Error: ${data.error}`;
-          logType = 'error';
-          refetch();
+          message = `✕ [${payload.companyName}] Error: ${payload.error}`;
+          throttledRefetch();
           break;
         case 'batch:complete':
-          message = `✓ Batch ${data.batchIndex} complete`;
-          logType = 'success';
+          message = `✓ Batch ${payload.batchIndex} complete`;
           break;
         case 'run:complete':
-          message = `🏁 Scraper Run Finished in ${(data.durationMs / 1000).toFixed(1)}s. Total jobs: ${data.totalJobsFound}, Failures: ${data.totalFailures}`;
-          logType = data.totalFailures > 0 ? 'warn' : 'success';
+          message = `🏁 Scraper Run Finished in ${(payload.durationMs / 1000).toFixed(1)}s. Total jobs: ${payload.totalJobsFound}, Failures: ${payload.totalFailures}`;
           setIsRunning(false);
-          refetch();
+          throttledRefetch();
           break;
         default:
           return;
       }
 
-      setRealtimeLogs((prev) => [
-        ...prev.slice(-99),
-        { id: Math.random().toString(), time: timeStr, message, type: logType }
-      ]);
+      eventBuffer.push({
+        id: id || Math.random().toString(),
+        time: timeStr,
+        message,
+        type: logType
+      });
     }
 
     connectWebSocket();
 
     return () => {
       isDestroyed = true;
+      clearInterval(flushInterval);
+      if (refetchTimeout) clearTimeout(refetchTimeout);
       if (ws) ws.close();
       if (sse) sse.close();
     };

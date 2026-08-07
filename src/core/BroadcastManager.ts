@@ -4,11 +4,15 @@ import { EventBus } from './EventBus.js';
 import { Logger } from './Logger.js';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { config } from '../config/config.js';
+import crypto from 'crypto';
 
 export interface ScraperEvent {
-  type: string;
+  id: string;
   timestamp: string;
-  data: any;
+  type: string;
+  source: string;
+  level: 'info' | 'success' | 'warning' | 'error';
+  payload: any;
 }
 
 export class BroadcastManager {
@@ -19,17 +23,26 @@ export class BroadcastManager {
   private static isSubscribedToSupabase = false;
   private static isSystemSourcedChange = false;
 
+  // Ring buffer for the last 100 events
+  private static eventHistory: ScraperEvent[] = [];
+  private static heartbeatInterval: NodeJS.Timeout | null = null;
+
   public static initialize(server?: any): void {
     // 1. Initialize Supabase Realtime if not local and credentials exist
-    if (!config.isLocal && config.supabaseUrl && config.supabaseServiceKey) {
+    if (!config.isLocal && config.supabaseUrl && config.supabaseServiceKey && !this.supabaseClient) {
       this.supabaseClient = createClient(config.supabaseUrl, config.supabaseServiceKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
+        auth: PersistSessionFalseGuard(),
       });
       this.subscribeToSupabaseRealtime();
     }
 
+    // Helper closure to avoid ts-lint issues
+    function PersistSessionFalseGuard() {
+      return { persistSession: false, autoRefreshToken: false };
+    }
+
     // 2. Initialize WebSocket Server if HTTP server is provided
-    if (server) {
+    if (server && !this.wss) {
       this.wss = new WebSocketServer({ noServer: true });
 
       server.on('upgrade', (request: any, socket: any, head: any) => {
@@ -45,32 +58,37 @@ export class BroadcastManager {
         Logger.info('[WS] Realtime monitoring client connected');
         this.wsClients.add(ws);
 
-        // Keep-alive heartbeat ping every 30s
-        const heartbeat = setInterval(() => {
+        // Immediately replay event history to this client
+        for (const historyEvent of this.eventHistory) {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.ping();
+            ws.send(JSON.stringify(historyEvent));
           }
-        }, 30000);
+        }
 
         ws.on('close', () => {
           Logger.info('[WS] Realtime monitoring client disconnected');
           this.wsClients.delete(ws);
-          clearInterval(heartbeat);
         });
 
         ws.on('error', (err) => {
           Logger.error('[WS] Realtime connection error', err);
           this.wsClients.delete(ws);
-          clearInterval(heartbeat);
         });
       });
     }
 
     // 3. Listen to local EventBus and fan out events (only once)
-    if (!this.isSubscribedToSupabase && EventBus.listenerCount('scraper_event') === 0) {
+    if (EventBus.listenerCount('scraper_event') === 0) {
       EventBus.on('scraper_event', (event: ScraperEvent) => {
         this.fanOut(event);
       });
+    }
+
+    // 4. Setup heartbeat timer (every 25 seconds) to prevent proxy timeouts
+    if (!this.heartbeatInterval) {
+      this.heartbeatInterval = setInterval(() => {
+        this.sendHeartbeat();
+      }, 25000);
     }
   }
 
@@ -86,8 +104,13 @@ export class BroadcastManager {
     Logger.info('[SSE] Realtime monitoring client connected');
     this.sseClients.add(res);
 
-    // Initial handshake package
-    res.write(`data: ${JSON.stringify({ type: 'connected', timestamp: new Date().toISOString() })}\n\n`);
+    // Write initial connection success
+    res.write(`data: ${JSON.stringify({ id: crypto.randomUUID(), timestamp: new Date().toISOString(), type: 'connected', source: 'scraper_engine', level: 'info', payload: {} })}\n\n`);
+
+    // Immediately replay event history to this client
+    for (const historyEvent of this.eventHistory) {
+      res.write(`data: ${JSON.stringify(historyEvent)}\n\n`);
+    }
 
     res.on('close', () => {
       Logger.info('[SSE] Realtime monitoring client disconnected');
@@ -98,19 +121,56 @@ export class BroadcastManager {
   /**
    * Publishes an event to the transport-agnostic EventBus
    */
-  public static publish(type: string, data: any): void {
+  public static publish(type: string, payload: any, level: 'info' | 'success' | 'warning' | 'error' = 'info'): void {
     const event: ScraperEvent = {
-      type,
+      id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
-      data,
+      type,
+      source: 'scraper_engine',
+      level,
+      payload,
     };
     EventBus.emit('scraper_event', event);
+  }
+
+  /**
+   * Periodically broadcasts keep-alive heartbeat signals to all connected transports
+   */
+  private static sendHeartbeat(): void {
+    const heartbeatEvent: ScraperEvent = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      type: 'heartbeat',
+      source: 'scraper_engine',
+      level: 'info',
+      payload: {},
+    };
+    
+    const serialized = JSON.stringify(heartbeatEvent);
+
+    // Send heartbeat to WS
+    for (const ws of this.wsClients) {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(serialized);
+      }
+    }
+
+    // Send heartbeat to SSE
+    for (const res of this.sseClients) {
+      res.write(`data: ${serialized}\n\n`);
+    }
   }
 
   /**
    * Fans out a ScraperEvent to all registered transports
    */
   private static fanOut(event: ScraperEvent): void {
+    // Add to local ring buffer history (keep last 100)
+    this.eventHistory.push(event);
+    if (this.eventHistory.length > 100) {
+      this.eventHistory.shift();
+    }
+
     const serialized = JSON.stringify(event);
 
     // A. Broadcast to WebSockets

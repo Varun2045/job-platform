@@ -124,7 +124,7 @@ export async function runOrchestrator(
       return;
     }
 
-    BroadcastManager.publish('run:start', { totalCompanies: companies.length });
+    BroadcastManager.publish('run:start', { totalCompanies: companies.length }, 'info');
 
     // 4. Initialize Core Helpers
     const httpClient = (storage as any).httpClient ?? new (await import('./HttpClient.js')).HttpClient();
@@ -150,14 +150,14 @@ export async function runOrchestrator(
     for (let b = 0; b < batches.length; b++) {
       const batch = batches[b];
       Logger.info(`Enqueueing Batch ${b + 1}/${batches.length} (${batch.length} companies)...`);
-      BroadcastManager.publish('batch:start', { batchIndex: b + 1, totalBatches: batches.length });
+      BroadcastManager.publish('batch:start', { batchIndex: b + 1, totalBatches: batches.length }, 'info');
 
       for (const company of batch) {
         taskQueue.addTask({
           id: company.id,
           priority: company.priority,
           execute: async () => {
-            BroadcastManager.publish('scraper:start', { companyId: company.id, companyName: company.name });
+            BroadcastManager.publish('scraper:start', { companyId: company.id, companyName: company.name }, 'info');
             const compStartTime = Date.now();
             let scraperStatus = 'healthy';
             let jobsFound = 0;
@@ -403,6 +403,7 @@ export async function runOrchestrator(
                 });
               }
 
+              const progressLevel = scraperStatus === 'failed' ? 'error' : (scraperStatus === 'healthy' ? 'success' : 'warning');
               BroadcastManager.publish('scraper:progress', {
                 companyId: company.id,
                 companyName: company.name,
@@ -410,7 +411,7 @@ export async function runOrchestrator(
                 jobsFound,
                 newJobs: newJobsCount,
                 durationMs: Date.now() - compStartTime,
-              });
+              }, progressLevel);
             } catch (err: any) {
               scraperStatus = 'failed';
               totalFailuresCount++;
@@ -447,7 +448,7 @@ export async function runOrchestrator(
                 companyName: company.name,
                 error: err.message,
                 durationMs: Date.now() - compStartTime,
-              });
+              }, 'error');
             }
 
             // Save metrics tracking
@@ -468,7 +469,7 @@ export async function runOrchestrator(
       await taskQueue.runAll(5, 500);
       taskQueue.clear();
 
-      BroadcastManager.publish('batch:complete', { batchIndex: b + 1 });
+      BroadcastManager.publish('batch:complete', { batchIndex: b + 1 }, 'success');
 
       if (b < batches.length - 1 && !options.targetCompanyId) {
         Logger.info(`Finished Batch ${b + 1}. Staggering run: waiting 3 minutes before starting Batch ${b + 2}...`);
@@ -778,7 +779,7 @@ export async function runOrchestrator(
       durationMs: totalDurationMs,
       totalJobsFound: totalJobsFoundCount,
       totalFailures: totalFailuresCount,
-    });
+    }, totalFailuresCount > 0 ? 'warning' : 'success');
   } finally {
     // 8. Release Advisory Lock
     if (!config.isLocal) {
