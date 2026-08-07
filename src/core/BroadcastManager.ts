@@ -11,6 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'careeros-super-secret-jwt-key';
 
 export interface ScraperEvent {
   id: string;
+  version: number;
   sequence: number;
   timestamp: string;
   type: string;
@@ -160,6 +161,7 @@ export class BroadcastManager {
     // Initial connection frame
     res.write(`data: ${JSON.stringify({
       id: crypto.randomUUID(),
+      version: 1,
       sequence: ++this.nextSequence,
       timestamp: new Date().toISOString(),
       type: 'connected',
@@ -187,6 +189,7 @@ export class BroadcastManager {
   public static publish(type: string, payload: any, level: 'info' | 'success' | 'warning' | 'error' = 'info'): void {
     const event: ScraperEvent = {
       id: crypto.randomUUID(),
+      version: 1,
       sequence: ++this.nextSequence,
       timestamp: new Date().toISOString(),
       type,
@@ -204,6 +207,7 @@ export class BroadcastManager {
     this.metrics.heartbeatsSent++;
     const heartbeatEvent: ScraperEvent = {
       id: crypto.randomUUID(),
+      version: 1,
       sequence: ++this.nextSequence,
       timestamp: new Date().toISOString(),
       type: 'heartbeat',
