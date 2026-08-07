@@ -70,8 +70,6 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'winzo', name: 'WinZo', pattern: 'winzogames.com', careerPage: 'https://winzogames.com/careers', jobBoardUrl: 'https://winzogames.com/careers' },
 
-  { id: 'jai-kisan', name: 'Jai Kisan', pattern: 'jaikisan.co', careerPage: 'https://jaikisan.co/careers', jobBoardUrl: 'https://jaikisan.co/careers' },
-
   { id: 'waycool', name: 'Waycool', pattern: 'waycool.in', careerPage: 'https://waycool.in/careers', jobBoardUrl: 'https://waycool.in/careers' },
 
   { id: 'dehaat', name: 'DeHaat', pattern: 'dehaat.com', careerPage: 'https://dehaat.com/careers', jobBoardUrl: 'https://dehaat.com/careers' },
@@ -88,8 +86,6 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'licious', name: 'Licious', pattern: 'licious.in', careerPage: 'https://licious.in/careers', jobBoardUrl: 'https://licious.in/careers' },
 
-  { id: 'increff', name: 'Increff', pattern: 'increff.com', careerPage: 'https://increff.com/careers', jobBoardUrl: 'https://increff.com/careers' },
-
   { id: 'locus', name: 'Locus', pattern: 'locus.sh', careerPage: 'https://locus.sh/careers', jobBoardUrl: 'https://locus.sh/careers' },
 
   { id: 'porter', name: 'Porter', pattern: 'porter.in', careerPage: 'https://porter.in/careers', jobBoardUrl: 'https://porter.in/careers' },
@@ -97,8 +93,6 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'shadowfax', name: 'Shadowfax', pattern: 'shadowfax.in', careerPage: 'https://shadowfax.in/careers', jobBoardUrl: 'https://shadowfax.in/careers' },
 
   { id: 'shiprocket', name: 'Shiprocket', pattern: 'shiprocket.in', careerPage: 'https://shiprocket.in/careers', jobBoardUrl: 'https://shiprocket.in/careers' },
-
-  { id: 'healthplix', name: 'Healthplix', pattern: 'healthplix.com', careerPage: 'https://healthplix.com/careers', jobBoardUrl: 'https://healthplix.com/careers' },
 
   { id: 'medibuddy', name: 'MediBuddy', pattern: 'medibuddy.in', careerPage: 'https://medibuddy.in/careers', jobBoardUrl: 'https://medibuddy.in/careers' },
 
@@ -204,7 +198,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'plaid', name: 'Plaid', pattern: 'plaid.com', careerPage: 'https://plaid.com/careers/', jobBoardUrl: 'https://plaid.com/careers/' },
   { id: 'darwinbox', name: 'Darwinbox', pattern: 'darwinbox.in', careerPage: 'https://www.darwinbox.com/careers', jobBoardUrl: 'https://dbx.darwinbox.in/ms/candidatev2/main/careers/allJobs' },
   { id: 'huggingface', name: 'Hugging Face', pattern: 'workable.com', careerPage: 'https://apply.workable.com/huggingface/?lng=en', jobBoardUrl: 'https://apply.workable.com/huggingface/?lng=en' },
-  { id: 'indeed', name: 'Indeed', pattern: 'indeed.com', careerPage: 'https://careers.indeed.com', jobBoardUrl: 'https://careers.indeed.com' },
+  { id: 'indeed', name: 'Indeed', pattern: 'indeed.com', careerPage: 'https://careers.indeed.com', jobBoardUrl: 'https://in.indeed.com/cmp/Indeed/jobs' },
   { id: 'mygate', name: 'MyGate', pattern: 'mygate.darwinbox.in', careerPage: 'https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs', jobBoardUrl: 'https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs' },
   { id: 'navi', name: 'Navi', pattern: 'navi.turbohire.co', careerPage: 'https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6', jobBoardUrl: 'https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6' },
   { id: 'dream11', name: 'Dream11', pattern: 'dreamsports.group', careerPage: 'https://dreamsports.group/careers', jobBoardUrl: 'https://dreamsports.group/careers#jobs' },

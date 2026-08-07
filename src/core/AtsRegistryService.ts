@@ -274,6 +274,13 @@ export class AtsRegistryService {
       companies: ['Elasticrun'],
       companyDetails: [],
     },
+    {
+      id: 'zohorecruit',
+      name: 'Zoho Recruit',
+      averageExtractionMs: 18,
+      companies: ['Increff'],
+      companyDetails: [],
+    },
   ];
 
   constructor() {
@@ -408,6 +415,12 @@ export class AtsRegistryService {
         return { jobBoardUrl: 'https://elasticruncareers.peoplestrong.com/job/joblist', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'zohorecruit') {
+      if (name === 'Increff') {
+        return { jobBoardUrl: 'https://increff.zohorecruit.com/careers', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: `https://${clean}.zohorecruit.com/careers`, jobBoardNeedsReview: false };
     }
     if (careerPage && (careerPage.includes('#') || careerPage.includes('/jobs'))) {
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };

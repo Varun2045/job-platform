@@ -1330,16 +1330,6 @@
     "resume_profiles": []
   },
   {
-    "id": "healthplix",
-    "name": "Healthplix",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://healthplix.com/careers/",
-    "detected_ats": "custom",
-    "resume_profiles": []
-  },
-  {
     "id": "honeywell",
     "name": "Honeywell",
     "enabled": true,
@@ -1455,8 +1445,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.increff.com/careers",
-    "detected_ats": "custom",
+    "api_endpoint": "https://increff.zohorecruit.com/careers",
+    "detected_ats": "zohorecruit",
     "resume_profiles": []
   },
   {
@@ -1465,7 +1455,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://careers.indeed.com",
+    "api_endpoint": "https://in.indeed.com/cmp/Indeed/jobs",
     "detected_ats": "custom",
     "resume_profiles": []
   },
@@ -1476,16 +1466,6 @@
     "priority": 1,
     "interval_minutes": 60,
     "api_endpoint": "https://careers.indiamart.com/",
-    "detected_ats": "custom",
-    "resume_profiles": []
-  },
-  {
-    "id": "indmoney",
-    "name": "Indmoney",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://www.indmoney.com/careers",
     "detected_ats": "custom",
     "resume_profiles": []
   },
@@ -1556,16 +1536,6 @@
     "priority": 1,
     "interval_minutes": 60,
     "api_endpoint": "https://jobs.intuit.com/search-jobs",
-    "detected_ats": "custom",
-    "resume_profiles": []
-  },
-  {
-    "id": "jai-kisan",
-    "name": "Jai Kisan",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://jaikisan.co/careers",
     "detected_ats": "custom",
     "resume_profiles": []
   },

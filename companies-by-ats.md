@@ -1,7 +1,7 @@
 # Company List by ATS Type
 
-Total Companies: 386
-Total ATS Types: 26
+Total Companies: 383
+Total ATS Types: 27
 
 ## AMAZON (1 companies, 1 enabled)
 
@@ -77,7 +77,7 @@ Total ATS Types: 26
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
 | UBS | https://jobs.ubs.com | ✅ Enabled |
 
-## CUSTOM (203 companies, 203 enabled)
+## CUSTOM (199 companies, 199 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -143,20 +143,16 @@ Total ATS Types: 26
 | Goldman Sachs | https://www.goldmansachs.com/careers | ✅ Enabled |
 | GoodSpace AI | https://goodspace.ai/careers | ✅ Enabled |
 | Groq | https://groq.com/careers-at-groq | ✅ Enabled |
-| Healthplix | https://healthplix.com/careers/ | ✅ Enabled |
 | HSBC | https://www.hsbc.com/careers | ✅ Enabled |
 | HyperVerge | https://hyperverge.co/careers/ | ✅ Enabled |
 | IBM | https://www.ibm.com/in-en/careers/search | ✅ Enabled |
 | IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | ✅ Enabled |
 | IMC Trading | https://www.imc.com/us/careers/ | ✅ Enabled |
-| Increff | https://www.increff.com/careers | ✅ Enabled |
-| Indeed | https://careers.indeed.com | ✅ Enabled |
+| Indeed | https://in.indeed.com/cmp/Indeed/jobs | ✅ Enabled |
 | IndiaMART | https://careers.indiamart.com/ | ✅ Enabled |
-| Indmoney | https://www.indmoney.com/careers | ✅ Enabled |
 | Infra.Market | https://infra.market/careers | ✅ Enabled |
 | Innovaccer | https://innovaccer.com/careers/jobs | ✅ Enabled |
 | Intuit | https://jobs.intuit.com/search-jobs | ✅ Enabled |
-| Jai Kisan | https://jaikisan.co/careers | ✅ Enabled |
 | Jane Street | https://www.janestreet.com/join-jane-street/open-roles/ | ✅ Enabled |
 | Jupiter | https://jupiter.money/careers/ | ✅ Enabled |
 | Juspay | https://juspay.io/careers | ✅ Enabled |
@@ -518,4 +514,10 @@ Total ATS Types: 26
 | Workday | https://workday.wd5.myworkdayjobs.com/Workday | ✅ Enabled |
 | Zendesk | https://zendesk.wd1.myworkdayjobs.com/zendesk | ✅ Enabled |
 | Zoom | https://zoom.wd5.myworkdayjobs.com/Zoom | ✅ Enabled |
+
+## ZOHORECRUIT (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| Increff | https://increff.zohorecruit.com/careers | ✅ Enabled |
 

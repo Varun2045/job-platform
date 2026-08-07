@@ -133,7 +133,6 @@ Groq | https://groq.com/careers-at-groq | custom
 Groww | https://boards.greenhouse.io/groww | greenhouse
 Harvey | https://jobs.ashbyhq.com/harvey | ashby
 Headlands Tech | https://job-boards.greenhouse.io/headlandstechnologiesllc | greenhouse
-Healthplix | https://healthplix.com/careers/ | custom
 Honeywell | https://careers.honeywell.com/en/sites/Honeywell | oraclecloud
 HP Inc. | https://hp.wd5.myworkdayjobs.com/ExternalCareerSite | workday
 HPE | https://hpe.wd5.myworkdayjobs.com/Jobsathpe | workday
@@ -145,10 +144,9 @@ IBM | https://www.ibm.com/in-en/careers/search | custom
 Ideogram | https://jobs.ashbyhq.com/ideogram | ashby
 IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | custom
 IMC Trading | https://www.imc.com/us/careers/ | custom
-Increff | https://www.increff.com/careers | custom
-Indeed | https://careers.indeed.com | custom
+Increff | https://increff.zohorecruit.com/careers | zohorecruit
+Indeed | https://in.indeed.com/cmp/Indeed/jobs | custom
 IndiaMART | https://careers.indiamart.com/ | custom
-Indmoney | https://www.indmoney.com/careers | custom
 Informatica | https://informatica.wd1.myworkdayjobs.com/Informatica | workday
 Infra.Market | https://infra.market/careers | custom
 InMobi | https://boards.greenhouse.io/inmobi | greenhouse
@@ -156,7 +154,6 @@ Innovaccer | https://innovaccer.com/careers/jobs | custom
 Instacart | https://boards.greenhouse.io/instacart | greenhouse
 Intel | https://intel.wd1.myworkdayjobs.com/External | workday
 Intuit | https://jobs.intuit.com/search-jobs | custom
-Jai Kisan | https://jaikisan.co/careers | custom
 Jane Street | https://www.janestreet.com/join-jane-street/open-roles/ | custom
 Jar | https://changejar.applytojob.com/apply/ | applytojob
 JetBrains | https://job-boards.eu.greenhouse.io/jetbrains | greenhouse

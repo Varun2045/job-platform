@@ -2,7 +2,7 @@
 
 | ATS Type | Companies | % of Total | Enabled |
 |----------|-----------|------------|--------|
-| CUSTOM | 203 | 51.8% | 203 |
+| CUSTOM | 199 | 50.8% | 199 |
 | GREENHOUSE | 48 | 12.2% | 48 |
 | WORKDAY | 45 | 11.5% | 45 |
 | ASHBY | 43 | 11.0% | 43 |
@@ -28,3 +28,4 @@
 | TRAKSTAR | 1 | 0.3% | 1 |
 | WEEKDAY | 1 | 0.3% | 1 |
 | WORKABLE | 1 | 0.3% | 1 |
+| ZOHORECRUIT | 1 | 0.3% | 1 |
