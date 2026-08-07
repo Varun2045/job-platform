@@ -86,7 +86,7 @@ const JobMonitoring: React.FC = () => {
     let sseReconnectDelay = 1000;
 
     let lastRefetchTime = 0;
-    let refetchTimeout: NodeJS.Timeout | null = null;
+    let refetchTimeout: any = null;
 
     function throttledRefetch() {
       const now = Date.now();
