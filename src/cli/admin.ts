@@ -29,8 +29,9 @@ async function main() {
       }
 
       if (target.toLowerCase() === 'all') {
-        Logger.info('CLI Triggered: Running monitor for all due companies...');
-        await runOrchestrator();
+        const force = args[2] === 'force' || args[2] === '--force';
+        Logger.info(`CLI Triggered: Running monitor for ${force ? 'ALL forced' : 'all due'} companies...`);
+        await runOrchestrator({ forceAll: force });
       } else if (target.toLowerCase() === 'priority') {
         const priorityNum = Number(args[2]);
         if (isNaN(priorityNum) || priorityNum < 1 || priorityNum > 3) {
