@@ -91,15 +91,15 @@ Deloitte | https://careers.deloitte.com | custom
 Deutsche Bank | https://careers.db.com | avature
 Discord | https://discord.com/careers#all-jobs | custom
 Docker | https://www.docker.com/career-openings/ | custom
-DoorDash | https://careersatdoordash.com/job-search/ | custom
+DoorDash | https://job-boards.greenhouse.io/doordashindia | greenhouse
 Dream11 | https://dreamsports.group/careers#jobs | custom
 Dropbox | https://www.dropbox.jobs/en/jobs/ | custom
 DRW | https://drw.com/careers | custom
 EA | https://jobs.ea.com/en_US/careers | custom
 eBay | https://jobs.ebayinc.com/us/en/search-results | custom
-Eka Care | https://www.eka.care/careers | custom
+Eka Care | https://ekacare.keka.com/careers/ | kekahire
 Elastic | https://jobs.elastic.co/ | custom
-Elasticrun | https://www.elasticrun.com/careers | custom
+Elasticrun | https://elasticruncareers.peoplestrong.com/job/joblist | peoplestrong
 ElevenLabs | https://jobs.ashbyhq.com/elevenlabs | ashby
 EPAM | https://careers.epam.com/en/jobs | custom
 Epic Games | https://www.epicgames.com/site/careers/jobs | custom
@@ -118,7 +118,7 @@ Five Rings | https://fiverings.com/careers/ | custom
 Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | custom
 Fortinet | https://fortinet.wd1.myworkdayjobs.com/External | workday
 Freshworks | https://careers.smartrecruiters.com/freshworks | smartrecruiters
-Gartner | https://jobs.gartner.com | custom
+Gartner | https://jobs.gartner.com/ | custom
 GE Aerospace | https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite | workday
 GE HealthCare | https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite | workday
 GE Vernova | https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite | workday
@@ -128,7 +128,7 @@ Goldman Sachs | https://www.goldmansachs.com/careers | custom
 GoodSpace AI | https://goodspace.ai/careers | custom
 Google | https://careers.google.com/jobs/results | google
 Grafana Labs | https://boards.greenhouse.io/grafanalabs | greenhouse
-Graviton Research Capital | https://gravitonresearch.com/careers/ | custom
+Graviton Research Capital | https://boards.greenhouse.io/embed/job_board?for=gravitonresearchcapital | greenhouse
 Groq | https://groq.com/careers-at-groq | custom
 Groww | https://boards.greenhouse.io/groww | greenhouse
 Harvey | https://jobs.ashbyhq.com/harvey | ashby

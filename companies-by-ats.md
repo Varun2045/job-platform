@@ -1,7 +1,7 @@
 # Company List by ATS Type
 
 Total Companies: 386
-Total ATS Types: 25
+Total ATS Types: 26
 
 ## AMAZON (1 companies, 1 enabled)
 
@@ -77,7 +77,7 @@ Total ATS Types: 25
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
 | UBS | https://jobs.ubs.com | ✅ Enabled |
 
-## CUSTOM (207 companies, 207 enabled)
+## CUSTOM (203 companies, 203 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -121,15 +121,12 @@ Total ATS Types: 25
 | Deloitte | https://careers.deloitte.com | ✅ Enabled |
 | Discord | https://discord.com/careers#all-jobs | ✅ Enabled |
 | Docker | https://www.docker.com/career-openings/ | ✅ Enabled |
-| DoorDash | https://careersatdoordash.com/job-search/ | ✅ Enabled |
 | Dream11 | https://dreamsports.group/careers#jobs | ✅ Enabled |
 | Dropbox | https://www.dropbox.jobs/en/jobs/ | ✅ Enabled |
 | DRW | https://drw.com/careers | ✅ Enabled |
 | EA | https://jobs.ea.com/en_US/careers | ✅ Enabled |
 | eBay | https://jobs.ebayinc.com/us/en/search-results | ✅ Enabled |
-| Eka Care | https://www.eka.care/careers | ✅ Enabled |
 | Elastic | https://jobs.elastic.co/ | ✅ Enabled |
-| Elasticrun | https://www.elasticrun.com/careers | ✅ Enabled |
 | EPAM | https://careers.epam.com/en/jobs | ✅ Enabled |
 | Epic Games | https://www.epicgames.com/site/careers/jobs | ✅ Enabled |
 | Equinix | https://careers.equinix.com/equinix-is-hiring-in-india | ✅ Enabled |
@@ -141,11 +138,10 @@ Total ATS Types: 25
 | Figma | https://www.figma.com/careers/#job-openings | ✅ Enabled |
 | Five Rings | https://fiverings.com/careers/ | ✅ Enabled |
 | Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | ✅ Enabled |
-| Gartner | https://jobs.gartner.com | ✅ Enabled |
+| Gartner | https://jobs.gartner.com/ | ✅ Enabled |
 | GitHub | https://www.github.careers/careers-home/jobs | ✅ Enabled |
 | Goldman Sachs | https://www.goldmansachs.com/careers | ✅ Enabled |
 | GoodSpace AI | https://goodspace.ai/careers | ✅ Enabled |
-| Graviton Research Capital | https://gravitonresearch.com/careers/ | ✅ Enabled |
 | Groq | https://groq.com/careers-at-groq | ✅ Enabled |
 | Healthplix | https://healthplix.com/careers/ | ✅ Enabled |
 | HSBC | https://www.hsbc.com/careers | ✅ Enabled |
@@ -316,7 +312,7 @@ Total ATS Types: 25
 |--------------|--------------|--------|
 | Google | https://careers.google.com/jobs/results | ✅ Enabled |
 
-## GREENHOUSE (46 companies, 46 enabled)
+## GREENHOUSE (48 companies, 48 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -332,9 +328,11 @@ Total ATS Types: 25
 | Dagster Labs | https://job-boards.greenhouse.io/dagsterlabs | ✅ Enabled |
 | Databricks | https://boards.greenhouse.io/databricks | ✅ Enabled |
 | Datadog | https://boards.greenhouse.io/datadog | ✅ Enabled |
+| DoorDash | https://job-boards.greenhouse.io/doordashindia | ✅ Enabled |
 | Fastly | https://boards.greenhouse.io/fastly | ✅ Enabled |
 | GitLab | https://job-boards.greenhouse.io/gitlab | ✅ Enabled |
 | Grafana Labs | https://boards.greenhouse.io/grafanalabs | ✅ Enabled |
+| Graviton Research Capital | https://boards.greenhouse.io/embed/job_board?for=gravitonresearchcapital | ✅ Enabled |
 | Groww | https://boards.greenhouse.io/groww | ✅ Enabled |
 | Headlands Tech | https://job-boards.greenhouse.io/headlandstechnologiesllc | ✅ Enabled |
 | Hudson River Trading | https://www.hudsonrivertrading.com/careers/ | ✅ Enabled |
@@ -367,11 +365,12 @@ Total ATS Types: 25
 | Vercel | https://boards.greenhouse.io/vercel | ✅ Enabled |
 | Waymo | https://boards.greenhouse.io/waymo | ✅ Enabled |
 
-## KEKAHIRE (1 companies, 1 enabled)
+## KEKAHIRE (2 companies, 2 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Adda247 | https://adda247.keka.com/careers/ | ✅ Enabled |
+| Eka Care | https://ekacare.keka.com/careers/ | ✅ Enabled |
 
 ## KULA (1 companies, 1 enabled)
 
@@ -411,6 +410,12 @@ Total ATS Types: 25
 | KPMG | https://ejgk.fa.em2.oraclecloud.com/careers | ✅ Enabled |
 | Oracle | https://careers.oracle.com/en/sites/jobsearch/jobs?location=India | ✅ Enabled |
 | Tesco Bengaluru | https://apply.tesco-careers.com | ✅ Enabled |
+
+## PEOPLESTRONG (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| Elasticrun | https://elasticruncareers.peoplestrong.com/job/joblist | ✅ Enabled |
 
 ## PHENOM (4 companies, 4 enabled)
 

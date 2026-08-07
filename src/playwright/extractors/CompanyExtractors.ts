@@ -94,13 +94,9 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'porter', name: 'Porter', pattern: 'porter.in', careerPage: 'https://porter.in/careers', jobBoardUrl: 'https://porter.in/careers' },
 
-  { id: 'elasticrun', name: 'Elasticrun', pattern: 'elasticrun.com', careerPage: 'https://elasticrun.com/careers', jobBoardUrl: 'https://elasticrun.com/careers' },
-
   { id: 'shadowfax', name: 'Shadowfax', pattern: 'shadowfax.in', careerPage: 'https://shadowfax.in/careers', jobBoardUrl: 'https://shadowfax.in/careers' },
 
   { id: 'shiprocket', name: 'Shiprocket', pattern: 'shiprocket.in', careerPage: 'https://shiprocket.in/careers', jobBoardUrl: 'https://shiprocket.in/careers' },
-
-  { id: 'eka-care', name: 'Eka Care', pattern: 'eka.care', careerPage: 'https://eka.care/careers', jobBoardUrl: 'https://eka.care/careers' },
 
   { id: 'healthplix', name: 'Healthplix', pattern: 'healthplix.com', careerPage: 'https://healthplix.com/careers', jobBoardUrl: 'https://healthplix.com/careers' },
 
@@ -202,7 +198,7 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'wayfair', name: 'Wayfair', pattern: 'wayfair.com', careerPage: 'https://www.wayfair.com/careers/jobs', jobBoardUrl: 'https://www.wayfair.com/careers/jobs' },
   { id: 'zoho', name: 'Zoho', pattern: 'zoho.com', careerPage: 'https://www.zoho.com/careers/', jobBoardUrl: 'https://www.zoho.com/careers/' },
   { id: 'riotgames', name: 'Riot Games', pattern: 'riotgames.com', careerPage: 'https://www.riotgames.com/en/work-with-us/jobs', jobBoardUrl: 'https://www.riotgames.com/en/work-with-us/jobs' },
-  { id: 'epicgames', name: 'Epic Games', pattern: 'epicgames.com', careerPage: 'https://www.epicgames.com/site/careers/jobs', jobBoardUrl: 'https://www.epicgames.com/site/careers/jobs' },
+  { id: 'epic-games', name: 'Epic Games', pattern: 'epicgames.com', careerPage: 'https://www.epicgames.com/site/careers/jobs', jobBoardUrl: 'https://www.epicgames.com/site/careers/jobs' },
   { id: 'wise', name: 'Wise', pattern: 'wise.jobs', careerPage: 'https://wise.jobs/', jobBoardUrl: 'https://wise.jobs/' },
   { id: 'zepto', name: 'Zepto', pattern: 'talentrecruit.com', careerPage: 'https://zepto.talentrecruit.com/career-page', jobBoardUrl: 'https://zepto.talentrecruit.com/career-page' },
   { id: 'plaid', name: 'Plaid', pattern: 'plaid.com', careerPage: 'https://plaid.com/careers/', jobBoardUrl: 'https://plaid.com/careers/' },
@@ -233,7 +229,6 @@ export const SUPPORTED_50_COMPANIES = [
   { id: 'dbtlabs', name: 'dbt Labs', pattern: 'getdbt.com', careerPage: 'https://www.getdbt.com/about-us/careers', jobBoardUrl: 'https://www.getdbt.com/about-us/careers#roles' },
   { id: 'discord', name: 'Discord', pattern: 'discord.com', careerPage: 'https://discord.com/careers', jobBoardUrl: 'https://discord.com/careers#all-jobs' },
   { id: 'docker', name: 'Docker', pattern: 'docker.com', careerPage: 'https://www.docker.com/career-openings/', jobBoardUrl: 'https://www.docker.com/career-openings/' },
-  { id: 'doordash', name: 'DoorDash', pattern: 'careersatdoordash.com', careerPage: 'https://careersatdoordash.com', jobBoardUrl: 'https://careersatdoordash.com/job-search/' },
 
   // Infrastructure & Global Portals
   { id: 'bytedance', name: 'ByteDance', pattern: 'joinbytedance.com', careerPage: 'https://joinbytedance.com', jobBoardUrl: 'https://joinbytedance.com/search' },

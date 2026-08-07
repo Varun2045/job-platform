@@ -915,8 +915,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://careersatdoordash.com/job-search/",
-    "detected_ats": "custom",
+    "api_endpoint": "https://job-boards.greenhouse.io/doordashindia",
+    "detected_ats": "greenhouse",
     "resume_profiles": []
   },
   {
@@ -975,8 +975,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.eka.care/careers",
-    "detected_ats": "custom",
+    "api_endpoint": "https://ekacare.keka.com/careers/",
+    "detected_ats": "kekahire",
     "resume_profiles": []
   },
   {
@@ -995,8 +995,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.elasticrun.com/careers",
-    "detected_ats": "custom",
+    "api_endpoint": "https://elasticruncareers.peoplestrong.com/job/joblist",
+    "detected_ats": "peoplestrong",
     "resume_profiles": []
   },
   {
@@ -1185,7 +1185,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.gartner.com",
+    "api_endpoint": "https://jobs.gartner.com/",
     "detected_ats": "custom",
     "resume_profiles": []
   },
@@ -1285,8 +1285,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://gravitonresearch.com/careers/",
-    "detected_ats": "custom",
+    "api_endpoint": "https://boards.greenhouse.io/embed/job_board?for=gravitonresearchcapital",
+    "detected_ats": "greenhouse",
     "resume_profiles": []
   },
   {

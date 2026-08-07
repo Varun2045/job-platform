@@ -138,8 +138,8 @@ export class AtsRegistryService {
       companies: [
         'Adyen', 'Affirm', 'Airbnb', 'Anthropic', 'Box',
         'ClickHouse', 'Cloudflare', 'Cockroach Labs',
-        'CoreWeave', 'Dagster Labs', 'Databricks', 'Datadog', 'Fastly', 'GitLab', 'Grafana Labs',
-        'Groww', 'Headlands Tech', 'Hudson River Trading', 'InMobi',
+        'CoreWeave', 'Dagster Labs', 'Databricks', 'Datadog', 'DoorDash', 'Fastly', 'GitLab', 'Grafana Labs',
+        'Groww', 'Graviton Research Capital', 'Headlands Tech', 'Hudson River Trading', 'InMobi',
         'Instacart', 'JetBrains', 'Jump Trading', 'Klaviyo', 'LaunchDarkly',
         'Netlify', 'Old Mission Capital', 'PagerDuty', 'PhonePe', 'Pinterest', 'PlanetScale',
         'Postman', 'Pulumi', 'Pure Storage', 'Razorpay', 'Reddit',
@@ -250,7 +250,7 @@ export class AtsRegistryService {
       id: 'kekahire',
       name: 'Keka Hire',
       averageExtractionMs: 18,
-      companies: ['Adda247'],
+      companies: ['Adda247', 'Eka Care'],
       companyDetails: [],
     },
     {
@@ -265,6 +265,13 @@ export class AtsRegistryService {
       name: 'Trakstar Hire',
       averageExtractionMs: 20,
       companies: ['BookMyShow'],
+      companyDetails: [],
+    },
+    {
+      id: 'peoplestrong',
+      name: 'PeopleStrong',
+      averageExtractionMs: 22,
+      companies: ['Elasticrun'],
       companyDetails: [],
     },
   ];
@@ -382,6 +389,9 @@ export class AtsRegistryService {
       if (name === 'Adda247') {
         return { jobBoardUrl: 'https://adda247.keka.com/careers/', jobBoardNeedsReview: false };
       }
+      if (name === 'Eka Care') {
+        return { jobBoardUrl: 'https://ekacare.keka.com/careers/', jobBoardNeedsReview: false };
+      }
       return { jobBoardUrl: `https://${clean}.keka.com/careers/`, jobBoardNeedsReview: false };
     }
     if (platformId === 'weekday') {
@@ -390,6 +400,12 @@ export class AtsRegistryService {
     if (platformId === 'trakstar') {
       if (name === 'BookMyShow') {
         return { jobBoardUrl: 'https://in.bookmyshow.com/careers/job-listing', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'peoplestrong') {
+      if (name === 'Elasticrun') {
+        return { jobBoardUrl: 'https://elasticruncareers.peoplestrong.com/job/joblist', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }

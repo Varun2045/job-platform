@@ -2,8 +2,8 @@
 
 | ATS Type | Companies | % of Total | Enabled |
 |----------|-----------|------------|--------|
-| CUSTOM | 207 | 52.8% | 207 |
-| GREENHOUSE | 46 | 11.7% | 46 |
+| CUSTOM | 203 | 51.8% | 203 |
+| GREENHOUSE | 48 | 12.2% | 48 |
 | WORKDAY | 45 | 11.5% | 45 |
 | ASHBY | 43 | 11.0% | 43 |
 | LEVER | 6 | 1.5% | 6 |
@@ -14,15 +14,16 @@
 | AVATURE | 3 | 0.8% | 3 |
 | EIGHTFOLD | 3 | 0.8% | 3 |
 | DARWINBOX | 2 | 0.5% | 2 |
+| KEKAHIRE | 2 | 0.5% | 2 |
 | AMAZON | 1 | 0.3% | 1 |
 | APPLE | 1 | 0.3% | 1 |
 | APPLYTOJOB | 1 | 0.3% | 1 |
 | FRESHTEAM | 1 | 0.3% | 1 |
 | GOOGLE | 1 | 0.3% | 1 |
-| KEKAHIRE | 1 | 0.3% | 1 |
 | KULA | 1 | 0.3% | 1 |
 | META | 1 | 0.3% | 1 |
 | MICROSOFT | 1 | 0.3% | 1 |
+| PEOPLESTRONG | 1 | 0.3% | 1 |
 | TALENT500 | 1 | 0.3% | 1 |
 | TRAKSTAR | 1 | 0.3% | 1 |
 | WEEKDAY | 1 | 0.3% | 1 |
