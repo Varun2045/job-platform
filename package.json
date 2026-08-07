@@ -25,6 +25,7 @@
     "deploy:check": "npm run lint && npm run build && npm test -- --runInBand",
     "deploy:heroku": "deploy_heroku.bat",
     "validate-classification": "node dist/cli/validateClassification.js",
+    "validate-scrapers": "node dist/cli/validateScrapers.js",
     "reclassify-jobs": "node dist/cli/reclassifyJobs.js"
   },
   "dependencies": {
