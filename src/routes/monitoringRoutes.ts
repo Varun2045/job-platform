@@ -189,7 +189,7 @@ router.post('/resume', async (req: Request, res: Response) => {
  * Stream real-time scraper progress via SSE
  */
 router.get('/stream', (req: Request, res: Response) => {
-  if (!req.user || req.user.role !== 'Admin') {
+  if (!(req as any).user || (req as any).user.role !== 'Admin') {
     return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
   }
   BroadcastManager.addSseClient(req, res);
@@ -200,7 +200,7 @@ router.get('/stream', (req: Request, res: Response) => {
  * Retrieve operational metrics for real-time channels
  */
 router.get('/metrics', (req: Request, res: Response) => {
-  if (!req.user || req.user.role !== 'Admin') {
+  if (!(req as any).user || (req as any).user.role !== 'Admin') {
     return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
   }
   return sendSuccess(res, BroadcastManager.getMetrics());
