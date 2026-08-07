@@ -246,6 +246,7 @@ async function main() {
       printHelp();
       process.exit(1);
   }
+  process.exit(0);
 }
 
 function printHelp() {
