@@ -125,7 +125,7 @@ export class AtsRegistryService {
         'Expedia', 'Fortinet', 'GE Aerospace', 'GE HealthCare', 'GE Vernova', 'HP Inc.', 'HPE',
         'Informatica', 'Intel', 'Jio Hotstar', 'Juniper Networks', 'KLA Corporation', 'Lam Research',
         'Logitech', 'Marvell Technology', 'Mastercard', 'Motorola Solutions',
-        'NetApp', 'NVIDIA', 'Optum', 'Pfizer', 'Philips', 'Red Hat', 'Salesforce', 'Samsung',
+        'NetApp', 'NVIDIA', 'Optum', 'Pfizer', 'Philips', 'Red Hat', 'Rubrik', 'Salesforce',
         'Siemens', 'Slack', 'Splunk', 'Texas Instruments', 'Uniphore', 'Visa', 'Warner Bros. Discovery',
         'Workday', 'Zendesk', 'Zoom',
       ],
@@ -141,7 +141,7 @@ export class AtsRegistryService {
         'CoreWeave', 'Dagster Labs', 'Databricks', 'Datadog', 'DoorDash', 'Fastly', 'GitLab', 'Grafana Labs',
         'Groww', 'Graviton Research Capital', 'Headlands Tech', 'Hudson River Trading', 'InMobi',
         'Instacart', 'JetBrains', 'Jump Trading', 'Klaviyo', 'LaunchDarkly',
-        'Netlify', 'Old Mission Capital', 'PagerDuty', 'PhonePe', 'Pinterest', 'PlanetScale',
+        'Netlify', 'NK Securities', 'Old Mission Capital', 'Optiver', 'PagerDuty', 'PhonePe', 'Pinterest', 'PlanetScale',
         'Postman', 'Pulumi', 'Pure Storage', 'Razorpay', 'Reddit',
         'Samsara', 'SmartBear', 'Sourcegraph',
         'Sumo Logic', 'Toast', 'Together AI', 'Tower Research Capital', 'Twilio', 'Twitch',
@@ -215,7 +215,7 @@ export class AtsRegistryService {
       id: 'darwinbox',
       name: 'Darwinbox',
       averageExtractionMs: 26,
-      companies: ['Darwinbox', 'NxtWave'],
+      companies: ['Darwinbox', 'NxtWave', 'Porter', 'Rapido'],
       companyDetails: [],
     },
     {
@@ -257,7 +257,7 @@ export class AtsRegistryService {
       id: 'weekday',
       name: 'Weekday',
       averageExtractionMs: 19,
-      companies: ['Ather Energy'],
+      companies: ['Ather Energy', 'PhysicsWallah'],
       companyDetails: [],
     },
     {
@@ -279,6 +279,13 @@ export class AtsRegistryService {
       name: 'Zoho Recruit',
       averageExtractionMs: 18,
       companies: ['Increff'],
+      companyDetails: [],
+    },
+    {
+      id: 'consider',
+      name: 'Consider',
+      averageExtractionMs: 20,
+      companies: ['WinZO'],
       companyDetails: [],
     },
   ];
@@ -402,6 +409,9 @@ export class AtsRegistryService {
       return { jobBoardUrl: `https://${clean}.keka.com/careers/`, jobBoardNeedsReview: false };
     }
     if (platformId === 'weekday') {
+      if (name === 'PhysicsWallah') {
+        return { jobBoardUrl: 'https://jobs.lsvp.com/jobs/physicswallah', jobBoardNeedsReview: false };
+      }
       return { jobBoardUrl: `https://careers.atherenergy.com/jobs`, jobBoardNeedsReview: false };
     }
     if (platformId === 'trakstar') {
@@ -421,6 +431,21 @@ export class AtsRegistryService {
         return { jobBoardUrl: 'https://increff.zohorecruit.com/careers', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: `https://${clean}.zohorecruit.com/careers`, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'darwinbox') {
+      if (name === 'Porter') {
+        return { jobBoardUrl: 'https://porter.darwinbox.in/ms/candidatev2/main/careers/home', jobBoardNeedsReview: false };
+      }
+      if (name === 'Rapido') {
+        return { jobBoardUrl: 'https://rapido.darwinbox.in/ms/candidatev2/main', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'consider') {
+      if (name === 'WinZO') {
+        return { jobBoardUrl: 'https://consider.com/boards/vc/griffin-gaming/jobs/winzo', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
     if (careerPage && (careerPage.includes('#') || careerPage.includes('/jobs'))) {
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
