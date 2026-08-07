@@ -15,8 +15,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/acko",
-    "detected_ats": "lever",
+    "api_endpoint": "https://www.acko.com/careers/jobs/",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -1425,8 +1425,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/hyperverge",
-    "detected_ats": "lever",
+    "api_endpoint": "https://hyperverge.co/careers/",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -1605,8 +1605,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/myjar",
-    "detected_ats": "lever",
+    "api_endpoint": "https://changejar.applytojob.com/apply/",
+    "detected_ats": "applytojob",
     "resume_profiles": []
   },
   {
@@ -2107,16 +2107,6 @@
     "interval_minutes": 60,
     "api_endpoint": "https://www.moveworks.com/us/en/company/careers#open-roles",
     "detected_ats": "custom",
-    "resume_profiles": []
-  },
-  {
-    "id": "mpl",
-    "name": "MPL",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/mpl",
-    "detected_ats": "lever",
     "resume_profiles": []
   },
   {
@@ -2836,7 +2826,7 @@
     "priority": 1,
     "interval_minutes": 60,
     "api_endpoint": "https://www.revolut.com/careers/",
-    "detected_ats": "lever",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -3135,8 +3125,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/slice",
-    "detected_ats": "lever",
+    "api_endpoint": "https://slice.bank.in/careers/open-positions",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -3145,8 +3135,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/smallcase",
-    "detected_ats": "lever",
+    "api_endpoint": "https://smallcase.freshteam.com/jobs",
+    "detected_ats": "freshteam",
     "resume_profiles": []
   },
   {
@@ -3555,8 +3545,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://jobs.lever.co/upstox",
-    "detected_ats": "lever",
+    "api_endpoint": "https://upstox.com/careers/",
+    "detected_ats": "custom",
     "resume_profiles": []
   },
   {

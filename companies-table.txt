@@ -1,7 +1,7 @@
 Company Name | API Endpoint | ATS Type
 --- | --- | ---
 Accenture | https://www.accenture.com/in-en/careers/jobsearch | custom
-Acko | https://jobs.lever.co/acko | lever
+Acko | https://www.acko.com/careers/jobs/ | custom
 Adda247 | https://www.adda247.com/careers | custom
 Adobe | https://adobe.wd5.myworkdayjobs.com/external_experienced | workday
 Adyen | https://boards.greenhouse.io/adyen | greenhouse
@@ -142,7 +142,7 @@ HPE | https://hpe.wd5.myworkdayjobs.com/Jobsathpe | workday
 HSBC | https://www.hsbc.com/careers | custom
 Hudson River Trading | https://www.hudsonrivertrading.com/careers/ | greenhouse
 Hugging Face | https://apply.workable.com/huggingface/?lng=en | workable
-HyperVerge | https://jobs.lever.co/hyperverge | lever
+HyperVerge | https://hyperverge.co/careers/ | custom
 IBM | https://www.ibm.com/in-en/careers/search | custom
 Ideogram | https://jobs.ashbyhq.com/ideogram | ashby
 IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | custom
@@ -160,7 +160,7 @@ Intel | https://intel.wd1.myworkdayjobs.com/External | workday
 Intuit | https://jobs.intuit.com/search-jobs | custom
 Jai Kisan | https://jaikisan.co/careers | custom
 Jane Street | https://www.janestreet.com/join-jane-street/open-roles/ | custom
-Jar | https://jobs.lever.co/myjar | lever
+Jar | https://changejar.applytojob.com/apply/ | applytojob
 JetBrains | https://job-boards.eu.greenhouse.io/jetbrains | greenhouse
 Jio Hotstar | https://jiostar.wd102.myworkdayjobs.com/JioStar | workday
 JPMorgan Chase | https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs | oraclecloud
@@ -211,7 +211,6 @@ MongoDB | https://www.mongodb.com/company/careers/see-jobs#positions | custom
 Morgan Stanley | https://www.morganstanley.com/careers/career-opportunities-search/ | custom
 Motorola Solutions | https://motorolasolutions.wd5.myworkdayjobs.com/Careers | workday
 Moveworks | https://www.moveworks.com/us/en/company/careers#open-roles | custom
-MPL | https://jobs.lever.co/mpl | lever
 MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | custom
 Myntra | https://careers.myntra.com/ | custom
 Nagarro | https://www.nagarro.com/en/careers | custom
@@ -283,7 +282,7 @@ Replicate | https://jobs.ashbyhq.com/replicate | ashby
 Replit | https://jobs.ashbyhq.com/replit | ashby
 Resend | https://jobs.ashbyhq.com/resend | ashby
 Retool | https://retool.com/careers#open-positions | custom
-Revolut | https://www.revolut.com/careers/ | lever
+Revolut | https://www.revolut.com/careers/ | custom
 Riot Games | https://www.riotgames.com/en/work-with-us/jobs | custom
 Rippling | https://www.rippling.com/careers/open-roles | custom
 Rivian | https://careers.rivian.com/careers-home/ | custom
@@ -313,8 +312,8 @@ Siemens | https://siemens.wd3.myworkdayjobs.com/Siemens_Careers | workday
 SIG (Susquehanna) | https://sig.com/careers/ | custom
 Signzy | https://www.signzy.com/careers/ | custom
 Slack | https://salesforce.wd12.myworkdayjobs.com/Slack | workday
-Slice | https://jobs.lever.co/slice | lever
-Smallcase | https://jobs.lever.co/smallcase | lever
+Slice | https://slice.bank.in/careers/open-positions | custom
+Smallcase | https://smallcase.freshteam.com/jobs | freshteam
 SmartBear | https://job-boards.greenhouse.io/smartbear | greenhouse
 Snowflake | https://jobs.ashbyhq.com/snowflake | ashby
 Snowplow | https://snowplow.careers.hibob.com/ | custom
@@ -355,7 +354,7 @@ Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs |
 Uniphore | https://uniphore.wd503.myworkdayjobs.com/Uniphore | workday
 UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | custom
 Unity | https://unity.com/careers/positions | custom
-Upstox | https://jobs.lever.co/upstox | lever
+Upstox | https://upstox.com/careers/ | custom
 Urban Company | https://careers.urbancompany.com/jobs | custom
 Vast Data | https://www.vastdata.com/careers#open-positions | custom
 Vellum | https://jobs.ashbyhq.com/vellum | ashby

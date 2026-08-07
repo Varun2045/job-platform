@@ -1,7 +1,7 @@
 # Company List by ATS Type
 
-Total Companies: 389
-Total ATS Types: 20
+Total Companies: 388
+Total ATS Types: 22
 
 ## AMAZON (1 companies, 1 enabled)
 
@@ -14,6 +14,12 @@ Total ATS Types: 20
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Apple | https://jobs.apple.com/en-in/search?location=india-INDC | ✅ Enabled |
+
+## APPLYTOJOB (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| Jar | https://changejar.applytojob.com/apply/ | ✅ Enabled |
 
 ## ASHBY (42 companies, 42 enabled)
 
@@ -69,11 +75,12 @@ Total ATS Types: 20
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
 | UBS | https://jobs.ubs.com | ✅ Enabled |
 
-## CUSTOM (211 companies, 211 enabled)
+## CUSTOM (216 companies, 216 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Accenture | https://www.accenture.com/in-en/careers/jobsearch | ✅ Enabled |
+| Acko | https://www.acko.com/careers/jobs/ | ✅ Enabled |
 | Adda247 | https://www.adda247.com/careers | ✅ Enabled |
 | Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | ✅ Enabled |
 | AlphaGrep | https://www.alpha-grep.com/careers/ | ✅ Enabled |
@@ -149,6 +156,7 @@ Total ATS Types: 20
 | Groq | https://groq.com/careers-at-groq | ✅ Enabled |
 | Healthplix | https://healthplix.com/careers/ | ✅ Enabled |
 | HSBC | https://www.hsbc.com/careers | ✅ Enabled |
+| HyperVerge | https://hyperverge.co/careers/ | ✅ Enabled |
 | IBM | https://www.ibm.com/in-en/careers/search | ✅ Enabled |
 | IKEA | https://jobs.ikea.com/en/location/india-jobs/22908/1269750/2 | ✅ Enabled |
 | IMC Trading | https://www.imc.com/us/careers/ | ✅ Enabled |
@@ -219,6 +227,7 @@ Total ATS Types: 20
 | QuestDB | https://questdb.com/careers/ | ✅ Enabled |
 | Rapido | https://rapido.bike/careers | ✅ Enabled |
 | Retool | https://retool.com/careers#open-positions | ✅ Enabled |
+| Revolut | https://www.revolut.com/careers/ | ✅ Enabled |
 | Riot Games | https://www.riotgames.com/en/work-with-us/jobs | ✅ Enabled |
 | Rippling | https://www.rippling.com/careers/open-roles | ✅ Enabled |
 | Rivian | https://careers.rivian.com/careers-home/ | ✅ Enabled |
@@ -241,6 +250,7 @@ Total ATS Types: 20
 | Shopify | https://shopify.com/careers | ✅ Enabled |
 | SIG (Susquehanna) | https://sig.com/careers/ | ✅ Enabled |
 | Signzy | https://www.signzy.com/careers/ | ✅ Enabled |
+| Slice | https://slice.bank.in/careers/open-positions | ✅ Enabled |
 | Snowplow | https://snowplow.careers.hibob.com/ | ✅ Enabled |
 | Sony | https://www.sony.com/en_us/SCA/careers/overview.html | ✅ Enabled |
 | Spinny | https://www.spinny.com/careers/ | ✅ Enabled |
@@ -261,6 +271,7 @@ Total ATS Types: 20
 | Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | ✅ Enabled |
 | Unity | https://unity.com/careers/positions | ✅ Enabled |
+| Upstox | https://upstox.com/careers/ | ✅ Enabled |
 | Urban Company | https://careers.urbancompany.com/jobs | ✅ Enabled |
 | Vast Data | https://www.vastdata.com/careers#open-positions | ✅ Enabled |
 | VMware | https://www.broadcom.com/company/careers | ✅ Enabled |
@@ -299,6 +310,12 @@ Total ATS Types: 20
 | American Express | https://www.americanexpress.com/en-us/careers | ✅ Enabled |
 | Micron Technology | https://careers.micron.com/careers?start=0&pid=39738563&sort_by=hot | ✅ Enabled |
 | PayPal | https://paypal.eightfold.ai/careers | ✅ Enabled |
+
+## FRESHTEAM (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| Smallcase | https://smallcase.freshteam.com/jobs | ✅ Enabled |
 
 ## GOOGLE (1 companies, 1 enabled)
 
@@ -363,24 +380,16 @@ Total ATS Types: 20
 |--------------|--------------|--------|
 | CleverTap | https://careers.kula.ai/clevertap | ✅ Enabled |
 
-## LEVER (14 companies, 14 enabled)
+## LEVER (6 companies, 6 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Acko | https://jobs.lever.co/acko | ✅ Enabled |
 | CRED | https://jobs.lever.co/cred | ✅ Enabled |
-| HyperVerge | https://jobs.lever.co/hyperverge | ✅ Enabled |
-| Jar | https://jobs.lever.co/myjar | ✅ Enabled |
 | Meesho | https://jobs.lever.co/meesho | ✅ Enabled |
 | Mindtickle | https://jobs.lever.co/mindtickle | ✅ Enabled |
-| MPL | https://jobs.lever.co/mpl | ✅ Enabled |
 | Palantir | https://jobs.lever.co/palantir | ✅ Enabled |
 | Paytm | https://jobs.lever.co/paytm | ✅ Enabled |
-| Revolut | https://www.revolut.com/careers/ | ✅ Enabled |
-| Slice | https://jobs.lever.co/slice | ✅ Enabled |
-| Smallcase | https://jobs.lever.co/smallcase | ✅ Enabled |
 | Spotify | https://jobs.lever.co/spotify | ✅ Enabled |
-| Upstox | https://jobs.lever.co/upstox | ✅ Enabled |
 
 ## META (1 companies, 1 enabled)
 

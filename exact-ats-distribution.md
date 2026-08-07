@@ -2,11 +2,11 @@
 
 | ATS Type | Companies | % of Total | Enabled |
 |----------|-----------|------------|--------|
-| CUSTOM | 211 | 53.8% | 211 |
+| CUSTOM | 216 | 55.1% | 216 |
 | GREENHOUSE | 46 | 11.7% | 46 |
 | WORKDAY | 45 | 11.5% | 45 |
 | ASHBY | 42 | 10.7% | 42 |
-| LEVER | 14 | 3.6% | 14 |
+| LEVER | 6 | 1.5% | 6 |
 | ORACLECLOUD | 5 | 1.3% | 5 |
 | PHENOM | 4 | 1.0% | 4 |
 | TALEO | 4 | 1.0% | 4 |
@@ -16,6 +16,8 @@
 | DARWINBOX | 2 | 0.5% | 2 |
 | AMAZON | 1 | 0.3% | 1 |
 | APPLE | 1 | 0.3% | 1 |
+| APPLYTOJOB | 1 | 0.3% | 1 |
+| FRESHTEAM | 1 | 0.3% | 1 |
 | GOOGLE | 1 | 0.3% | 1 |
 | KULA | 1 | 0.3% | 1 |
 | META | 1 | 0.3% | 1 |

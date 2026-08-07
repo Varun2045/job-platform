@@ -166,7 +166,7 @@ export class AtsRegistryService {
       id: 'lever',
       name: 'Lever',
       averageExtractionMs: 16,
-      companies: ['Acko', 'CRED', 'HyperVerge', 'Jar', 'Meesho', 'Mindtickle', 'MPL', 'Palantir', 'Paytm', 'Revolut', 'Slice', 'Smallcase', 'Spotify', 'Upstox'],
+      companies: ['CRED', 'Meesho', 'Mindtickle', 'Palantir', 'Paytm', 'Spotify'],
       companyDetails: [],
     },
     {
