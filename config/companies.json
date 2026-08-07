@@ -25,8 +25,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.adda247.com/careers",
-    "detected_ats": "custom",
+    "api_endpoint": "https://adda247.keka.com/careers/",
+    "detected_ats": "kekahire",
     "resume_profiles": []
   },
   {
@@ -95,7 +95,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.alpha-grep.com/careers/",
+    "api_endpoint": "https://www.alpha-grep.com/career/",
     "detected_ats": "custom",
     "resume_profiles": []
   },
@@ -195,8 +195,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.arista.com/en/careers",
-    "detected_ats": "custom",
+    "api_endpoint": "https://careers.smartrecruiters.com/AristaNetworks",
+    "detected_ats": "smartrecruiters",
     "resume_profiles": []
   },
   {
@@ -235,8 +235,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.atherenergy.com/careers",
-    "detected_ats": "custom",
+    "api_endpoint": "https://careers.atherenergy.com/jobs",
+    "detected_ats": "weekday",
     "resume_profiles": []
   },
   {
@@ -257,16 +257,6 @@
     "interval_minutes": 60,
     "api_endpoint": "https://autodesk.wd1.myworkdayjobs.com/Ext",
     "detected_ats": "workday",
-    "resume_profiles": []
-  },
-  {
-    "id": "axio",
-    "name": "Axio",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://axio.in/careers/",
-    "detected_ats": "custom",
     "resume_profiles": []
   },
   {
@@ -320,16 +310,6 @@
     "resume_profiles": []
   },
   {
-    "id": "bewakoof",
-    "name": "Bewakoof",
-    "enabled": true,
-    "priority": 1,
-    "interval_minutes": 60,
-    "api_endpoint": "https://www.bewakoof.com/careers",
-    "detected_ats": "custom",
-    "resume_profiles": []
-  },
-  {
     "id": "blackrock",
     "name": "BlackRock",
     "enabled": true,
@@ -345,7 +325,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://blinkit.com/careers",
+    "api_endpoint": "https://blinkit.com/careers/jobs",
     "detected_ats": "custom",
     "resume_profiles": []
   },
@@ -365,8 +345,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.bloomberg.com/company/careers/",
-    "detected_ats": "custom",
+    "api_endpoint": "https://bloomberg.avature.net/careers/SearchJobs",
+    "detected_ats": "avature",
     "resume_profiles": []
   },
   {
@@ -395,8 +375,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://in.bookmyshow.com/careers/",
-    "detected_ats": "custom",
+    "api_endpoint": "https://in.bookmyshow.com/careers/job-listing",
+    "detected_ats": "trakstar",
     "resume_profiles": []
   },
   {
@@ -485,8 +465,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.lifeatcanva.com/en/jobs/",
-    "detected_ats": "custom",
+    "api_endpoint": "https://careers.smartrecruiters.com/Canva",
+    "detected_ats": "smartrecruiters",
     "resume_profiles": []
   },
   {
@@ -705,7 +685,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.coinbase.com/careers/positions",
+    "api_endpoint": "https://www.coinbase.com/en-in/careers/positions?location=india",
     "detected_ats": "custom",
     "resume_profiles": []
   },
@@ -715,8 +695,8 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://careers.confluent.io/jobs",
-    "detected_ats": "custom",
+    "api_endpoint": "https://jobs.ashbyhq.com/confluent",
+    "detected_ats": "ashby",
     "resume_profiles": []
   },
   {

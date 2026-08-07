@@ -2,14 +2,14 @@ Company Name | API Endpoint | ATS Type
 --- | --- | ---
 Accenture | https://www.accenture.com/in-en/careers/jobsearch | custom
 Acko | https://www.acko.com/careers/jobs/ | custom
-Adda247 | https://www.adda247.com/careers | custom
+Adda247 | https://adda247.keka.com/careers/ | kekahire
 Adobe | https://adobe.wd5.myworkdayjobs.com/external_experienced | workday
 Adyen | https://boards.greenhouse.io/adyen | greenhouse
 Affirm | https://boards.greenhouse.io/affirm | greenhouse
 Airbnb | https://boards.greenhouse.io/airbnb | greenhouse
 Airbyte | https://airbyte.com/company/careers#open-roles | ashby
 Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | custom
-AlphaGrep | https://www.alpha-grep.com/careers/ | custom
+AlphaGrep | https://www.alpha-grep.com/career/ | custom
 Amazon | https://amazon.jobs/en/search | amazon
 AMD | https://careers.amd.com/careers-home/jobs | custom
 American Airlines GCC | https://talent500.com/jobs/aatechhubindia/ | talent500
@@ -19,27 +19,25 @@ Anthropic | https://job-boards.greenhouse.io/anthropic | greenhouse
 Anyscale | https://jobs.ashbyhq.com/anyscale | ashby
 Apple | https://jobs.apple.com/en-in/search?location=india-INDC | apple
 Applied Materials | https://amat.wd1.myworkdayjobs.com/External_Careers | workday
-Arista Networks | https://www.arista.com/en/careers | custom
+Arista Networks | https://careers.smartrecruiters.com/AristaNetworks | smartrecruiters
 ARM | https://careers.arm.com/search-jobs | custom
 Asana | https://asana.com/jobs/all | custom
 ASML | https://www.asml.com/en/careers/find-your-job | workday
-Ather Energy | https://www.atherenergy.com/careers | custom
+Ather Energy | https://careers.atherenergy.com/jobs | weekday
 Atlassian | https://www.atlassian.com/company/careers/all-jobs | custom
 Autodesk | https://autodesk.wd1.myworkdayjobs.com/Ext | workday
-Axio | https://axio.in/careers/ | custom
 Bain & Company | https://www.bain.com/careers/find-a-role/ | custom
 Bank of America | https://careers.bankofamerica.com/en-us/job-search | custom
 Barclays | https://search.jobs.barclays | phenom
 Baseten | https://jobs.ashbyhq.com/baseten | ashby
 BCG | https://careers.bcg.com/global/en/ | custom
-Bewakoof | https://www.bewakoof.com/careers | custom
 BlackRock | https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional | workday
-Blinkit | https://blinkit.com/careers | custom
+Blinkit | https://blinkit.com/careers/jobs | custom
 Block | https://block.xyz/careers/jobs | custom
-Bloomberg | https://www.bloomberg.com/company/careers/ | custom
+Bloomberg | https://bloomberg.avature.net/careers/SearchJobs | avature
 Boeing | https://jobs.boeing.com/ | taleo
 Booking.com | https://jobs.booking.com | custom
-BookMyShow | https://in.bookmyshow.com/careers/ | custom
+BookMyShow | https://in.bookmyshow.com/careers/job-listing | trakstar
 Bosch | https://careers.smartrecruiters.com/BoschGroup | smartrecruiters
 Box | https://job-boards.greenhouse.io/boxinc | greenhouse
 Brex | https://www.brex.com/careers | custom
@@ -48,7 +46,7 @@ BrowserStack | https://browserstack.wd3.myworkdayjobs.com/External | workday
 ByteDance | https://joinbytedance.com/search | custom
 Cadence Design Systems | https://cadence.wd1.myworkdayjobs.com/External_Careers | workday
 Canonical | https://canonical.com/careers/all | custom
-Canva | https://www.lifeatcanva.com/en/jobs/ | custom
+Canva | https://careers.smartrecruiters.com/Canva | smartrecruiters
 Capgemini | https://www.capgemini.com/careers | custom
 Cars24 | https://www.cars24.com/careers/ | custom
 Cashfree Payments | https://www.cashfree.com/careers/ | custom
@@ -70,8 +68,8 @@ Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | greenhouse
 Cognition AI | https://jobs.ashbyhq.com/cognition | ashby
 Cohere | https://jobs.ashbyhq.com/cohere | ashby
 Cohesity | https://www.cohesity.com/careers/open-positions/ | custom
-Coinbase | https://www.coinbase.com/careers/positions | custom
-Confluent | https://careers.confluent.io/jobs | custom
+Coinbase | https://www.coinbase.com/en-in/careers/positions?location=india | custom
+Confluent | https://jobs.ashbyhq.com/confluent | ashby
 CoreWeave | https://boards.greenhouse.io/coreweave | greenhouse
 Country Delight | https://countrydelight.in/careers | custom
 CRED | https://jobs.lever.co/cred | lever

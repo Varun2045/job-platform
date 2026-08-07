@@ -1,7 +1,7 @@
 # Company List by ATS Type
 
-Total Companies: 388
-Total ATS Types: 22
+Total Companies: 386
+Total ATS Types: 25
 
 ## AMAZON (1 companies, 1 enabled)
 
@@ -21,7 +21,7 @@ Total ATS Types: 22
 |--------------|--------------|--------|
 | Jar | https://changejar.applytojob.com/apply/ | ✅ Enabled |
 
-## ASHBY (42 companies, 42 enabled)
+## ASHBY (43 companies, 43 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -34,6 +34,7 @@ Total ATS Types: 22
 | Clerk | https://jobs.ashbyhq.com/clerk | ✅ Enabled |
 | Cognition AI | https://jobs.ashbyhq.com/cognition | ✅ Enabled |
 | Cohere | https://jobs.ashbyhq.com/cohere | ✅ Enabled |
+| Confluent | https://jobs.ashbyhq.com/confluent | ✅ Enabled |
 | Cursor | https://jobs.ashbyhq.com/cursor | ✅ Enabled |
 | ElevenLabs | https://jobs.ashbyhq.com/elevenlabs | ✅ Enabled |
 | Harvey | https://jobs.ashbyhq.com/harvey | ✅ Enabled |
@@ -68,42 +69,35 @@ Total ATS Types: 22
 | Vellum | https://jobs.ashbyhq.com/vellum | ✅ Enabled |
 | World Labs | https://jobs.ashbyhq.com/worldlabs | ✅ Enabled |
 
-## AVATURE (2 companies, 2 enabled)
+## AVATURE (3 companies, 3 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
+| Bloomberg | https://bloomberg.avature.net/careers/SearchJobs | ✅ Enabled |
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
 | UBS | https://jobs.ubs.com | ✅ Enabled |
 
-## CUSTOM (216 companies, 216 enabled)
+## CUSTOM (207 companies, 207 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Accenture | https://www.accenture.com/in-en/careers/jobsearch | ✅ Enabled |
 | Acko | https://www.acko.com/careers/jobs/ | ✅ Enabled |
-| Adda247 | https://www.adda247.com/careers | ✅ Enabled |
 | Akamai | https://jobs.akamai.com/en/sites/CX_1/jobs | ✅ Enabled |
-| AlphaGrep | https://www.alpha-grep.com/careers/ | ✅ Enabled |
+| AlphaGrep | https://www.alpha-grep.com/career/ | ✅ Enabled |
 | AMD | https://careers.amd.com/careers-home/jobs | ✅ Enabled |
-| Arista Networks | https://www.arista.com/en/careers | ✅ Enabled |
 | ARM | https://careers.arm.com/search-jobs | ✅ Enabled |
 | Asana | https://asana.com/jobs/all | ✅ Enabled |
-| Ather Energy | https://www.atherenergy.com/careers | ✅ Enabled |
 | Atlassian | https://www.atlassian.com/company/careers/all-jobs | ✅ Enabled |
-| Axio | https://axio.in/careers/ | ✅ Enabled |
 | Bain & Company | https://www.bain.com/careers/find-a-role/ | ✅ Enabled |
 | Bank of America | https://careers.bankofamerica.com/en-us/job-search | ✅ Enabled |
 | BCG | https://careers.bcg.com/global/en/ | ✅ Enabled |
-| Bewakoof | https://www.bewakoof.com/careers | ✅ Enabled |
-| Blinkit | https://blinkit.com/careers | ✅ Enabled |
+| Blinkit | https://blinkit.com/careers/jobs | ✅ Enabled |
 | Block | https://block.xyz/careers/jobs | ✅ Enabled |
-| Bloomberg | https://www.bloomberg.com/company/careers/ | ✅ Enabled |
 | Booking.com | https://jobs.booking.com | ✅ Enabled |
-| BookMyShow | https://in.bookmyshow.com/careers/ | ✅ Enabled |
 | Brex | https://www.brex.com/careers | ✅ Enabled |
 | ByteDance | https://joinbytedance.com/search | ✅ Enabled |
 | Canonical | https://canonical.com/careers/all | ✅ Enabled |
-| Canva | https://www.lifeatcanva.com/en/jobs/ | ✅ Enabled |
 | Capgemini | https://www.capgemini.com/careers | ✅ Enabled |
 | Cars24 | https://www.cars24.com/careers/ | ✅ Enabled |
 | Cashfree Payments | https://www.cashfree.com/careers/ | ✅ Enabled |
@@ -114,8 +108,7 @@ Total ATS Types: 22
 | Cisco | https://jobs.cisco.com/jobs/SearchJobs | ✅ Enabled |
 | Citadel | https://www.citadel.com/careers/open-opportunities/ | ✅ Enabled |
 | Cohesity | https://www.cohesity.com/careers/open-positions/ | ✅ Enabled |
-| Coinbase | https://www.coinbase.com/careers/positions | ✅ Enabled |
-| Confluent | https://careers.confluent.io/jobs | ✅ Enabled |
+| Coinbase | https://www.coinbase.com/en-in/careers/positions?location=india | ✅ Enabled |
 | Country Delight | https://countrydelight.in/careers | ✅ Enabled |
 | Curefit (Cult.fit) | https://cult.fit/careers | ✅ Enabled |
 | D. E. Shaw | https://www.deshaw.com/careers | ✅ Enabled |
@@ -374,6 +367,12 @@ Total ATS Types: 22
 | Vercel | https://boards.greenhouse.io/vercel | ✅ Enabled |
 | Waymo | https://boards.greenhouse.io/waymo | ✅ Enabled |
 
+## KEKAHIRE (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| Adda247 | https://adda247.keka.com/careers/ | ✅ Enabled |
+
 ## KULA (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
@@ -422,11 +421,13 @@ Total ATS Types: 22
 | Lowe's India | https://talent.lowes.com | ✅ Enabled |
 | Wells Fargo | https://www.wellsfargojobs.com/en | ✅ Enabled |
 
-## SMARTRECRUITERS (3 companies, 3 enabled)
+## SMARTRECRUITERS (5 companies, 5 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
+| Arista Networks | https://careers.smartrecruiters.com/AristaNetworks | ✅ Enabled |
 | Bosch | https://careers.smartrecruiters.com/BoschGroup | ✅ Enabled |
+| Canva | https://careers.smartrecruiters.com/Canva | ✅ Enabled |
 | Freshworks | https://careers.smartrecruiters.com/freshworks | ✅ Enabled |
 | Ubisoft | https://careers.smartrecruiters.com/ubisoft | ✅ Enabled |
 
@@ -444,6 +445,18 @@ Total ATS Types: 22
 | Caterpillar | https://careers.caterpillar.com/en/jobs/ | ✅ Enabled |
 | FedEx | https://careers.fedex.com | ✅ Enabled |
 | Lockheed Martin | https://www.lockheedmartinjobs.com | ✅ Enabled |
+
+## TRAKSTAR (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| BookMyShow | https://in.bookmyshow.com/careers/job-listing | ✅ Enabled |
+
+## WEEKDAY (1 companies, 1 enabled)
+
+| Company Name | API Endpoint | Status |
+|--------------|--------------|--------|
+| Ather Energy | https://careers.atherenergy.com/jobs | ✅ Enabled |
 
 ## WORKABLE (1 companies, 1 enabled)
 

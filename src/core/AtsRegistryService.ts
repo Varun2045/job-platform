@@ -154,7 +154,7 @@ export class AtsRegistryService {
       name: 'Ashby',
       averageExtractionMs: 14,
       companies: [
-        'Airbyte', 'Anyscale', 'Baseten', 'Character.ai', 'Chroma', 'Classplus', 'Clerk', 'Cognition AI', 'Cohere', 'Cursor',
+        'Airbyte', 'Anyscale', 'Baseten', 'Character.ai', 'Chroma', 'Classplus', 'Clerk', 'Cognition AI', 'Cohere', 'Confluent', 'Cursor',
         'ElevenLabs', 'Harvey', 'Ideogram', 'LangChain', 'Linear', 'Luma AI', 'Mercor', 'Mistral AI',
         'Modal Labs', 'Neon', 'Notion', 'OpenAI', 'Perplexity', 'Photoroom', 'Pinecone',
         'Qdrant', 'Railway', 'Ramp', 'Redis', 'Render', 'Replicate', 'Replit', 'Resend', 'Rocketlane', 'Sentry',
@@ -194,14 +194,14 @@ export class AtsRegistryService {
       id: 'smartrecruiters',
       name: 'SmartRecruiters',
       averageExtractionMs: 20,
-      companies: ['Bosch', 'Freshworks', 'Ubisoft'],
+      companies: ['Arista Networks', 'Bosch', 'Canva', 'Freshworks', 'Ubisoft'],
       companyDetails: [],
     },
     {
       id: 'avature',
       name: 'Avature',
       averageExtractionMs: 24,
-      companies: ['Deutsche Bank', 'UBS'],
+      companies: ['Bloomberg', 'Deutsche Bank', 'UBS'],
       companyDetails: [],
     },
     {
@@ -244,6 +244,27 @@ export class AtsRegistryService {
       name: 'Freshteam',
       averageExtractionMs: 17,
       companies: ['Smallcase'],
+      companyDetails: [],
+    },
+    {
+      id: 'kekahire',
+      name: 'Keka Hire',
+      averageExtractionMs: 18,
+      companies: ['Adda247'],
+      companyDetails: [],
+    },
+    {
+      id: 'weekday',
+      name: 'Weekday',
+      averageExtractionMs: 19,
+      companies: ['Ather Energy'],
+      companyDetails: [],
+    },
+    {
+      id: 'trakstar',
+      name: 'Trakstar Hire',
+      averageExtractionMs: 20,
+      companies: ['BookMyShow'],
       companyDetails: [],
     },
   ];
@@ -356,6 +377,21 @@ export class AtsRegistryService {
     }
     if (platformId === 'freshteam') {
       return { jobBoardUrl: `https://${clean}.freshteam.com/jobs`, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'kekahire') {
+      if (name === 'Adda247') {
+        return { jobBoardUrl: 'https://adda247.keka.com/careers/', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: `https://${clean}.keka.com/careers/`, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'weekday') {
+      return { jobBoardUrl: `https://careers.atherenergy.com/jobs`, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'trakstar') {
+      if (name === 'BookMyShow') {
+        return { jobBoardUrl: 'https://in.bookmyshow.com/careers/job-listing', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
     if (careerPage && (careerPage.includes('#') || careerPage.includes('/jobs'))) {
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
