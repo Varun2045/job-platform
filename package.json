@@ -8,7 +8,7 @@
     "node": "20.x || 22.x"
   },
   "scripts": {
-    "build": "npm --prefix frontend install --include=dev && tsc && npm --prefix frontend run build",
+    "build": "npm --prefix frontend install --include=dev && tsc && npm --prefix frontend run build && npx playwright install chromium",
     "heroku-postbuild": "npm run build",
     "start": "node dist/server.js",
     "server": "node dist/server.js",
