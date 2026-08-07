@@ -108,7 +108,7 @@ export const SUPPORTED_50_COMPANIES = [
 
   { id: 'signzy', name: 'Signzy', pattern: 'signzy.com', careerPage: 'https://signzy.com/careers', jobBoardUrl: 'https://signzy.com/careers' },
 
-  { id: 'yellow-ai', name: 'Yellow.ai', pattern: 'yellow.ai', careerPage: 'https://yellow.ai/careers', jobBoardUrl: 'https://yellow.ai/career/' },
+  { id: 'yellow-ai', name: 'Yellow.ai', pattern: 'yellow.ai', careerPage: 'https://yellow.ai/career/', jobBoardUrl: 'https://yellow.ai/career/' },
 
   { id: 'keka', name: 'Keka', pattern: 'keka.com', careerPage: 'https://keka.com/careers', jobBoardUrl: 'https://hr.keka.com/careers' },
 

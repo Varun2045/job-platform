@@ -2181,7 +2181,7 @@
   },
   {
     "id": "nk-securities",
-    "name": "NK Securities",
+    "name": "NK Securities Research",
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
@@ -2965,7 +2965,7 @@
     "enabled": true,
     "priority": 1,
     "interval_minutes": 60,
-    "api_endpoint": "https://www.shiprocket.in/careers/",
+    "api_endpoint": "https://careers.shiprocket.in/#jobs",
     "detected_ats": "custom",
     "resume_profiles": []
   },

@@ -90,6 +90,7 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'BlackRock': { careerPage: 'https://www.blackrock.com/corporate/careers', jobBoardUrl: 'https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional' },
   'Logitech': { careerPage: 'https://www.logitech.com/en-us/about/careers.html', jobBoardUrl: 'https://logitech.wd5.myworkdayjobs.com/Logitech' },
   'Zscaler': { careerPage: 'https://www.zscaler.com/careers', jobBoardUrl: 'https://zscaler.wd1.myworkdayjobs.com/Zscaler' },
+  'Uniphore': { careerPage: 'https://www.uniphore.com/careers/', jobBoardUrl: 'https://uniphore.wd503.myworkdayjobs.com/Uniphore' },
 };
 
 // Custom portal overrides for companies that left their listed ATS
@@ -141,7 +142,7 @@ export class AtsRegistryService {
         'CoreWeave', 'Dagster Labs', 'Databricks', 'Datadog', 'DoorDash', 'Fastly', 'GitLab', 'Grafana Labs',
         'Groww', 'Graviton Research Capital', 'Headlands Tech', 'Hudson River Trading', 'InMobi',
         'Instacart', 'JetBrains', 'Jump Trading', 'Klaviyo', 'LaunchDarkly',
-        'Netlify', 'NK Securities', 'Old Mission Capital', 'Optiver', 'PagerDuty', 'PhonePe', 'Pinterest', 'PlanetScale',
+        'Netlify', 'NK Securities Research', 'Old Mission Capital', 'Optiver', 'PagerDuty', 'PhonePe', 'Pinterest', 'PlanetScale',
         'Postman', 'Pulumi', 'Pure Storage', 'Razorpay', 'Reddit',
         'Samsara', 'SmartBear', 'Sourcegraph',
         'Sumo Logic', 'Toast', 'Together AI', 'Tower Research Capital', 'Twilio', 'Twitch',
@@ -354,6 +355,15 @@ export class AtsRegistryService {
       }
       if (name === 'Twilio') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/twilio', jobBoardNeedsReview: false };
+      }
+      if (name === 'NK Securities' || name === 'NK Securities Research') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/nksecuritiesresearch', jobBoardNeedsReview: false };
+      }
+      if (name === 'Pulumi') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/pulumicorporation', jobBoardNeedsReview: false };
+      }
+      if (name === 'Sourcegraph') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/sourcegraph91', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }

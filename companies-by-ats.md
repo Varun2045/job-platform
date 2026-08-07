@@ -226,7 +226,7 @@ Total ATS Types: 28
 | Setu | https://setu.co/careers | ✅ Enabled |
 | Shadowfax | https://www.shadowfax.in/careers | ✅ Enabled |
 | ShareChat | https://sharechat.com/careers | ✅ Enabled |
-| Shiprocket | https://www.shiprocket.in/careers/ | ✅ Enabled |
+| Shiprocket | https://careers.shiprocket.in/#jobs | ✅ Enabled |
 | Shopee | https://careers.shopee.sg/ | ✅ Enabled |
 | Shopify | https://shopify.com/careers | ✅ Enabled |
 | SIG (Susquehanna) | https://sig.com/careers/ | ✅ Enabled |
@@ -335,7 +335,7 @@ Total ATS Types: 28
 | Klaviyo | https://boards.greenhouse.io/klaviyo | ✅ Enabled |
 | LaunchDarkly | https://boards.greenhouse.io/launchdarkly | ✅ Enabled |
 | Netlify | https://boards.greenhouse.io/netlify | ✅ Enabled |
-| NK Securities | https://job-boards.greenhouse.io/nksecuritiesresearch | ✅ Enabled |
+| NK Securities Research | https://job-boards.greenhouse.io/nksecuritiesresearch | ✅ Enabled |
 | Old Mission Capital | https://boards.greenhouse.io/oldmissioncapital | ✅ Enabled |
 | Optiver | https://optiver.com/working-at-optiver/career-opportunities | ✅ Enabled |
 | PagerDuty | https://boards.greenhouse.io/pagerduty | ✅ Enabled |
