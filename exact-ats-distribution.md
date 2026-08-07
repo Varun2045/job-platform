@@ -1,17 +1,17 @@
-# Exact ATS Distribution - 392 Companies
+# Exact ATS Distribution - 378 Companies
 
 | ATS Type | Companies | % of Total | Enabled |
 |----------|-----------|------------|--------|
-| CUSTOM | 187 | 47.7% | 187 |
-| GREENHOUSE | 50 | 12.8% | 50 |
-| WORKDAY | 46 | 11.7% | 46 |
-| ASHBY | 43 | 11.0% | 43 |
-| LEVER | 6 | 1.5% | 6 |
+| CUSTOM | 187 | 49.5% | 187 |
+| GREENHOUSE | 50 | 13.2% | 50 |
+| WORKDAY | 46 | 12.2% | 46 |
+| ASHBY | 43 | 11.4% | 43 |
+| LEVER | 6 | 1.6% | 6 |
 | ORACLECLOUD | 5 | 1.3% | 5 |
 | SMARTRECRUITERS | 5 | 1.3% | 5 |
-| DARWINBOX | 4 | 1.0% | 4 |
-| PHENOM | 4 | 1.0% | 4 |
-| TALEO | 4 | 1.0% | 4 |
+| DARWINBOX | 4 | 1.1% | 4 |
+| PHENOM | 4 | 1.1% | 4 |
+| TALEO | 4 | 1.1% | 4 |
 | AVATURE | 3 | 0.8% | 3 |
 | EIGHTFOLD | 3 | 0.8% | 3 |
 | KEKAHIRE | 2 | 0.5% | 2 |

@@ -27,7 +27,7 @@ const sortedAtsTypes = Object.entries(atsGroups).sort((a, b) => {
 
 // Generate summary
 console.log('='.repeat(60));
-console.log('EXACT ATS DISTRIBUTION - 392 COMPANIES');
+console.log(`EXACT ATS DISTRIBUTION - ${companies.length} COMPANIES`);
 console.log('='.repeat(60));
 console.log('');
 
@@ -36,7 +36,7 @@ let totalCompanies = 0;
 
 sortedAtsTypes.forEach(([ats, companyList]) => {
   const enabledCount = companyList.filter(c => c.enabled).length;
-  const percentage = ((companyList.length / 392) * 100).toFixed(1);
+  const percentage = ((companyList.length / companies.length) * 100).toFixed(1);
   
   console.log(`${ats.toUpperCase().padEnd(20)} ${String(companyList.length).padStart(3)} companies (${percentage}%) - ${enabledCount} enabled`);
   
@@ -50,13 +50,13 @@ console.log(`TOTAL: ${totalCompanies} companies, ${totalEnabled} enabled`);
 console.log('='.repeat(60));
 
 // Generate detailed breakdown
-let report = '# Exact ATS Distribution - 392 Companies\n\n';
+let report = `# Exact ATS Distribution - ${companies.length} Companies\n\n`;
 report += `| ATS Type | Companies | % of Total | Enabled |\n`;
 report += `|----------|-----------|------------|--------|\n`;
 
 sortedAtsTypes.forEach(([ats, companyList]) => {
   const enabledCount = companyList.filter(c => c.enabled).length;
-  const percentage = ((companyList.length / 392) * 100).toFixed(1);
+  const percentage = ((companyList.length / companies.length) * 100).toFixed(1);
   report += `| ${ats.toUpperCase()} | ${companyList.length} | ${percentage}% | ${enabledCount} |\n`;
 });
 
