@@ -232,6 +232,20 @@ export class AtsRegistryService {
       companies: ['American Airlines GCC'],
       companyDetails: [],
     },
+    {
+      id: 'applytojob',
+      name: 'ApplyToJob',
+      averageExtractionMs: 18,
+      companies: ['Jar'],
+      companyDetails: [],
+    },
+    {
+      id: 'freshteam',
+      name: 'Freshteam',
+      averageExtractionMs: 17,
+      companies: ['Smallcase'],
+      companyDetails: [],
+    },
   ];
 
   constructor() {
@@ -333,6 +347,15 @@ export class AtsRegistryService {
         return { jobBoardUrl: ORACLECLOUD_KNOWN_URLS[name].jobBoardUrl, jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'applytojob') {
+      if (name === 'Jar') {
+        return { jobBoardUrl: 'https://changejar.applytojob.com/apply/', jobBoardNeedsReview: false };
+      }
+      return { jobBoardUrl: `https://${clean}.applytojob.com/apply/`, jobBoardNeedsReview: false };
+    }
+    if (platformId === 'freshteam') {
+      return { jobBoardUrl: `https://${clean}.freshteam.com/jobs`, jobBoardNeedsReview: false };
     }
     if (careerPage && (careerPage.includes('#') || careerPage.includes('/jobs'))) {
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
