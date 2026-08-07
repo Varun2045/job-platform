@@ -21,7 +21,7 @@ const envSchema = z.object({
   
   // Email & Notifications
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().email().optional(),
+  EMAIL_FROM: z.string().optional(),
   NOTIFICATION_EMAIL_SENDER: z.string().email().optional(),
   NOTIFICATION_EMAIL_RECIPIENT: z.string().email().optional(),
   
