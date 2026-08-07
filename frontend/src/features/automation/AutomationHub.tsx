@@ -64,6 +64,9 @@ const JobMonitoring: React.FC = () => {
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
   const [secondsAgo, setSecondsAgo] = useState(0);
 
+  const [realtimeLogs, setRealtimeLogs] = useState<{ id: string; time: string; message: string; type: 'info' | 'success' | 'error' | 'warn' }[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'websocket' | 'sse' | 'disconnected'>('disconnected');
+
   const { data: monitoringData, refetch, dataUpdatedAt } = useQuery({
     queryKey: ['monitoring'],
     queryFn: async () => {
@@ -72,8 +75,157 @@ const JobMonitoring: React.FC = () => {
       const json = await res.json();
       return json.data;
     },
-    refetchInterval: 30000, // Auto refresh every 30 seconds
+    refetchInterval: 30000,
   });
+
+  useEffect(() => {
+    let ws: WebSocket | null = null;
+    let sse: EventSource | null = null;
+    let isDestroyed = false;
+
+    function connectWebSocket() {
+      if (isDestroyed) return;
+      setConnectionStatus('connecting');
+
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const wsUrl = `${protocol}//${host}/api/monitoring/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        if (isDestroyed) {
+          ws?.close();
+          return;
+        }
+        console.log('[WS] Connected to real-time scraper stream');
+        setConnectionStatus('websocket');
+      };
+
+      ws.onmessage = (event) => {
+        if (isDestroyed) return;
+        try {
+          const payload = JSON.parse(event.data);
+          handleRealtimeEvent(payload);
+        } catch (err) {
+          console.error('Error parsing WS message', err);
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.warn('[WS] Connection failed, falling back to SSE...', err);
+        if (ws) {
+          ws.close();
+          ws = null;
+        }
+        connectSSE();
+      };
+
+      ws.onclose = () => {
+        if (isDestroyed) return;
+        if (connectionStatus === 'websocket') {
+          setConnectionStatus('disconnected');
+          setTimeout(connectWebSocket, 5000);
+        }
+      };
+    }
+
+    function connectSSE() {
+      if (isDestroyed) return;
+      console.log('[SSE] Attempting connection...');
+      setConnectionStatus('connecting');
+
+      sse = new EventSource('/api/monitoring/stream');
+
+      sse.onopen = () => {
+        if (isDestroyed) {
+          sse?.close();
+          return;
+        }
+        console.log('[SSE] Connected to real-time scraper stream');
+        setConnectionStatus('sse');
+      };
+
+      sse.onmessage = (event) => {
+        if (isDestroyed) return;
+        try {
+          const payload = JSON.parse(event.data);
+          handleRealtimeEvent(payload);
+        } catch (err) {
+          console.error('Error parsing SSE message', err);
+        }
+      };
+
+      sse.onerror = (err) => {
+        console.error('[SSE] Stream encountered error, disconnecting...', err);
+        if (sse) {
+          sse.close();
+          sse = null;
+        }
+        setConnectionStatus('disconnected');
+        setTimeout(connectWebSocket, 10000);
+      };
+    }
+
+    function handleRealtimeEvent(event: any) {
+      const { type, timestamp, data } = event;
+      const timeStr = new Date(timestamp || Date.now()).toLocaleTimeString();
+
+      let message = '';
+      let logType: 'info' | 'success' | 'error' | 'warn' = 'info';
+
+      switch (type) {
+        case 'run:start':
+          message = `🚀 Scraper Run Started: Monitoring ${data.totalCompanies} companies`;
+          logType = 'info';
+          setIsRunning(true);
+          break;
+        case 'batch:start':
+          message = `📦 Enqueueing Batch ${data.batchIndex}/${data.totalBatches}`;
+          logType = 'info';
+          break;
+        case 'scraper:start':
+          message = `🔍 [${data.companyName}] Starting scraper...`;
+          logType = 'info';
+          break;
+        case 'scraper:progress':
+          message = `✓ [${data.companyName}] Finished: ${data.jobsFound} jobs found (${data.newJobs} new matches) in ${(data.durationMs / 1000).toFixed(1)}s`;
+          logType = data.status === 'failed' ? 'error' : 'success';
+          refetch();
+          break;
+        case 'scraper:error':
+          message = `✕ [${data.companyName}] Error: ${data.error}`;
+          logType = 'error';
+          refetch();
+          break;
+        case 'batch:complete':
+          message = `✓ Batch ${data.batchIndex} complete`;
+          logType = 'success';
+          break;
+        case 'run:complete':
+          message = `🏁 Scraper Run Finished in ${(data.durationMs / 1000).toFixed(1)}s. Total jobs: ${data.totalJobsFound}, Failures: ${data.totalFailures}`;
+          logType = data.totalFailures > 0 ? 'warn' : 'success';
+          setIsRunning(false);
+          refetch();
+          break;
+        default:
+          return;
+      }
+
+      setRealtimeLogs((prev) => [
+        ...prev.slice(-99),
+        { id: Math.random().toString(), time: timeStr, message, type: logType }
+      ]);
+    }
+
+    connectWebSocket();
+
+    return () => {
+      isDestroyed = true;
+      if (ws) ws.close();
+      if (sse) sse.close();
+    };
+  }, [refetch]);
 
   useEffect(() => {
     if (dataUpdatedAt) {
@@ -438,6 +590,56 @@ const JobMonitoring: React.FC = () => {
             No scrapers configured yet. Add target companies in Company Manager to begin automated monitoring.
           </div>
         )}
+      </div>
+
+      {/* Real-time Console Log Terminal Card */}
+      <div className="bg-[#1b2535] border border-[#232d3f] rounded-xl p-6 shadow-xl space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className={`w-2.5 h-2.5 rounded-full ${
+              connectionStatus === 'websocket'
+                ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
+                : connectionStatus === 'sse'
+                ? 'bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.6)]'
+                : connectionStatus === 'connecting'
+                ? 'bg-amber-400 animate-pulse'
+                : 'bg-rose-400'
+            }`} />
+            <h3 className="text-base font-bold text-white">Live Monitoring Stream</h3>
+            <span className="text-xs text-slate-400 font-mono">
+              ({connectionStatus === 'websocket' ? 'WebSocket active' : connectionStatus === 'sse' ? 'SSE fallback active' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'})
+            </span>
+          </div>
+          <button
+            onClick={() => setRealtimeLogs([])}
+            className="text-xs text-slate-400 hover:text-white transition-colors border border-[#232d3f] hover:border-slate-500 px-2.5 py-1 rounded-lg"
+          >
+            Clear Terminal
+          </button>
+        </div>
+
+        <div className="bg-[#0b0f19] border border-[#232d3f] rounded-xl p-4 h-64 overflow-y-auto font-mono text-xs text-slate-300 space-y-2 select-text scrollbar-thin scrollbar-thumb-slate-800">
+          {realtimeLogs.length > 0 ? (
+            realtimeLogs.map((log) => {
+              const colorMap = {
+                info: 'text-slate-300',
+                success: 'text-emerald-400 font-semibold',
+                error: 'text-rose-400 font-semibold',
+                warn: 'text-amber-400 font-semibold',
+              };
+              return (
+                <div key={log.id} className="flex gap-3 leading-relaxed hover:bg-[#111827]/40 py-0.5 px-1 rounded transition-colors">
+                  <span className="text-slate-500 select-none">[{log.time}]</span>
+                  <span className={colorMap[log.type]}>{log.message}</span>
+                </div>
+              );
+            })
+          ) : (
+            <div className="h-full flex items-center justify-center text-slate-500 text-xs italic select-none">
+              Waiting for live scraper events. Click "Run Now" to trigger a scrape session.
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Logs Modal */}

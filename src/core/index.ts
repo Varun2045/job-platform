@@ -25,6 +25,7 @@ import { AnalyticsGenerator } from './AnalyticsGenerator.js';
 import { WeeklyReportGenerator } from './WeeklyReportGenerator.js';
 import { Telemetry } from './Telemetry.js';
 import { BackupService } from './BackupService.js';
+import { BroadcastManager } from './BroadcastManager.js';
 
 export async function runOrchestrator(
   options: {
@@ -123,6 +124,8 @@ export async function runOrchestrator(
       return;
     }
 
+    BroadcastManager.publish('run:start', { totalCompanies: companies.length });
+
     // 4. Initialize Core Helpers
     const httpClient = (storage as any).httpClient ?? new (await import('./HttpClient.js')).HttpClient();
     const playwrightScraper = new PlaywrightScraper();
@@ -147,12 +150,14 @@ export async function runOrchestrator(
     for (let b = 0; b < batches.length; b++) {
       const batch = batches[b];
       Logger.info(`Enqueueing Batch ${b + 1}/${batches.length} (${batch.length} companies)...`);
+      BroadcastManager.publish('batch:start', { batchIndex: b + 1, totalBatches: batches.length });
 
       for (const company of batch) {
         taskQueue.addTask({
           id: company.id,
           priority: company.priority,
           execute: async () => {
+            BroadcastManager.publish('scraper:start', { companyId: company.id, companyName: company.name });
             const compStartTime = Date.now();
             let scraperStatus = 'healthy';
             let jobsFound = 0;
@@ -397,6 +402,15 @@ export async function runOrchestrator(
                   api_suspended_until: null,
                 });
               }
+
+              BroadcastManager.publish('scraper:progress', {
+                companyId: company.id,
+                companyName: company.name,
+                status: scraperStatus,
+                jobsFound,
+                newJobs: newJobsCount,
+                durationMs: Date.now() - compStartTime,
+              });
             } catch (err: any) {
               scraperStatus = 'failed';
               totalFailuresCount++;
@@ -427,6 +441,13 @@ export async function runOrchestrator(
 
                 await storage.updateCompanyScrapeState(company.id, nextState);
               }
+
+              BroadcastManager.publish('scraper:error', {
+                companyId: company.id,
+                companyName: company.name,
+                error: err.message,
+                durationMs: Date.now() - compStartTime,
+              });
             }
 
             // Save metrics tracking
@@ -446,6 +467,8 @@ export async function runOrchestrator(
 
       await taskQueue.runAll(5, 500);
       taskQueue.clear();
+
+      BroadcastManager.publish('batch:complete', { batchIndex: b + 1 });
 
       if (b < batches.length - 1 && !options.targetCompanyId) {
         Logger.info(`Finished Batch ${b + 1}. Staggering run: waiting 3 minutes before starting Batch ${b + 2}...`);
@@ -751,6 +774,11 @@ export async function runOrchestrator(
     Logger.info(
       `Job Monitor Platform run completed in ${(totalDurationMs / 1000).toFixed(1)}s. Total matches: ${finalAlertList.length + finalUpdatedAlertList.length}`,
     );
+    BroadcastManager.publish('run:complete', {
+      durationMs: totalDurationMs,
+      totalJobsFound: totalJobsFoundCount,
+      totalFailures: totalFailuresCount,
+    });
   } finally {
     // 8. Release Advisory Lock
     if (!config.isLocal) {

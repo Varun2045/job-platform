@@ -32,7 +32,7 @@ import { authRoutes, jobsRoutes, applicationsRoutes, dashboardRoutes, resumesRou
 import { sendSuccess, sendError, ErrorCodes } from './utils/apiResponse.js';
 import { FeatureFlagsService } from './core/FeatureFlagsService.js';
 import { AuditLogger } from './core/AuditLogger.js';
-import { RealtimeBroadcaster } from './core/RealtimeBroadcaster.js';
+import { BroadcastManager } from './core/BroadcastManager.js';
 import { runOrchestrator } from './core/index.js';
 import { CareerAgent } from './core/CareerAgent.js';
 import { SkillGapEngine } from './core/SkillGapEngine.js';
@@ -214,7 +214,7 @@ const storage: StorageProvider = config.isLocal ? new FileStorage() : new Supaba
 await storage.initialize();
 FeatureFlagsService.initialize(storage);
 AuditLogger.initialize(storage);
-RealtimeBroadcaster.initialize();
+BroadcastManager.initialize();
 
 // Monitoring state
 let isScrapersPaused = false;
@@ -4975,8 +4975,9 @@ if (fs.existsSync(frontendDist)) {
 }
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   Logger.info(`REST API Server is running on port ${PORT}`);
+  BroadcastManager.initialize(server);
 
   // Automated Hourly Cron Scheduler (Every 1 hour)
   if (process.env.DISABLE_HOURLY_SCHEDULER !== 'true') {

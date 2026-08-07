@@ -8,6 +8,7 @@ import express from 'express';
 import { Logger } from '../core/Logger.js';
 import { sendSuccess, sendError, ErrorCodes } from '../utils/apiResponse.js';
 import type { Request, Response } from 'express';
+import { BroadcastManager } from '../core/BroadcastManager.js';
 
 const router = express.Router();
 
@@ -181,6 +182,14 @@ router.post('/resume', async (req: Request, res: Response) => {
     Logger.error('Error in POST /api/monitoring/resume', error);
     return sendError(res, ErrorCodes.INTERNAL_ERROR, error.message, 500);
   }
+});
+
+/**
+ * GET /api/monitoring/stream
+ * Stream real-time scraper progress via SSE
+ */
+router.get('/stream', (req: Request, res: Response) => {
+  BroadcastManager.addSseClient(res);
 });
 
 export default router;
