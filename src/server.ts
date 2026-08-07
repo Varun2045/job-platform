@@ -269,13 +269,17 @@ function verifyAuthToken(token: string) {
     return null;
   }
 }
-
 // Authentication & Token Verification Middleware
 const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
+  let token: string | null = null;
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.split(' ')[1];
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token as string;
+  }
 
+  if (token) {
     // 1. Verify System Signed JWT
     const decoded = verifyAuthToken(token);
     if (decoded) {
@@ -4995,6 +4999,23 @@ const server = app.listen(PORT, () => {
     }, HOURLY_INTERVAL_MS);
   }
 });
+
+const gracefulShutdown = () => {
+  Logger.info('Received shutdown signal, terminating server processes...');
+  BroadcastManager.shutdown();
+  server.close(() => {
+    Logger.info('HTTP Server closed cleanly.');
+    process.exit(0);
+  });
+  // Force shutdown after 5 seconds
+  setTimeout(() => {
+    Logger.warn('Shutdown timed out, forcing exit.');
+    process.exit(1);
+  }, 5000);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
 
 
 

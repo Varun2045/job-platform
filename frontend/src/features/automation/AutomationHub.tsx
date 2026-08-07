@@ -125,7 +125,8 @@ const JobMonitoring: React.FC = () => {
 
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
-      const wsUrl = `${protocol}//${host}/api/monitoring/ws`;
+      const token = localStorage.getItem('token') || '';
+      const wsUrl = `${protocol}//${host}/api/monitoring/ws?token=${encodeURIComponent(token)}`;
 
       ws = new WebSocket(wsUrl);
 
@@ -175,7 +176,8 @@ const JobMonitoring: React.FC = () => {
       console.log('[SSE] Attempting connection...');
       setConnectionStatus('connecting');
 
-      sse = new EventSource('/api/monitoring/stream');
+      const token = localStorage.getItem('token') || '';
+      sse = new EventSource(`/api/monitoring/stream?token=${encodeURIComponent(token)}`);
 
       sse.onopen = () => {
         if (isDestroyed) {
