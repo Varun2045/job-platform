@@ -1,2 +1,2 @@
 web: npm run start
-worker: node dist/cli/admin.js monitor
+worker: node dist/cli/admin.js monitor all
