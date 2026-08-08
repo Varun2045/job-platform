@@ -179,28 +179,23 @@ heroku restart -a your-app-name
 
 ## Configuration
 
-### ProxyCollector
-No configuration needed - uses default sources.
+The proxy system is fully configurable using environment variables.
 
-### ProxyValidator
-```typescript
-const validator = ProxyValidator.getInstance({
-  timeoutMs: 10000,      // 10 second timeout
-  maxLatencyMs: 5000,    // 5 second max latency
-  testEndpoint: 'http://ifconfig.me/ip',
-  concurrency: 10,        // Test 10 proxies at once
-});
-```
+### Environment Variables
 
-### ProxyPoolManager
-```typescript
-const poolManager = ProxyPoolManager.getInstance({
-  maxPoolSize: 100,              // Max proxies in pool
-  cooldownMs: 300000,            // 5 minute cooldown
-  maxFailures: 3,                // Max failures before unhealthy
-  healthCheckIntervalMs: 600000, // 10 minute health check
-});
-```
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `PROXY_ENABLED` | Enables proxy rotation in the HTTP client | `false` |
+| `PROXY_MAX_POOL_SIZE` | Maximum number of active proxies in the pool | `30` |
+| `PROXY_VALIDATION_TIMEOUT` | Timeout in milliseconds for validating proxies | `5000` |
+| `PROXY_MAX_CONCURRENT_VALIDATIONS` | Number of concurrent proxy validations | `10` |
+| `PROXY_FAILURE_THRESHOLD` | Failures before placing a proxy on cooldown | `3` |
+| `PROXY_COOLDOWN_MS` | Cooldown duration in milliseconds for failed proxies | `300000` (5m) |
+| `PROXY_REFRESH_INTERVAL` | Interval in milliseconds between full pipeline runs | `21600000` (6h) |
+
+### Proxy Pool Environment Array
+
+When `PROXY_ENABLED=true` is set, `HttpClient` automatically scans `process.env` for environment variables matching `PROXY_POOL_1`, `PROXY_POOL_2`, etc. (up to `PROXY_MAX_POOL_SIZE`), parses them, and initializes the rotating proxy pool at application startup.
 
 ## Proxy Pool Behavior
 

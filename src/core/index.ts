@@ -108,7 +108,7 @@ export async function runOrchestrator(
       }
     }
 
-    if (!options.targetCompanyId) {
+    if (!options.targetCompanyId && !options.forceAll) {
       companies = companies.filter((c) => {
         if (c.api_suspended_until) {
           const suspendedUntil = new Date(c.api_suspended_until).getTime();

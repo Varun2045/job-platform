@@ -86,7 +86,14 @@ export class TaskQueue {
       const taskPromise = (async () => {
         try {
           Logger.debug(`Executing task: ${task.id} (Priority: ${task.priority})`);
-          const val = await task.execute();
+          
+          // Enforce a 120-second timeout on task execution to prevent queue hangs
+          const timeoutLimit = 120000;
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error(`Task execution timed out after ${timeoutLimit / 1000}s.`)), timeoutLimit)
+          );
+
+          const val = await Promise.race([task.execute(), timeoutPromise]);
           results.push({ id: task.id, status: 'fulfilled', value: val });
           this.totalCompleted++;
         } catch (err) {
