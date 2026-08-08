@@ -89,6 +89,19 @@ router.post('/register', async (req: Request, res: Response) => {
       role: 'User',
     });
 
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'default-secret',
+      { expiresIn: '7d' },
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     return sendSuccess(
       res,
       {
@@ -98,11 +111,7 @@ router.post('/register', async (req: Request, res: Response) => {
           role: user.role,
           name: user.name,
         },
-        token: jwt.sign(
-          { id: user.id, email: user.email, role: user.role },
-          process.env.JWT_SECRET || 'default-secret',
-          { expiresIn: '7d' },
-        ),
+        token,
       },
       201,
     );
@@ -142,6 +151,19 @@ router.post('/login', async (req: Request, res: Response) => {
       }
     }
 
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'default-secret',
+      { expiresIn: '7d' },
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     return sendSuccess(res, {
       user: {
         id: user.id,
@@ -157,11 +179,7 @@ router.post('/login', async (req: Request, res: Response) => {
         github: user.github,
         portfolio: user.portfolio,
       },
-      token: jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        process.env.JWT_SECRET || 'default-secret',
-        { expiresIn: '7d' },
-      ),
+      token,
     });
   } catch (err: unknown) {
     const error = err as Error;

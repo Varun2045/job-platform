@@ -9,6 +9,8 @@ import { Logger } from '../core/Logger.js';
 import { sendSuccess, sendError, ErrorCodes } from '../utils/apiResponse.js';
 import type { Request, Response } from 'express';
 import { BroadcastManager } from '../core/BroadcastManager.js';
+import { ExtractorRegistry } from '../core/ExtractorRegistry.js';
+import { BrowserPool } from '../core/BrowserPool.js';
 
 const router = express.Router();
 
@@ -204,6 +206,82 @@ router.get('/metrics', (req: Request, res: Response) => {
     return sendError(res, 'UNAUTHORIZED', 'Unauthorized', 401);
   }
   return sendSuccess(res, BroadcastManager.getMetrics());
+});
+
+/**
+ * GET /api/monitoring/extraction-metrics
+ * Retrieve detailed performance and extraction metrics for the hybrid engine
+ */
+router.get('/extraction-metrics', async (req: Request, res: Response) => {
+  try {
+    const companiesList = await storage.getAllCompanies();
+    const allJobs = await storage.getAllJobs();
+    const registryData = ExtractorRegistry.getAllHistory();
+    const browserStats = BrowserPool.getInstance().getStats();
+
+    const companiesProcessed = companiesList.length;
+    const jobsExtracted = allJobs.length;
+
+    // Extractor distribution & Success rate calculation
+    const extractorDistribution: Record<string, number> = {};
+    const extractorSuccessStats: Record<string, { success: number; failure: number }> = {};
+
+    for (const history of Object.values(registryData)) {
+      if (history.preferredExtractor) {
+        extractorDistribution[history.preferredExtractor] = (extractorDistribution[history.preferredExtractor] || 0) + 1;
+      }
+      for (const [name, stats] of Object.entries(history.stats)) {
+        if (!extractorSuccessStats[name]) {
+          extractorSuccessStats[name] = { success: 0, failure: 0 };
+        }
+        extractorSuccessStats[name].success += stats.successCount;
+        extractorSuccessStats[name].failure += stats.failureCount;
+      }
+    }
+
+    const successRateByExtractor: Record<string, number> = {};
+    for (const [name, counts] of Object.entries(extractorSuccessStats)) {
+      const total = counts.success + counts.failure;
+      successRateByExtractor[name] = total > 0 ? parseFloat(((counts.success / total) * 100).toFixed(1)) : 100.0;
+    }
+
+    // Slowest and fastest companies
+    const activeCompanies = companiesList.filter((c: any) => (c.avg_response_time_ms || 0) > 0);
+    const sortedSlowest = [...activeCompanies].sort((a: any, b: any) => b.avg_response_time_ms - a.avg_response_time_ms).slice(0, 10);
+    const sortedFastest = [...activeCompanies].sort((a: any, b: any) => a.avg_response_time_ms - b.avg_response_time_ms).slice(0, 10);
+
+    const slowestCompanies = sortedSlowest.map((c: any) => ({ name: c.name, avgResponseTimeMs: c.avg_response_time_ms }));
+    const fastestCompanies = sortedFastest.map((c: any) => ({ name: c.name, avgResponseTimeMs: c.avg_response_time_ms }));
+
+    // Cache hit vs miss (or change detection skips vs scrapes)
+    const totalRuns = Object.values(registryData).reduce((sum, hist) => sum + Object.values(hist.stats).reduce((s, st) => s + st.successCount + st.failureCount, 0), 0);
+    const cacheHits = Object.values(registryData).reduce((sum, hist) => sum + Object.values(hist.stats).reduce((s, st) => s + (st.avgJobsFound === 0 && st.successCount > 0 ? st.successCount : 0), 0), 0);
+
+    // Sum overall runtime
+    const responseTimes = companiesList.map((c: any) => c.avg_response_time_ms || 0).filter((t: number) => t > 0);
+    const averageRuntimeMs = responseTimes.length > 0 ? Math.round(responseTimes.reduce((a: number, b: number) => a + b, 0) / responseTimes.length) : 0;
+
+    return sendSuccess(res, {
+      companiesProcessed,
+      jobsExtracted,
+      extractorDistribution,
+      successRateByExtractor,
+      browserStats,
+      cacheStats: {
+        totalRuns,
+        cacheHits,
+        cacheMisses: Math.max(0, totalRuns - cacheHits),
+        skipsCount: cacheHits,
+      },
+      averageRuntimeMs,
+      slowestCompanies,
+      fastestCompanies
+    });
+  } catch (err: unknown) {
+    const error = err as Error;
+    Logger.error('Error in GET /api/monitoring/extraction-metrics', error);
+    return sendError(res, ErrorCodes.INTERNAL_ERROR, error.message, 500);
+  }
 });
 
 export default router;

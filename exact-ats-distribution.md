@@ -1,21 +1,20 @@
-# Exact ATS Distribution - 378 Companies
+# Exact ATS Distribution - 369 Companies
 
 | ATS Type | Companies | % of Total | Enabled |
 |----------|-----------|------------|--------|
-| CUSTOM | 187 | 49.5% | 187 |
-| GREENHOUSE | 50 | 13.2% | 50 |
-| WORKDAY | 46 | 12.2% | 46 |
-| ASHBY | 43 | 11.4% | 43 |
+| CUSTOM | 179 | 48.5% | 179 |
+| GREENHOUSE | 50 | 13.6% | 50 |
+| WORKDAY | 46 | 12.5% | 46 |
+| ASHBY | 42 | 11.4% | 42 |
+| DARWINBOX | 7 | 1.9% | 7 |
 | LEVER | 6 | 1.6% | 6 |
-| ORACLECLOUD | 5 | 1.3% | 5 |
-| SMARTRECRUITERS | 5 | 1.3% | 5 |
-| DARWINBOX | 4 | 1.1% | 4 |
+| ORACLECLOUD | 6 | 1.6% | 6 |
+| SMARTRECRUITERS | 5 | 1.4% | 5 |
 | PHENOM | 4 | 1.1% | 4 |
 | TALEO | 4 | 1.1% | 4 |
-| AVATURE | 3 | 0.8% | 3 |
 | EIGHTFOLD | 3 | 0.8% | 3 |
+| AVATURE | 2 | 0.5% | 2 |
 | KEKAHIRE | 2 | 0.5% | 2 |
-| WEEKDAY | 2 | 0.5% | 2 |
 | AMAZON | 1 | 0.3% | 1 |
 | APPLE | 1 | 0.3% | 1 |
 | APPLYTOJOB | 1 | 0.3% | 1 |
@@ -25,8 +24,7 @@
 | KULA | 1 | 0.3% | 1 |
 | META | 1 | 0.3% | 1 |
 | MICROSOFT | 1 | 0.3% | 1 |
-| PEOPLESTRONG | 1 | 0.3% | 1 |
 | TALENT500 | 1 | 0.3% | 1 |
-| TRAKSTAR | 1 | 0.3% | 1 |
+| WEEKDAY | 1 | 0.3% | 1 |
 | WORKABLE | 1 | 0.3% | 1 |
 | ZOHORECRUIT | 1 | 0.3% | 1 |

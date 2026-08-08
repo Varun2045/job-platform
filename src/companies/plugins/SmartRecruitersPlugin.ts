@@ -26,88 +26,85 @@ export class SmartRecruitersPlugin implements ScraperPlugin {
   }
 
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
-    const url = company.api_endpoint;
-    
-    if (!url) {
-      throw new Error(`No API endpoint configured for SmartRecruiters company ${company.name}`);
-    }
-
-    Logger.debug(`SmartRecruiters scraping: ${url}`);
-    const response = await httpClient.get<string>(url);
-    const $ = cheerio.load(response.data);
-
-    const jobs: RawJob[] = [];
-
-    // SmartRecruiters typically uses specific CSS selectors
-    $('.job-item, .job-opening, [data-job-id]').each((_, element) => {
+    let companySlug = company.api_endpoint || company.id;
+    if (companySlug.startsWith('http://') || companySlug.startsWith('https://')) {
       try {
-        const $el = $(element);
-        
-        const title = $el.find('.job-title, h2, h3, .title').first().text().trim();
-        const location = $el.find('.job-location, .location, [data-field="location"]').first().text().trim();
-        const link = $el.find('a').first();
-        const url = link.attr('href');
-        const description = $el.find('.job-description, .description, [data-field="description"]').first().text().trim();
-        
-        // Extract job ID from data attributes
-        const jobId = $el.attr('data-job-id') || 
-                      $el.attr('data-id') || 
-                      (url ? this.extractJobIdFromUrl(url) : 
-                      `job-${jobs.length}`);
-
-        if (title && url) {
-          const fullUrl = url.startsWith('http') ? url : new URL(url, `https://${new URL(company.api_endpoint || '').hostname}`).href;
-          
-          jobs.push({
-            company: company.name,
-            id: jobId,
-            title: title,
-            location: location || 'Remote',
-            country: this.extractCountry(location),
-            url: fullUrl,
-            datePosted: new Date().toISOString(),
-            team: 'Engineering',
-            source: 'smartrecruiters',
-            description: description,
-            isRemote: this.isRemote(location),
-            raw: $el.html(),
-          });
-        }
-      } catch (error) {
-        Logger.warn(`Failed to parse SmartRecruiters job item: ${error}`);
+        const urlObj = new URL(companySlug);
+        const pathParts = urlObj.pathname.split('/').filter(Boolean);
+        companySlug = pathParts[0] || company.id;
+      } catch {
+        companySlug = company.id;
       }
-    });
-
-    if (jobs.length === 0) {
-      Logger.warn(`No jobs found for ${company.name} via SmartRecruiters plugin`);
     }
 
-    Logger.debug(`SmartRecruiters plugin found ${jobs.length} jobs for ${company.name}`);
-    return jobs;
+    // SmartRecruiters API postings endpoint
+    const url = `https://api.smartrecruiters.com/v1/companies/${companySlug}/postings`;
+
+    Logger.debug(`SmartRecruiters API discovery for ${company.name} [Slug: ${companySlug}]`);
+    
+    try {
+      const response = await httpClient.get<any>(url);
+      
+      const content = response.data?.content || response.data;
+      if (!Array.isArray(content)) {
+        throw new Error(`Unexpected SmartRecruiters API structure for ${company.name}`);
+      }
+
+      const rawJobs = content.map((job: any) => {
+        const jobId = String(job.id);
+        const jobUrl = `https://jobs.smartrecruiters.com/${job.company?.identifier || companySlug}/${jobId}`;
+        const location = job.location?.fullLocation || job.location?.city || 'Unknown';
+        
+        return {
+          company: company.name,
+          id: jobId,
+          title: job.name || 'Unknown Role',
+          location: location,
+          url: jobUrl,
+          datePosted: job.releasedDate || new Date().toISOString(),
+          team: job.function?.label || job.industry?.label || 'General',
+          source: 'smartrecruiters',
+          description: '', // Will be enriched
+          raw: job,
+        };
+      });
+
+      return rawJobs;
+    } catch (error: any) {
+      Logger.warn(`SmartRecruiters API request failed for ${company.name}: ${error.message}, falling back to generic scraping`);
+      return [];
+    }
   }
 
   public async enrich(rawJob: RawJob, httpClient: HttpClient): Promise<RawJob> {
     try {
-      const response = await httpClient.get<string>(rawJob.url);
-      const $ = cheerio.load(response.data);
-
-      // Extract full job description
-      const fullDescription = $('.job-description, .description, [data-field="description"]').first().text().trim();
+      const companySlug = rawJob.raw?.company?.identifier || rawJob.company.replace(/\s+/g, '');
+      const url = `https://api.smartrecruiters.com/v1/companies/${companySlug}/postings/${rawJob.id}`;
       
-      // Extract additional metadata
-      const employmentType = $('.employment-type, [data-field="employmentType"]').first().text().trim();
-      const team = $('.team, [data-field="department"]').first().text().trim();
-      const postedDate = $('.posted-date, [data-field="datePosted"]').first().text().trim();
-
-      return {
-        ...rawJob,
-        description: fullDescription || rawJob.description,
-        employmentType: employmentType || rawJob.employmentType,
-        team: team || rawJob.team,
-        datePosted: postedDate ? this.parseDate(postedDate) : rawJob.datePosted,
-      };
-    } catch (error) {
-      Logger.warn(`Failed to enrich SmartRecruiters job ${rawJob.id}: ${error}`);
+      const response = await httpClient.get<any>(url);
+      const jobAd = response.data?.jobAd;
+      
+      if (jobAd?.sections) {
+        const sections = jobAd.sections;
+        const descriptionText = [
+          sections.jobDescription?.text || '',
+          sections.qualifications?.text || '',
+          sections.additionalInformation?.text || ''
+        ].filter(Boolean).join('\n\n');
+        
+        // Clean up HTML tags if any
+        const cleanedDescription = descriptionText.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        
+        return {
+          ...rawJob,
+          description: cleanedDescription || rawJob.description,
+          employmentType: response.data?.typeOfEmployment?.label || rawJob.employmentType,
+        };
+      }
+      
+      return rawJob;
+    } catch (error: any) {
+      Logger.warn(`Failed to enrich SmartRecruiters job ${rawJob.id} via API: ${error.message}`);
       return rawJob;
     }
   }

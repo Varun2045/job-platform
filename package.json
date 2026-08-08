@@ -26,6 +26,7 @@
     "deploy:heroku": "deploy_heroku.bat",
     "validate-classification": "node dist/cli/validateClassification.js",
     "validate-scrapers": "node dist/cli/validateScrapers.js",
+    "benchmark-scrapers": "node dist/cli/benchmarkScrapers.js",
     "reclassify-jobs": "node dist/cli/reclassifyJobs.js"
   },
   "dependencies": {

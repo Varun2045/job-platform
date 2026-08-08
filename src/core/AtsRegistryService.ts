@@ -80,7 +80,10 @@ const WORKDAY_KNOWN_URLS: Record<string, { careerPage: string; jobBoardUrl: stri
   'Siemens': { careerPage: 'https://jobs.siemens.com', jobBoardUrl: 'https://siemens.wd3.myworkdayjobs.com/Siemens_Careers' },
   'Slack': { careerPage: 'https://salesforce.wd12.myworkdayjobs.com/Slack', jobBoardUrl: 'https://salesforce.wd12.myworkdayjobs.com/Slack' },
   'Splunk': { careerPage: 'https://www.splunk.com/en_us/careers.html', jobBoardUrl: 'https://splunk.wd1.myworkdayjobs.com/External' },
-  'Tesla': { careerPage: 'https://www.tesla.com/careers', jobBoardUrl: 'https://www.tesla.com/careers' },
+  'Fidelity Investments': { careerPage: 'https://fil.wd3.myworkdayjobs.com/en-US/001', jobBoardUrl: 'https://fil.wd3.myworkdayjobs.com/en-US/001' },
+  'Gartner': { careerPage: 'https://gartner.wd5.myworkdayjobs.com/en-US/EXT', jobBoardUrl: 'https://gartner.wd5.myworkdayjobs.com/en-US/EXT' },
+  'Wells Fargo': { careerPage: 'https://wd1.myworkdaysite.com/en-US/recruiting/wf/WellsFargoJobs', jobBoardUrl: 'https://wd1.myworkdaysite.com/en-US/recruiting/wf/WellsFargoJobs' },
+  'Workday': { careerPage: 'https://workday.wd5.myworkdayjobs.com/Workday/?source=Careers_Website', jobBoardUrl: 'https://workday.wd5.myworkdayjobs.com/Workday/?source=Careers_Website' },
   'Visa': { careerPage: 'https://careers.visa.com', jobBoardUrl: 'https://visa.wd5.myworkdayjobs.com/Visa' },
   'Walmart': { careerPage: 'https://careers.walmart.com', jobBoardUrl: 'https://walmart.wd5.myworkdayjobs.com/WalmartExternal' },
   'CrowdStrike': { careerPage: 'https://www.crowdstrike.com/careers', jobBoardUrl: 'https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers' },
@@ -123,12 +126,12 @@ export class AtsRegistryService {
       companies: [
         'Adobe', 'Analog Devices', 'Applied Materials', 'ASML', 'Autodesk',
         'BlackRock', 'Broadcom', 'BrowserStack', 'Cadence Design Systems', 'CrowdStrike',
-        'Expedia', 'Fortinet', 'GE Aerospace', 'GE HealthCare', 'GE Vernova', 'HP Inc.', 'HPE',
+        'Expedia', 'Fidelity Investments', 'Fortinet', 'Gartner', 'GE Aerospace', 'GE HealthCare', 'GE Vernova', 'HP Inc.', 'HPE',
         'Informatica', 'Intel', 'Jio Hotstar', 'Juniper Networks', 'KLA Corporation', 'Lam Research',
         'Logitech', 'Marvell Technology', 'Mastercard', 'Motorola Solutions',
         'NetApp', 'NVIDIA', 'Optum', 'Pfizer', 'Philips', 'Red Hat', 'Rubrik', 'Salesforce',
         'Siemens', 'Slack', 'Splunk', 'Texas Instruments', 'Uniphore', 'Visa', 'Warner Bros. Discovery',
-        'Workday', 'Zendesk', 'Zoom',
+        'Wells Fargo', 'Workday', 'Zendesk', 'Zoom',
       ],
       companyDetails: [],
     },
@@ -188,7 +191,7 @@ export class AtsRegistryService {
       id: 'phenom',
       name: 'Phenom',
       averageExtractionMs: 21,
-      companies: ['Barclays', 'Fidelity Investments', "Lowe's India", 'Wells Fargo'],
+      companies: ['Barclays', "Lowe's India"],
       companyDetails: [],
     },
     {
@@ -202,7 +205,7 @@ export class AtsRegistryService {
       id: 'avature',
       name: 'Avature',
       averageExtractionMs: 24,
-      companies: ['Bloomberg', 'Deutsche Bank', 'UBS'],
+      companies: ['Deutsche Bank', 'UBS'],
       companyDetails: [],
     },
     {
@@ -216,7 +219,7 @@ export class AtsRegistryService {
       id: 'darwinbox',
       name: 'Darwinbox',
       averageExtractionMs: 26,
-      companies: ['Darwinbox', 'NxtWave', 'Porter', 'Rapido'],
+      companies: ['Darwinbox', 'Leadsquared', 'NxtWave', 'Porter', 'Rapido'],
       companyDetails: [],
     },
     {
@@ -258,21 +261,21 @@ export class AtsRegistryService {
       id: 'weekday',
       name: 'Weekday',
       averageExtractionMs: 19,
-      companies: ['Ather Energy', 'PhysicsWallah'],
+      companies: ['PhysicsWallah'],
       companyDetails: [],
     },
     {
       id: 'trakstar',
       name: 'Trakstar Hire',
       averageExtractionMs: 20,
-      companies: ['BookMyShow'],
+      companies: [],
       companyDetails: [],
     },
     {
       id: 'peoplestrong',
       name: 'PeopleStrong',
       averageExtractionMs: 22,
-      companies: ['Elasticrun'],
+      companies: [],
       companyDetails: [],
     },
     {
@@ -365,6 +368,9 @@ export class AtsRegistryService {
       if (name === 'Sourcegraph') {
         return { jobBoardUrl: 'https://job-boards.greenhouse.io/sourcegraph91', jobBoardNeedsReview: false };
       }
+      if (name === 'Hudson River Trading') {
+        return { jobBoardUrl: 'https://job-boards.greenhouse.io/hrttalentcommunity', jobBoardNeedsReview: false };
+      }
       return { jobBoardUrl: `https://boards.greenhouse.io/${clean}`, jobBoardNeedsReview: false };
     }
     if (platformId === 'lever') {
@@ -422,18 +428,12 @@ export class AtsRegistryService {
       if (name === 'PhysicsWallah') {
         return { jobBoardUrl: 'https://jobs.lsvp.com/jobs/physicswallah', jobBoardNeedsReview: false };
       }
-      return { jobBoardUrl: `https://careers.atherenergy.com/jobs`, jobBoardNeedsReview: false };
+      return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
     if (platformId === 'trakstar') {
-      if (name === 'BookMyShow') {
-        return { jobBoardUrl: 'https://in.bookmyshow.com/careers/job-listing', jobBoardNeedsReview: false };
-      }
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
     if (platformId === 'peoplestrong') {
-      if (name === 'Elasticrun') {
-        return { jobBoardUrl: 'https://elasticruncareers.peoplestrong.com/job/joblist', jobBoardNeedsReview: false };
-      }
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }
     if (platformId === 'zohorecruit') {
@@ -448,6 +448,9 @@ export class AtsRegistryService {
       }
       if (name === 'Rapido') {
         return { jobBoardUrl: 'https://rapido.darwinbox.in/ms/candidatev2/main', jobBoardNeedsReview: false };
+      }
+      if (name === 'Leadsquared' || name === 'LeadSquared') {
+        return { jobBoardUrl: 'https://leadsquaredhrms.darwinbox.in/ms/candidatev2/main/careers/allJobs', jobBoardNeedsReview: false };
       }
       return { jobBoardUrl: careerPage, jobBoardNeedsReview: false };
     }

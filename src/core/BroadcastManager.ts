@@ -44,7 +44,29 @@ export class BroadcastManager {
     heartbeatsSent: 0,
     reconnectsDetected: 0,
     droppedEvents: 0,
+    apiExtractorCount: 0,
+    staticHtmlExtractorCount: 0,
+    jsonLdExtractorCount: 0,
+    rssExtractorCount: 0,
+    sitemapExtractorCount: 0,
+    playwrightExtractorCount: 0,
+    browserLaunches: 0,
+    browserContextsReused: 0
   };
+
+  public static incrementExtractorMetric(extractorName: string): void {
+    if (extractorName === 'ApiExtractor') this.metrics.apiExtractorCount++;
+    else if (extractorName === 'StaticHtmlExtractor') this.metrics.staticHtmlExtractorCount++;
+    else if (extractorName === 'JsonLdExtractor') this.metrics.jsonLdExtractorCount++;
+    else if (extractorName === 'RSSExtractor') this.metrics.rssExtractorCount++;
+    else if (extractorName === 'SitemapExtractor') this.metrics.sitemapExtractorCount++;
+    else if (extractorName === 'PlaywrightExtractor') this.metrics.playwrightExtractorCount++;
+  }
+
+  public static incrementBrowserMetric(metricName: 'launch' | 'reuse'): void {
+    if (metricName === 'launch') this.metrics.browserLaunches++;
+    else this.metrics.browserContextsReused++;
+  }
 
   public static initialize(server?: any): void {
     // 1. Initialize Supabase Realtime if not local and credentials exist
@@ -67,7 +89,16 @@ export class BroadcastManager {
         const urlObj = new URL(request.url || '', `http://${request.headers.host || 'localhost'}`);
         if (urlObj.pathname === '/api/monitoring/ws') {
           // Token Verification at Upgrade stage
-          const token = urlObj.searchParams.get('token');
+          let token = urlObj.searchParams.get('token');
+          if (!token && request.headers.cookie) {
+            const tokenCookie = request.headers.cookie
+              .split(';')
+              .map((c: string) => c.trim())
+              .find((c: string) => c.startsWith('token='));
+            if (tokenCookie) {
+              token = tokenCookie.substring(6); // length of 'token=' is 6
+            }
+          }
           let isAuthorized = false;
 
           if (token) {
@@ -298,6 +329,14 @@ export class BroadcastManager {
       droppedEvents: this.metrics.droppedEvents,
       historySize: this.eventHistory.length,
       historyLimit,
+      apiExtractorCount: this.metrics.apiExtractorCount,
+      staticHtmlExtractorCount: this.metrics.staticHtmlExtractorCount,
+      jsonLdExtractorCount: this.metrics.jsonLdExtractorCount,
+      rssExtractorCount: this.metrics.rssExtractorCount,
+      sitemapExtractorCount: this.metrics.sitemapExtractorCount,
+      playwrightExtractorCount: this.metrics.playwrightExtractorCount,
+      browserLaunches: this.metrics.browserLaunches,
+      browserContextsReused: this.metrics.browserContextsReused
     };
   }
 

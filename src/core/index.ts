@@ -26,6 +26,10 @@ import { WeeklyReportGenerator } from './WeeklyReportGenerator.js';
 import { Telemetry } from './Telemetry.js';
 import { BackupService } from './BackupService.js';
 import { BroadcastManager } from './BroadcastManager.js';
+import { BrowserPool } from './BrowserPool.js';
+import { MultiPoolQueue } from './MultiPoolQueue.js';
+import { ExtractionEngine } from './ExtractionEngine.js';
+import { ChangeDetection } from './ChangeDetection.js';
 
 export async function runOrchestrator(
   options: {
@@ -130,7 +134,7 @@ export async function runOrchestrator(
     const httpClient = (storage as any).httpClient ?? new (await import('./HttpClient.js')).HttpClient();
     const playwrightScraper = new PlaywrightScraper();
     const fallbackScraper = new FallbackScraper();
-    const taskQueue = new TaskQueue();
+    const multiPoolQueue = new MultiPoolQueue();
 
     const companyMetricsList: any[] = [];
     const allMatchesToNotify: { job: Job; score: number }[] = [];
@@ -153,7 +157,14 @@ export async function runOrchestrator(
       BroadcastManager.publish('batch:start', { batchIndex: b + 1, totalBatches: batches.length }, 'info');
 
       for (const company of batch) {
-        taskQueue.addTask({
+        let poolType: 'api' | 'static' | 'playwright' = 'static';
+        if (company.detected_ats && company.detected_ats !== 'custom' && company.detected_ats !== 'fallback') {
+          poolType = 'api';
+        } else if (company.preferred_scraper === 'playwright_fallback') {
+          poolType = 'playwright';
+        }
+
+        multiPoolQueue.addTask(poolType, {
           id: company.id,
           priority: company.priority,
           execute: async () => {
@@ -178,75 +189,47 @@ export async function runOrchestrator(
                 });
               }
 
-              // B. Scraper selection
-              const plugin = ScraperRegistry.getPlugin(company);
-              const forceScraper = company.preferred_scraper;
+              // B. Change Detection Check
+              const targetUrl = company.api_endpoint || `https://www.${company.id}.com/careers`;
+              const isChanged = await ChangeDetection.hasChanged(company.id, targetUrl, httpClient);
 
-              // C. Scraper Hierarchy and Timeout Wrapper
-              const runScraperPromise = (async () => {
-                if (forceScraper) {
-                  finalScraperUsed = forceScraper;
-                  Logger.info(`[${company.name}] Using preferred scraper override: ${forceScraper}`);
-                  if (forceScraper === 'playwright_fallback') {
-                    return await playwrightScraper.discover(company);
-                  } else if (forceScraper === 'cheerio_fallback') {
-                    return await fallbackScraper.discover(company, httpClient);
+              if (!isChanged) {
+                Logger.info(`[${company.name}] Scrape skipped: Content has not changed.`);
+                finalScraperUsed = company.last_scraper_used || 'cached';
+                jobsFound = 0;
+                scraperStatus = 'healthy';
+                // Mark success state directly
+                await storage.updateCompanyScrapeState(company.id, {
+                  last_successful_scrape: new Date().toISOString(),
+                  last_scraper_used: finalScraperUsed,
+                  consecutive_failures: 0,
+                });
+              } else {
+                // C. Extraction Engine strategy execution
+                const extractionResult = await ExtractionEngine.extract(company, httpClient);
+                finalScraperUsed = extractionResult.extractor;
+
+                if (extractionResult.success) {
+                  rawPostings = extractionResult.jobs;
+                  jobsFound = rawPostings.length;
+
+                  // Update change detection signature with the fetched data
+                  ChangeDetection.update(company.id, targetUrl, rawPostings);
+
+                  if (finalScraperUsed.includes('playwright')) {
+                    scraperStatus = 'degraded';
                   } else {
-                    const specificPlugin = ScraperRegistry.getPlugin(company);
-                    return specificPlugin
-                      ? await specificPlugin.discover(company, httpClient)
-                      : await fallbackScraper.discover(company, httpClient);
+                    scraperStatus = 'healthy';
                   }
                 } else {
-                  if (plugin && company.detected_ats !== 'fallback') {
-                    try {
-                      finalScraperUsed = plugin.metadata.id;
-                      Logger.info(`[${company.name}] Stage 1: API Discovery (${finalScraperUsed})`);
-                      return await plugin.discover(company, httpClient);
-                    } catch (e: any) {
-                      Logger.warn(`[${company.name}] API Scraper failed: ${e.message}. Falling back to Playwright...`);
-                      scraperStatus = 'api_failed_playwright_success';
-                    }
-                  }
-
-                  if (config.features.playwright) {
-                    try {
-                      finalScraperUsed = 'playwright_fallback';
-                      Logger.info(`[${company.name}] Stage 2: Browser Discovery (Playwright)`);
-                      const res = await playwrightScraper.discover(company);
-                      if (scraperStatus === 'healthy') scraperStatus = 'degraded';
-                      return res;
-                    } catch (e: any) {
-                      Logger.warn(`[${company.name}] Playwright failed: ${e.message}. Falling back to Cheerio HTML...`);
-                      scraperStatus = 'failed';
-                    }
-                  }
-
-                  finalScraperUsed = 'cheerio_fallback';
-                  Logger.info(`[${company.name}] Stage 3: Cheerio HTML Scraping`);
-                  const res = await fallbackScraper.discover(company, httpClient);
-                  scraperStatus = 'degraded';
-                  return res;
+                  throw new Error(extractionResult.error || 'Scraper failed');
                 }
-              })();
-
-              // Apply scrape_timeout if specified
-              if (company.scrape_timeout && company.scrape_timeout > 0) {
-                const timeoutPromise = new Promise<RawJob[]>((_, reject) =>
-                  setTimeout(
-                    () => reject(new Error(`Scrape timeout exceeded after ${company.scrape_timeout}ms`)),
-                    company.scrape_timeout!,
-                  ),
-                );
-                rawPostings = await Promise.race([runScraperPromise, timeoutPromise]);
-              } else {
-                rawPostings = await runScraperPromise;
               }
 
-              jobsFound = rawPostings.length;
               totalJobsFoundCount += jobsFound;
 
               // D. Job Normalization Layer
+              const plugin = ScraperRegistry.getPlugin(company);
               let currentJobs = rawPostings.map((raw) =>
                 plugin ? plugin.normalize(raw, company) : JobNormalizer.normalize(raw, company),
               );
@@ -466,8 +449,7 @@ export async function runOrchestrator(
         });
       }
 
-      await taskQueue.runAll(5, 500);
-      taskQueue.clear();
+      await multiPoolQueue.runAll(150);
 
       BroadcastManager.publish('batch:complete', { batchIndex: b + 1 }, 'success');
 
@@ -781,6 +763,9 @@ export async function runOrchestrator(
       totalFailures: totalFailuresCount,
     }, totalFailuresCount > 0 ? 'warning' : 'success');
   } finally {
+    // 7.5. Shutdown Browser Pool
+    await BrowserPool.getInstance().shutdown();
+
     // 8. Release Advisory Lock
     if (!config.isLocal) {
       try {

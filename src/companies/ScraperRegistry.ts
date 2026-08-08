@@ -17,6 +17,8 @@ import { plugin as eightfoldPlugin } from './plugins/EightfoldPlugin.js';
 import { plugin as avaturePlugin } from './plugins/AvaturePlugin.js';
 import { plugin as darwinboxPlugin } from './plugins/DarwinboxPlugin.js';
 import { plugin as bambooHRPlugin } from './plugins/BambooHRPlugin.js';
+import { plugin as weekdayPlugin } from './plugins/WeekdayPlugin.js';
+import { plugin as peoplestrongPlugin } from './plugins/PeopleStrongPlugin.js';
 import { Logger } from '../core/Logger.js';
 
 export class ScraperRegistry {
@@ -39,6 +41,8 @@ export class ScraperRegistry {
     avaturePlugin,
     darwinboxPlugin,
     bambooHRPlugin,
+    weekdayPlugin,
+    peoplestrongPlugin,
   ];
 
   /**

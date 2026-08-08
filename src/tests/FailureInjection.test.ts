@@ -11,6 +11,7 @@ describe('Failure-Injection and Resiliency Tests', () => {
   beforeAll(async () => {
     const configMod = await import('../config/config.js');
     config = configMod.config;
+    config.isLocal = true;
 
     const orchestratorMod = await import('../core/index.js');
     runOrchestrator = orchestratorMod.runOrchestrator;

@@ -26,6 +26,7 @@ export interface HttpResponse<T = any> {
   status: number;
   headers: Headers;
   durationMs: number;
+  url: string;
 }
 
 export class HttpClient {
@@ -60,9 +61,13 @@ export class HttpClient {
       const startTime = Date.now();
 
       try {
+        const defaultAccept = method === 'GET'
+          ? 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/json;q=0.5'
+          : 'application/json, text/plain, */*';
+
         const headers: Record<string, string> = {
           'User-Agent': this.getRandomUserAgent(),
-          Accept: 'application/json, text/plain, */*',
+          Accept: defaultAccept,
           'Accept-Language': 'en-US,en;q=0.9',
           'Accept-Encoding': 'gzip, deflate, br',
           ...config.headers,
@@ -114,10 +119,15 @@ export class HttpClient {
           const contentType = response.headers.get('content-type') ?? '';
           let data: any;
 
+          const rawText = await response.text();
           if (contentType.includes('application/json')) {
-            data = await response.json();
+            try {
+              data = JSON.parse(rawText);
+            } catch {
+              data = rawText;
+            }
           } else {
-            data = await response.text();
+            data = rawText;
           }
 
           return {
@@ -125,6 +135,7 @@ export class HttpClient {
             status: response.status,
             headers: response.headers,
             durationMs,
+            url: response.url,
           };
         } catch (error: any) {
           clearTimeout(timeoutId);

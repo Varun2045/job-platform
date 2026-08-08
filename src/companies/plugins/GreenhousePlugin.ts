@@ -25,34 +25,73 @@ export class GreenhousePlugin implements ScraperPlugin {
   }
 
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
+    const genericTokens = new Set(['careers', 'jobs', 'positions', 'open-positions', 'search-jobs', 'current-openings', 'search', 'all-jobs', 'join', 'embed', 'job_board', 'v1', 'global', 'en', 'careers-home', 'careers-list', 'positions']);
+
     let boardToken = company.api_endpoint || company.id;
     if (boardToken.startsWith('http://') || boardToken.startsWith('https://')) {
-      const match = boardToken.match(/boards\.greenhouse\.io\/([^/?#]+)/);
-      if (match) {
-        boardToken = match[1];
+      try {
+        const urlObj = new URL(boardToken);
+        const forParam = urlObj.searchParams.get('for');
+        if (forParam) {
+          boardToken = forParam;
+        } else {
+          const parts = urlObj.pathname.split('/').filter(Boolean);
+          const filteredParts = parts.filter(p => p !== 'embed' && p !== 'job_board' && p !== 'v1');
+          boardToken = filteredParts[filteredParts.length - 1] || company.id;
+        }
+      } catch {
+        const match = boardToken.match(/boards\.greenhouse\.io\/([^/?#]+)/);
+        if (match) {
+          boardToken = match[1];
+        }
       }
     }
-    const url = `https://boards-api.greenhouse.io/v1/boards/${boardToken}/jobs?content=true`;
 
-    Logger.debug(`Greenhouse discovery request for company: ${company.name} [Board: ${boardToken}]`);
-    const response = await httpClient.get<any>(url);
-
-    if (!response.data || !Array.isArray(response.data.jobs)) {
-      throw new Error(`Unexpected Greenhouse API response structure for ${company.name}`);
+    if (genericTokens.has(boardToken.toLowerCase())) {
+      boardToken = company.id;
     }
 
-    const rawJobs = response.data.jobs.map((job: any) => ({
-      company: company.name,
-      id: String(job.id),
-      title: job.title,
-      location: job.location?.name ?? 'Unknown',
-      url: job.absolute_url,
-      datePosted: job.updated_at,
-      team: job.departments?.[0]?.name ?? job.offices?.[0]?.name ?? 'General',
-      source: 'greenhouse',
-      description: job.content, // greenhouse content is HTML description
-      raw: job,
-    }));
+    const tryTokens = [boardToken];
+    if (boardToken !== company.id) {
+      tryTokens.push(company.id);
+    }
+    const cleanedId = company.id.replace(/[-_]/g, '');
+    if (!tryTokens.includes(cleanedId)) {
+      tryTokens.push(cleanedId);
+    }
+
+    let lastError: any = null;
+    let rawJobs: RawJob[] = [];
+
+    for (const token of tryTokens) {
+      const url = `https://boards-api.greenhouse.io/v1/boards/${token}/jobs?content=true`;
+      Logger.debug(`Greenhouse discovery request for company: ${company.name} [Board: ${token}]`);
+      try {
+        const response = await httpClient.get<any>(url, undefined, { timeoutMs: 20000, retries: 1 });
+        if (response.data && Array.isArray(response.data.jobs)) {
+          rawJobs = response.data.jobs.map((job: any) => ({
+            company: company.name,
+            id: String(job.id),
+            title: job.title,
+            location: job.location?.name ?? 'Unknown',
+            url: job.absolute_url,
+            datePosted: job.updated_at,
+            team: job.departments?.[0]?.name ?? job.offices?.[0]?.name ?? 'General',
+            source: 'greenhouse',
+            description: job.content, // greenhouse content is HTML description
+            raw: job,
+          }));
+          break;
+        }
+      } catch (err: any) {
+        lastError = err;
+        Logger.warn(`Greenhouse board token "${token}" failed for ${company.name}: ${err.message}`);
+      }
+    }
+
+    if (rawJobs.length === 0 && lastError) {
+      throw lastError;
+    }
 
     return rawJobs;
   }

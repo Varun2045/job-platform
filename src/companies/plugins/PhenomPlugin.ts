@@ -29,14 +29,38 @@ export class PhenomPlugin implements ScraperPlugin {
     
     // Extract company slug from Phenom URLs
     if (companySlug.startsWith('http://') || companySlug.startsWith('https://')) {
-      const match = companySlug.match(/phenom\.com\/([^/?#]+)/);
-      if (match) {
-        companySlug = match[1];
-      } else {
-        // Try to extract from subdomain pattern
-        const subdomainMatch = companySlug.match(/:\/\/([^.]+)\.phenom\.pro/);
-        if (subdomainMatch) {
-          companySlug = subdomainMatch[1];
+      try {
+        const urlObj = new URL(companySlug);
+        const hostname = urlObj.hostname;
+        const hostParts = hostname.split('.');
+        
+        // Extract tenant name from domain (e.g., jobs.fidelity.com -> fidelity, careers.wellsfargojobs.com -> wellsfargo, talent.lowes.com -> lowes)
+        if (hostParts.length >= 3) {
+          const sub = hostParts[0].toLowerCase();
+          if (sub === 'jobs' || sub === 'careers' || sub === 'search' || sub === 'talent' || sub === 'www' || sub === 'sec') {
+            companySlug = hostParts[1];
+          } else {
+            companySlug = hostParts[0];
+          }
+        } else {
+          companySlug = hostParts[0];
+        }
+        
+        // Remove common suffixes or map specific ones
+        companySlug = companySlug.toLowerCase();
+        if (companySlug.endsWith('jobs') && companySlug.length > 4) {
+          companySlug = companySlug.substring(0, companySlug.length - 4);
+        }
+        if (companySlug === 'wellsfargojobs') companySlug = 'wellsfargo';
+      } catch {
+        const match = companySlug.match(/phenom\.com\/([^/?#]+)/);
+        if (match) {
+          companySlug = match[1];
+        } else {
+          const subdomainMatch = companySlug.match(/:\/\/([^.]+)\.phenom\.pro/);
+          if (subdomainMatch) {
+            companySlug = subdomainMatch[1];
+          }
         }
       }
     }

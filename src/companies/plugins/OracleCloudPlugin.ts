@@ -26,25 +26,30 @@ export class OracleCloudPlugin implements ScraperPlugin {
 
   public async discover(company: CompanyConfig, httpClient: HttpClient): Promise<RawJob[]> {
     let companyContext = company.api_endpoint || company.id;
-    
-    // Extract context from Oracle Cloud URLs
+    let baseUrl = 'https://fa.oraclecloud.com';
+    let site = companyContext;
+
     if (companyContext.startsWith('http://') || companyContext.startsWith('https://')) {
-      const match = companyContext.match(/fa\.oraclecloud\.com\/hcmUI\/CandidateExperience\/en\/sites\/([^/]+)/);
-      if (match) {
-        companyContext = match[1];
-      } else {
-        // Try alternative pattern
-        const altMatch = companyContext.match(/oraclecloud\.com\/([^/?#]+)/);
-        if (altMatch) {
-          companyContext = altMatch[1];
+      try {
+        const urlObj = new URL(companyContext);
+        baseUrl = `${urlObj.protocol}//${urlObj.host}`;
+        const match = urlObj.pathname.match(/CandidateExperience\/en\/sites\/([^/]+)/);
+        if (match) {
+          site = match[1];
+        } else {
+          const altMatch = urlObj.pathname.match(/\/([^/?#]+)/);
+          if (altMatch) {
+            site = altMatch[1];
+          }
         }
-      }
+      } catch {}
+    } else {
+      baseUrl = `https://fa.${companyContext}.oraclecloud.com`;
     }
 
-    // Oracle Cloud API endpoint pattern
-    const url = `https://fa.{companyContext}.oraclecloud.com/hcmUI/api/Employee/Candidate/${companyContext}/jobs`;
+    const url = `${baseUrl}/hcmUI/api/Employee/Candidate/${site}/jobs`;
 
-    Logger.debug(`Oracle Cloud discovery request for company: ${company.name} [Context: ${companyContext}]`);
+    Logger.debug(`Oracle Cloud discovery request for company: ${company.name} [URL: ${url}]`);
     
     try {
       const response = await httpClient.get<any>(url);

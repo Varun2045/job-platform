@@ -1,7 +1,7 @@
 # Company List by ATS Type
 
-Total Companies: 378
-Total ATS Types: 28
+Total Companies: 369
+Total ATS Types: 26
 
 ## AMAZON (1 companies, 1 enabled)
 
@@ -21,15 +21,14 @@ Total ATS Types: 28
 |--------------|--------------|--------|
 | Jar | https://changejar.applytojob.com/apply/ | ✅ Enabled |
 
-## ASHBY (43 companies, 43 enabled)
+## ASHBY (42 companies, 42 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Airbyte | https://airbyte.com/company/careers#open-roles | ✅ Enabled |
 | Anyscale | https://jobs.ashbyhq.com/anyscale | ✅ Enabled |
 | Baseten | https://jobs.ashbyhq.com/baseten | ✅ Enabled |
-| Character.ai | https://jobs.ashbyhq.com/character.ai | ✅ Enabled |
-| Chroma | https://jobs.ashbyhq.com/chroma | ✅ Enabled |
+| Character.ai | https://jobs.ashbyhq.com/character | ✅ Enabled |
 | Classplus | https://jobs.ashbyhq.com/classplus | ✅ Enabled |
 | Clerk | https://jobs.ashbyhq.com/clerk | ✅ Enabled |
 | Cognition AI | https://jobs.ashbyhq.com/cognition | ✅ Enabled |
@@ -69,13 +68,12 @@ Total ATS Types: 28
 | Vellum | https://jobs.ashbyhq.com/vellum | ✅ Enabled |
 | World Labs | https://jobs.ashbyhq.com/worldlabs | ✅ Enabled |
 
-## AVATURE (3 companies, 3 enabled)
+## AVATURE (2 companies, 2 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Bloomberg | https://bloomberg.avature.net/careers/SearchJobs | ✅ Enabled |
 | Deutsche Bank | https://careers.db.com | ✅ Enabled |
-| UBS | https://jobs.ubs.com | ✅ Enabled |
+| UBS | https://www.ubs.com/global/en/careers/search-jobs.html | ✅ Enabled |
 
 ## CONSIDER (1 companies, 1 enabled)
 
@@ -83,7 +81,7 @@ Total ATS Types: 28
 |--------------|--------------|--------|
 | WinZo | https://consider.com/boards/vc/griffin-gaming/jobs/winzo | ✅ Enabled |
 
-## CUSTOM (187 companies, 187 enabled)
+## CUSTOM (179 companies, 179 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
@@ -98,9 +96,8 @@ Total ATS Types: 28
 | Bain & Company | https://www.bain.com/careers/find-a-role/ | ✅ Enabled |
 | Bank of America | https://careers.bankofamerica.com/en-us/job-search | ✅ Enabled |
 | BCG | https://careers.bcg.com/global/en/ | ✅ Enabled |
-| Blinkit | https://blinkit.com/careers/jobs | ✅ Enabled |
 | Block | https://block.xyz/careers/jobs | ✅ Enabled |
-| Booking.com | https://jobs.booking.com | ✅ Enabled |
+| Booking.com | https://jobs.booking.com/booking/jobs | ✅ Enabled |
 | Brex | https://www.brex.com/careers | ✅ Enabled |
 | ByteDance | https://joinbytedance.com/search | ✅ Enabled |
 | Canonical | https://canonical.com/careers/all | ✅ Enabled |
@@ -109,46 +106,46 @@ Total ATS Types: 28
 | Cashfree Payments | https://www.cashfree.com/careers/ | ✅ Enabled |
 | Cerebras Systems | https://www.cerebras.ai/open-positions | ✅ Enabled |
 | Chargebee | https://www.chargebee.com/careers/ | ✅ Enabled |
-| Check Point | https://careers.checkpoint.com/ | ✅ Enabled |
+| Check Point | https://www.checkpoint.com/careers/ | ✅ Enabled |
+| Chroma | https://www.trychroma.com/careers | ✅ Enabled |
 | CircleCI | https://circleci.com/careers/jobs/ | ✅ Enabled |
-| Cisco | https://jobs.cisco.com/jobs/SearchJobs | ✅ Enabled |
+| Cisco | https://careers.cisco.com/global/en | ✅ Enabled |
 | Citadel | https://www.citadel.com/careers/open-opportunities/ | ✅ Enabled |
 | Cohesity | https://www.cohesity.com/careers/open-positions/ | ✅ Enabled |
-| Coinbase | https://www.coinbase.com/en-in/careers/positions?location=india | ✅ Enabled |
+| Coinbase | https://www.coinbase.com/en-in/careers/positions | ✅ Enabled |
 | Country Delight | https://countrydelight.in/careers | ✅ Enabled |
 | Curefit (Cult.fit) | https://careers.cult.fit/cult/jobslist | ✅ Enabled |
 | D. E. Shaw | https://www.deshaw.com/careers | ✅ Enabled |
-| DataStax | https://www.datastax.com/company/careers | ✅ Enabled |
+| DataStax | https://www.ibm.com/products/datastax | ✅ Enabled |
 | dbt Labs | https://www.getdbt.com/about-us/careers#roles | ✅ Enabled |
 | Decentro | https://decentro.tech/careers | ✅ Enabled |
 | DeHaat | https://agrevolution.in/careers | ✅ Enabled |
-| Delhivery | https://www.delhivery.com/careers/ | ✅ Enabled |
-| Dell | https://jobs.dell.com/ | ✅ Enabled |
-| Deloitte | https://careers.deloitte.com | ✅ Enabled |
+| Delhivery | https://www.delhivery.com/404 | ✅ Enabled |
+| Dell | https://enterpriseplatform.dell.com/hcmUI/CandidateExperience/en/sites/careers | ✅ Enabled |
+| Deloitte | https://www.deloitte.com/global/en.html | ✅ Enabled |
 | Discord | https://discord.com/careers#all-jobs | ✅ Enabled |
 | Docker | https://www.docker.com/career-openings/ | ✅ Enabled |
-| Dream11 | https://dreamsports.group/careers#jobs | ✅ Enabled |
+| Dream11 | https://www.dreamsports.group/lifeatdreamsports | ✅ Enabled |
 | Dropbox | https://www.dropbox.jobs/en/jobs/ | ✅ Enabled |
-| DRW | https://drw.com/careers | ✅ Enabled |
+| DRW | https://www.drw.com/work-at-drw | ✅ Enabled |
 | EA | https://jobs.ea.com/en_US/careers | ✅ Enabled |
 | eBay | https://jobs.ebayinc.com/us/en/search-results | ✅ Enabled |
 | Elastic | https://jobs.elastic.co/ | ✅ Enabled |
 | EPAM | https://careers.epam.com/en/jobs | ✅ Enabled |
 | Epic Games | https://www.epicgames.com/site/careers/jobs | ✅ Enabled |
 | Equinix | https://careers.equinix.com/equinix-is-hiring-in-india | ✅ Enabled |
-| Ericsson | https://jobs.ericsson.com | ✅ Enabled |
-| Exotel | https://exotel.com/careers/ | ✅ Enabled |
+| Ericsson | https://jobs.ericsson.com/careers | ✅ Enabled |
+| Exotel | https://exotel.com/about-us/careers/ | ✅ Enabled |
 | EY | https://careers.ey.com/ | ✅ Enabled |
 | Fi Money | https://fi.money/careers | ✅ Enabled |
 | Fibe | https://www.fibe.in/careers/ | ✅ Enabled |
 | Figma | https://www.figma.com/careers/#job-openings | ✅ Enabled |
 | Five Rings | https://fiverings.com/careers/ | ✅ Enabled |
 | Flipkart | https://flipkart.turbohire.co/careerpage/4d757ba0-3d57-448a-b82c-238ed87ac90f | ✅ Enabled |
-| Gartner | https://jobs.gartner.com/ | ✅ Enabled |
 | GitHub | https://www.github.careers/careers-home/jobs | ✅ Enabled |
 | Goldman Sachs | https://www.goldmansachs.com/careers | ✅ Enabled |
 | GoodSpace AI | https://goodspace.ai/careers | ✅ Enabled |
-| Groq | https://groq.com/careers-at-groq | ✅ Enabled |
+| Groq | https://groq.com/company | ✅ Enabled |
 | HSBC | https://www.hsbc.com/careers | ✅ Enabled |
 | HyperVerge | https://hyperverge.co/careers/ | ✅ Enabled |
 | IBM | https://www.ibm.com/in-en/careers/search | ✅ Enabled |
@@ -166,23 +163,20 @@ Total ATS Types: 28
 | Khatabook | https://khatabook.turbohire.co/careerpage/alljobs | ✅ Enabled |
 | Klarna | https://www.klarna.com/careers/ | ✅ Enabled |
 | KreditBee | https://www.kreditbee.in/careers | ✅ Enabled |
-| Leadsquared | https://www.leadsquared.com/careers/ | ✅ Enabled |
 | Lenovo | https://jobs.lenovo.com/en_US/careers | ✅ Enabled |
 | Lenskart | https://www.lenskart.com/careers-at-lenskart | ✅ Enabled |
-| Licious | https://www.licious.in/careers | ✅ Enabled |
+| Licious | https://careers.licious.com/ | ✅ Enabled |
 | LinkedIn | https://careers.linkedin.com/ | ✅ Enabled |
 | Locus | https://locus.sh/careers/ | ✅ Enabled |
 | Loom | https://loom.technology/careers/ | ✅ Enabled |
-| M2P Fintech | https://m2pfintech.com/careers | ✅ Enabled |
+| M2P Fintech | https://careers.m2pfintech.com/ | ✅ Enabled |
 | MakeMyTrip | https://careers.makemytrip.com/ | ✅ Enabled |
 | McKinsey | https://www.mckinsey.com/careers/search-jobs | ✅ Enabled |
-| MediaTek | https://careers.mediatek.com/en/jobs | ✅ Enabled |
 | Mensa Brands | https://brndme.in/join-us.html | ✅ Enabled |
 | Miro | https://miro.com/careers/open-positions/ | ✅ Enabled |
 | MongoDB | https://www.mongodb.com/company/careers/see-jobs#positions | ✅ Enabled |
 | Morgan Stanley | https://www.morganstanley.com/careers/career-opportunities-search/ | ✅ Enabled |
 | Moveworks | https://www.moveworks.com/us/en/company/careers#open-roles | ✅ Enabled |
-| MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | Myntra | https://careers.myntra.com/ | ✅ Enabled |
 | Nagarro | https://www.nagarro.com/en/careers | ✅ Enabled |
 | Navi | https://navi.turbohire.co/dashboardv2?orgId=3e818601-0baa-429c-b6f8-4b21903ae0e6 | ✅ Enabled |
@@ -195,10 +189,10 @@ Total ATS Types: 28
 | NoBroker | https://www.nobroker.in/careers | ✅ Enabled |
 | Nokia | https://jobs.nokia.com/en/sites/CX_1 | ✅ Enabled |
 | Nutanix | https://careers.nutanix.com/en/jobs | ✅ Enabled |
-| Nykaa | https://www.nykaa.com/careers | ✅ Enabled |
+| Nykaa | https://www.nykaa.com/who_are_we | ✅ Enabled |
 | Okta | https://www.okta.com/company/careers/job-listing/ | ✅ Enabled |
 | Ola | https://olacareers.turbohire.co/careerpage/e0c1eb37-eb7a-4ca4-bcc5-d59ce4ce9212 | ✅ Enabled |
-| OYO | https://www.oyorooms.com/careers | ✅ Enabled |
+| OYO | https://www.oyorooms.com/ | ✅ Enabled |
 | Palo Alto Networks | https://jobs.paloaltonetworks.com/en | ✅ Enabled |
 | Pine Labs | https://www.pinelabs.com/careers | ✅ Enabled |
 | Plaid | https://plaid.com/careers/ | ✅ Enabled |
@@ -206,7 +200,7 @@ Total ATS Types: 28
 | PostHog | https://posthog.com/careers | ✅ Enabled |
 | Purplle | https://www.purplle.com/careers | ✅ Enabled |
 | PwC | https://jobs-ta.pwc.com/global/en/ac-india-job-search | ✅ Enabled |
-| Quadeye | https://quadeye.com/careers | ✅ Enabled |
+| Quadeye | https://www.quadeye.com/careers/ | ✅ Enabled |
 | Qualcomm | https://careers.qualcomm.com/careers | ✅ Enabled |
 | QuestDB | https://questdb.com/careers/ | ✅ Enabled |
 | Retool | https://retool.com/careers#open-positions | ✅ Enabled |
@@ -228,7 +222,7 @@ Total ATS Types: 28
 | ShareChat | https://sharechat.com/careers | ✅ Enabled |
 | Shiprocket | https://careers.shiprocket.in/#jobs | ✅ Enabled |
 | Shopee | https://careers.shopee.sg/ | ✅ Enabled |
-| Shopify | https://shopify.com/careers | ✅ Enabled |
+| Shopify | https://www.shopify.com/careers | ✅ Enabled |
 | SIG (Susquehanna) | https://sig.com/careers/ | ✅ Enabled |
 | Signzy | https://www.signzy.com/careers/ | ✅ Enabled |
 | Slice | https://slice.bank.in/careers/open-positions | ✅ Enabled |
@@ -237,19 +231,17 @@ Total ATS Types: 28
 | Spinny | https://www.spinny.com/careers/ | ✅ Enabled |
 | Square Yards | https://www.squareyards.com/career | ✅ Enabled |
 | Stanza Living | https://www.stanzaliving.com/careers | ✅ Enabled |
-| Stripe | https://stripe.com/jobs/search | ✅ Enabled |
-| Sugar Cosmetics | https://sugarcosmetics.com/pages/careers | ✅ Enabled |
+| Stripe | https://stripe.com/careers/search | ✅ Enabled |
+| Sugar Cosmetics | https://www.sugarcosmetics.com/collections/all-makeup | ✅ Enabled |
 | Supercell | https://supercell.com/en/careers/ | ✅ Enabled |
 | Swiggy | https://careers.swiggy.com | ✅ Enabled |
 | Synopsys | https://careers.synopsys.com/search-jobs | ✅ Enabled |
 | Tailscale | https://tailscale.com/careers | ✅ Enabled |
-| Target | https://jobs.target.com | ✅ Enabled |
-| Tata Digital | https://www.tatadigital.com/careers | ✅ Enabled |
-| Tesla | https://www.tesla.com/careers | ✅ Enabled |
+| Target | https://corporate.target.com/careers | ✅ Enabled |
+| Tata Digital | https://www.tataneu.com/careers | ✅ Enabled |
 | Testbook | https://testbook.com/careers | ✅ Enabled |
 | Two Sigma | https://www.twosigma.com/careers/ | ✅ Enabled |
 | Uber | https://jobs.uber.com/en/jobs/ | ✅ Enabled |
-| Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | UnitedHealth | https://careers.unitedhealthgroup.com/search-jobs | ✅ Enabled |
 | Unity | https://unity.com/careers/positions | ✅ Enabled |
 | Upstox | https://upstox.com/careers/ | ✅ Enabled |
@@ -259,7 +251,7 @@ Total ATS Types: 28
 | Walmart | https://careers.walmart.com/us/en/home | ✅ Enabled |
 | Wayfair | https://www.wayfair.com/careers/jobs | ✅ Enabled |
 | Weaviate | https://weaviate.io/company/careers#jobs | ✅ Enabled |
-| WebEngage | https://webengage.com/careers/ | ✅ Enabled |
+| WebEngage | https://webengage.com/current-openings/ | ✅ Enabled |
 | Weights & Biases | https://www.coreweave.com/careers/weights-biases | ✅ Enabled |
 | Whatfix | https://whatfix.com/careers | ✅ Enabled |
 | Wise | https://wise.jobs/ | ✅ Enabled |
@@ -268,21 +260,22 @@ Total ATS Types: 28
 | Yellow.ai | https://yellow.ai/career/ | ✅ Enabled |
 | YubiKey | https://www.go-yubi.com/careers | ✅ Enabled |
 | Zapier | https://zapier.com/jobs#job-openings | ✅ Enabled |
-| Zepto | https://zepto.talentrecruit.com/career-page | ✅ Enabled |
 | Zerodha | https://careers.zerodha.com/ | ✅ Enabled |
 | Zoho | https://www.zoho.com/careers/ | ✅ Enabled |
-| Zomato (Eternal) | https://www.eternal.com/careers/ | ✅ Enabled |
 | ZS Associates | https://jobs.zs.com/jobs | ✅ Enabled |
 | Zscaler | https://www.zscaler.com/careers | ✅ Enabled |
 
-## DARWINBOX (4 companies, 4 enabled)
+## DARWINBOX (7 companies, 7 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Darwinbox | https://dbx.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
+| Leadsquared | https://leadsquaredhrms.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
+| MyGate | https://mygate.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | NxtWave | https://nxtwave.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 | Porter | https://porter.darwinbox.in/ms/candidatev2/main/careers/home | ✅ Enabled |
 | Rapido | https://rapido.darwinbox.in/ms/candidatev2/main | ✅ Enabled |
+| Unacademy | https://unacademy.darwinbox.in/ms/candidatev2/main/careers/allJobs | ✅ Enabled |
 
 ## EIGHTFOLD (3 companies, 3 enabled)
 
@@ -302,43 +295,43 @@ Total ATS Types: 28
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Google | https://careers.google.com/jobs/results | ✅ Enabled |
+| Google | https://www.google.com/about/careers/applications/jobs/results | ✅ Enabled |
 
 ## GREENHOUSE (50 companies, 50 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Adyen | https://boards.greenhouse.io/adyen | ✅ Enabled |
-| Affirm | https://boards.greenhouse.io/affirm | ✅ Enabled |
-| Airbnb | https://boards.greenhouse.io/airbnb | ✅ Enabled |
+| Adyen | https://job-boards.greenhouse.io/adyen | ✅ Enabled |
+| Affirm | https://job-boards.greenhouse.io/affirm | ✅ Enabled |
+| Airbnb | https://careers.airbnb.com/positions/ | ✅ Enabled |
 | Anthropic | https://job-boards.greenhouse.io/anthropic | ✅ Enabled |
 | Box | https://job-boards.greenhouse.io/boxinc | ✅ Enabled |
 | ClickHouse | https://job-boards.greenhouse.io/clickhouse | ✅ Enabled |
-| Cloudflare | https://boards.greenhouse.io/cloudflare | ✅ Enabled |
-| Cockroach Labs | https://boards.greenhouse.io/cockroachlabs | ✅ Enabled |
-| CoreWeave | https://boards.greenhouse.io/coreweave | ✅ Enabled |
+| Cloudflare | https://www.cloudflare.com/careers/ | ✅ Enabled |
+| Cockroach Labs | https://www.cockroachlabs.com/careers/open-positions/ | ✅ Enabled |
+| CoreWeave | https://coreweave.com/careers | ✅ Enabled |
 | Dagster Labs | https://job-boards.greenhouse.io/dagsterlabs | ✅ Enabled |
-| Databricks | https://boards.greenhouse.io/databricks | ✅ Enabled |
-| Datadog | https://boards.greenhouse.io/datadog | ✅ Enabled |
+| Databricks | https://www.databricks.com/company/careers/open-positions | ✅ Enabled |
+| Datadog | https://careers.datadoghq.com/ | ✅ Enabled |
 | DoorDash | https://job-boards.greenhouse.io/doordashindia | ✅ Enabled |
-| Fastly | https://boards.greenhouse.io/fastly | ✅ Enabled |
+| Fastly | https://www.fastly.com/about/careers/current-openings | ✅ Enabled |
 | GitLab | https://job-boards.greenhouse.io/gitlab | ✅ Enabled |
-| Grafana Labs | https://boards.greenhouse.io/grafanalabs | ✅ Enabled |
-| Graviton Research Capital | https://boards.greenhouse.io/embed/job_board?for=gravitonresearchcapital | ✅ Enabled |
-| Groww | https://boards.greenhouse.io/groww | ✅ Enabled |
+| Grafana Labs | https://job-boards.greenhouse.io/grafanalabs | ✅ Enabled |
+| Graviton Research Capital | https://job-boards.greenhouse.io/embed/job_board?for=gravitonresearchcapital | ✅ Enabled |
+| Groww | https://job-boards.greenhouse.io/groww | ✅ Enabled |
 | Headlands Tech | https://job-boards.greenhouse.io/headlandstechnologiesllc | ✅ Enabled |
-| Hudson River Trading | https://www.hudsonrivertrading.com/careers/ | ✅ Enabled |
-| InMobi | https://boards.greenhouse.io/inmobi | ✅ Enabled |
-| Instacart | https://boards.greenhouse.io/instacart | ✅ Enabled |
+| Hudson River Trading | https://job-boards.greenhouse.io/hrttalentcommunity | ✅ Enabled |
+| InMobi | https://job-boards.greenhouse.io/inmobi | ✅ Enabled |
+| Instacart | https://www.instacart.careers/current-openings | ✅ Enabled |
 | JetBrains | https://job-boards.eu.greenhouse.io/jetbrains | ✅ Enabled |
-| Jump Trading | https://www.jumptrading.com/careers/ | ✅ Enabled |
-| Klaviyo | https://boards.greenhouse.io/klaviyo | ✅ Enabled |
-| LaunchDarkly | https://boards.greenhouse.io/launchdarkly | ✅ Enabled |
-| Netlify | https://boards.greenhouse.io/netlify | ✅ Enabled |
+| Jump Trading | https://www.jumptrading.com/careers | ✅ Enabled |
+| Klaviyo | https://www.klaviyo.com/careers/search-jobs | ✅ Enabled |
+| LaunchDarkly | https://job-boards.greenhouse.io/launchdarkly | ✅ Enabled |
+| Netlify | https://job-boards.greenhouse.io/netlify | ✅ Enabled |
 | NK Securities Research | https://job-boards.greenhouse.io/nksecuritiesresearch | ✅ Enabled |
-| Old Mission Capital | https://boards.greenhouse.io/oldmissioncapital | ✅ Enabled |
-| Optiver | https://optiver.com/working-at-optiver/career-opportunities | ✅ Enabled |
-| PagerDuty | https://boards.greenhouse.io/pagerduty | ✅ Enabled |
+| Old Mission Capital | https://www.oldmissioncapital.com/careers/ | ✅ Enabled |
+| Optiver | https://www.optiver.com/join-us/jobs/ | ✅ Enabled |
+| PagerDuty | https://job-boards.greenhouse.io/pagerduty | ✅ Enabled |
 | PhonePe | https://job-boards.greenhouse.io/phonepe | ✅ Enabled |
 | Pinterest | https://boards.greenhouse.io/pinterest | ✅ Enabled |
 | PlanetScale | https://job-boards.greenhouse.io/planetscale | ✅ Enabled |
@@ -347,17 +340,17 @@ Total ATS Types: 28
 | Pure Storage | https://job-boards.greenhouse.io/purestorage | ✅ Enabled |
 | Razorpay | https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited | ✅ Enabled |
 | Reddit | https://job-boards.greenhouse.io/reddit | ✅ Enabled |
-| Samsara | https://boards.greenhouse.io/samsara | ✅ Enabled |
+| Samsara | https://www.samsara.com/company/careers/roles | ✅ Enabled |
 | SmartBear | https://job-boards.greenhouse.io/smartbear | ✅ Enabled |
 | Sourcegraph | https://job-boards.greenhouse.io/sourcegraph91 | ✅ Enabled |
 | Sumo Logic | https://job-boards.greenhouse.io/sumologic | ✅ Enabled |
-| Toast | https://boards.greenhouse.io/toast | ✅ Enabled |
-| Together AI | https://boards.greenhouse.io/togetherai | ✅ Enabled |
-| Tower Research Capital | https://boards.greenhouse.io/towerresearchcapital | ✅ Enabled |
-| Twilio | https://boards.greenhouse.io/twilio | ✅ Enabled |
+| Toast | https://careers.toasttab.com/homepage | ✅ Enabled |
+| Together AI | https://job-boards.greenhouse.io/togetherai | ✅ Enabled |
+| Tower Research Capital | https://tower-research.com/open-positions/ | ✅ Enabled |
+| Twilio | https://job-boards.greenhouse.io/twilio | ✅ Enabled |
 | Twitch | https://job-boards.greenhouse.io/twitch | ✅ Enabled |
-| Vercel | https://boards.greenhouse.io/vercel | ✅ Enabled |
-| Waymo | https://boards.greenhouse.io/waymo | ✅ Enabled |
+| Vercel | https://job-boards.greenhouse.io/vercel | ✅ Enabled |
+| Waymo | https://careers.withwaymo.com/jobs/search | ✅ Enabled |
 
 ## KEKAHIRE (2 companies, 2 enabled)
 
@@ -387,7 +380,7 @@ Total ATS Types: 28
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Meta | https://www.metacareers.com/jobsearch/ | ✅ Enabled |
+| Meta | https://www.metacareers.com/jobs/ | ✅ Enabled |
 
 ## MICROSOFT (1 companies, 1 enabled)
 
@@ -395,40 +388,35 @@ Total ATS Types: 28
 |--------------|--------------|--------|
 | Microsoft | https://apply.careers.microsoft.com/careers?domain=microsoft.com | ✅ Enabled |
 
-## ORACLECLOUD (5 companies, 5 enabled)
+## ORACLECLOUD (6 companies, 6 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Honeywell | https://careers.honeywell.com/en/sites/Honeywell | ✅ Enabled |
 | JPMorgan Chase | https://jpmc.fa.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/jobs | ✅ Enabled |
-| KPMG | https://ejgk.fa.em2.oraclecloud.com/careers | ✅ Enabled |
+| KPMG | https://ejgk.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_3 | ✅ Enabled |
 | Oracle | https://careers.oracle.com/en/sites/jobsearch/jobs?location=India | ✅ Enabled |
-| Tesco Bengaluru | https://apply.tesco-careers.com | ✅ Enabled |
-
-## PEOPLESTRONG (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| Elasticrun | https://elasticruncareers.peoplestrong.com/job/joblist | ✅ Enabled |
+| Tesco Bengaluru | https://apply.tesco-careers.com/members/index.php | ✅ Enabled |
+| Texas Instruments | https://careers.ti.com/en/sites/CX/jobs | ✅ Enabled |
 
 ## PHENOM (4 companies, 4 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Barclays | https://search.jobs.barclays | ✅ Enabled |
-| Fidelity Investments | https://jobs.fidelity.com | ✅ Enabled |
-| Lowe's India | https://talent.lowes.com | ✅ Enabled |
-| Wells Fargo | https://www.wellsfargojobs.com/en | ✅ Enabled |
+| Lowe's India | https://talent.lowes.com/us/en | ✅ Enabled |
+| Philips | https://www.careers.philips.com/global/en/search-results | ✅ Enabled |
+| Warner Bros. Discovery | https://careers.wbd.com/global/en | ✅ Enabled |
 
 ## SMARTRECRUITERS (5 companies, 5 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
 | Arista Networks | https://careers.smartrecruiters.com/AristaNetworks | ✅ Enabled |
-| Bosch | https://careers.smartrecruiters.com/BoschGroup | ✅ Enabled |
+| Bosch | https://jobs.bosch.com/en | ✅ Enabled |
 | Canva | https://careers.smartrecruiters.com/Canva | ✅ Enabled |
 | Freshworks | https://careers.smartrecruiters.com/freshworks | ✅ Enabled |
-| Ubisoft | https://careers.smartrecruiters.com/ubisoft | ✅ Enabled |
+| Ubisoft | https://jobs.smartrecruiters.com/ | ✅ Enabled |
 
 ## TALENT500 (1 companies, 1 enabled)
 
@@ -443,19 +431,12 @@ Total ATS Types: 28
 | Boeing | https://jobs.boeing.com/ | ✅ Enabled |
 | Caterpillar | https://careers.caterpillar.com/en/jobs/ | ✅ Enabled |
 | FedEx | https://careers.fedex.com | ✅ Enabled |
-| Lockheed Martin | https://www.lockheedmartinjobs.com | ✅ Enabled |
+| Lockheed Martin | https://www.lockheedmartin.com/en-us/careers/index.html | ✅ Enabled |
 
-## TRAKSTAR (1 companies, 1 enabled)
-
-| Company Name | API Endpoint | Status |
-|--------------|--------------|--------|
-| BookMyShow | https://in.bookmyshow.com/careers/job-listing | ✅ Enabled |
-
-## WEEKDAY (2 companies, 2 enabled)
+## WEEKDAY (1 companies, 1 enabled)
 
 | Company Name | API Endpoint | Status |
 |--------------|--------------|--------|
-| Ather Energy | https://careers.atherenergy.com/jobs | ✅ Enabled |
 | PhysicsWallah | https://jobs.lsvp.com/jobs/physicswallah | ✅ Enabled |
 
 ## WORKABLE (1 companies, 1 enabled)
@@ -470,8 +451,8 @@ Total ATS Types: 28
 |--------------|--------------|--------|
 | Adobe | https://adobe.wd5.myworkdayjobs.com/external_experienced | ✅ Enabled |
 | Analog Devices | https://analogdevices.wd1.myworkdayjobs.com/External | ✅ Enabled |
-| Applied Materials | https://amat.wd1.myworkdayjobs.com/External_Careers | ✅ Enabled |
-| ASML | https://www.asml.com/en/careers/find-your-job | ✅ Enabled |
+| Applied Materials | https://appliedmaterials.wd1.myworkdayjobs.com/AppliedMaterials | ✅ Enabled |
+| ASML | https://asml.wd3.myworkdayjobs.com/ASMLEXT1 | ✅ Enabled |
 | Autodesk | https://autodesk.wd1.myworkdayjobs.com/Ext | ✅ Enabled |
 | BlackRock | https://blackrock.wd1.myworkdayjobs.com/BlackRock_Professional | ✅ Enabled |
 | Broadcom | https://broadcom.wd1.myworkdayjobs.com/External_Career | ✅ Enabled |
@@ -479,7 +460,9 @@ Total ATS Types: 28
 | Cadence Design Systems | https://cadence.wd1.myworkdayjobs.com/External_Careers | ✅ Enabled |
 | CrowdStrike | https://crowdstrike.wd5.myworkdayjobs.com/CrowdStrikeCareers | ✅ Enabled |
 | Expedia | https://expedia.wd108.myworkdayjobs.com/en-US/search | ✅ Enabled |
+| Fidelity Investments | https://fil.wd3.myworkdayjobs.com/en-US/001 | ✅ Enabled |
 | Fortinet | https://fortinet.wd1.myworkdayjobs.com/External | ✅ Enabled |
+| Gartner | https://gartner.wd5.myworkdayjobs.com/en-US/EXT | ✅ Enabled |
 | GE Aerospace | https://geaerospace.wd5.myworkdayjobs.com/GE_ExternalSite | ✅ Enabled |
 | GE HealthCare | https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite | ✅ Enabled |
 | GE Vernova | https://gevernova.wd5.myworkdayjobs.com/Vernova_ExternalSite | ✅ Enabled |
@@ -499,7 +482,6 @@ Total ATS Types: 28
 | NVIDIA | https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite | ✅ Enabled |
 | Optum | https://optum.wd5.myworkdayjobs.com/OptumCareers | ✅ Enabled |
 | Pfizer | https://pfizer.wd1.myworkdayjobs.com/PfizerCareers | ✅ Enabled |
-| Philips | https://www.careers.philips.com/global/en/search-results | ✅ Enabled |
 | Red Hat | https://redhat.wd5.myworkdayjobs.com/Jobs | ✅ Enabled |
 | Rubrik | https://www.rubrik.com/company/careers#positions | ✅ Enabled |
 | Salesforce | https://salesforce.wd12.myworkdayjobs.com/External_Career_Site | ✅ Enabled |
@@ -507,11 +489,10 @@ Total ATS Types: 28
 | Siemens | https://siemens.wd3.myworkdayjobs.com/Siemens_Careers | ✅ Enabled |
 | Slack | https://salesforce.wd12.myworkdayjobs.com/Slack | ✅ Enabled |
 | Splunk | https://splunk.wd1.myworkdayjobs.com/External | ✅ Enabled |
-| Texas Instruments | https://careers.ti.com/search-jobs/ | ✅ Enabled |
 | Uniphore | https://uniphore.wd503.myworkdayjobs.com/Uniphore | ✅ Enabled |
 | Visa | https://visa.wd1.myworkdayjobs.com/Careers | ✅ Enabled |
-| Warner Bros. Discovery | https://careers.wbd.com | ✅ Enabled |
-| Workday | https://workday.wd5.myworkdayjobs.com/Workday | ✅ Enabled |
+| Wells Fargo | https://wd1.myworkdaysite.com/en-US/recruiting/wf/WellsFargoJobs | ✅ Enabled |
+| Workday | https://workday.wd5.myworkdayjobs.com/Workday/?source=Careers_Website | ✅ Enabled |
 | Zendesk | https://zendesk.wd1.myworkdayjobs.com/zendesk | ✅ Enabled |
 | Zoom | https://zoom.wd5.myworkdayjobs.com/Zoom | ✅ Enabled |
 

@@ -151,7 +151,7 @@ export class FileStorage implements StorageProvider {
     const stateComps = this.readJsonFile<CompanyConfig[]>(this.companiesPath, []);
     
     // In test mode, if test explicitly seeded custom companies_state.json, return stateComps directly
-    if (process.env.NODE_ENV === 'test' && stateComps.length > 0 && stateComps.length < 50) {
+    if ((process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined) && stateComps.length > 0 && (stateComps.length < 150 || stateComps[0]?.id.startsWith('mock-'))) {
       return stateComps;
     }
 

@@ -1,6 +1,7 @@
-import { chromium, Browser, Page } from 'playwright';
+import { Page } from 'playwright';
 import { CompanyConfig, RawJob } from './Scraper.js';
 import { Logger } from '../core/Logger.js';
+import { BrowserPool } from '../core/BrowserPool.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -34,16 +35,9 @@ export class PlaywrightScraper {
     }
     Logger.info(`Launching Playwright scraper for ${company.name} at: ${url}`);
 
-    let browser: Browser | null = null;
+    const pool = BrowserPool.getInstance();
+    const { context, page } = await pool.acquirePage();
     try {
-      browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-      });
-
-      const page = await browser.newPage();
-      await page.setViewportSize({ width: 1280, height: 800 });
-
       // Navigate with timeout
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
 
@@ -89,34 +83,23 @@ export class PlaywrightScraper {
     } catch (e: any) {
       Logger.error(`Playwright discovery failed for ${company.name}: ${e.message}`);
       // Take screenshot of failure before throwing
-      if (browser) {
-        try {
-          const pages = browser.contexts()[0]?.pages() ?? [];
-          if (pages.length > 0) {
-            await this.captureError(company.id, pages[0]);
-          }
-        } catch {
-          // Ignore
-        }
+      try {
+        await this.captureError(company.id, page);
+      } catch {
+        // Ignore
       }
       throw e;
     } finally {
-      if (browser) {
-        await browser.close();
-      }
+      await pool.releasePage(context);
     }
   }
 
   public async enrich(rawJob: RawJob): Promise<RawJob> {
     Logger.info(`Playwright enriching job description for ${rawJob.id} at URL: ${rawJob.url}`);
 
-    let browser: Browser | null = null;
+    const pool = BrowserPool.getInstance();
+    const { context, page } = await pool.acquirePage();
     try {
-      browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-      });
-      const page = await browser.newPage();
       await page.goto(rawJob.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
       await page.waitForTimeout(2000);
 
@@ -136,9 +119,7 @@ export class PlaywrightScraper {
       Logger.warn(`Playwright enrichment failed for ${rawJob.id}: ${e.message}`);
       return rawJob;
     } finally {
-      if (browser) {
-        await browser.close();
-      }
+      await pool.releasePage(context);
     }
   }
 }

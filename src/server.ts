@@ -277,6 +277,14 @@ const authMiddleware = async (req: express.Request, res: express.Response, next:
     token = authHeader.split(' ')[1];
   } else if (req.query.token) {
     token = req.query.token as string;
+  } else if (req.headers.cookie) {
+    const tokenCookie = req.headers.cookie
+      .split(';')
+      .map((c) => c.trim())
+      .find((c) => c.startsWith('token='));
+    if (tokenCookie) {
+      token = tokenCookie.substring(6); // length of 'token=' is 6
+    }
   }
 
   if (token) {
