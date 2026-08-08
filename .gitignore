@@ -25,6 +25,9 @@ storage/*.md
 storage/*.html
 storage/*.prom
 storage/screenshots/
+scraper-health-report.csv
+scraper-health-report.json
+scraper-health-report.md
 
 # Environment files
 .env
