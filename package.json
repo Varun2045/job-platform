@@ -35,7 +35,9 @@
     "proxy:full": "node dist/cli/proxyManager.js full-pipeline",
     "daily:digest": "node dist/cli/dailyScheduler.js",
     "daily:digest:now": "node dist/cli/dailyScheduler.js --now",
-    "uniform:intervals": "node scripts/apply-uniform-intervals.mjs"
+    "uniform:intervals": "node scripts/apply-uniform-intervals.mjs",
+    "midnight:scrape": "node dist/cli/midnightScraper.js",
+    "midnight:scrape:now": "node dist/cli/midnightScraper.js --now"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",
