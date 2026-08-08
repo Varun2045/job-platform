@@ -804,10 +804,6 @@ async function main() {
       why = 'Strict rate limits (429) that block request concurrency.';
       action = 'Reduce validation concurrency specifically for Wayfair or configure premium proxies.';
       effort = 'Medium (2-4 hours)';
-    } else if (r.companyName === 'MediaTek') {
-      why = 'Redirect loop on headless crawlers due to region block.';
-      action = 'Use geolocation residential proxies.';
-      effort = 'Medium (2-4 hours)';
     } else if (r.companyName === 'Setu') {
       why = 'Site connection timeout/abort under load.';
       action = 'Increase Playwright timeout limit specifically for Setu.';
