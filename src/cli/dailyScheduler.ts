@@ -76,20 +76,33 @@ export class DailyScheduler {
         return;
       }
       
-      // Create job digest
-      const digest: JobDigest = {
-        jobs: recentJobs,
-        runTimestamp: new Date().toISOString(),
-        totalCompaniesChecked: recentJobs.length,
-        totalJobsFound: recentJobs.length,
-        totalNewJobs: recentJobs.length,
-      };
+      // Create job digest with chunking (Telegram has 4096 char limit)
+      const JOBS_PER_MESSAGE = 10; // Split into smaller batches
+      const jobChunks = [];
+      for (let i = 0; i < recentJobs.length; i += JOBS_PER_MESSAGE) {
+        jobChunks.push(recentJobs.slice(i, i + JOBS_PER_MESSAGE));
+      }
       
-      // Send digest via Telegram
-      await this.telegramProvider.sendDigest(digest);
+      Logger.info(`Split ${recentJobs.length} jobs into ${jobChunks.length} messages`);
       
-      // Also send CSV version if requested
-      await this.sendCsvDigest(recentJobs);
+      // Send each chunk as a separate message
+      for (let i = 0; i < jobChunks.length; i++) {
+        const chunk = jobChunks[i];
+        const chunkDigest: JobDigest = {
+          jobs: chunk,
+          runTimestamp: new Date().toISOString(),
+          totalCompaniesChecked: recentJobs.length,
+          totalJobsFound: recentJobs.length,
+          totalNewJobs: recentJobs.length,
+        };
+        
+        const chunkNumber = i + 1;
+        const totalChunks = jobChunks.length;
+        
+        // Use the chunked digest method
+        await this.telegramProvider.sendChunkedDigest(chunkDigest, chunkNumber, totalChunks);
+        Logger.info(`Sent chunk ${chunkNumber}/${totalChunks} with ${chunk.length} jobs`);
+      }
       
       Logger.info(`Daily digest sent successfully with ${recentJobs.length} jobs`);
       

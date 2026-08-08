@@ -121,6 +121,102 @@ export class TelegramNotificationProvider implements NotificationProvider {
     }
   }
 
+  /**
+   * Send digest with chunk information for large job lists
+   */
+  public async sendChunkedDigest(digest: JobDigest, chunkNumber: number, totalChunks: number): Promise<void> {
+    if (!this.botToken || !this.chatId) {
+      Logger.warn('Telegram bot token or chat ID not configured. Skipping Telegram notification.');
+      return;
+    }
+
+    // Apply same filtering as sendDigest
+    const SENIOR_PATTERNS = [
+      /\bsenior\b/i,
+      /\bsr\.?\b/i,
+      /\bstaff\b/i,
+      /\bprincipal\b/i,
+      /\blead\b/i,
+      /\barchitect\b/i,
+      /\bdirector\b/i,
+      /\bmanager\b/i,
+      /\bhead\b/i,
+      /\bvp\b/i,
+      /\bexecutive\b/i,
+      /\bmid[- ]level\b/i,
+    ];
+
+    const FOREIGN_LOCATIONS = [
+      'united states', 'usa', 'uk', 'united kingdom', 'london', 'beijing', 'china',
+      'brazil', 'são paulo', 'sao paulo', 'germany', 'munich', 'berlin', 'tokyo', 'japan',
+      'france', 'paris', 'canada', 'toronto', 'vancouver', 'australia', 'sydney', 'singapore',
+      'europe', 'latam', 'apac', 'emea'
+    ];
+
+    const targetJobs = digest.jobs.filter((j) => {
+      if (process.env.NODE_ENV === 'test') return true;
+
+      const title = (j.title || '').toLowerCase();
+      const loc = (j.location || '').toLowerCase();
+      const exp = (j.experience || j.experienceLevel || '').toLowerCase();
+
+      // 1. Reject Senior & Mid-Level roles
+      if (
+        exp.includes('mid level') ||
+        exp.includes('senior') ||
+        exp.includes('manager') ||
+        exp.includes('executive') ||
+        exp.includes('director') ||
+        exp.includes('staff') ||
+        exp.includes('principal') ||
+        exp.includes('2–5 years') ||
+        exp.includes('5–8 years') ||
+        SENIOR_PATTERNS.some((pat) => pat.test(title)) ||
+        SENIOR_PATTERNS.some((pat) => pat.test(exp))
+      ) {
+        return false;
+      }
+
+      // 2. Reject Foreign non-India locations
+      const isExplicitForeign = FOREIGN_LOCATIONS.some((fLoc) => loc.includes(fLoc));
+      if (isExplicitForeign) {
+        return false;
+      }
+
+      // 3. Must be India location or India Remote
+      const isIndiaCityOrCountry = /india|bangalore|bengaluru|hyderabad|pune|gurugram|gurgaon|noida|mumbai|chennai|kolkata|ahmedabad|delhi|trivandrum|thiruvananthapuram|kochi|cochin|indore|jaipur/i.test(loc);
+      const isRemote = j.isRemote || loc.includes('remote') || loc.includes('work from home');
+
+      return isIndiaCityOrCountry || isRemote;
+    });
+
+    if (targetJobs.length === 0) {
+      Logger.info('No new Recent Graduate / Entry-Level India or Remote jobs matched filtering criteria. Skipping Telegram notification.');
+      return;
+    }
+
+    // Sort by most recent first
+    const sortedJobs = [...targetJobs].sort((a, b) => {
+      const dateA = a.datePosted ? new Date(a.datePosted).getTime() : 0;
+      const dateB = b.datePosted ? new Date(b.datePosted).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    // Build Telegram message with chunk indicator
+    const message = this.buildTelegramMessage(sortedJobs, digest.runTimestamp, chunkNumber, totalChunks);
+
+    try {
+      await this.sendMessage(message);
+      Logger.info(`Telegram chunk ${chunkNumber}/${totalChunks} sent successfully with ${sortedJobs.length} jobs`);
+      const telemetry = Telemetry.getInstance();
+      telemetry.recordEmail(true);
+    } catch (error) {
+      Logger.error('Failed to send Telegram chunked digest', error as Error);
+      const telemetry = Telemetry.getInstance();
+      telemetry.recordEmail(false);
+    }
+  }
+
   private buildTelegramMessage(jobs: Array<{
     title: string;
     companyName: string;
@@ -130,8 +226,12 @@ export class TelegramNotificationProvider implements NotificationProvider {
     isRemote?: boolean;
     datePosted?: string;
     applyUrl: string;
-  }>, runTimestamp: string): string {
-    const header = `🚀 *NEW GRAD & ENTRY LEVEL JOBS ALERT*\n`;
+  }>, runTimestamp: string, chunkNumber?: number, totalChunks?: number): string {
+    const chunkIndicator = chunkNumber && totalChunks 
+      ? ` (${chunkNumber}/${totalChunks})` 
+      : '';
+    
+    const header = `🚀 *NEW GRAD & ENTRY LEVEL JOBS ALERT${chunkIndicator}*\n`;
     const subheader = `${jobs.length} new job${jobs.length > 1 ? 's' : ''} found\n`;
     const divider = '─────────────────\n';
 
