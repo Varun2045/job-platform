@@ -37,15 +37,15 @@ export interface ImageCaptchaConfig {
 export class CaptchaSolver {
   private static instance: CaptchaSolver | null = null;
   private apiKey: string;
-  private provider: '2captcha' | 'anticaptcha' | 'custom';
+  private provider: '2captcha' | 'anticaptcha' | 'nocaptchaai' | 'custom';
   private baseUrl: string;
   private pollingIntervalMs: number = 2000;
   private maxPollAttempts: number = 30;
 
   private constructor() {
     this.apiKey = process.env.CAPTCHA_API_KEY || '';
-    this.provider = (process.env.CAPTCHA_PROVIDER as '2captcha' | 'anticaptcha' | 'custom') || '2captcha';
-    
+    this.provider = (process.env.CAPTCHA_PROVIDER as '2captcha' | 'anticaptcha' | 'nocaptchaai' | 'custom') || '2captcha';
+
     // Set base URL based on provider
     switch (this.provider) {
       case '2captcha':
@@ -53,6 +53,9 @@ export class CaptchaSolver {
         break;
       case 'anticaptcha':
         this.baseUrl = 'https://api.anti-captcha.com';
+        break;
+      case 'nocaptchaai':
+        this.baseUrl = 'https://api.nocaptchaai.com';
         break;
       default:
         this.baseUrl = 'http://2captcha.com';
@@ -96,6 +99,8 @@ export class CaptchaSolver {
         return await this.solveRecaptchaV2With2Captcha(config);
       } else if (this.provider === 'anticaptcha') {
         return await this.solveRecaptchaV2WithAntiCaptcha(config);
+      } else if (this.provider === 'nocaptchaai') {
+        return await this.solveRecaptchaV2WithNoCaptchaAI(config);
       }
 
       return null;
@@ -122,6 +127,8 @@ export class CaptchaSolver {
         return await this.solveHCaptchaWith2Captcha(config);
       } else if (this.provider === 'anticaptcha') {
         return await this.solveHCaptchaWithAntiCaptcha(config);
+      } else if (this.provider === 'nocaptchaai') {
+        return await this.solveHCaptchaWithNoCaptchaAI(config);
       }
 
       return null;
@@ -148,6 +155,8 @@ export class CaptchaSolver {
         return await this.solveImageCaptchaWith2Captcha(config);
       } else if (this.provider === 'anticaptcha') {
         return await this.solveImageCaptchaWithAntiCaptcha(config);
+      } else if (this.provider === 'nocaptchaai') {
+        return await this.solveImageCaptchaWithNoCaptchaAI(config);
       }
 
       return null;
@@ -496,6 +505,13 @@ export class CaptchaSolver {
         const response = await this.makeRequest(`${this.baseUrl}/getBalance`, balanceData);
         const result = JSON.parse(response);
         return parseFloat(result.balance || '0');
+      } else if (this.provider === 'nocaptchaai') {
+        const balanceData = {
+          key: this.apiKey,
+        };
+        const response = await this.makeRequest(`${this.baseUrl}/balance`, balanceData);
+        const result = JSON.parse(response);
+        return parseFloat(result.balance || '0');
       }
 
       return 0;
@@ -503,5 +519,91 @@ export class CaptchaSolver {
       Logger.error(`[CaptchaSolver] Failed to get balance: ${error.message}`);
       return 0;
     }
+  }
+
+  /**
+   * Solve reCAPTCHA v2 with NoCaptchaAI
+   */
+  private async solveRecaptchaV2WithNoCaptchaAI(config: RecaptchaV2Config): Promise<CaptchaSolution> {
+    const taskData = {
+      key: this.apiKey,
+      method: 'recaptcha_v2',
+      sitekey: config.siteKey,
+      pageurl: config.pageUrl,
+    };
+
+    const createResponse = await this.makeRequest(`${this.baseUrl}/solve`, taskData);
+    const result = JSON.parse(createResponse);
+
+    if (result.status !== 'success') {
+      throw new Error(`Failed to create CAPTCHA task: ${result.message}`);
+    }
+
+    const captchaId = result.task_id;
+    const solution = result.solution || result.token;
+    const solveTimeMs = Date.now() - Date.now();
+
+    return {
+      solution,
+      captchaId,
+      solveTimeMs,
+    };
+  }
+
+  /**
+   * Solve hCaptcha with NoCaptchaAI
+   */
+  private async solveHCaptchaWithNoCaptchaAI(config: HCaptchaConfig): Promise<CaptchaSolution> {
+    const taskData = {
+      key: this.apiKey,
+      method: 'hcaptcha',
+      sitekey: config.siteKey,
+      pageurl: config.pageUrl,
+    };
+
+    const createResponse = await this.makeRequest(`${this.baseUrl}/solve`, taskData);
+    const result = JSON.parse(createResponse);
+
+    if (result.status !== 'success') {
+      throw new Error(`Failed to create CAPTCHA task: ${result.message}`);
+    }
+
+    const captchaId = result.task_id;
+    const solution = result.solution || result.token;
+    const solveTimeMs = Date.now() - Date.now();
+
+    return {
+      solution,
+      captchaId,
+      solveTimeMs,
+    };
+  }
+
+  /**
+   * Solve image CAPTCHA with NoCaptchaAI
+   */
+  private async solveImageCaptchaWithNoCaptchaAI(config: ImageCaptchaConfig): Promise<CaptchaSolution> {
+    const taskData = {
+      key: this.apiKey,
+      method: 'image',
+      image: config.imageBase64,
+    };
+
+    const createResponse = await this.makeRequest(`${this.baseUrl}/solve`, taskData);
+    const result = JSON.parse(createResponse);
+
+    if (result.status !== 'success') {
+      throw new Error(`Failed to create CAPTCHA task: ${result.message}`);
+    }
+
+    const captchaId = result.task_id;
+    const solution = result.solution || result.text;
+    const solveTimeMs = Date.now() - Date.now();
+
+    return {
+      solution,
+      captchaId,
+      solveTimeMs,
+    };
   }
 }
