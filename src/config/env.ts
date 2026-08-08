@@ -69,6 +69,15 @@ const envSchema = z.object({
   WEIGHT_EXPERIENCE: z.coerce.number().optional(),
   WEIGHT_LOCATION: z.coerce.number().optional(),
   WEIGHT_TFIDF: z.coerce.number().optional(),
+
+  // Proxy Configuration
+  PROXY_ENABLED: z.preprocess((val) => val === 'true' || val === '1' || val === true, z.boolean()).default(false),
+  PROXY_MAX_POOL_SIZE: z.coerce.number().default(30),
+  PROXY_VALIDATION_TIMEOUT: z.coerce.number().default(5000),
+  PROXY_MAX_CONCURRENT_VALIDATIONS: z.coerce.number().default(10),
+  PROXY_FAILURE_THRESHOLD: z.coerce.number().default(3),
+  PROXY_COOLDOWN_MS: z.coerce.number().default(300000),
+  PROXY_REFRESH_INTERVAL: z.coerce.number().default(21600000),
 });
 
 // Validate environment variables at startup

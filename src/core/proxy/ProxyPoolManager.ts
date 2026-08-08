@@ -177,7 +177,7 @@ export class ProxyPoolManager {
     const now = Date.now();
     let recovered = 0;
 
-    for (const [key, entry] of this.pool.entries()) {
+    for (const [, entry] of this.pool.entries()) {
       if (entry.cooldownUntil && entry.cooldownUntil < now) {
         entry.healthy = true;
         entry.cooldownUntil = undefined;

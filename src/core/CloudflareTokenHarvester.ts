@@ -56,7 +56,7 @@ export class CloudflareTokenHarvester {
       this.redisClient = createClient({
         url: redisUrl,
         socket: {
-          reconnectStrategy: 'reconnect',
+          reconnectStrategy: (retries) => Math.min(retries * 50, 2000),
         },
       });
 

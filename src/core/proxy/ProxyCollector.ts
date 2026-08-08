@@ -5,7 +5,7 @@ export interface ProxyCandidate {
   ip: string;
   port: number;
   protocol: 'http' | 'https' | 'socks4' | 'socks5';
-  source: 'proxyscrape' | 'geonode' | 'freeproxylist';
+  source: 'proxyscrape' | 'geonode' | 'freeproxylist' | 'custom';
   country?: string;
   anonymity?: string;
   uptime?: number;
@@ -70,7 +70,7 @@ export class ProxyCollector {
    */
   private async fetchFromProxyScrape(): Promise<ProxyCandidate[]> {
     try {
-      const url = 'https://api.proxyscrape.com/v2/account_datacenter_proxy/elite?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all';
+      const url = 'https://api.proxyscrape.com/v4/free-proxy-list/get?request=display_proxies&protocol=http&proxy_format=ipport&format=text';
       
       const response = await got(url, {
         timeout: { request: 30000 },

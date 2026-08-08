@@ -47,6 +47,13 @@ export interface Config {
   localUserPassword?: string;
   localViewerEmail?: string;
   localViewerPassword?: string;
+  proxyEnabled?: boolean;
+  proxyMaxPoolSize?: number;
+  proxyValidationTimeout?: number;
+  proxyMaxConcurrentValidations?: number;
+  proxyFailureThreshold?: number;
+  proxyCooldownMs?: number;
+  proxyRefreshInterval?: number;
 }
 
 // Startup Validation Helper
@@ -162,4 +169,11 @@ export const config: Config = {
   localUserPassword: process.env.LOCAL_USER_PASSWORD,
   localViewerEmail: process.env.LOCAL_VIEWER_EMAIL,
   localViewerPassword: process.env.LOCAL_VIEWER_PASSWORD,
+  proxyEnabled: process.env.PROXY_ENABLED === 'true',
+  proxyMaxPoolSize: process.env.PROXY_MAX_POOL_SIZE ? parseInt(process.env.PROXY_MAX_POOL_SIZE, 10) : 30,
+  proxyValidationTimeout: process.env.PROXY_VALIDATION_TIMEOUT ? parseInt(process.env.PROXY_VALIDATION_TIMEOUT, 10) : 5000,
+  proxyMaxConcurrentValidations: process.env.PROXY_MAX_CONCURRENT_VALIDATIONS ? parseInt(process.env.PROXY_MAX_CONCURRENT_VALIDATIONS, 10) : 10,
+  proxyFailureThreshold: process.env.PROXY_FAILURE_THRESHOLD ? parseInt(process.env.PROXY_FAILURE_THRESHOLD, 10) : 3,
+  proxyCooldownMs: process.env.PROXY_COOLDOWN_MS ? parseInt(process.env.PROXY_COOLDOWN_MS, 10) : 300000,
+  proxyRefreshInterval: process.env.PROXY_REFRESH_INTERVAL ? parseInt(process.env.PROXY_REFRESH_INTERVAL, 10) : 21600000,
 };

@@ -1,7 +1,7 @@
 import { Logger } from './Logger.js';
 import got, { OptionsInit, Response } from 'got';
 import { ProxyPoolManager } from './proxy/ProxyPoolManager.js';
-import { ProxyCandidate } from './proxy/ProxyCollector.js';
+import { config as appConfig } from '../config/config.js';
 
 export class HttpError extends Error {
   public status: number;
@@ -46,6 +46,50 @@ export class HttpClient {
   private static currentProxyIndex = 0;
   private static proxyPoolManager: ProxyPoolManager | null = null;
   private static useAdvancedProxyPool = false;
+
+  static {
+    // Automatically initialize advanced proxy pool if enabled in config
+    if (appConfig.proxyEnabled) {
+      const envProxies: string[] = [];
+      for (const key of Object.keys(process.env)) {
+        if (key.startsWith('PROXY_POOL_')) {
+          const val = process.env[key];
+          if (val) envProxies.push(val);
+        }
+      }
+      
+      if (envProxies.length > 0) {
+        Logger.info(`[HttpClient] Auto-initializing proxy pool with ${envProxies.length} proxies from env...`);
+        const manager = ProxyPoolManager.getInstance({
+          maxPoolSize: appConfig.proxyMaxPoolSize,
+          cooldownMs: appConfig.proxyCooldownMs,
+          maxFailures: appConfig.proxyFailureThreshold,
+        });
+        
+        const results = envProxies.map(url => {
+          try {
+            const parsed = new URL(url);
+            const protocol = (parsed.protocol.replace(':', '') as any) || 'http';
+            const ip = parsed.hostname;
+            const port = parsed.port ? parseInt(parsed.port, 10) : 80;
+            return {
+              proxy: { ip, port, protocol, source: 'custom' as const },
+              isWorking: true,
+              latencyMs: 100,
+              supportsHttps: protocol === 'https' || protocol === 'http',
+            };
+          } catch {
+            return null;
+          }
+        }).filter(Boolean) as any[];
+        
+        manager.initializePool(results);
+        HttpClient.configureAdvancedProxyPool(manager);
+      } else {
+        Logger.warn('[HttpClient] Proxy rotation enabled but no PROXY_POOL_x variables found in env');
+      }
+    }
+  }
 
   /**
    * Configure proxy pool for rotation (simple string array)
@@ -272,11 +316,15 @@ export class HttpClient {
 
     // Add proxy configuration if available
     if (proxyUrl) {
-      options.proxyUrl = proxyUrl;
+      const parsedUrl = new URL(proxyUrl);
       if (config.proxyUsername && config.proxyPassword) {
-        options.username = config.proxyUsername;
-        options.password = config.proxyPassword;
+        parsedUrl.username = config.proxyUsername;
+        parsedUrl.password = config.proxyPassword;
       }
+      
+      // Use proxyUrl for got v15 (deprecated but still works)
+      // @ts-ignore - proxyUrl is deprecated in got v15 but still functional
+      options.proxyUrl = parsedUrl.toString();
     }
 
     if (config.body) {

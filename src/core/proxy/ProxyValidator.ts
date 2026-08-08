@@ -46,12 +46,13 @@ export class ProxyValidator {
     const proxyUrl = `${proxy.protocol}://${proxy.ip}:${proxy.port}`;
 
     try {
-      // Test HTTP connectivity
+      // Test HTTP connectivity using got's built-in proxy support
       const httpResponse = await got('http://ifconfig.me/ip', {
+        // @ts-ignore - proxyUrl is deprecated in got v15 but still functional
         proxyUrl,
         timeout: { request: this.config.timeoutMs },
         responseType: 'text',
-        retry: 0,
+        retry: { limit: 0 },
       });
 
       const latencyMs = Date.now() - startTime;
@@ -61,10 +62,11 @@ export class ProxyValidator {
       let supportsHttps = false;
       try {
         await got('https://ifconfig.me/ip', {
+          // @ts-ignore - proxyUrl is deprecated in got v15 but still functional
           proxyUrl,
           timeout: { request: this.config.timeoutMs },
           responseType: 'text',
-          retry: 0,
+          retry: { limit: 0 },
         });
         supportsHttps = true;
       } catch {
@@ -103,6 +105,44 @@ export class ProxyValidator {
   }
 
   /**
+   * Validate a single proxy with a strict fallback timeout wrapper
+   */
+  public async validateProxyWithTimeout(proxy: ProxyCandidate): Promise<ValidationResult> {
+    const hardTimeoutMs = this.config.timeoutMs + 2000;
+    let timer: NodeJS.Timeout | null = null;
+
+    const timeoutPromise = new Promise<ValidationResult>((resolve) => {
+      timer = setTimeout(() => {
+        resolve({
+          proxy,
+          isWorking: false,
+          latencyMs: hardTimeoutMs,
+          error: `Strict validator timeout after ${hardTimeoutMs}ms`,
+          supportsHttps: false,
+        });
+      }, hardTimeoutMs);
+    });
+
+    try {
+      const result = await Promise.race([
+        this.validateProxy(proxy),
+        timeoutPromise
+      ]);
+      if (timer) clearTimeout(timer);
+      return result;
+    } catch (e: any) {
+      if (timer) clearTimeout(timer);
+      return {
+        proxy,
+        isWorking: false,
+        latencyMs: this.config.timeoutMs,
+        error: e.message || 'Unknown validation error',
+        supportsHttps: false,
+      };
+    }
+  }
+
+  /**
    * Validate multiple proxies with concurrency control
    */
   public async validateProxies(proxies: ProxyCandidate[]): Promise<ValidationResult[]> {
@@ -116,7 +156,7 @@ export class ProxyValidator {
       Logger.info(`[ProxyValidator] Validating chunk ${i + 1}/${chunks.length} (${chunk.length} proxies)...`);
 
       const chunkResults = await Promise.all(
-        chunk.map(proxy => this.validateProxy(proxy))
+        chunk.map(proxy => this.validateProxyWithTimeout(proxy))
       );
 
       results.push(...chunkResults);

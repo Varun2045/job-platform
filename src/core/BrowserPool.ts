@@ -269,8 +269,8 @@ export class BrowserPool {
       };
       
       // 12. Audio fingerprint randomization
-      const originalGetChannelData = AudioContext.prototype.getChannelData;
-      AudioContext.prototype.getChannelData = function(channel) {
+      const originalGetChannelData = (AudioContext.prototype as any).getChannelData;
+      (AudioContext.prototype as any).getChannelData = function(channel: any) {
         const result = originalGetChannelData.apply(this, arguments as any);
         for (let i = 0; i < result.length; i++) {
           result[i] = result[i] + Math.random() * 0.0001 - 0.00005;
@@ -280,7 +280,7 @@ export class BrowserPool {
       
       // 13. Font enumeration spoofing
       const originalMeasureText = (CanvasRenderingContext2D as any).prototype.measureText;
-      (CanvasRenderingContext2D as any).prototype.measureText = function(text) {
+      (CanvasRenderingContext2D as any).prototype.measureText = function(text: any) {
         const result = originalMeasureText.apply(this, arguments as any);
         result.width = result.width + Math.random() * 0.1 - 0.05;
         return result;

@@ -228,7 +228,7 @@ export class CaptchaSolver {
     formData.append('key', this.apiKey);
     formData.append('method', 'base64');
     formData.append('body', config.imageBase64);
-    formData.append('json', 1);
+    formData.append('json', '1');
 
     if (config.numeric !== undefined) formData.append('numeric', config.numeric ? '1' : '0');
     if (config.minLength) formData.append('min_len', config.minLength.toString());

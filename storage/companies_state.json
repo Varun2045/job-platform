@@ -1,13 +1,1542 @@
 [
   {
-    "id": "test",
-    "name": "Test Corp",
+    "id": "mock-company-0",
+    "name": "Mock Company 0",
     "enabled": true,
+    "api_endpoint": "https://google.com/careers",
     "priority": 3,
     "interval_minutes": 60,
-    "resume_profiles": [],
-    "avg_response_time_ms": 0,
-    "total_scrapes": 10,
-    "total_failures": 0
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.382Z"
+  },
+  {
+    "id": "mock-company-1",
+    "name": "Mock Company 1",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.368Z"
+  },
+  {
+    "id": "mock-company-2",
+    "name": "Mock Company 2",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.352Z"
+  },
+  {
+    "id": "mock-company-3",
+    "name": "Mock Company 3",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.397Z"
+  },
+  {
+    "id": "mock-company-4",
+    "name": "Mock Company 4",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.786Z"
+  },
+  {
+    "id": "mock-company-5",
+    "name": "Mock Company 5",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.953Z"
+  },
+  {
+    "id": "mock-company-6",
+    "name": "Mock Company 6",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.251Z"
+  },
+  {
+    "id": "mock-company-7",
+    "name": "Mock Company 7",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.848Z"
+  },
+  {
+    "id": "mock-company-8",
+    "name": "Mock Company 8",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.002Z"
+  },
+  {
+    "id": "mock-company-9",
+    "name": "Mock Company 9",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.419Z"
+  },
+  {
+    "id": "mock-company-10",
+    "name": "Mock Company 10",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.573Z"
+  },
+  {
+    "id": "mock-company-11",
+    "name": "Mock Company 11",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.390Z"
+  },
+  {
+    "id": "mock-company-12",
+    "name": "Mock Company 12",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.118Z"
+  },
+  {
+    "id": "mock-company-13",
+    "name": "Mock Company 13",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.342Z"
+  },
+  {
+    "id": "mock-company-14",
+    "name": "Mock Company 14",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.915Z"
+  },
+  {
+    "id": "mock-company-15",
+    "name": "Mock Company 15",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.819Z"
+  },
+  {
+    "id": "mock-company-16",
+    "name": "Mock Company 16",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.885Z"
+  },
+  {
+    "id": "mock-company-17",
+    "name": "Mock Company 17",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.203Z"
+  },
+  {
+    "id": "mock-company-18",
+    "name": "Mock Company 18",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:24.755Z"
+  },
+  {
+    "id": "mock-company-19",
+    "name": "Mock Company 19",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback",
+    "detected_ats": "fallback",
+    "detected_ats_at": "2026-08-08T14:52:25.306Z"
+  },
+  {
+    "id": "mock-company-20",
+    "name": "Mock Company 20",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-21",
+    "name": "Mock Company 21",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-22",
+    "name": "Mock Company 22",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-23",
+    "name": "Mock Company 23",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-24",
+    "name": "Mock Company 24",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-25",
+    "name": "Mock Company 25",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-26",
+    "name": "Mock Company 26",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-27",
+    "name": "Mock Company 27",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-28",
+    "name": "Mock Company 28",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-29",
+    "name": "Mock Company 29",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-30",
+    "name": "Mock Company 30",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-31",
+    "name": "Mock Company 31",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-32",
+    "name": "Mock Company 32",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-33",
+    "name": "Mock Company 33",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-34",
+    "name": "Mock Company 34",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-35",
+    "name": "Mock Company 35",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-36",
+    "name": "Mock Company 36",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-37",
+    "name": "Mock Company 37",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-38",
+    "name": "Mock Company 38",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-39",
+    "name": "Mock Company 39",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-40",
+    "name": "Mock Company 40",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-41",
+    "name": "Mock Company 41",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-42",
+    "name": "Mock Company 42",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-43",
+    "name": "Mock Company 43",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-44",
+    "name": "Mock Company 44",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-45",
+    "name": "Mock Company 45",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-46",
+    "name": "Mock Company 46",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-47",
+    "name": "Mock Company 47",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-48",
+    "name": "Mock Company 48",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-49",
+    "name": "Mock Company 49",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-50",
+    "name": "Mock Company 50",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-51",
+    "name": "Mock Company 51",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-52",
+    "name": "Mock Company 52",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-53",
+    "name": "Mock Company 53",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-54",
+    "name": "Mock Company 54",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-55",
+    "name": "Mock Company 55",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-56",
+    "name": "Mock Company 56",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-57",
+    "name": "Mock Company 57",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-58",
+    "name": "Mock Company 58",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-59",
+    "name": "Mock Company 59",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-60",
+    "name": "Mock Company 60",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-61",
+    "name": "Mock Company 61",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-62",
+    "name": "Mock Company 62",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-63",
+    "name": "Mock Company 63",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-64",
+    "name": "Mock Company 64",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-65",
+    "name": "Mock Company 65",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-66",
+    "name": "Mock Company 66",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-67",
+    "name": "Mock Company 67",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-68",
+    "name": "Mock Company 68",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-69",
+    "name": "Mock Company 69",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-70",
+    "name": "Mock Company 70",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-71",
+    "name": "Mock Company 71",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-72",
+    "name": "Mock Company 72",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-73",
+    "name": "Mock Company 73",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-74",
+    "name": "Mock Company 74",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-75",
+    "name": "Mock Company 75",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-76",
+    "name": "Mock Company 76",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-77",
+    "name": "Mock Company 77",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-78",
+    "name": "Mock Company 78",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-79",
+    "name": "Mock Company 79",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-80",
+    "name": "Mock Company 80",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-81",
+    "name": "Mock Company 81",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-82",
+    "name": "Mock Company 82",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-83",
+    "name": "Mock Company 83",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-84",
+    "name": "Mock Company 84",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-85",
+    "name": "Mock Company 85",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-86",
+    "name": "Mock Company 86",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-87",
+    "name": "Mock Company 87",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-88",
+    "name": "Mock Company 88",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-89",
+    "name": "Mock Company 89",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-90",
+    "name": "Mock Company 90",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-91",
+    "name": "Mock Company 91",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-92",
+    "name": "Mock Company 92",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-93",
+    "name": "Mock Company 93",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-94",
+    "name": "Mock Company 94",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-95",
+    "name": "Mock Company 95",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-96",
+    "name": "Mock Company 96",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-97",
+    "name": "Mock Company 97",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-98",
+    "name": "Mock Company 98",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
+  },
+  {
+    "id": "mock-company-99",
+    "name": "Mock Company 99",
+    "enabled": true,
+    "api_endpoint": "https://google.com/careers",
+    "priority": 3,
+    "interval_minutes": 60,
+    "resume_profiles": [
+      "backend"
+    ],
+    "consecutive_failures": 0,
+    "total_scrapes": 0,
+    "total_failures": 0,
+    "preferred_scraper": "cheerio_fallback"
   }
 ]

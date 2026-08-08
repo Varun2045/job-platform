@@ -4,6 +4,7 @@ import { ProxyCollector } from '../core/proxy/ProxyCollector.js';
 import { ProxyValidator } from '../core/proxy/ProxyValidator.js';
 import { ProxyPoolManager } from '../core/proxy/ProxyPoolManager.js';
 import { Logger } from '../core/Logger.js';
+import { config } from '../config/config.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -32,7 +33,8 @@ async function main() {
       await buildPool();
       break;
     case 'export-heroku':
-      await exportForHeroku();
+      const count = process.argv[3] ? parseInt(process.argv[3], 10) : 10;
+      await exportForHeroku(count);
       break;
     case 'full-pipeline':
       await fullPipeline();
@@ -40,6 +42,7 @@ async function main() {
     default:
       printUsage();
   }
+  process.exit(0);
 }
 
 function printUsage() {
@@ -83,15 +86,19 @@ async function validateProxies() {
   }
   
   const proxies = JSON.parse(fs.readFileSync(inputFile, 'utf-8'));
-  console.log(`Loaded ${proxies.length} proxy candidates\n`);
+  
+  // Limit validation candidates count for efficiency (default 150)
+  const limit = process.env.PROXY_VALIDATION_LIMIT ? parseInt(process.env.PROXY_VALIDATION_LIMIT, 10) : 150;
+  const slicedProxies = proxies.slice(0, limit);
+  console.log(`Loaded ${proxies.length} proxy candidates. Slicing to first ${slicedProxies.length} candidates for validation.\n`);
   
   const validator = ProxyValidator.getInstance({
-    timeoutMs: 10000,
-    maxLatencyMs: 5000,
-    concurrency: 10,
+    timeoutMs: 15000,
+    maxLatencyMs: 10000,
+    concurrency: 5,
   });
   
-  const results = await validator.validateProxies(proxies);
+  const results = await validator.validateProxies(slicedProxies);
   const stats = validator.getStatistics(results);
   
   // Save validation results
@@ -142,7 +149,17 @@ async function buildPool() {
 async function exportForHeroku(maxProxies: number = 20) {
   console.log('\n=== Phase 5: Export for Heroku ===\n');
   
+  // Load validation results to initialize the pool before exporting
+  const inputFile = path.join(process.cwd(), 'proxy-validation-results.json');
+  let results = [];
+  if (fs.existsSync(inputFile)) {
+    results = JSON.parse(fs.readFileSync(inputFile, 'utf-8'));
+  }
+  
   const poolManager = ProxyPoolManager.getInstance();
+  if (results.length > 0) {
+    poolManager.initializePool(results);
+  }
   const proxies = poolManager.exportForHeroku(maxProxies);
   
   console.log(`Exporting ${proxies.length} proxies for Heroku\n`);
