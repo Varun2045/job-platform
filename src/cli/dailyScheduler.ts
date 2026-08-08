@@ -186,6 +186,14 @@ export class DailyScheduler {
       this.startScheduler();
     }, delay);
   }
+
+  /**
+   * Run immediately (for testing or manual triggering)
+   */
+  async runNow(): Promise<void> {
+    Logger.info('Running daily digest immediately...');
+    await this.runDailyDigest();
+  }
 }
 
 /**
@@ -200,8 +208,7 @@ export async function runDailyScheduler(): Promise<void> {
   const runNow = args.includes('--now') || args.includes('-n');
   
   if (runNow) {
-    Logger.info('Running daily digest immediately...');
-    await scheduler.runDailyDigest();
+    await scheduler.runNow();
   } else {
     Logger.info('Starting daily scheduler (runs at 10 PM every night)...');
     scheduler.startScheduler();
