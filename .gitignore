@@ -29,6 +29,11 @@ scraper-health-report.csv
 scraper-health-report.json
 scraper-health-report.md
 
+# Proxy system generated files
+proxy-candidates.json
+proxy-validation-results.json
+heroku-proxy-config.txt
+
 # Environment files
 .env
 .env.local

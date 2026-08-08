@@ -1,5 +1,7 @@
 import { Logger } from './Logger.js';
 import got, { OptionsInit, Response } from 'got';
+import { ProxyPoolManager } from './proxy/ProxyPoolManager.js';
+import { ProxyCandidate } from './proxy/ProxyCollector.js';
 
 export class HttpError extends Error {
   public status: number;
@@ -42,25 +44,78 @@ export class HttpClient {
   private static sessionCookies: Map<string, string> = new Map();
   private static proxyPool: string[] = [];
   private static currentProxyIndex = 0;
+  private static proxyPoolManager: ProxyPoolManager | null = null;
+  private static useAdvancedProxyPool = false;
 
   /**
-   * Configure proxy pool for rotation
+   * Configure proxy pool for rotation (simple string array)
    */
   public static configureProxyPool(proxies: string[]): void {
     this.proxyPool = proxies;
     this.currentProxyIndex = 0;
-    Logger.info(`[HttpClient] Configured proxy pool with ${proxies.length} proxies`);
+    this.useAdvancedProxyPool = false;
+    Logger.info(`[HttpClient] Configured simple proxy pool with ${proxies.length} proxies`);
+  }
+
+  /**
+   * Configure advanced proxy pool with ProxyPoolManager
+   */
+  public static configureAdvancedProxyPool(manager: ProxyPoolManager): void {
+    this.proxyPoolManager = manager;
+    this.useAdvancedProxyPool = true;
+    Logger.info('[HttpClient] Configured advanced proxy pool with ProxyPoolManager');
   }
 
   /**
    * Get next proxy from pool with rotation
    */
   private static getNextProxy(): string | null {
+    if (this.useAdvancedProxyPool && this.proxyPoolManager) {
+      const entry = this.proxyPoolManager.getNextProxy();
+      if (entry) {
+        return this.proxyPoolManager.formatProxyUrl(entry);
+      }
+      return null;
+    }
+
+    // Fallback to simple pool
     if (this.proxyPool.length === 0) return null;
     
     const proxy = this.proxyPool[this.currentProxyIndex];
     this.currentProxyIndex = (this.currentProxyIndex + 1) % this.proxyPool.length;
     return proxy;
+  }
+
+  /**
+   * Mark proxy as failed
+   */
+  private static markProxyFailed(proxyUrl: string, error?: string): void {
+    if (this.useAdvancedProxyPool && this.proxyPoolManager) {
+      // Parse proxy URL to get IP and port
+      const match = proxyUrl.match(/(?:https?:\/\/)?([^:]+):(\d+)/);
+      if (match) {
+        const [, ip, port] = match;
+        this.proxyPoolManager.markProxyFailed(
+          { ip, port: parseInt(port, 10), protocol: 'http', source: 'custom' },
+          error
+        );
+      }
+    }
+  }
+
+  /**
+   * Mark proxy as successful
+   */
+  private static markProxySuccess(proxyUrl: string): void {
+    if (this.useAdvancedProxyPool && this.proxyPoolManager) {
+      const match = proxyUrl.match(/(?:https?:\/\/)?([^:]+):(\d+)/);
+      if (match) {
+        const [, ip, port] = match;
+        this.proxyPoolManager.markProxySuccess(
+          { ip, port: parseInt(port, 10), protocol: 'http', source: 'custom' }
+        );
+      }
+    }
   }
 
   public static setSharedCookies(domain: string, cookies: string): void {
@@ -240,6 +295,11 @@ export class HttpClient {
       const response: Response<string> = await got(url, options);
       const durationMs = Date.now() - startTime;
 
+      // Mark proxy as successful
+      if (proxyUrl) {
+        HttpClient.markProxySuccess(proxyUrl);
+      }
+
       // Update sticky session cookies
       if (config.useStickySession && response.headers['set-cookie']) {
         const cookies = Array.isArray(response.headers['set-cookie']) 
@@ -249,6 +309,10 @@ export class HttpClient {
       }
 
       if (response.statusCode >= 400) {
+        // Mark proxy as failed for 4xx/5xx errors
+        if (proxyUrl) {
+          HttpClient.markProxyFailed(proxyUrl, `HTTP ${response.statusCode}`);
+        }
         throw new HttpError(
           `HTTP Error ${response.statusCode}: ${response.statusMessage}`,
           response.statusCode,
@@ -275,6 +339,12 @@ export class HttpClient {
       };
     } catch (error: any) {
       const durationMs = Date.now() - startTime;
+      
+      // Mark proxy as failed on error
+      if (proxyUrl) {
+        HttpClient.markProxyFailed(proxyUrl, error.message);
+      }
+      
       Logger.warn(`Request failed to ${url} in ${durationMs}ms: ${error.message}`);
       throw error;
     }

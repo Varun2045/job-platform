@@ -27,7 +27,12 @@
     "validate-classification": "node dist/cli/validateClassification.js",
     "validate-scrapers": "node dist/cli/validateScrapers.js",
     "benchmark-scrapers": "node dist/cli/benchmarkScrapers.js",
-    "reclassify-jobs": "node dist/cli/reclassifyJobs.js"
+    "reclassify-jobs": "node dist/cli/reclassifyJobs.js",
+    "proxy:collect": "node dist/cli/proxyManager.js collect",
+    "proxy:validate": "node dist/cli/proxyManager.js validate",
+    "proxy:build-pool": "node dist/cli/proxyManager.js build-pool",
+    "proxy:export": "node dist/cli/proxyManager.js export-heroku",
+    "proxy:full": "node dist/cli/proxyManager.js full-pipeline"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",
