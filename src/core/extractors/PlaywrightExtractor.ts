@@ -23,14 +23,22 @@ export class PlaywrightExtractor implements Extractor {
 
     Logger.info(`[PlaywrightExtractor] Acquiring browser page from context pool for ${company.name}...`);
     const pool = BrowserPool.getInstance();
-    const { context: browserCtx, page } = await pool.acquirePage();
+    const { context: browserCtx, page } = await pool.acquirePage({
+      usePersistent: company.use_persistent_profile,
+      cdpEndpoint: company.cdp_endpoint || undefined
+    });
 
     try {
       // Navigate to URL
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 35000 });
 
-      // Wait for hydration
-      await page.waitForTimeout(3000);
+      // Category 5: Cloudflare Turnstile Action Bypass
+      // Often, simply waiting for the layout to stabilize allows the script to pass.
+      await page.waitForLoadState('networkidle').catch(() => {});
+      await page.waitForTimeout(4000); 
+
+      // Category 4: Jitter and Backoff Intervals
+      await page.waitForTimeout(Math.random() * 2000);
 
       // Evaluate job listings
       const links = await page.evaluate(() => {

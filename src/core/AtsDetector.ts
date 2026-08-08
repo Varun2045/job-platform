@@ -28,13 +28,49 @@ export class AtsDetector {
         Logger.info(`Detected Workday ATS by URL structure for ${company.name}`);
         return 'workday';
       }
-      if (/greenhouse\.io/i.test(url)) {
+      if (/greenhouse\.io/i.test(url) || /boards\.greenhouse\.io/i.test(url)) {
         Logger.info(`Detected Greenhouse ATS by URL structure for ${company.name}`);
         return 'greenhouse';
       }
       if (/lever\.co/i.test(url)) {
         Logger.info(`Detected Lever ATS by URL structure for ${company.name}`);
         return 'lever';
+      }
+      if (/ashbyhq\.com/i.test(url)) {
+        Logger.info(`Detected Ashby ATS by URL structure for ${company.name}`);
+        return 'ashby';
+      }
+      if (/smartrecruiters\.com/i.test(url)) {
+        Logger.info(`Detected SmartRecruiters ATS by URL structure for ${company.name}`);
+        return 'smartrecruiters';
+      }
+      if (/oraclecloud\.com/i.test(url)) {
+        Logger.info(`Detected Oracle Cloud ATS by URL structure for ${company.name}`);
+        return 'oraclecloud';
+      }
+      if (/bamboohr\.com/i.test(url)) {
+        Logger.info(`Detected BambooHR ATS by URL structure for ${company.name}`);
+        return 'bamboohr';
+      }
+      if (/successfactors\.com/i.test(url) || /successfactors\.eu/i.test(url)) {
+        Logger.info(`Detected SuccessFactors ATS by URL structure for ${company.name}`);
+        return 'successfactors';
+      }
+      if (/icims\.com/i.test(url)) {
+        Logger.info(`Detected iCIMS ATS by URL structure for ${company.name}`);
+        return 'icims';
+      }
+      if (/recruitee\.com/i.test(url)) {
+        Logger.info(`Detected Recruitee ATS by URL structure for ${company.name}`);
+        return 'recruitee';
+      }
+      if (/teamtailor\.com/i.test(url)) {
+        Logger.info(`Detected Teamtailor ATS by URL structure for ${company.name}`);
+        return 'teamtailor';
+      }
+      if (/comeet\.co/i.test(url) || /comeet\.com/i.test(url)) {
+        Logger.info(`Detected Comeet ATS by URL structure for ${company.name}`);
+        return 'comeet';
       }
 
       // Probing the HTML page content
@@ -57,13 +93,43 @@ export class AtsDetector {
       }
 
       if (/smartrecruiters\.com/i.test(html)) {
-        Logger.info(`Detected SmartRecruiters ATS (using fallback) via HTML for ${company.name}`);
-        return 'fallback';
+        Logger.info(`Detected SmartRecruiters ATS via HTML for ${company.name}`);
+        return 'smartrecruiters';
       }
 
       if (/ashbyhq\.com/i.test(html)) {
-        Logger.info(`Detected Ashby ATS (using fallback) via HTML for ${company.name}`);
-        return 'fallback';
+        Logger.info(`Detected Ashby ATS via HTML for ${company.name}`);
+        return 'ashby';
+      }
+
+      if (/bamboohr\.com/i.test(html)) {
+        Logger.info(`Detected BambooHR ATS via HTML for ${company.name}`);
+        return 'bamboohr';
+      }
+
+      if (/successfactors/i.test(html)) {
+        Logger.info(`Detected SuccessFactors ATS via HTML for ${company.name}`);
+        return 'successfactors';
+      }
+
+      if (/icims/i.test(html)) {
+        Logger.info(`Detected iCIMS ATS via HTML for ${company.name}`);
+        return 'icims';
+      }
+
+      if (/recruitee/i.test(html)) {
+        Logger.info(`Detected Recruitee ATS via HTML for ${company.name}`);
+        return 'recruitee';
+      }
+
+      if (/teamtailor/i.test(html)) {
+        Logger.info(`Detected Teamtailor ATS via HTML for ${company.name}`);
+        return 'teamtailor';
+      }
+
+      if (/comeet/i.test(html)) {
+        Logger.info(`Detected Comeet ATS via HTML for ${company.name}`);
+        return 'comeet';
       }
 
       Logger.info(`No specific ATS signatures found for ${company.name}. Falling back to default.`);

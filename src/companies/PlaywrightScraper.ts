@@ -2,10 +2,17 @@ import { Page } from 'playwright';
 import { CompanyConfig, RawJob } from './Scraper.js';
 import { Logger } from '../core/Logger.js';
 import { BrowserPool } from '../core/BrowserPool.js';
+import { SitemapParser } from '../core/SitemapParser.js';
 import fs from 'fs';
 import path from 'path';
 
 export class PlaywrightScraper {
+  private sitemapParser: SitemapParser;
+
+  constructor() {
+    this.sitemapParser = new SitemapParser();
+  }
+
   private async ensureScreenshotDir(): Promise<string> {
     const dir = path.join(process.cwd(), 'storage', 'screenshots');
     if (!fs.existsSync(dir)) {
@@ -27,6 +34,12 @@ export class PlaywrightScraper {
   }
 
   public async discover(company: CompanyConfig): Promise<RawJob[]> {
+    // Category 1: XML Sitemap parsing if configured
+    if (company.sitemap_url && this.sitemapParser.isValidSitemapUrl(company.sitemap_url)) {
+      Logger.info(`[PlaywrightScraper] Using sitemap discovery for ${company.name}`);
+      return this.discoverFromSitemap(company);
+    }
+
     let url = company.api_endpoint || `https://www.${company.id}.com/careers`;
     if (company.detected_ats === 'greenhouse' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
       url = `https://boards.greenhouse.io/${company.api_endpoint}`;
@@ -38,8 +51,11 @@ export class PlaywrightScraper {
     const pool = BrowserPool.getInstance();
     const { context, page } = await pool.acquirePage();
     try {
-      // Navigate with timeout
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      // Navigate with Cloudflare challenge bypass
+      await BrowserPool.navigateWithChallengeBypass(page, url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 25000,
+      });
 
       // Wait another 3s for hydration/rendering of lists
       await page.waitForTimeout(3000);
@@ -94,13 +110,54 @@ export class PlaywrightScraper {
     }
   }
 
+  /**
+   * Discover jobs from XML sitemap
+   */
+  private async discoverFromSitemap(company: CompanyConfig): Promise<RawJob[]> {
+    if (!company.sitemap_url) {
+      Logger.warn(`[PlaywrightScraper] No sitemap URL configured for ${company.name}`);
+      return [];
+    }
+
+    try {
+      const jobUrls = await this.sitemapParser.discoverJobsFromSitemapIndex(
+        company.sitemap_url,
+        2 // max depth
+      );
+
+      const jobIds = this.sitemapParser.extractJobIdsFromUrls(jobUrls);
+      const rawJobs: RawJob[] = [];
+
+      for (const [jobId, url] of jobIds.entries()) {
+        rawJobs.push({
+          company: company.name,
+          id: jobId,
+          title: `Job ${jobId}`, // Title will be enriched later
+          location: 'Unknown',
+          url: url,
+          source: 'sitemap_discovery',
+        });
+      }
+
+      Logger.info(`[PlaywrightScraper] Sitemap discovery found ${rawJobs.length} jobs for ${company.name}`);
+      return rawJobs;
+    } catch (error: any) {
+      Logger.error(`[PlaywrightScraper] Sitemap discovery failed for ${company.name}: ${error.message}`);
+      return [];
+    }
+  }
+
   public async enrich(rawJob: RawJob): Promise<RawJob> {
     Logger.info(`Playwright enriching job description for ${rawJob.id} at URL: ${rawJob.url}`);
 
     const pool = BrowserPool.getInstance();
     const { context, page } = await pool.acquirePage();
     try {
-      await page.goto(rawJob.url, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      // Navigate with Cloudflare challenge bypass
+      await BrowserPool.navigateWithChallengeBypass(page, rawJob.url, {
+        waitUntil: 'domcontentloaded',
+        timeout: 25000,
+      });
       await page.waitForTimeout(2000);
 
       // Extract inner text of body excluding headers/footers

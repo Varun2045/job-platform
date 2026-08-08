@@ -64,8 +64,18 @@ export class ExtractionEngine {
     const startTime = Date.now();
     let url = company.api_endpoint || `https://www.${company.id}.com/careers`;
 
-    // Handle ATS URL mappings
-    if (company.detected_ats === 'greenhouse' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
+    // Priority 1: Mobile API Spoofing (Category 1)
+    if (company.mobile_api_endpoint) {
+      url = company.mobile_api_endpoint;
+      Logger.info(`[ExtractionEngine] Using mobile API spoofing endpoint for ${company.name}: ${url}`);
+    } 
+    // Priority 2: Sitemap Discovery (Category 1)
+    else if (company.sitemap_url) {
+      url = company.sitemap_url;
+      Logger.info(`[ExtractionEngine] Using explicit sitemap URL for ${company.name}: ${url}`);
+    }
+    // Priority 3: Standard ATS Mappings
+    else if (company.detected_ats === 'greenhouse' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
       url = `https://boards.greenhouse.io/${company.api_endpoint}`;
     } else if (company.detected_ats === 'lever' && company.api_endpoint && !company.api_endpoint.startsWith('http')) {
       url = `https://jobs.lever.co/${company.api_endpoint}`;

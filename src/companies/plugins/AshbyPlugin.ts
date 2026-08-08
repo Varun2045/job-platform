@@ -36,8 +36,14 @@ export class AshbyPlugin implements ScraperPlugin {
     Logger.debug(`Ashby JSON API request to: ${apiUrl}`);
 
     const response = await httpClient.get<any>(apiUrl, undefined, { timeoutMs: 30000 });
+    const responseText = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+
+    if (responseText.toLowerCase().includes('cloudflare') || responseText.toLowerCase().includes('captcha')) {
+      throw new Error(`Access Blocked by Anti-Bot Detection (Cloudflare/CAPTCHA) during Ashby API request`);
+    }
+
     if (!response.data || !Array.isArray(response.data.jobs)) {
-      throw new Error(`Unexpected Ashby API response structure for ${company.name}`);
+      throw new Error(`Unexpected Ashby API response structure: missing jobs array`);
     }
 
     const rawJobs: RawJob[] = response.data.jobs.map((job: any) => {

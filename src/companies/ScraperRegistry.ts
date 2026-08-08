@@ -61,6 +61,10 @@ export class ScraperRegistry {
       return null;
     }
 
+    if (company.detected_ats === 'custom' || company.detected_ats === 'fallback' || company.detected_ats === 'auto') {
+      return null;
+    }
+
     const plugin = this.plugins.find((p) => p.metadata.id === company.detected_ats);
     if (!plugin) {
       Logger.warn(`No registered scraper plugin matches detected_ats: "${company.detected_ats}" for ${company.name}`);

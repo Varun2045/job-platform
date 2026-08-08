@@ -47,7 +47,13 @@ export class WorkdayPlugin implements ScraperPlugin {
       appliedFacets: {},
     };
 
-    const response = await httpClient.post<any>(searchUrl, requestBody, undefined, { timeoutMs: 30000 });
+    const headers = {
+      'Accept': 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      'X-Workday-Client': 'CXS',
+    };
+
+    const response = await httpClient.post<any>(searchUrl, requestBody, headers, { timeoutMs: 30000 });
     
     let postings: any[] = [];
     if (response.data) {
@@ -77,7 +83,7 @@ export class WorkdayPlugin implements ScraperPlugin {
       Logger.debug(`Workday paging for ${company.name}: offset ${offset}/${total}`);
       const pageBody = { limit, offset, searchText: '', appliedFacets: {} };
       try {
-        const pageResponse = await httpClient.post<any>(searchUrl, pageBody, undefined, { timeoutMs: 30000 });
+        const pageResponse = await httpClient.post<any>(searchUrl, pageBody, headers, { timeoutMs: 30000 });
         if (pageResponse.data) {
           let pagePostings: any[] = [];
           if (Array.isArray(pageResponse.data.jobPostings)) {
@@ -183,7 +189,7 @@ export class WorkdayPlugin implements ScraperPlugin {
 
 function parseWorkdayUrl(url: string): { baseUrl: string; tenant: string; site: string } {
   const urlObj = new URL(url);
-  const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
+  const baseUrl = `https://${urlObj.host}`;
 
   const cxsMatch = urlObj.pathname.match(/\/wday\/cxs\/([^/]+)\/([^/]+)/);
   if (cxsMatch) {
@@ -191,6 +197,15 @@ function parseWorkdayUrl(url: string): { baseUrl: string; tenant: string; site: 
       baseUrl,
       tenant: cxsMatch[1],
       site: cxsMatch[2],
+    };
+  }
+
+  const recruitingMatch = urlObj.pathname.match(/\/recruiting\/([^/]+)\/([^/]+)/);
+  if (recruitingMatch) {
+    return {
+      baseUrl,
+      tenant: recruitingMatch[1],
+      site: recruitingMatch[2],
     };
   }
 

@@ -17,7 +17,29 @@ interface ScraperValidationResult {
   careerUrl: string;
   atsPlatform: string;
   pluginName: string;
-  status: 'Green' | 'Yellow' | 'Red';
+  status: 'GREEN' | 'YELLOW' | 'RED' | 'EXTERNAL_BLOCK';
+  problemCategory?:
+    | 'CONFIGURATION_ERROR'
+    | 'INVALID_URL'
+    | 'REDIRECT_MIGRATED_URL'
+    | 'ATS_MISCLASSIFICATION'
+    | 'MISSING_PLUGIN'
+    | 'EXTRACTOR_ROUTING_ERROR'
+    | 'API_ENDPOINT_ERROR'
+    | 'API_SCHEMA_ERROR'
+    | 'PARSER_ERROR'
+    | 'EMPTY_RESULT_ERROR'
+    | 'PLAYWRIGHT_ERROR'
+    | 'CLOUDFLARE_BLOCK'
+    | 'CAPTCHA_BLOCK'
+    | 'GENERIC_FIREWALL_BLOCK'
+    | 'HTTP_403'
+    | 'HTTP_429'
+    | 'HTTP_5XX'
+    | 'GRAPHQL_API_SESSION_ERROR'
+    | 'REGIONAL_GEO_BLOCK'
+    | 'SLOW_EXTRACTION'
+    | 'UNKNOWN';
   httpStatus: number;
   jobsFound: number;
   executionTimeMs: number;
@@ -42,6 +64,11 @@ function detectAtsFromUrl(url: string): string | null {
   if (urlStr.includes('darwinbox.in') || urlStr.includes('darwinbox.com')) return 'darwinbox';
   if (urlStr.includes('bamboohr.com')) return 'bamboohr';
   if (urlStr.includes('apply.workable.com') || urlStr.includes('workable.com')) return 'workable';
+  if (urlStr.includes('successfactors.com') || urlStr.includes('successfactors.eu')) return 'successfactors';
+  if (urlStr.includes('icims.com')) return 'icims';
+  if (urlStr.includes('recruitee.com')) return 'recruitee';
+  if (urlStr.includes('teamtailor.com')) return 'teamtailor';
+  if (urlStr.includes('comeet.co') || urlStr.includes('comeet.com')) return 'comeet';
   return null;
 }
 
@@ -132,7 +159,7 @@ async function main() {
             careerUrl: apiEndpoint,
             atsPlatform: company.detected_ats || 'custom',
             pluginName: 'cached',
-            status: 'Green',
+            status: 'GREEN',
             httpStatus: 200,
             jobsFound: cacheEntry && cacheEntry.stats ? Object.values(cacheEntry.stats).reduce((acc, curr) => acc + curr.avgJobsFound, 0) : 0,
             executionTimeMs: 50,
@@ -151,7 +178,8 @@ async function main() {
         let hasMissingFields = false;
         let failureReason = '';
         let suggestedFix = '';
-        let status: 'Green' | 'Yellow' | 'Red' = 'Green';
+        let status: 'GREEN' | 'YELLOW' | 'RED' | 'EXTERNAL_BLOCK' = 'GREEN';
+        let problemCategory: ScraperValidationResult['problemCategory'] = undefined;
         let finalUrl = company.api_endpoint || '';
         let responseData = '';
 
@@ -249,8 +277,9 @@ async function main() {
               rawJobs = await plugin.discover(company, httpClient);
               sourceUsed = plugin.metadata.id;
             } catch (pluginErr: any) {
-              Logger.warn(`Native plugin ${plugin.metadata.id} failed for ${company.name}: ${pluginErr.message}. Trying Playwright fallback...`);
-              if (config.features.playwright) {
+              Logger.warn(`Native plugin ${plugin.metadata.id} failed for ${company.name}: ${pluginErr.message}.`);
+              if (config.features.playwright && !isBlocked) {
+                Logger.info(`Trying Playwright fallback...`);
                 browserLaunches++;
                 rawJobs = await playwrightScraper.discover(company);
                 sourceUsed = 'playwright';
@@ -259,20 +288,8 @@ async function main() {
               }
             }
 
-            // If native plugin returned 0 jobs, also try Playwright fallback
-            if (rawJobs.length === 0 && config.features.playwright && !isBlocked) {
-              try {
-                Logger.info(`Native plugin ${plugin.metadata.id} returned 0 jobs for ${company.name}. Trying Playwright fallback...`);
-                browserLaunches++;
-                const pwJobs = await playwrightScraper.discover(company);
-                if (pwJobs.length > 0) {
-                  rawJobs = pwJobs;
-                  sourceUsed = 'playwright';
-                }
-              } catch (e) {
-                // Keep the 0 result
-              }
-            }
+            // If native plugin successfully executed and returned 0 jobs, do not fall back to Playwright.
+            // A valid native ATS API can legitimately return 0 jobs (verified empty result).
           } else {
             // Hybrid Engine Flow: Try HTTP-based Fallback Scraper first
             try {
@@ -293,7 +310,7 @@ async function main() {
               }
             } catch (err: any) {
               // Fall back to Playwright if enabled
-              if (config.features.playwright) {
+              if (config.features.playwright && !isBlocked) {
                 browserLaunches++;
                 rawJobs = await playwrightScraper.discover(company);
                 sourceUsed = 'playwright';
@@ -429,46 +446,102 @@ async function main() {
 
         const durationMs = Date.now() - scraperStart;
 
-        // Classify Status (GREEN / YELLOW / RED)
+        // Classify Status (GREEN / YELLOW / RED / EXTERNAL_BLOCK)
         const isMaintenance = responseData.includes('maintenance-page') || responseData.includes('community.workday.com/maintenance-page');
         let yellowClassification: string | undefined = undefined;
+        problemCategory = undefined;
+
+        // Determine if it was blocked by anti-bot or got a firewall error
+        const fullErrorMessage = ((scraperError || '') + ' ' + (errorMessage || '') + ' ' + (responseData || '')).toLowerCase();
+        const isCloudflare = fullErrorMessage.includes('cloudflare') || fullErrorMessage.includes('cf-chall') || botVendor === 'Cloudflare';
+        const isCaptcha = fullErrorMessage.includes('captcha') || fullErrorMessage.includes('hcaptcha') || fullErrorMessage.includes('recaptcha') || fullErrorMessage.includes('turnstile') || botVendor === 'Captcha Page';
+        const isFirewall = isBlocked || httpStatus === 403 || httpStatus === 429 || fullErrorMessage.includes('blocked') || fullErrorMessage.includes('access denied') || fullErrorMessage.includes('forbidden') || fullErrorMessage.includes('permission denied');
 
         if (isMaintenance) {
-          status = 'Yellow';
+          status = 'YELLOW';
           failureReason = 'Workday Weekly Maintenance Outage (Scheduled)';
           suggestedFix = 'Workday clusters undergo scheduled weekly maintenance. No action required.';
           yellowClassification = 'Temporary outage';
+          problemCategory = 'SLOW_EXTRACTION';
         } else if (scraperError) {
-          status = 'Red';
+          // Scraper crashed or threw an error
+          status = 'RED';
           failureReason = scraperError;
           suggestedFix = getSuggestedFix(httpStatus, scraperError);
+          
+          // Classify the scraper crash reason
+          if (isCloudflare) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = 'CLOUDFLARE_BLOCK';
+          } else if (isCaptcha) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = 'CAPTCHA_BLOCK';
+          } else if (httpStatus === 403) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = 'HTTP_403';
+          } else if (httpStatus === 429) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = 'HTTP_429';
+          } else if (httpStatus >= 500) {
+            problemCategory = 'HTTP_5XX';
+          } else if (fullErrorMessage.includes('schema') || fullErrorMessage.includes('json') || fullErrorMessage.includes('cannot read properties') || fullErrorMessage.includes('undefined')) {
+            problemCategory = 'API_SCHEMA_ERROR';
+          } else if (fullErrorMessage.includes('selector') || fullErrorMessage.includes('parse') || fullErrorMessage.includes('regex')) {
+            problemCategory = 'PARSER_ERROR';
+          } else if (fullErrorMessage.includes('timeout') || fullErrorMessage.includes('navigation')) {
+            problemCategory = 'PLAYWRIGHT_ERROR';
+          } else {
+            problemCategory = 'UNKNOWN';
+          }
         } else if (rawJobs.length === 0) {
-          if (isBlocked) {
-            status = 'Red';
-            failureReason = `Access Blocked by Anti-Bot Detection (${botVendor})`;
-            suggestedFix = 'Website is protected by anti-bot measures. Recommend migrating to Playwright with Stealth plugin, Proxy, or Browser Pool.';
+          // Scraper executed successfully but returned 0 jobs
+          if (isCloudflare) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = 'CLOUDFLARE_BLOCK';
+            failureReason = 'Access Blocked by Cloudflare Anti-Bot';
+            suggestedFix = 'Website is protected by Cloudflare. Recommend migrating to Playwright with Stealth, Proxy, or Browser Pool.';
+          } else if (isCaptcha) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = 'CAPTCHA_BLOCK';
+            failureReason = 'Access Blocked by CAPTCHA Challenge';
+            suggestedFix = 'Website is protected by CAPTCHA. Recommend manual intervention or CAPTCHA solver.';
+          } else if (isFirewall) {
+            status = 'EXTERNAL_BLOCK';
+            problemCategory = httpStatus === 403 ? 'HTTP_403' : httpStatus === 429 ? 'HTTP_429' : 'GENERIC_FIREWALL_BLOCK';
+            failureReason = `Access Blocked by Firewall (HTTP ${httpStatus})`;
+            suggestedFix = 'Website is protected by firewall. Recommend Playwright with Stealth and proxies.';
+          } else if (httpStatus === 404) {
+            status = 'RED';
+            problemCategory = 'CONFIGURATION_ERROR';
+            failureReason = 'Career page returned HTTP 404 Not Found';
+            suggestedFix = 'Verify and update the company career URL in config/companies.json';
           } else if (httpStatus >= 400) {
-            status = 'Red';
+            status = 'RED';
+            problemCategory = httpStatus >= 500 ? 'HTTP_5XX' : 'API_ENDPOINT_ERROR';
             failureReason = `HTTP Error Code: ${httpStatus}${errorMessage ? ' - ' + errorMessage : ''}`;
             suggestedFix = getSuggestedFix(httpStatus, '');
           } else {
-            status = 'Green';
+            // Truly green, 0 jobs
+            status = 'GREEN';
             failureReason = 'Healthy (0 legitimate jobs)';
             suggestedFix = '';
             yellowClassification = 'Healthy (0 legitimate jobs)';
           }
         } else {
-          // Jobs were successfully extracted
+          // Jobs successfully extracted (> 0 jobs)
+          status = 'GREEN';
           if (hasMissingFields) {
-            status = 'Yellow';
+            status = 'YELLOW';
             failureReason = 'Extracted job listings have missing required fields (title or url).';
             suggestedFix = 'Inspect parser selectors to ensure correct extraction rules are mapped.';
             yellowClassification = 'Missing fields';
+            problemCategory = 'PARSER_ERROR';
           } else if (durationMs > 10000) {
-            status = 'Yellow';
+            status = 'YELLOW';
             failureReason = `Slow extraction response: took ${(durationMs / 1000).toFixed(1)}s`;
             suggestedFix = 'Enable API-based scraping or add cache-control headers to decrease latency.';
             yellowClassification = 'Slow extraction';
+            problemCategory = 'SLOW_EXTRACTION';
           }
         }
 
@@ -479,6 +552,7 @@ async function main() {
           atsPlatform: company.detected_ats || 'custom',
           pluginName,
           status,
+          problemCategory,
           httpStatus,
           jobsFound,
           executionTimeMs: durationMs,
@@ -491,10 +565,12 @@ async function main() {
         results.push(result);
 
         // Colorful Console Logging
-        if (status === 'Green') {
+        if (status === 'GREEN') {
           console.log(`\x1b[32m🟢 SUCCESS\x1b[0m ${company.name.padEnd(20)} | ATS: ${(company.detected_ats || 'custom').padEnd(12)} | Jobs: ${String(jobsFound).padEnd(4)} | Time: ${durationMs}ms`);
-        } else if (status === 'Yellow') {
+        } else if (status === 'YELLOW') {
           console.log(`\x1b[33m🟡 WARNING\x1b[0m ${company.name.padEnd(19)} | Reason: ${failureReason.substring(0, 60)}`);
+        } else if (status === 'EXTERNAL_BLOCK') {
+          console.log(`\x1b[35m🛡️ BLOCKED\x1b[0m ${company.name.padEnd(19)} | Category: ${(problemCategory || 'UNKNOWN').padEnd(20)} | Time: ${durationMs}ms`);
         } else {
           console.log(`\x1b[31m🔴 ERROR\x1b[0m ${company.name.padEnd(21)} | Reason: ${failureReason.substring(0, 60)}`);
         }
@@ -556,9 +632,10 @@ async function main() {
 
   // Generate Reports
   const total = results.length;
-  const green = results.filter(r => r.status === 'Green').length;
-  const yellow = results.filter(r => r.status === 'Yellow').length;
-  const red = results.filter(r => r.status === 'Red').length;
+  const green = results.filter(r => r.status === 'GREEN').length;
+  const yellow = results.filter(r => r.status === 'YELLOW').length;
+  const red = results.filter(r => r.status === 'RED').length;
+  const externalBlock = results.filter(r => r.status === 'EXTERNAL_BLOCK').length;
   const successRate = total > 0 ? ((green / total) * 100).toFixed(1) : '0.0';
 
   const times = results.map(r => r.executionTimeMs);
@@ -581,21 +658,22 @@ async function main() {
 
   // Failure reasons aggregation
   const failureReasons: Record<string, number> = {};
-  results.filter(r => r.status !== 'Green').forEach(r => {
+  results.filter(r => r.status !== 'GREEN').forEach(r => {
     const reason = r.failureReason || 'Unknown error';
     failureReasons[reason] = (failureReasons[reason] || 0) + 1;
   });
   const topFailures = Object.entries(failureReasons).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   // Failure by ATS aggregation
-  const atsStats: Record<string, { total: number; green: number; yellow: number; red: number }> = {};
+  const atsStats: Record<string, { total: number; green: number; yellow: number; red: number; externalBlock: number }> = {};
   results.forEach(r => {
     if (!atsStats[r.atsPlatform]) {
-      atsStats[r.atsPlatform] = { total: 0, green: 0, yellow: 0, red: 0 };
+      atsStats[r.atsPlatform] = { total: 0, green: 0, yellow: 0, red: 0, externalBlock: 0 };
     }
     atsStats[r.atsPlatform].total++;
-    if (r.status === 'Green') atsStats[r.atsPlatform].green++;
-    else if (r.status === 'Yellow') atsStats[r.atsPlatform].yellow++;
+    if (r.status === 'GREEN') atsStats[r.atsPlatform].green++;
+    else if (r.status === 'YELLOW') atsStats[r.atsPlatform].yellow++;
+    else if (r.status === 'EXTERNAL_BLOCK') atsStats[r.atsPlatform].externalBlock++;
     else atsStats[r.atsPlatform].red++;
   });
 
@@ -611,6 +689,7 @@ async function main() {
   console.log(`🟢 Green:              ${green}`);
   console.log(`🟡 Yellow:             ${yellow}`);
   console.log(`🔴 Red:                ${red}`);
+  console.log(`🛡️ External Block:      ${externalBlock}`);
   console.log(`Success Rate:           ${successRate}%`);
   console.log(`Avg Extraction Time:    ${avgTime} ms`);
   console.log(`==========================================================\n`);
@@ -619,7 +698,7 @@ async function main() {
   const jsonPath = path.join(process.cwd(), 'scraper-health-report.json');
   fs.writeFileSync(jsonPath, JSON.stringify({
     timestamp: new Date().toISOString(),
-    metrics: { total, green, yellow, red, successRatePercent: parseFloat(successRate), averageTimeMs: parseInt(avgTime, 10) },
+    metrics: { total, green, yellow, red, externalBlock, successRatePercent: parseFloat(successRate), averageTimeMs: parseInt(avgTime, 10) },
     results,
     customScraperGroups,
     botVendorGroups,
@@ -652,18 +731,19 @@ async function main() {
   
   mdContent += `## Executive Summary\n\n`;
   mdContent += `* **Total Companies Tested**: ${total}\n`;
-  mdContent += `* **🟢 Green (Healthy)**: ${green}\n`;
-  mdContent += `* **🟡 Yellow (Degraded)**: ${yellow}\n`;
-  mdContent += `* **🔴 Red (Failed)**: ${red}\n`;
+  mdContent += `* **🟢 GREEN (Healthy)**: ${green}\n`;
+  mdContent += `* **🟡 YELLOW (Degraded)**: ${yellow}\n`;
+  mdContent += `* **🔴 RED (Failed)**: ${red}\n`;
+  mdContent += `* **🛡️ EXTERNAL_BLOCK (Protected)**: ${externalBlock}\n`;
   mdContent += `* **Overall Health Score**: **${successRate}%**\n`;
   mdContent += `* **Average Extraction Duration**: ${avgTime} ms\n\n`;
 
   mdContent += `### ATS Coverage Statistics\n\n`;
-  mdContent += `| ATS Platform | Total | Green | Yellow | Red | Success Rate |\n`;
-  mdContent += `| --- | --- | --- | --- | --- | --- |\n`;
+  mdContent += `| ATS Platform | Total | Green | Yellow | Red | External Block | Success Rate |\n`;
+  mdContent += `| --- | --- | --- | --- | --- | --- | --- |\n`;
   Object.entries(atsStats).forEach(([ats, stat]) => {
     const rate = ((stat.green / stat.total) * 100).toFixed(1);
-    mdContent += `| ${ats} | ${stat.total} | ${stat.green} | ${stat.yellow} | ${stat.red} | ${rate}% |\n`;
+    mdContent += `| ${ats} | ${stat.total} | ${stat.green} | ${stat.yellow} | ${stat.red} | ${stat.externalBlock} | ${rate}% |\n`;
   });
   mdContent += `\n`;
 
@@ -760,38 +840,47 @@ async function main() {
   mdContent += `## Validation Result Tables\n\n`;
 
   // Green Table
-  mdContent += `### 🟢 Green (Successful Scrapers)\n\n`;
+  mdContent += `### 🟢 GREEN (Successful Scrapers)\n\n`;
   mdContent += `| Company | ATS | Career URL | Jobs Found | Time (ms) |\n`;
   mdContent += `| --- | --- | --- | --- | --- |\n`;
-  results.filter(r => r.status === 'Green').forEach(r => {
+  results.filter(r => r.status === 'GREEN').forEach(r => {
     mdContent += `| ${r.companyName} | ${r.atsPlatform} | [Link](${r.careerUrl}) | ${r.jobsFound} | ${r.executionTimeMs} |\n`;
   });
   mdContent += `\n`;
 
   // Yellow Table
-  mdContent += `### 🟡 Yellow (Degraded/Empty Scrapers)\n\n`;
+  mdContent += `### 🟡 YELLOW (Degraded/Empty Scrapers)\n\n`;
   mdContent += `| Company | ATS | Career URL | Warning Reason | Jobs | Time (ms) |\n`;
   mdContent += `| --- | --- | --- | --- | --- | --- |\n`;
-  results.filter(r => r.status === 'Yellow').forEach(r => {
+  results.filter(r => r.status === 'YELLOW').forEach(r => {
     mdContent += `| ${r.companyName} | ${r.atsPlatform} | [Link](${r.careerUrl}) | ${r.failureReason} | ${r.jobsFound} | ${r.executionTimeMs} |\n`;
   });
   mdContent += `\n`;
 
+  // External Block Table
+  mdContent += `### 🛡️ EXTERNAL_BLOCK (Anti-Bot Blocked Scrapers)\n\n`;
+  mdContent += `| Company | ATS | Career URL | Problem Category | Error | HTTP | Suggested Fix |\n`;
+  mdContent += `| --- | --- | --- | --- | --- | --- | --- |\n`;
+  results.filter(r => r.status === 'EXTERNAL_BLOCK').forEach(r => {
+    mdContent += `| ${r.companyName} | ${r.atsPlatform} | [Link](${r.careerUrl}) | ${r.problemCategory} | ${r.failureReason} | ${r.httpStatus} | ${r.suggestedFix} |\n`;
+  });
+  mdContent += `\n`;
+
   // Red Table
-  mdContent += `### 🔴 Red (Failed Scrapers)\n\n`;
-  mdContent += `| Company | ATS | Career URL | Error | HTTP | Suggested Fix |\n`;
-  mdContent += `| --- | --- | --- | --- | --- | --- |\n`;
-  results.filter(r => r.status === 'Red').forEach(r => {
-    mdContent += `| ${r.companyName} | ${r.atsPlatform} | [Link](${r.careerUrl}) | ${r.failureReason} | ${r.httpStatus} | ${r.suggestedFix} |\n`;
+  mdContent += `### 🔴 RED (Failed Scrapers)\n\n`;
+  mdContent += `| Company | ATS | Career URL | Problem Category | Error | HTTP | Suggested Fix |\n`;
+  mdContent += `| --- | --- | --- | --- | --- | --- | --- |\n`;
+  results.filter(r => r.status === 'RED').forEach(r => {
+    mdContent += `| ${r.companyName} | ${r.atsPlatform} | [Link](${r.careerUrl}) | ${r.problemCategory || 'UNKNOWN'} | ${r.failureReason} | ${r.httpStatus} | ${r.suggestedFix} |\n`;
   });
   mdContent += `\n`;
 
   // Manual Intervention Report (Step 8)
-  mdContent += `## Manual Intervention Roadmap (Remaining Red Companies)\n\n`;
+  mdContent += `## Manual Intervention Roadmap (Remaining RED & EXTERNAL_BLOCK Companies)\n\n`;
   mdContent += `The following companies cannot be recovered via shared/framework improvements and require manual intervention:\n\n`;
   mdContent += `| Company | ATS | Failure Reason | Why Shared Fixes Cannot Solve | Recommended Manual Action | Est. Effort |\n`;
   mdContent += `| --- | --- | --- | --- | --- | --- |\n`;
-  results.filter(r => r.status === 'Red').forEach(r => {
+  results.filter(r => r.status === 'RED' || r.status === 'EXTERNAL_BLOCK').forEach(r => {
     let why = 'Requires company-specific login session or CAPTCHA solving bypass.';
     let action = 'Implement specific cookie storage or session bypass logic.';
     let effort = 'Medium (2-4 hours)';
@@ -808,8 +897,8 @@ async function main() {
       why = 'Site connection timeout/abort under load.';
       action = 'Increase Playwright timeout limit specifically for Setu.';
       effort = 'Low (1 hour)';
-    } else {
-      why = 'Access blocked by Cloudflare/Akamai/DataDome at the firewall level.';
+    } else if (r.status === 'EXTERNAL_BLOCK') {
+      why = 'Access blocked by anti-bot protection (Cloudflare, CAPTCHA, or Generic Firewall) at the network level.';
       action = 'Integrate premium residential proxy pool or CAPTCHA-solving service.';
       effort = 'High (4-8 hours)';
     }

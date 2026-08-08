@@ -292,6 +292,48 @@ export class AtsRegistryService {
       companies: ['WinZO'],
       companyDetails: [],
     },
+    {
+      id: 'bamboohr',
+      name: 'BambooHR',
+      averageExtractionMs: 20,
+      companies: [],
+      companyDetails: [],
+    },
+    {
+      id: 'successfactors',
+      name: 'SuccessFactors',
+      averageExtractionMs: 22,
+      companies: [],
+      companyDetails: [],
+    },
+    {
+      id: 'icims',
+      name: 'iCIMS',
+      averageExtractionMs: 24,
+      companies: [],
+      companyDetails: [],
+    },
+    {
+      id: 'recruitee',
+      name: 'Recruitee',
+      averageExtractionMs: 18,
+      companies: [],
+      companyDetails: [],
+    },
+    {
+      id: 'teamtailor',
+      name: 'Teamtailor',
+      averageExtractionMs: 19,
+      companies: [],
+      companyDetails: [],
+    },
+    {
+      id: 'comeet',
+      name: 'Comeet',
+      averageExtractionMs: 21,
+      companies: [],
+      companyDetails: [],
+    }
   ];
 
   constructor() {

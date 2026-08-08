@@ -1,4 +1,5 @@
 import { HttpClient } from '../core/HttpClient.js';
+import { SitemapParser } from '../core/SitemapParser.js';
 
 export interface CompanyConfig {
   id: string;
@@ -25,6 +26,11 @@ export interface CompanyConfig {
   scrape_timeout?: number | null;
   retry_count?: number | null;
   preferred_scraper?: string | null;
+  mobile_api_endpoint?: string | null;
+  sitemap_url?: string | null;
+  proxy_sticky_session?: boolean;
+  use_persistent_profile?: boolean;
+  cdp_endpoint?: string | null;
 }
 
 export interface RawJob {

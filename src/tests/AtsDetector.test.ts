@@ -104,7 +104,7 @@ describe('AtsDetector Unit Tests', () => {
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
-    expect(result).toBe('fallback');
+    expect(result).toBe('smartrecruiters');
   });
 
   it('should detect Ashby via HTML contents', async () => {
@@ -119,7 +119,7 @@ describe('AtsDetector Unit Tests', () => {
     } as unknown as HttpClient;
 
     const result = await AtsDetector.detect(company, mockHttpClient);
-    expect(result).toBe('fallback');
+    expect(result).toBe('ashby');
   });
 
   it('should fall back to default when no signature matches', async () => {

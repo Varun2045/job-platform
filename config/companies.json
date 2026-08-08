@@ -1457,7 +1457,7 @@
     "api_endpoint": "https://jobs.ashbyhq.com/ideogram",
     "detected_ats": "ashby",
     "resume_profiles": [],
-    "preferred_scraper": "cheerio_fallback"
+    "preferred_scraper": "playwright_fallback"
   },
   {
     "id": "ikea",
@@ -1775,7 +1775,7 @@
     "api_endpoint": "https://jobs.ashbyhq.com/langchain",
     "detected_ats": "ashby",
     "resume_profiles": [],
-    "preferred_scraper": "cheerio_fallback"
+    "preferred_scraper": "playwright_fallback"
   },
   {
     "id": "launchdarkly",
@@ -2835,7 +2835,7 @@
     "api_endpoint": "https://jobs.ashbyhq.com/resend",
     "detected_ats": "ashby",
     "resume_profiles": [],
-    "preferred_scraper": "cheerio_fallback"
+    "preferred_scraper": "playwright_fallback"
   },
   {
     "id": "retool",
@@ -3006,7 +3006,7 @@
     "api_endpoint": "http://sec.wd3.myworkdayjobs.com/Samsung_Careers",
     "detected_ats": "workday",
     "resume_profiles": [],
-    "preferred_scraper": "playwright_fallback"
+    "preferred_scraper": "cheerio_fallback"
   },
   {
     "id": "sap",
@@ -3048,7 +3048,7 @@
     "api_endpoint": "https://jobs.ashbyhq.com/sentry",
     "detected_ats": "ashby",
     "resume_profiles": [],
-    "preferred_scraper": "cheerio_fallback"
+    "preferred_scraper": "playwright_fallback"
   },
   {
     "id": "setu",
@@ -3320,7 +3320,7 @@
     "api_endpoint": "https://jobs.ashbyhq.com/supabase",
     "detected_ats": "ashby",
     "resume_profiles": [],
-    "preferred_scraper": "cheerio_fallback"
+    "preferred_scraper": "playwright_fallback"
   },
   {
     "id": "supercell",
@@ -3746,7 +3746,7 @@
     "api_endpoint": "https://wd1.myworkdaysite.com/en-US/recruiting/wf/WellsFargoJobs",
     "detected_ats": "workday",
     "resume_profiles": [],
-    "preferred_scraper": "playwright_fallback"
+    "preferred_scraper": "cheerio_fallback"
   },
   {
     "id": "whatfix",
