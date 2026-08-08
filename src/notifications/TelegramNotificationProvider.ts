@@ -194,7 +194,39 @@ ${emoji} ${job.companyName}
     return '🏢';
   }
 
-  private async sendMessage(message: string): Promise<void> {
+  public async sendMessage(message: string): Promise<void> {
+    const payload: TelegramMessage = {
+      chat_id: this.chatId,
+      text: message,
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true,
+    };
+
+    const response = await fetch(`${this.apiUrl}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data: TelegramResponse = await response.json();
+
+    if (!data.ok) {
+      throw new Error(`Telegram API error: ${data.description}`);
+    }
+  }
+
+  /**
+   * Send CSV data as a text message (Telegram has file size limits for documents)
+   */
+  public async sendCsvMessage(csvContent: string, title: string): Promise<void> {
+    const message = `📊 *${title}*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `\`\`\`\n${csvContent}\n\`\`\`\n\n` +
+      `💼 *CareerOS Job Monitor*`;
+    
+    // Use the sendMessage method directly since it's now public
     const payload: TelegramMessage = {
       chat_id: this.chatId,
       text: message,
